@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="sheet-kind" content="form">
+<title>Things That Go — Quiet Pages</title>
+<style>
+  :root { --font: Georgia, "Times New Roman", serif; }
+
+  /* Page margins live HERE only — body padding stays 0 for print so the two
+     don't stack and eat the sheet. */
+  @page { size: letter portrait; margin: 0.45in 0.5in; }
+
+  /*
+   * THE PALETTE. The same one the shop wears (kitchen-table/BRAND.md): warm
+   * near-black ink, one accent, pine kept back for the answer key.
+   *
+   * WHY A SHEET HAS COLOR AT ALL. Every sheet was pure grayscale — #000 rules,
+   * #333 subtitles, #f0f0f0 boxes — which is what you get by never deciding.
+   * The paper is the product and it looked like a fax. A printer set to
+   * grayscale, or one that has no color to give, renders all of this as the
+   * greys it already had, so nothing below costs a parent anything they were
+   * not already spending.
+   *
+   * WHAT STAYS BLACK, ON PURPOSE:
+   *   - anything drawn to be written on (rules, name lines, answer boxes)
+   *   - anything drawn to be traced or colored in (line art, letter guides)
+   *   - the confidence rings, which have to survive a mono laser
+   * Color marks the sheet's own furniture — its rule, its numbering, its
+   * boxes — and never the part a child puts a pencil through.
+   */
+  :root {
+    --ink:    #16130F;
+    --muted:  #6B635A;
+    --rule:   #CFC3B2;
+    --guide:  #BCAE9C;
+    --accent: #C0511D;
+    --tint:   #F7EDE4;
+    --slate:  #2E5A78;
+    --tintslate: #E9EFF4;
+    --deep:   #2C4A45;
+    --tintdeep: #ECF1EF;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font);
+    color: #000; background: #fff;
+    font-size: 12pt; line-height: 1.3;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+
+  /* ORDER MATTERS. This generic rule must come BEFORE the @media screen block:
+     same specificity, so whichever is declared last wins. With it after, the
+     on-screen preview stretches to the viewport instead of 8.5in — print is
+     unaffected, but the proof you check before printing is wrong. */
+  .page { width: 100%; }
+  .page + .page { page-break-before: always; }
+
+  @media screen {
+    body { padding: 0.5in; background: #ddd; }
+    .page {
+      background: #fff; padding: 0.45in 0.5in;
+      width: 8.5in; min-height: 11in;
+      margin: 0 auto 24px; box-shadow: 0 2px 10px rgba(0,0,0,.3);
+    }
+  }
+
+  /* ------------------------------------------------------------- header */
+  header { border-bottom: 3px double var(--accent); padding-bottom: 6px; }
+  header.cont { border-bottom: 1px solid var(--rule); }
+  h1 { font-size: 16pt; margin: 0 0 1px; letter-spacing: .01em; }
+  .sub { font-size: 10pt; font-style: italic; color: var(--muted); margin: 0; }
+
+  .nameline { display: flex; gap: 26px; font-size: 10.5pt; margin: 11px 0 12px; }
+  .nameline span { flex: 1; border-bottom: 1px solid var(--ink); padding-bottom: 1px; }
+  .nameline span.short { flex: 0 0 1.9in; }
+
+  .directions {
+    font-size: 10.5pt; line-height: 1.35;
+    background: var(--tint); border-left: 4px solid var(--accent);
+    padding: 7px 10px; margin: 12px 0 14px;
+  }
+  .directions b { letter-spacing: .03em; }
+  .tip { font-style: italic; margin-top: 3px; }
+
+  /* ------------------------------------------------- problems and grids */
+  .grid { display: grid; gap: 13px 16px; margin-top: 4px; }
+  .prob { page-break-inside: avoid; display: flex; gap: 5px; align-items: flex-start; }
+  .pn { font-weight: bold; font-size: 11pt; min-width: .28in; flex: 0 0 auto; color: var(--accent); }
+  .pbody { flex: 1; min-width: 0; }
+
+  /* Digits need lining figures and even widths whatever the body font is. */
+  .num, .vert, .horiz { font-family: "Trebuchet MS", "Segoe UI", Tahoma, Verdana, sans-serif; font-variant-numeric: lining-nums tabular-nums; }
+
+  /* A stacked column algorithm.
+     Two grid columns — operator, then digits — because a floated or absolutely
+     positioned operator overlaps the digits as soon as the numbers get wide,
+     and "324" with a + sitting on the 3 is unreadable. The grid also lets the
+     rule under the last operand span BOTH columns, which is how it is written
+     by hand. The rule is heavy: it is the line you write the answer beneath. */
+  .vert {
+    display: inline-grid; grid-template-columns: auto auto;
+    font-size: 15pt; line-height: 1.3; text-align: right;
+  }
+  .vert > span { padding: 0 0 1px 0; }
+  .vert .op { text-align: left; padding-right: .16in; }
+  .vert .last { border-bottom: 2.5px solid var(--ink); padding-bottom: 3px; }
+  .vert .ans { height: .4in; }
+  /* Partial-products working, for 2-digit x 1-digit before the short method. */
+  .vert .part { font-size: 11pt; color: var(--muted); }
+  /* A row of worked examples that fade — see lib/formats.js faded(). The
+     caption is what makes the fade legible: without it the third one looks like
+     a question somebody forgot to number. */
+  .egrow { display: flex; gap: .34in; align-items: flex-start; margin: 0 0 4px; }
+  .eg { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; }
+  .eglab { font-size: 8.5pt; color: var(--slate); letter-spacing: .02em; }
+
+  /* The carried digits. Small and grey so the sum still reads as the sum, and
+     tight to the row below it so a carry sits ON the column it goes into. */
+  .vert .carry { font-size: 9pt; color: var(--slate); line-height: 1; padding: 0 0 1px 0; }
+
+  .horiz { font-size: 14pt; white-space: nowrap; }
+
+  /* Row numbers in a word list. Gray and small: they are there so a list can be
+     dictated ("number seven") and marked without counting down the page, and
+     they must not compete with the word itself. */
+  .wn { color: var(--muted); font-size: 9pt; }
+
+  /* The box an answer goes in. inline-block so it can sit mid-sentence. */
+  .abox {
+    display: inline-block; border: 1.6px solid var(--slate); border-radius: 3px;
+    vertical-align: middle; margin: 0 3px; position: relative; background: #fff;
+  }
+  /* Scoped to the box: as a bare ".alab" it pinned any generator's own .alab
+     to the bottom of the page (life-07-signs-and-forms 40, 2026-09-24). */
+  .abox > .alab {
+    position: absolute; bottom: 1px; left: 0; right: 0;
+    text-align: center; font-size: 7pt; color: var(--muted); font-style: italic;
+  }
+
+  /* Confidence marks. The rings are drawn with a border and a gradient rather
+     than an SVG so they stay inline with the question text at any font size,
+     and print black on a mono laser without relying on a background image. */
+  .conf { float: right; margin: 2px 0 0 8px; white-space: nowrap; }
+  .cring {
+    display: inline-block; width: 11px; height: 11px; margin-left: 4px;
+    border: 1.4px solid var(--slate); border-radius: 50%; vertical-align: middle;
+  }
+  .cring-full { background: var(--accent); }
+  .cring-half { background: linear-gradient(90deg, var(--accent) 50%, #fff 50%); }
+  .cring-none { background: #fff; }
+  ol.qs.hasconf li { overflow: hidden; }
+
+  .conflegend {
+    border: 1.2px solid var(--rule); border-radius: 4px;
+    padding: 3px 8px; margin: 0 0 7px;
+    font-size: 8.5pt; color: var(--muted); display: flex; gap: 14px; align-items: center;
+  }
+  .conftitle { font-weight: 700; color: var(--ink); }
+  .confitem { white-space: nowrap; }
+
+  .work {
+    border: 1.4px dashed var(--rule); border-radius: 4px;
+    margin: 6px 0 2px; position: relative;
+  }
+  /* The label S.work() puts in the box: a DIRECT child only. As ".work span"
+     it also caught every span inside any generator's own .work content and
+     stacked them all at the top-left corner (math-11-grade6 47, 2026-09-23). */
+  .work > span {
+    position: absolute; top: 3px; left: 6px;
+    font-size: 8pt; color: var(--muted); font-style: italic;
+  }
+
+  /* ------------------------------------------------------ writing lines */
+  /* Primary rule: solid top, dashed midline, heavy baseline. Capitals reach
+     the top line, lowercase bodies sit under the dashed one. */
+  .write {
+    position: relative; height: 0.375in;
+    margin: 6px 0 0 .3in;
+    border-top: 1px solid var(--rule); border-bottom: 2px solid var(--ink);
+  }
+  .write.flush { margin-left: 0; }
+  .write + .write { margin-top: .17in; }
+  .write::after {
+    content: ""; position: absolute; left: 0; right: 0; top: 50%;
+    border-top: 1px dashed var(--guide);
+  }
+
+  /* ------------------------------------------------------- question list */
+  ol.qs { margin: 0; padding: 0 0 0 .34in; }
+  ol.qs li { margin-bottom: 13px; page-break-inside: avoid; }
+  ol.qs li::marker { font-weight: bold; font-size: 11pt; color: var(--accent); }
+  .qt { display: block; }
+
+  .mcq { display: grid; gap: 3px 14px; margin: 5px 0 2px .12in; font-size: 11pt; }
+  .opt { white-space: nowrap; }
+
+  /* -------------------------------------------------------------- tables */
+  .tbl { border-collapse: collapse; margin: 8px 0; font-size: 11pt; width: 100%; }
+  .tbl th, .tbl td { border: 1.4px solid var(--ink); padding: 5px 8px; text-align: left; }
+  .tbl th { color: var(--slate); }
+  .tbl th { background: var(--tint); font-size: 10pt; letter-spacing: .02em; }
+  .tbl td.blank { height: .34in; }
+  .tbl.narrow { width: auto; }
+  .tbl.center td, .tbl.center th { text-align: center; }
+
+  /* ------------------------------------------------------------ passages */
+  .passage {
+    border: 1.5px solid var(--slate); border-radius: 4px;
+    padding: 11px 14px; margin-bottom: 12px;
+    font-size: 11.5pt; line-height: 1.55;
+  }
+  .passage h2 { font-size: 13pt; margin: 0 0 6px; color: var(--deep); }
+  .passage p { margin: 0 0 8px; }
+  .passage p:last-child { margin-bottom: 0; }
+  .passage .byline { font-size: 9.5pt; font-style: italic; color: var(--muted); margin-bottom: 8px; }
+  /* Numbered paragraphs, so a question can say "in paragraph 2". */
+  .passage p.np { position: relative; padding-left: .3in; }
+  .passage p.np::before {
+    content: attr(data-p); position: absolute; left: 0; top: 0;
+    font-size: 9pt; color: var(--accent); font-weight: bold;
+  }
+
+  .wordbank {
+    border: 1.5px dashed var(--slate); border-radius: 4px;
+    padding: 8px 12px; margin: 10px 0 12px;
+    font-size: 11.5pt; text-align: center;
+  }
+  .wordbank b { display: block; font-size: 9.5pt; letter-spacing: .06em;
+    text-transform: uppercase; margin-bottom: 4px; color: var(--accent); }
+  .wordbank span { display: inline-block; margin: 2px 11px; }
+
+  .note {
+    border-left: 4px solid var(--deep); background: var(--tintdeep);
+    padding: 7px 11px; margin: 10px 0; font-size: 10.5pt;
+  }
+  .note b { letter-spacing: .02em; }
+
+  /* -------------------------------------------------------------- footer */
+  /* THE WORDMARK SITS IN THE FOOTER THAT WAS ALREADY THERE, so it costs no
+     height at all — a sheet that fitted before fits now. Upright where the rest
+     of the line is italic, and a size down: it is a signature, not a message,
+     and it must never compete with "Score: ___ / 10". */
+  .brand { font-style: normal; font-size: 7.5pt; letter-spacing: .04em;
+    color: var(--accent); align-self: center; }
+
+  footer {
+    margin-top: 14px; padding-top: 6px; border-top: 1px solid var(--rule);
+    font-size: 9pt; font-style: italic; color: var(--muted);
+    display: flex; justify-content: space-between;
+  }
+
+  /* ---------------------------------------------------------- answer key */
+  .keybadge {
+    display: inline-block; border: 2px solid var(--deep); color: var(--deep); padding: 2px 9px;
+    font-size: 9.5pt; font-weight: bold; letter-spacing: .08em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .key .why {
+    display: block; font-size: 9pt; font-style: italic; color: var(--muted); margin-top: 1px;
+  }
+  /* Highlight rather than underline: <u> in a key marks WHAT CHANGED, and an
+     underline under a comma is invisible. */
+  .key u { text-decoration: none; background: var(--tint); padding: 0 2px; font-weight: bold; }
+  .keygrid .pbody { font-family: "Trebuchet MS", "Segoe UI", Tahoma, Verdana, sans-serif; font-size: 12pt; }
+  /* A key's pictures scale to their column: at 1fr a wide drawing pushed a
+     three-column key 92px off the paper (art-04-drawing 10, 2026-09-24). */
+  .keygrid svg { max-width: 100%; height: auto; }
+  .keylist .qt { font-weight: normal; }
+
+  /*
+   * The guide page. Four lines per question, and the ASK line is the one that
+   * gets used at the table, so it is the one with a rule beside it — a parent
+   * scanning this page in ten seconds should land on the follow-up question
+   * and nothing else.
+   */
+  .guide { padding-left: .3in; }
+  .guide li { margin-bottom: 11px; page-break-inside: avoid; }
+  .guide .gq { font-weight: bold; font-size: 11pt; margin-bottom: 3px; }
+  /* 9pt, matching the key's own why line, because the guide page is the
+     binding constraint on every open sheet: four lines per question against a
+     key's one, and at 10pt a sheet with seven questions ran onto a second
+     side. Found by measuring, not chosen. (No backticks in here — this CSS
+     lives inside a template literal and one would close it.) */
+  .guide .glook, .guide .gthin, .guide .gstrong {
+    font-size: 9pt; line-height: 1.3; margin-top: 1px;
+  }
+  .guide .gthin { color: var(--muted); }
+  .guide .gstrong { color: var(--muted); font-style: italic; }
+  .guide .gask {
+    font-size: 9.5pt; line-height: 1.3; margin-top: 3px;
+    border-left: 3px solid var(--slate); padding-left: 7px;
+  }
+  .key .qs li { margin-bottom: 9px; }
+
+  /*
+   * INLINE-BLOCK, NOT BLOCK, AND THIS WAS WRONG FOR A LONG TIME. A block-level
+   * svg ignores text-align: center on its parent and sits flush left — so 117
+   * sheets across 35 packs said "centre this diagram" and got a left-aligned
+   * one. Twenty-five of them were origami and paper-plane fold sequences, where
+   * the whole page is diagrams.
+   *
+   * Nobody spotted it because a left-flush diagram looks deliberate; it only
+   * reads as wrong next to a centered one, and no sheet has both.
+   *
+   * inline-block makes text-align do what every one of those authors meant,
+   * and leaves a diagram in a left-aligned container exactly where it was.
+   * vertical-align: top kills the baseline gap that inline elements otherwise
+   * leave underneath them, which would have pushed long pages over.
+   */
+  svg { display: inline-block; vertical-align: top; }
+  svg.inline { vertical-align: middle; }
+
+  .pic-wrap { text-align: center; margin-top: .06in; }
+  /* Bounded by height as well as width: these are a mix of portrait and
+     landscape bitmaps, and a width-only rule pushes the tall ones onto a
+     second side. Page one carries the directions, so it gets less room. */
+  img.pic { display: block; margin: 0 auto; max-width: 100%; max-height: 8.1in;
+    width: auto; height: auto; }
+  .page:first-of-type img.pic { max-height: 7.05in; }
+
+</style>
+</head>
+<body>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>Things That Go</h1>
+    <p class="sub">Quiet Pages &middot; Page 8 of 12</p>
+  </header>
+
+
+
+  <div class="pic-wrap"><img class="pic" alt="an outline drawing of a tow truck lifting a small car on its hook to color in" src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBzdGFuZGFsb25lPSJubyI/Pgo8IURPQ1RZUEUgc3ZnIFBVQkxJQyAiLS8vVzNDLy9EVEQgU1ZHIDIwMDEwOTA0Ly9FTiIKICJodHRwOi8vd3d3LnczLm9yZy9UUi8yMDAxL1JFQy1TVkctMjAwMTA5MDQvRFREL3N2ZzEwLmR0ZCI+CjxzdmcgdmVyc2lvbj0iMS4wIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciCiB3aWR0aD0iMTUzNi4wMDAwMDBwdCIgaGVpZ2h0PSIxMDI0LjAwMDAwMHB0IiB2aWV3Qm94PSIwIDAgMTUzNi4wMDAwMDAgMTAyNC4wMDAwMDAiCiBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJ4TWlkWU1pZCBtZWV0Ij4KPG1ldGFkYXRhPgpDcmVhdGVkIGJ5IHBvdHJhY2UgMS4xNiwgd3JpdHRlbiBieSBQZXRlciBTZWxpbmdlciAyMDAxLTIwMTkKPC9tZXRhZGF0YT4KPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMC4wMDAwMDAsMTAyNC4wMDAwMDApIHNjYWxlKDAuMTAwMDAwLC0wLjEwMDAwMCkiCmZpbGw9IiMwMDAwMDAiIHN0cm9rZT0ibm9uZSI+CjxwYXRoIGQ9Ik0xMDIyMCA4NTQyIGMtMTI3IC00MyAtMzE3IC0xMjggLTM1MCAtMTU3IC0xOSAtMTcgLTU3IC00MCAtODUgLTUwCi0xMzUgLTQ5IC03NDIgLTMxMyAtMTE1NSAtNTAwIC0yMTkgLTEwMCAtMzkzIC0xNzIgLTkyNSAtMzg1IC0yODYgLTExNSAtODA4Ci0zMjUgLTExNjEgLTQ2OCBsLTY0MSAtMjYwIC0xMDQgLTQgYy05MSAtMyAtMTEyIC03IC0xNjkgLTM0IC04MyAtMzkgLTE1MwotMTEwIC0xOTMgLTE5NCAtMzEgLTYzIC0zMiAtNzAgLTM4IC0yNTUgLTQgLTEwNCAtOCAtMzEwIC04IC00NTYgLTEgLTE0NiAtNAotMzc0IC04IC01MDcgbC02IC0yNDIgLTEwOSAwIGMtODUgMCAtMTEwIDMgLTExNCAxNCAtMyA4IC01MCAxODUgLTEwNCAzOTMKLTc5IDMwMSAtMTA0IDM4MiAtMTIxIDM5NiAtMTcgMTQgLTQxIDE3IC0xMjkgMTcgbC0xMDcgMCAtNiAxMDcgYy00IDU4IC03CjIyNCAtNyAzNjcgMCAzMTMgLTE3IDc3NiAtMzEgODY2IC0xNCA5MCAtNTQgMTc0IC0xMDIgMjE1IC03MCA2MCAtMTA3IDY4Ci0zNTcgNzUgLTEyNCAzIC0yMDIgNyAtMTc1IDggNTcgMyA2NyA3IDg1IDQxIDE2IDMxIDUgMTM3IC0yMSAyMDggLTI2IDY4IC03MAoxMTAgLTEzNyAxMjkgLTQ2IDE0IC0xMTggMTUgLTUxNSAxMSAtMzIzIC0zIC00NzMgLTggLTUwMCAtMTYgLTkxIC0yOSAtMTUyCi0xMjQgLTE2MyAtMjUzIC04IC05MiA3IC0xMTUgODEgLTEyNiA0MiAtNyAyNSAtMTAgLTExMiAtMjAgLTE3OSAtMTQgLTMxNwotNDQgLTQwNCAtODcgLTEwNSAtNTMgLTI0OSAtMjMyIC0yNDkgLTMwOSAwIC0xNCAtMjkgLTkwIC02NCAtMTY4IC0xMjAgLTI2OQotMzIwIC03NjMgLTQwMiAtOTk3IC0xMCAtMjkgLTIzIC01NSAtMjkgLTU3IC01IC0xIC0xMzQgLTM5IC0yODUgLTg0IC03OTEKLTIzNSAtOTUxIC0zMjkgLTEwMDUgLTU4OCAtMjEgLTk3IC0zOSAtNjA2IC0zMiAtODk5IGw2IC0yNTIgLTIyIC03IGMtMzQgLTEwCi04NSAtNjQgLTk5IC0xMDMgLTE3IC00OSAtMTYgLTYxNyAxIC02NzggMTQgLTUyIDUyIC05OCAxMDAgLTEyMiA2NiAtMzQgMzkyCi03MSA2MzEgLTcxIDc2IDAgMTA0IDQgMTM1IDIwIDI4IDE0IDU5IDIwIDEwNSAyMCBsNjYgMCAxNiAtNzMgYzUyIC0yNDAgMTk2Ci00NTAgMzk5IC01ODcgNDA1IC0yNzEgOTc2IC0xODQgMTI3NiAxOTUgODEgMTAyIDE1NiAyNTMgMTg1IDM3MiBsMjMgOTMgNjIgMApjNTMgMCA2NiAtNCA4NyAtMjUgbDI1IC0yNSAxOTgwIDIgMTk3OSAzIDI0IDIzIGMyMCAxOCAzNiAyMiA4NiAyMiBsNjEgMCA2Ci0zNyBjMTMgLTc4IDU4IC0yMTEgMTAxIC0yOTQgMjgxIC01NDUgMTA2MSAtNjUxIDE0ODcgLTIwMiA3MyA3NiAxMTYgMTMzIDE1OQoyMTMgNDAgNzIgOTIgMjEyIDEwMyAyNzcgbDcgNDMgODMgMCBjMTExIDAgMTE1IDUgMTE1IDEyMSBsMCA4OSAzMjggMCBjMjQyIDAKMzMxIDMgMzQwIDEyIDE2IDE2IDE3IDk5OSAxIDEwMjkgLTEwIDE5IC0yMCAyMCAtMTYwIDE4IC04NCAtMiAtMTUzIDEgLTE1OCA3Ci01IDUgLTE2IDU0IC0yNSAxMDkgLTIyIDE0MCAtNDEgMTk2IC04MyAyNDUgLTUzIDYyIC0xMjAgOTAgLTIxMyA5MCAtNDEgMAotMTQ1IDMgLTIzMSA3IGwtMTU2IDYgLTIzIDQ0IGMtMzIgNjAgLTk2IDExNiAtMTY2IDE0NCBsLTU5IDI0IC04NTYgMyAtODU3IDMKLTQgMzQgYy00IDMzIC0zIDMzIDMzIDMyIDM2IC0yIDM3IDAgMjI1IDI0MCAxMDQgMTMzIDI5OCAzODEgNDMyIDU1MiAxNTMgMTk2CjI0MiAzMTggMjQyIDMzMiAwIDEzIC0xMCAzMyAtMjEgNDUgbC0yMSAyMyAxMDMgMTMyIGM1NyA3MyAxODEgMjMyIDI3NSAzNTMKMTcxIDIyMSAxNzEgMjIxIDIxNSAyMjcgNTMgNiA5NSAyNyAxMzAgNjYgNTIgNTUgNjIgOTAgNjIgMjAxIGwwIDEwMyA5OSA1MApjMTMwIDY1IDYyMyAyOTggODU4IDQwNiBsMTg1IDg1IDQ1IC0xNiBjMzUgLTEyIDY2IC0xNSAxNDEgLTEwIGw5NiA3IDUgLTExNQpjMyAtOTcgOCAtMTIwIDI3IC0xNTEgMTMgLTIxIDMxIC00MiA0MiAtNDcgMTYgLTkgMTkgLTIyIDE5IC04MSAwIC02NCAtMyAtNzMKLTI1IC05MSAtMzkgLTMwIC01NiAtNzMgLTYyIC0xNTMgLTggLTEwMCA5IC0xNjYgNTMgLTIwNCAzMSAtMjggMzQgLTM1IDM0Ci05MCAwIC01MSAtMyAtNjEgLTI1IC03NSAtMzkgLTI1IC01NyAtNzIgLTYyIC0xNjAgLTcgLTEwMiA4IC0xNTYgNTIgLTE5OSAzMgotMzEgMzUgLTM5IDM1IC05MCAwIC00OSAtNCAtNTkgLTM0IC04OSAtNDAgLTQwIC01NiAtOTAgLTU2IC0xNzMgMCAtODQgMTcKLTEzNCA1NiAtMTcyIGwzNSAtMzIgLTMgLTExMyBjLTMgLTEwNyAtNCAtMTEzIC0yNCAtMTE2IC00NyAtNyAtNTkgLTM2IC01OQotMTQ0IGwwIC0xMDAgODIgLTc2IGM4NCAtNzkgMTAzIC0xMDUgMTAzIC0xNDIgMCAtMTcgLTQgLTE5IC0yNyAtMTMgLTc5IDIxCi0xODggLTkgLTI1MSAtNzAgLTExNiAtMTExIC0xMjMgLTMzNCAtMTQgLTQ0NSAyMSAtMjAgNTIgLTQ1IDcwIC01NCAxOCAtMTAKMzIgLTI1IDMyIC0zNiAwIC0xMCAxNiAtNDUgMzYgLTc4IGwzNiAtNTkgLTIyIC0xMDMgYy0xNyAtODIgLTIxIC0xMjkgLTE5Ci0yMjAgNSAtMTM2IDE4IC0xNjkgODkgLTIxNiA0OCAtMzIgMTkxIC04NiAyMzAgLTg2IDI0IDAgMjUgLTIgMjIgLTUyIC0yIC0yOQo0IC04NyAxMiAtMTI4IDQ0IC0yMDkgMTk3IC0zNjcgNDAyIC00MTYgMTIxIC0yOCAyNjggLTQgMzgxIDYyIDU3IDMzIDE0NCAxMjEKMTc5IDE3OSBsMjcgNDYgMjYgLTI1IGMyMyAtMjIgODcgLTM4IDUwNiAtMTMxIDI2NCAtNTggNTIxIC0xMTUgNTcwIC0xMjUgNTAKLTExIDE1MyAtMzMgMjMwIC01MCA0OTEgLTEwOCA4MDMgLTE3MCA4MjggLTE2NiBsMjcgNiAwIC02MyBjMCAtMzM3IDMxOSAtNTg5CjY0OCAtNTEyIDE5NSA0NiAzNjMgMjE5IDQwNCA0MTUgMTEgNTcgMTIgNTggNDIgNTMgNDggLTcgMTQyIDMzIDE5MSA4MSA1MSA1Mgo5NSAxNTQgMTI1IDI5MSAzMCAxMzkgMzEgMjE3IDMgMjgxIC0yMiA1MCAtMjIgNTIgLTcgMTgwIDIzIDE5MCAxMSAzNTMgLTM3CjUwNCAtMzggMTIxIC0yMjkgNTIwIC0zMjIgNjc0IC0zMyA1NCAtMzUgNjEgLTIxIDgwIDMxIDQ1IDYgMTAxIC02NSAxNDQgLTIzMgoxNDMgLTgzOCAzMTkgLTE0NzMgNDI3IC00MTkgNzEgLTYzNyA1NiAtOTM1IC02NCAtMjAwIC04MCAtNDg4IC0yMjYgLTcwNwotMzU3IC01OSAtMzYgLTEwMCAtNTQgLTEyMiAtNTQgLTUxIDAgLTMyOCAtNDkgLTQ0OSAtODAgLTE0OSAtMzcgLTI5OCAtOTcKLTM4MyAtMTU0IC03NiAtNTAgLTE2OSAtMTQ0IC0yMDUgLTIwNyAtMTIgLTIxIC0yNSAtMzkgLTI5IC0zOSAtMyAwIC0xNiAxNQotMjggMzQgbC0yMSAzNSAzNSA0NSBjMjMgMzAgMzYgNjEgNDEgOTMgNiA0NyA4IDQ5IDczIDg0IDExOSA2MyAxNzkgMTczIDE3MAozMTMgLTYgODcgLTMyIDE0MiAtMTAwIDIxMyAtNDYgNDYgLTUxIDU3IC01NSAxMDUgLTcgODggLTExIDk3IC01MSAxMTYgbC0zNwoxOCAzIDEwOSBjMyAxMDQgNCAxMTEgMjggMTI5IDQ2IDM0IDU5IDcyIDU5IDE4MSAwIDExMiAtMTMgMTQ4IC02NSAxODUgLTI4CjIwIC0zMCAyNiAtMzAgODAgMCA1NSAyIDYxIDI5IDc0IDQ4IDI1IDY2IDc3IDY2IDE5MSAtMSAxMTMgLTE0IDE1MiAtNjUgMTgyCi0yNyAxNiAtMzAgMjIgLTMwIDcxIDAgNDggMyA1NiAzOSA5MCA0OSA0NyA2NSAxMDEgNTggMjAzIC02IDg2IC0yMyAxMjggLTY3CjE1OSAtMjggMjAgLTMwIDI2IC0zMCA4MyAwIDU5IDIgNjUgMzYgOTYgMjAgMTkgNDAgNDUgNDUgNTggNSAxMyA5IDEwMiA5IDE5NwowIDE2NyAxIDE3NiAyNyAyMzIgNTggMTI3IDM3IDI4MyAtNTMgMzgzIC0yNCAyNyAtNjQgNTkgLTg4IDcwIC02MiAzMSAtMTU3CjM2IC0yMjYgMTN6IG0xOTMgLTY5IGM1MyAtMjIgMTE0IC05NSAxMzMgLTE2MSAyMCAtNjggMTQgLTE1MyAtMTQgLTIwOCAtMjYKLTUwIC04OSAtMTA4IC0xMzMgLTEyMyAtNDAgLTEyIC0yMjcgLTMxIC0zMTUgLTMxIC05MCAwIC05NiA4IC0xNDggMTg5IC01NgoxOTggLTU3IDE5NSA2NyAyNTAgMjY2IDExNiAzMDcgMTI0IDQxMCA4NHogbS01NzMgLTIwNSBjMCAtMTMgMTggLTgxIDQwIC0xNTMKMjIgLTcxIDQwIC0xMzQgNDAgLTEzOCAwIC01IC0zMCAtMjIgLTY3IC0zOSAtNTgyIC0yNjMgLTEzNTAgLTY0MiAtMjAwOCAtOTkwCi0xODcgLTEwMCAtMTQ3NyAtODAyIC0xNTY1IC04NTIgLTI1IC0xNCAtNDggLTI2IC01MiAtMjYgLTUgMCAtOCA2MyAtOCAxNDAgMAoxNTUgLTExIDIyMiAtNDcgMjk0IC0zMCA1OSAtMTAwIDEzNiAtMTQ4IDE2MiAtMTkgMTAgLTM1IDIxIC0zNSAyNCAwIDMgMzcgMTkKODMgMzcgNDUgMTcgMzU3IDE0MiA2OTIgMjc4IDMzNiAxMzUgNzgzIDMxNSA5OTUgNDAwIDQ5OSAxOTkgNjQxIDI1OCA5NTUgNDAxCjI2OSAxMjEgNTA2IDIyNiA3MzAgMzIxIDcyIDMxIDE4NiA4MCAyNTUgMTA5IDY5IDI5IDEyOCA1NCAxMzMgNTQgNCAwIDcgLTEwCjcgLTIyeiBtNjcwIC00MjAgYzAgLTExOSAtMTIgLTE5OCAtMjkgLTE5OCAtNSAwIC0xMiAxMSAtMTUgMjQgLTE0IDU2IC0xMDkKNTUgLTEzNiAtMiBsLTEzIC0yNyAtMTMgMzAgYy04IDE4IC0xMyA2OSAtMTQgMTI2IGwwIDk2IDcwIDEyIGM0MCA3IDg0IDIzCjEwMiAzNiAxOCAxMyAzNiAyNCA0MSAyNCA0IDEgNyAtNTQgNyAtMTIxeiBtLTcyODAgLTMyIGMwIC0yIC03IC0yMCAtMTYgLTQxCi0xMSAtMjYgLTE1IC02NiAtMTMgLTEzOSBsMiAtMTAxIC0xODkgMCAtMTg5IDAgMiA2OCBjMSA3NyAzMSAxNDkgNzQgMTgwIDE2CjEyIDU0IDIyIDEwMCAyNyA4MSA4IDIyOSAxMiAyMjkgNnogbTMxNSAtMTMgYy0yMSAtNTEgLTI3IC05NSAtMjMgLTE3NCBsMwotODcgLTEyMyAtNyBjLTg5IC01IC0xMjcgLTQgLTEzNSA0IC0yMCAyMCAtMTUgMjEwIDYgMjQ5IGwxOCAzMiAxMzAgMCBjMTIxIDAKMTMxIC0xIDEyNCAtMTd6IG0zODcgNSBjMjIgLTYgNTAgLTI1IDY0IC00MCAzMCAtMzcgNTYgLTEyNSA1MiAtMTgwIGwtMyAtNDMKLTIyOCAtMyBjLTIxMCAtMiAtMjI4IC0xIC0yMzUgMTUgLTE0IDM1IC03IDE4NiAxMCAyMjYgbDE3IDM3IDE0MiAwIGM4MCAwCjE1OSAtNSAxODEgLTEyeiBtNjQ5MiAtMTY0IGMzIC05IDYgLTc4IDYgLTE1NCAwIC0xMTAgLTMgLTE0MCAtMTUgLTE1MCAtMTIKLTEwIC0xOCAtMTAgLTMwIDAgLTEyIDEwIC0xNSA0MSAtMTUgMTYwIDAgODAgMyAxNTAgNyAxNTMgMTIgMTMgNDEgNyA0NyAtOXoKbS02NTE1IC0xNTggYy0yIC0yIC0yMjEgLTcgLTQ4NiAtMTEgLTM0NyAtNSAtNDgzIC00IC00ODMgNCAwIDggMTQyIDExIDQ4NwoxMSAyNjcgMCA0ODQgLTIgNDgyIC00eiBtNTQ2IC0xMDEgYzk2IC00OCAxMjcgLTExMyAxNDUgLTMwNCAxNyAtMTg4IDMwIC05ODgKMzAgLTE5MzUgMCAtMTA1OCAtNSAtMTI0NyAtMzEgLTEyNzkgbC0xNyAtMjIgLTU4MyAwIC01ODMgMCAtMTggNzUgYy0xMCA0MQotMjIgODcgLTI3IDEwMiBsLTEwIDI3IDM5MyAzIGM0MzAgMyA0MjIgMiA0NjMgNjUgMTcgMjUgMTggOTUgMjEgMTEyMyAxIDYwMgotMSAxMjU5IC01IDE0NjAgLTggMzU4IC04IDM2NiAtMzEgNDA1IC0yNiA0MyAtNTAgNjQgLTk3IDgyIC0yMiA4IC0yMDYgMTIKLTY3MSAxMiAtNzEzIDEgLTcxMCAxIC03ODQgLTY1IC01MCAtNDUgLTY1IC04MCAtMTQwIC0zMTQgLTIwOCAtNjUyIC0yODkKLTkzMiAtMzAxIC0xMDQwIC01IC01MyAtOSAtMjYzIC03IC00NzMgbDMgLTM3NyAtODYgMCBjLTQxMyAwIC05NDcgLTExMAotMTEzNSAtMjMzIC0yNyAtMTggLTcwIC00NSAtOTYgLTYwIC0yNSAtMTUgLTYzIC00NiAtODMgLTY5IGwtMzcgLTQzIDcgODUgYzMKNDcgMTAgMTQxIDE1IDIxMCAxNyAyMjUgMTMgMjg0IC0yNCAzNzEgLTYgMTQgMzYgMjcgMjgxIDg3IDE1OCAzOSA0MjggMTAxCjU5OCAxMzcgMTcxIDM3IDMyNiA3NSAzNDUgODUgOTMgNDggMTQ3IDE2NiAxMDQgMjI4IC0xOSAyNyAtMzYgMjAgLTI4IC0xMiAxNQotNTkgLTM5IC0xNTQgLTEwMSAtMTgwIC0xOCAtOCAtMTYyIC00MiAtMzIxIC03NiAtMzU0IC03NSAtNDg0IC0xMDYgLTczMQotMTcxIC0xOTAgLTUxIC0xOTMgLTUxIC0yMzMgLTM1IC0yOSAxMiAtNzMgMTYgLTE2MCAxNiAtNzggMCAtMTIwIDQgLTEyMCAxMQowIDUgMjQgMzUgNTIgNjYgOTkgMTA0IDMzMiAxOTUgMTAzMyA0MDUgMTA0IDMxIDEyMSAzMyAzMTEgMzggMTk4IDUgMjAxIDUKMjQyIDMzIDIzIDE1IDUxIDQ1IDYyIDY3IDM0IDY3IDM0MSAxMDExIDM0NyAxMDY3IDExIDEwMSAtMzcgMTMzIC0xOTcgMTMzCmwtMTAxIDAgMjcgNTAgYzM2IDY2IDExNiAxNDEgMTkyIDE3OSAxNjYgODQgMzk1IDk5IDE0MzIgOTcgbDU5NSAtMSA2MCAtMzB6Cm02MDQxIC02MCBjMTcgLTQxIDE5IC0xNDkgMyAtMTk0IC0xMiAtMzMgLTI5IC00MiAtMjkgLTE0IDAgMjkgLTMxIDUzIC03MCA1MwotMzggMCAtNjAgLTE3IC03NCAtNTUgLTcgLTIwIC03IC0yMCAtMTggMCAtMTcgMjkgLTIyIDE1NyAtOCAxOTkgMTIgMzcgMzAgNDkKMzAgMTkgMCAtMjggMzEgLTUzIDY3IC01MyAzNyAwIDczIDI5IDczIDYwIDAgMzAgOSAyNCAyNiAtMTV6IG0tMTc1MSAtMzUgYzI1Ci0xNDYgLTg5IC0yNjYgLTIwOSAtMjIwIC0zMiAxMiAtMTA4IDg4IC0xMDQgMTAyIDUgMTMgOTYgNjYgMTE1IDY3IDggMSA4IC02CjAgLTI4IC0yNSAtNjcgNTggLTExMiAxMDIgLTU1IDI5IDM2IDI2IDU4IC05IDg4IGwtMzEgMjUgMjMgMTQgYzM5IDI1IDgzIDQ2Cjk1IDQ3IDYgMCAxNCAtMTggMTggLTQweiBtLTEzMSAtNzUgYzE5IC0xOSAxMCAtNDUgLTE1IC00NSAtMjUgMCAtMzUgMjYgLTE5CjQ1IDE1IDE4IDE1IDE4IDM0IDB6IG0tNDUwNCAtODAgYzE5IC0xMiA0MyAtMzYgNTUgLTU1IDIwIC0zNSAyMCAtNDUgMjAKLTE0ODIgbDAgLTE0NDcgLTIzIC0yMyAtMjMgLTIzIC0zOTUgLTMgLTM5NSAtMyAtMTcgNDMgYy02OCAxNzkgLTIwNiAzOTQKLTMyMiA1MDIgLTE4NyAxNzIgLTM1OSAyNDAgLTcxNiAyODIgLTM3IDQgLTQyIDggLTQ4IDM2IC05IDQzIC02IDU4NSAzIDc1MyA4CjE0NiAyNyAyMjMgMTQ0IDYwMCAxOSA2MSA3MyAyMzYgMTIxIDM5MCA5NyAzMTEgMTIzIDM3NCAxNjkgNDA3IDY1IDQ2IDgzIDQ3Cjc1NyA0NSA2MTkgLTIgNjM2IC0zIDY3MCAtMjJ6IG00MjU3IC0yNyBjLTkgLTEzIC0xMzEgLTE2NyAtMjcxIC0zNDMgLTE5MgotMjQyIC0yNTggLTMxOSAtMjcyIC0zMTcgLTExIDIgLTMxIDYgLTQ1IDkgLTI0IDUgLTQ3IC0yMiAtMzE1IC0zNjQgLTU5NAotNzYwIC01OTAgLTc1NCAtNTc1IC03ODIgNyAtMTIgLTIgLTE5IC00MiAtMzYgLTM2IC0xNCAtNjMgLTM1IC05NCAtNzIgbC00MgotNTMgLTM1IDYzIGMtMTggMzQgLTEyNCAyMjcgLTIzMyA0MjggbC0yMDAgMzY2IDcxIDM4IGMzOSAyMSAyODUgMTU1IDU0NiAyOTgKMTAyNyA1NjEgMTUwMCA4MTAgMTUxNCA3OTcgNSAtNSAyIC0xOCAtNyAtMzJ6IG0yMDUxIDAgYzE0IC0xNCAxNyAtMjY1IDMKLTI4NiAtNSAtOCAtMTcgLTEyIC0yNyAtMTAgLTE3IDMgLTE5IDE1IC0yMiAxNDMgLTEgNzYgMCAxNDUgMiAxNTIgNyAxNiAyOAoxNyA0NCAxeiBtLTE5NTcgLTYwIGMyMSAtMTcgMzkgLTM1IDM5IC00MSAwIC01IC01NSAtNzkgLTEyMyAtMTY1IC02OCAtODcKLTE4NSAtMjM3IC0yNjEgLTMzNCAtNzYgLTk4IC0xNDEgLTE3OCAtMTQzIC0xNzggLTYgMCAtOTMgNjIgLTkzIDY2IDAgOCA1MzIKNjg0IDUzOCA2ODQgMiAwIDIxIC0xNCA0MyAtMzJ6IG0tNjA4OSAtMzUgYzEwIC05IDE4IC0yOSAxOCAtNDUgMCAtMzQgLTMyNAotMTAyMiAtMzQ2IC0xMDU2IC0zNSAtNTMgLTY3IC02MiAtMjMxIC02MiAtODQgMCAtMTUzIDIgLTE1MyA0IDAgMzUgMzkyIDEwMDMKNDYxIDExMzcgbDE5IDM5IDEwNyAwIGM4NSAwIDExMCAtMyAxMjUgLTE3eiBtODAwMCAtMjU3IGMzNyAtMTMgNzYgNiA5MiA0NQoxMiAyOCAxNCAyOSAyNyAxMyAyMiAtMjcgMjUgLTE2MSA0IC0yMTAgbC0xNyAtMzkgLTkgMzEgYy0xNyA2MiAtMTEwIDcxIC0xMzIKMTQgLTYgLTE3IC0xNSAtMzAgLTE5IC0zMCAtMjkgMCAtMzUgMjAyIC04IDIzNiAxMiAxMyAxNSAxMSAyNCAtMTggNyAtMjEgMjAKLTM2IDM4IC00MnogbS00NDIwIC0xMjMgYzEwOSAtNDkgMTkwIC0xNjQgMjAzIC0yODkgOSAtNzYgLTIgLTk2IC00OSAtOTIgLTMxCjMgLTMxIDMgLTM3IC01NyAtOCAtNzggNCAtMTI4IDQxIC0xNTggMTYgLTE0IDM0IC0yNyA0MCAtMjkgMTAgLTMgMzMgLTk1NCAyMwotOTcwIC0yIC01IC0xNjggLTggLTM2OSAtOCBsLTM2NCAwIDAgMTU4IGMwIDg2IDUgMzg3IDEwIDY2NyAxMSA1NTQgMTMgNTcxCjcwIDY1NyAzNSA1MiAxMTYgMTEyIDE4MSAxMzQgNjMgMjAgMTkxIDEzIDI1MSAtMTN6IG00NDc2IC0xODMgYzMgLTE0NCAtNgotMTgwIC00MiAtMTY3IC0xNCA2IC0xNiAyNiAtMTYgMTUwIDAgNzkgMyAxNDcgNyAxNTEgNCA0IDE2IDYgMjggNCAxOSAtMyAyMAotMTEgMjMgLTEzOHogbS0yNTM1IC0xNDEgYzU2IC00NCAxMDMgLTgzIDEwNCAtODcgMiAtNCAtMTIwIC0xNjMgLTI3MCAtMzUzCi0xNDkgLTE5MCAtMzM1IC00MjcgLTQxMiAtNTI3IC03NyAtMTAwIC0xNDYgLTE4MCAtMTUzIC0xNzkgLTE1IDIgLTIxMCAxNTkKLTIxMSAxNjkgLTEgNyA3NjQgOTk0IDgwMiAxMDM2IDExIDEyIDI0IDIyIDI5IDIyIDUgMCA1NSAtMzYgMTExIC04MXogbTI0MzcKLTI4IGMwIC0yNSAzNyAtNTEgNzIgLTUxIDMxIDAgNjggMzEgNjggNTcgMCAxNiAxIDE2IDE3IDAgMjYgLTI2IDMxIC0xNTAgNwotMjAyIC0xNSAtMzQgLTE4IC0zNiAtMjEgLTE5IC02IDMyIC0zOSA1NyAtNzMgNTcgLTMyIDAgLTcwIC0yNyAtNzAgLTUwIDAKLTI0IC0xOCAtMTMgLTI5IDE4IC0yMiA2MiAtNyAyMDkgMjAgMjA5IDUgMCA5IC05IDkgLTE5eiBtLTQxNzAgLTE2MSBjMCAtNTQKLTEgLTU1IC0zMSAtNDAgLTM0IDE5IC0yMCA5MCAxOCA5MCA5IDAgMTMgLTE2IDEzIC01MHogbTQyNjUgLTcyIGMzIC0xMyA0Ci04OCAzIC0xNjggbC0zIC0xNDUgLTI1IDAgLTI1IDAgLTMgMTQ1IGMtMyAxNjYgMCAxOTAgMjggMTkwIDEyIDAgMjIgLTkgMjUKLTIyeiBtLTQwODggLTMzOCBjNTAgLTkxIDEzNCAtMjQ2IDE4OCAtMzQ1IDU0IC05OSAxMTUgLTIxMiAxMzYgLTI1MSAyMiAtMzkKMzkgLTc0IDM5IC03OCAwIC0zIC0xMDQgLTYgLTIzMCAtNiAtMTc2IDAgLTIzMiAzIC0yMzQgMTMgLTMgNiAtNyAyMDYgLTEwCjQ0MiAtNiAzNjMgLTUgNDI3IDcgNDEwIDcgLTExIDU0IC05NCAxMDQgLTE4NXogbS0xNDUwIDcyIGM3IC00IDI4IC02NiA0NgotMTM3IDcyIC0yNzEgMTU3IC02MDEgMTU3IC02MDggMCAtNCAtOTAgLTcgLTIwMCAtNyBsLTIwMCAwIDAgMzgwIDAgMzgwIDkzIDAKYzUwIDAgOTcgLTQgMTA0IC04eiBtNTYyMyAtMTczIGM1IC02NCA3IC02OSA1NiAtMTIxIDY1IC02OSA4NSAtMTA3IDkxIC0xNzgKMTUgLTE2MiAtMTAzIC0zMDAgLTI1OSAtMzAwIC01OSAwIC0xMDggMTUgLTEwOCAzMyAwIDE2IDQyIDU3IDU4IDU3IDMzIDAgOTMKNDUgMTEyIDg1IDQzIDkwIDIyIDE1NSAtODcgMjYxIGwtODMgODEgMCA3NyAwIDc3IDEwOCAtMyAxMDcgLTMgNSAtNjZ6IG0yNjE1CjUgYzI0MiAtMzMgNTEyIC04NyA4MzUgLTE2OSA0MzggLTExMSA4MzggLTI3MSA4MDYgLTMyMyAtMyAtNiAtMjkgLTEzIC01NwotMTcgLTQwIC02IC01MyAtMTIgLTYxIC0zMSAtMTAgLTIxIC0yIC00MyA2MSAtMTcyIDEwMCAtMjA0IDE3NCAtMzMxIDIxMwotMzY5IDE4IC0xNyA1NCAtNDEgNzkgLTUxIDQzIC0xOSA0NyAtMjQgNzMgLTk2IDE2IC00MiAyNyAtNzkgMjUgLTgxIC0yIC0yCi00MCAxIC04NCA3IC05NiAxMyAtMTQyIC0yIC0xNzUgLTU0IC0xOSAtMjkgLTIxIC00NCAtMTcgLTEyOCA3IC0xNDggNDYgLTIzMAoxMzIgLTI3MyAxNyAtOCA2MyAtMjAgMTAzIC0yNyBsNzMgLTEyIC02IC02MiBjLTYgLTU0IC0zIC03MCAyMCAtMTI3IGwyNyAtNjQKLTE3IC0xMDUgYy0yMiAtMTM1IC01NyAtMjQ2IC05OCAtMzA2IC0zMiAtNDkgLTkzIC05MSAtMTM2IC05NiAtMjIgLTMgLTIzIDEKLTI3IDY3IC01IDk5IC0yMCAxNTggLTY2IDI1NSAtNTMgMTEwIC0xNTEgMjEyIC0yNTAgMjU4IC0yMjYgMTA2IC00NTMgNjkKLTYyNCAtMTAyIC04MiAtODIgLTEzMiAtMTY2IC0xNzAgLTI4NiAtMTUgLTQ3IC0zMCAtODggLTMzIC05MiAtNCAtNCAtMzUgLTEKLTcxIDcgLTM2IDggLTI2NSA1NyAtNTEwIDEwOSAtNzkzIDE3MCAtMTQ4MiAzMjQgLTE0OTIgMzM0IC03IDcgLTcgMzEgMSA3NAoxOCAxMDQgMTQgMjY0IC05IDM1MiAtNjUgMjU3IC0yNTcgNDI1IC01MDUgNDQzIC0yNTcgMTggLTQ5MyAtMTY2IC01NzEgLTQ0NgpsLTE4IC02MyAtMzUgNiBjLTIwIDMgLTcwIDIyIC0xMTEgNDMgLTEwNSA1MyAtMTEzIDcwIC0xMDYgMjMzIDUgMTM0IDMzIDI2Ngo2NSAzMTAgMjkgNDAgMTAyIDkyIDExOSA4NSA5IC0zIDQ5IC0xMSA5MCAtMTcgMTQwIC0yMiAyODMgMzIgMzkyIDE0OCA5OCAxMDUKMTAzIDE3NiAxNSAyMTUgLTI2IDEyIC0zNCAyMCAtMjUgMjMgNzYgMjYgMzE4IDc4IDQyMCA5MCAzMCA0IDY3IDkgODMgMTIgMjQKNSAyNyAzIDI3IC0yMCAwIC0xNCAxMyAtNDAgMjkgLTU4IDI0IC0yNyAzNiAtMzIgODggLTM2IDc0IC01IDc4IC0zIDI3MCAxMzcKMTM5IDEwMSAzOTMgMjc0IDUzNiAzNjQgNTIgMzMgNjIgNDYgNTggNzAgLTIgMTYgMTE4IDQzIDI2OSA2MSA1NiA3IDI0NSAtNAozNjUgLTIweiBtLTg4MSAtMTgwIGMtOTkgLTY0IC0yMjQgLTE0OCAtMjc5IC0xODcgLTI0MCAtMTcxIC0yNzEgLTE4OSAtMzE0Ci0xOTEgLTUxIC0xIC05MyAzMyAtNzUgNjIgMzYgNTggNzUxIDQyOSA4MzMgNDMyIDcgMCAtNjcgLTUyIC0xNjUgLTExNnoKbS01MjI5IC0yNDUgYzU1IC01MSA1NiAtNTIgNTMgLTEwMyBsLTMgLTUxIC01NSAtMyBjLTUzIC0zIC01NCAtMyAtMzcgMTYgMzgKNDIgNiAxMTIgLTUyIDExMiAtNTAgMCAtNjAgLTMxIC0zNiAtMTA3IDcgLTIyIDUgLTIzIC01MiAtMjMgLTU0IDAgLTYxIDIgLTcxCjI1IC0xNyAzOCAtMTUgNDUgMzEgMTA1IDI4IDM1IDU1IDU5IDc3IDY3IDY0IDIyIDg1IDE3IDE0NSAtMzh6IG0tNjMyNyAxMQpjNTkgLTM2IDY2IC02OCA1OCAtMzAwIC05IC0zMDAgLTMzIC01MzAgLTc3IC03MjAgLTEzIC01NyAtNDkgLTEwNSAtOTkgLTEzMAotMzEgLTE2IC01OSAtMjAgLTE0MCAtMjAgbC0xMDAgMCAwIDcwIDAgNzAgNjUgMCBjNzYgMCAxMjcgMTggMTQ5IDUzIDkgMTMgMjMKNTYgMzEgOTUgMTcgNzkgNTUgNTMzIDU1IDY0OSAwIDY5IC0yIDc3IC0yOSAxMDQgLTI5IDI5IC0zMSAyOSAtMTQxIDI5IGwtMTEyCjAgNyA0NiBjMTEgNzggMiA3NCAxNTkgNzQgMTI0IDAgMTQ1IC0zIDE3NCAtMjB6IG05Njk4IDEwIGMyNiAtMTAgMjYgLTExIDkKLTMwIC0xMCAtMTEgLTI4IC0yMCAtMzkgLTIwIC01MSAwIC0xMjYgLTc1IC0xMjYgLTEyNiAwIC00MCA3OCAtODQgMTUwIC04NAozNyAwIDQwIC0yIDQwIC0yNyAwIC0zNCAtMzUgLTExMyAtNDkgLTExMyAtNiAwIC0xNiA5IC0yMyAyMCAtNyAxMSAtMjAgMjAKLTMwIDIwIC0xOCAwIC02MyAtNDkgLTczIC04MCAtMTAgLTMwIC0yOCAtMjQgLTczIDI0IC04OSA5NiAtODggMjU0IDIgMzUyIDU4CjY0IDE0MyA5MCAyMTIgNjR6IG0tMzQzOCAtMTI4IGM0IC0yOCAtMjQgLTQwIC00NSAtMTkgLTE0IDEzIC0xNCAxOSAtMyAzMiAxOAoyMiA0NCAxNSA0OCAtMTN6IG03ODU2IC0xMjkgYzY4IC0xMjEgMjEwIC00MTIgMjA0IC00MTggLTEzIC0xMyAtODIgNTMgLTExNgoxMTMgLTY5IDExOCAtMjAxIDM4NSAtMTk2IDM5NCAzIDQgMTYgOCAyOSA4IDIwIDAgMzMgLTE3IDc5IC05N3ogbS0xNDIyNiA1CmwzIC03OCAtMTI2IDAgLTEyNSAwIDAgMjkgMCAyOSAxMTAgNyBjNjEgNCAxMTIgMTEgMTE1IDE1IDcgMTIgLTQ5IDIwIC0xMzYKMjAgbC03OSAwIDAgMzAgMCAzMSAxMTggLTMgMTE3IC0zIDMgLTc3eiBtODI4MyAtNiBjMjAgLTcgNTEgLTIyIDY5IC0zNSA0MQotMjggOTYgLTk0IDg2IC0xMDQgLTQgLTUgLTk3OSAtOSAtMjE2NyAtMTEgbC0yMTU5IC0yIDAgODUgMCA4NSAyMDY4IC0yCmMxNjEyIC0zIDIwNzUgLTYgMjEwMyAtMTZ6IG0yMTE3IC04IGMyNCAtMTAgMzIgLTE5IDMyIC0zOCAwIC01OCAtMTQ2IC0xODkKLTI0MyAtMjE4IC01MSAtMTUgLTE3MiAtMTUgLTIxMCAxIC0yNSAxMCAtMjcgMTMgLTE2IDMzIDIxIDM5IDEyMCAxMzcgMTc3CjE3NSAxMDcgNzEgMTcyIDgzIDI2MCA0N3ogbS04Njg0IC04NSBjNDUyIC0zNCA3NDEgLTIyOCA5MjYgLTYyMiAxMjUgLTI2OAoxNzcgLTUyMSAxODcgLTkxNCBsNiAtMjMzIC02MCAwIGMtMzcgMCAtNjUgNSAtNzEgMTMgLTYgNyAtMTEgNjcgLTExIDE0NCAtMQo3ODUgLTUwMCAxMzE2IC0xMTg5IDEyNjIgLTMxMSAtMjQgLTYxNCAtMTkxIC03OTcgLTQ0MCAtMjYgLTM1IC00OCAtNjUgLTQ5Ci02NiAtMSAtMSAtMjAgNCAtNDEgMTIgLTMwIDExIC0xMDIgMTQgLTI5OCAxNSBsLTI1OSAwIDI4IDMzIGMxNSAxNyAzMyA0NyA0MQo2NSAxMSAyNiAxOCAzMiAzMSAyNiAyOSAtMTQgMjU2IC0xNyAzMDIgLTQgNTMgMTQgOTUgNTQgMTA5IDEwNiAyNCA4MSA1NSAyODkKNDcgMzE4IC05IDM4IC00NiA2OSAtOTggODIgbC00MyAxMSA1NiAyNiBjMjA1IDkzIDU3MCAxNTcgMTAwOSAxNzUgMTkgMSA5NwotMyAxNzQgLTl6IG0tMTcyNCAtODYgYy00IC0yNiAtNSAtNTMgLTMgLTYwIDMgLTcgMyAtMjMgMCAtMzYgLTYgLTIyIC05IC0yMgotMTI3IC0xOSAtMTE3IDMgLTEyMSA0IC0xMTggMjQgMiAxNCAxNSAyNSAzNiAzMiAzNiAxMiAzMyAyNiAtNSAyNiAtMjAgMCAtMjMKNSAtMjMgNDAgbDAgNDAgMTIzIDAgMTI0IDAgLTcgLTQ3eiBtOTgxMiAtODAgYzE2IC0yNyAxNSAtMjkgLTE3IC02NiBsLTM0Ci0zOSAtMjYgNDIgYy0yMiAzNCAtMjUgNDkgLTIwIDgxIDkgNTMgMzMgNjYgNjAgMzQgMTEgLTE0IDI4IC0zNyAzNyAtNTJ6Cm0tODI3IDM0IGM1MCAtMTYgOTIgLTUxIDExNCAtOTUgNyAtMTIgMjcgLTg4IDQ1IC0xNjggMTkgLTgxIDQwIC0xNTMgNDggLTE2MAo4IC04IDM4IC0xNyA2NiAtMjEgbDUyIC02IC0yIC00NjEgLTMgLTQ2MSAtMjE3IC0zIC0yMTggLTIgMCA0NyBjMCA1NyAtMjIKMTg4IC01MSAyOTggLTQ5IDE5MCAtMTcyIDQxMyAtMzAxIDU0NiAtMjAxIDIwNSAtNDMzIDI5OSAtNzQ0IDI5OSAtMTgyIDAKLTMyNCAtMzQgLTQ4NCAtMTE2IC0yMDkgLTEwOCAtMzU5IC0yNjQgLTQ4NyAtNTA5IGwtNTMgLTEwMCAzIDM5NyAyIDM5NyAtMjMKMjMgLTIzIDIzIC00MDggMyAtNDA5IDMgLTI5IC0yNSAtMjggLTI0IDAgLTYzNiAwIC02MzUgMjMgLTIzIDIzIC0yMyAzNzkgLTMKMzgwIC0zIDAgLTg0IGMwIC02MyAtNCAtODcgLTE2IC05OSAtMTQgLTE0IC0xNDIgLTE2IC0xMjU5IC0xNiBsLTEyNDMgMCAtMwoxMTEgYy01IDEyOSAtNSA2MTAgLTEgMTE2MiBsMiAzODggMjQwOCAtMyBjMjIxMyAtNCAyNDExIC02IDI0NTcgLTIxeiBtLTIyOTcKLTEzMyBjOSAtMyAxMiAtMTA0IDEyIC00NjEgMCAtNDQ4IC0xIC00NjEgLTI0IC01NjggLTE0IC02MSAtMjcgLTEzNCAtMzEKLTE2MiBsLTcgLTUzIC0zNjkgMCAtMzY5IDAgLTEwIDI2IGMtNiAxNSAtMTAgMjU1IC0xMCA2MTMgMCA0NzIgMyA1OTEgMTMgNTk5CjcgNiA1NiAxMyAxMDggMTUgMTEyIDQgNjY5IC0zIDY4NyAtOXogbS02Njk5IC0yNiBjMCAtMTggLTQgLTUzIC03IC03NyBsLTcKLTQ0IC04NSAwIGMtMTU3IDEgLTE0MCAtOCAtMTQwIDc4IGwwIDc1IDEyMCAwIDEyMCAwIC0xIC0zMnogbTU3MSAxMyBjMTUgLTI4CjEzIC02NiAtMTAgLTE4OCAtMzYgLTE5MSAtMzkgLTE5MyAtMjI0IC0xOTMgLTE3MCAwIC0xNzIgMyAtMTI5IDE2MCAyNyA5OSA3NQoxNzcgMTMzIDIxNiAzMCAyMSA0NiAyNCAxMjcgMjQgODEgMCA5NCAtMiAxMDMgLTE5eiBtNzQ5OSAtMTM1IGMyNjQgLTc0IDQ3OAotMjYxIDYxOSAtNTQxIDM2IC03MyA4NiAtMjI0IDEwNiAtMzIwIDIxIC0xMDAgMzggLTI4OCAzNCAtMzcwIGwtMyAtNzAgLTU3Ci0zIC01OCAtMyAwIDEyMSBjMCAzMDggLTg2IDU3MSAtMjUzIDc3MCAtMjM4IDI4NCAtNjA3IDM4MSAtOTcwIDI1NSAtMTE5IC00MQotMjE0IC0xMDIgLTMxOCAtMjA1IC0yMTQgLTIxMSAtMzI2IC00NzcgLTM0NiAtODI2IGwtNiAtMTE0IC01NSAwIC01NSAwIDYKMTUzIGMyMiA1NzYgMzY1IDEwNTMgODM0IDExNjEgMTA2IDI0IDEwOSAyNSAyNzMgMjEgMTMxIC0yIDE3MCAtNyAyNDkgLTI5egptLTYyNDYgLTE3IGMxNjcgLTM0IDMxMCAtMTA0IDQzOSAtMjE2IDEwMCAtODYgMTcxIC0xODIgMjQ0IC0zMjggMTAxIC0yMDYKMTQ0IC0zODggMTQ0IC02MTcgbDAgLTEyOCAtNTUgMCAtNTUgMCAwIDEwMyBjMCA2MjQgLTM5NiAxMDg3IC05MzAgMTA4NyAtMzA1CjAgLTU5NyAtMTYxIC03ODAgLTQzMCAtMTI4IC0xODkgLTIxMCAtNDU5IC0yMTAgLTY5MiBsMCAtNjggLTU3IDAgLTU2IDAgNgoxMzggYzE5IDQxNCAyMDggNzg2IDQ5OSA5ODQgMTI0IDg0IDI4MyAxNTAgNDIzIDE3NiA5NCAxOCAyNzkgMTQgMzg4IC05egptODg2MiAtMjQgYzExMCAtMjkgMjQ2IC0xMjIgMjg1IC0xOTUgNyAtMTMgLTEwIC0xIC00MCAyOCAtMzMgMzMgLTg0IDY4IC0xMzQKOTIgLTE1OCA3OCAtMzEzIDc1IC00ODEgLTkgLTg1IC00MyAtNzAgLTIyIDI4IDM3IDk4IDU5IDIyNiA3NyAzNDIgNDd6Cm0tMTA3MTAgLTUyIGMtMyAtMjEgLTEwIC00MSAtMTMgLTQ0IC00IC0zIC00OCAtMyAtOTggLTEgbC05MiA0IC02IDMwIGMtMyAxNwotMyAzNCAwIDM5IDMgNSA1MyA5IDExMSA5IGwxMDUgMCAtNyAtMzd6IG0xMDY4OCAtMzggYzE4OCAtNDAgMzM1IC0yMDAgMzY4Ci00MDIgNDIgLTI1MyAtMTM5IC01MTAgLTM4OSAtNTU0IC0xNDIgLTI1IC0zMDQgMzEgLTQwNSAxNDEgLTY5IDc0IC0xMDMgMTQ0Ci0xMjQgMjUwIC01OCAyOTQgMTU2IDU3MSA0NDcgNTc5IDE5IDAgNjYgLTYgMTAzIC0xNHogbS0xMTU1IC00OTcgbDIgLTQ2OAotNzAgMCAtNzAgMCAwIDQ3MCAwIDQ3MSA2OCAtMyA2NyAtMyAzIC00Njd6IG0tMTUxNSA0MzggYzExMiAtMjkgMjUyIC05NyAzMTcKLTE1NiBsNDUgLTQxIC03OCA1MCBjLTI0OSAxNTkgLTU4NCAxODYgLTg1NyA2OCAtNDQgLTE5IC04MCAtMzMgLTgwIC0zMSAwIDkKOTcgNTggMTcwIDg0IDEwMiAzOCAxNTggNDcgMjg2IDQ5IDc3IDEgMTI0IC01IDE5NyAtMjN6IG0tODA3NSA0IGwyNyAtMSAtMjQKLTE5IGMtMTggLTE1IC0zOCAtMjAgLTg3IC0yMCAtNTcgMCAtNjQgMiAtNjQgMTkgMCAxNiA4IDIxIDQ4IDI0IDI2IDIgNTMgMgo2MCAwIDggLTIgMjYgLTMgNDAgLTN6IG0xOTUyIC0yOSBjOTcgLTMzIDIwOCAtOTIgMjU3IC0xMzcgMjAgLTE4IDExIC0xNCAtMzEKMTIgLTg0IDUyIC0xNzEgOTAgLTI2OCAxMTYgLTcxIDIwIC0xMDYgMjMgLTI0MyAyMiAtMTQyIC0xIC0xNjkgLTQgLTI0NCAtMjcKLTg2IC0yNiAtMTAwIC0yMiAtMjEgNyA5NiAzNSAxNzIgNDYgMzE1IDQzIDEyNyAtMyAxNDkgLTYgMjM1IC0zNnogbTEyNjUyIDkKYzIwIC02IDM5IC0xOCA0MiAtMjcgMTMgLTM0IDI4IC0yMjggMjEgLTI4MSBsLTcgLTU0IC00NSA2IGMtODIgMTEgLTEyNiAyNwotMTUzIDU2IC0zNSAzNyAtNjAgMTI4IC02MCAyMTMgMCA1NSA0IDcxIDIxIDg4IDE5IDE5IDI5IDIxIDgzIDE2IDMzIC00IDc3Ci0xMSA5OCAtMTd6IG0tMTI3MDcgLTc5IGMyMDYgLTU1IDM4MyAtMTgwIDQ5OCAtMzU0IDE4NiAtMjgwIDIxMiAtNjc5IDY1Ci05NzcgLTE4NCAtMzcxIC01NzAgLTU2MiAtOTc4IC00ODQgLTM1MyA2NyAtNjE2IDMzNCAtNjkyIDcwMyAtMjYgMTI0IC0yMQozMDUgMTEgNDMxIDQ5IDE5MCAxODIgNDAyIDMyMCA1MTMgOTkgNzkgMjQ5IDE1MCAzNzEgMTc2IDEyMSAyNyAyODYgMjMgNDA1Ci04eiBtNjE5MCAwIGMzNTEgLTkzIDU5MyAtMzk1IDYzNiAtNzk1IDI1IC0yMjYgLTM4IC00NzAgLTE3MSAtNjY2IC01MyAtNzgKLTE4NCAtMjAwIC0yNjkgLTI1MCAtMTQyIC04NCAtMzIxIC0xMjcgLTQ4OSAtMTE3IC00MTggMjUgLTczMyAzMTEgLTgwNyA3MzMKLTgxIDQ2MyAxODggOTQ0IDYwMyAxMDc5IDE1MiA0OSAzNDYgNTUgNDk3IDE2eiBtLTczNzQgLTIwOCBjNCAtNCAtMTQgLTUyCi00MCAtMTA1IC04NSAtMTcyIC0xNDEgLTQxMSAtMTQxIC02MDMgMCAtMTM4IDQgLTEzNSAtMTg4IC0xMzUgLTE1NCAwIC0zODcKMTkgLTQ4OSA0MCAtMjggNiAtNjQgMjEgLTc5IDMyIC01MSA0MSAtNTcgNzEgLTYyIDM0OCAtNyAzOTEgNCA0MjEgMTUxIDQzMAoxMjYgOCA4MzkgMiA4NDggLTd6IG0zNDAxIC0zOTcgbDMgLTIyOCAtNTMwIC01IGMtMjkxIC0yIC01NDQgLTEgLTU2MSAyIGwtMzIKNSAtNyAxMTggYy0zIDY0IC0xMyAxNjQgLTIxIDIyMSAtOCA1OCAtMTQgMTA2IC0xNCAxMDggMCAyIDExNDQgMTAgMTE1NyA4IDEKLTEgMyAtMTAzIDUgLTIyOXogbTk4NTMgNjkgYzExNSAtMzAgMjIwIC05NyAyNzcgLTE3OCAxOCAtMjUgMTAgLTIxIC0zNCAxOQotNjkgNjMgLTEyNCA5NiAtMjA4IDEyNSAtMTIxIDQxIC0zMTMgMjQgLTQwOCAtMzggLTEzIC04IC0yNiAtMTMgLTI4IC0xMCAtMTIKMTIgMTA5IDY5IDE4NSA4NiA1OCAxNCAxNTIgMTIgMjE2IC00eiBtNDEgLTEwMCBjMTY1IC02MiAyNzcgLTIwNCAzMDUgLTM4NwoxNiAtMTAyIDAgLTE5MyAtNTIgLTI5OCAtODcgLTE3MyAtMjc4IC0yODUgLTQ1NCAtMjY1IC0xOTEgMjEgLTMzNiAxMzMgLTQwNgozMTMgLTMxIDc5IC0zOCAyMjcgLTE0IDMwOCA4MSAyODEgMzU4IDQyOCA2MjEgMzI5eiBtLTk4NTggLTM1MiBsMyAtODMgLTU4MQowIC01ODAgMCAwIDg1IDAgODUgNTc4IC0yIDU3NyAtMyAzIC04MnoiLz4KPHBhdGggZD0iTTEwMjQ1IDgzNTEgYy04NSAtNTEgLTk1IC0xNjQgLTIxIC0yMjkgNDggLTQyIDg1IC00OCAxNDAgLTIzIDc5IDM0CjEwOCAxMTggNjkgMTk4IC0zMiA2OCAtMTIzIDk0IC0xODggNTR6IG0xMzMgLTY3IGM0MyAtNDkgMTQgLTEyNyAtNTQgLTE0MAotNDYgLTkgLTk0IDM1IC05NCA4NSAwIDg0IDkyIDExOSAxNDggNTV6Ii8+CjxwYXRoIGQ9Ik0yODAwIDcwMjkgYy02MSAtMjUgLTgyIC02MyAtMTQxIC0yNTcgLTQxIC0xMzUgLTQ1IC0xNDQgLTc2IC0xNTkKLTczIC0zNCAtOTMgLTk1IC0xMDAgLTI5MyAtNCAtMTQ1IC03IC0xNjQgLTQ2IC0yOTUgLTQ0IC0xNTAgLTUwIC0yMTkgLTIzCi0yNjAgMjEgLTMyIDIxIC0zMiAtMTQgLTUwIC02NSAtMzQgLTgwIC0xNDAgLTI2IC0xOTQgMjMgLTIzIDM0IC0yNiA5MCAtMjUKOTUgMSAxNjggNTUgMjAxIDE1MCBsMTMgMzkgNjkgNiBjMzcgNCAzMjQgNyA2MzYgOCA2NDAgMSA2MDkgLTIgNjQ3IDc2IDE5IDQwCjIwIDY0IDIwIDU5OCAwIDU5NiAwIDU5OCAtNTAgNjQyIC0yMSAxOSAtMzggMjAgLTU5OSAyMiAtMzY2IDEgLTU4NSAtMiAtNjAxCi04eiBtODIzIC00OSBjMzE0IDAgMzI4IC0xIDM0NyAtMjAgMjAgLTIwIDIwIC0zMyAyMCAtNTg3IGwwIC01NjcgLTIyIC0yMwotMjEgLTIzIC01MjkgMCAtNTI5IDAgMTMgMjMgYzEwIDE3IDEzIDEwOCAxMyAzODcgMCAzMzAgLTIgMzY4IC0xOCAzOTcgLTI0CjQ0IC02OCA2NSAtMTUwIDcxIC01NiA0IC02NyA3IC02MyAyMSAzIDkgMjMgNzYgNDYgMTQ5IDMzIDEwOCA0NiAxMzUgNjcgMTUwCjIzIDE0IDYwIDE4IDIyOCAyMyAxMTAgMyAyMTYgNCAyMzUgMiAxOSAtMSAxODIgLTMgMzYzIC0zeiBtLTgxOCAtNDEwIGM1MQotMTkgNTUgLTQ5IDU1IC00MDUgMCAtNDE4IDEgLTQxNSAtMTQzIC00MTUgLTE0MSAwIC0xNjQgMjIgLTE3OSAxNzMgLTExIDExMwotMiA1MDEgMTMgNTU4IDEwIDQxIDUwIDg2IDgyIDkyIDQ0IDkgMTQ2IDcgMTcyIC0zeiBtLTMxOSAtNzg4IGMtMyAtMyAtMTIgMQotMjEgOCAtMTggMTUgLTE5IDUxIC0yIDEyMiBsMTIgNTMgOCAtODkgYzQgLTQ5IDYgLTkxIDMgLTk0eiBtNjYgLTEyNCBjLTM1Ci01MCAtOTYgLTEwOCAtMTE1IC0xMDggLTIzIDAgLTM3IDIzIC0zNyA2MiAwIDMxIDUgNDAgMzAgNTMgMTYgOCA0NCAzMyA2MiA1NQpsMzIgNDEgMjkgLTMwIDI5IC0yOSAtMzAgLTQ0eiIvPgo8cGF0aCBkPSJNMzY5NSA1NDQxIGMtNDQgLTE4IC02MCAtNTAgLTYwIC0xMTcgMCAtNTYgMyAtNjcgMjggLTkxIGwyNyAtMjgKMTY2IDAgMTY2IDAgMjkgMzMgYzUzIDU5IDM0IDE3OCAtMzIgMjAxIC0zNyAxMyAtMjk0IDE0IC0zMjQgMnogbTMyMyAtMTA0IGM1Ci03NSAwIC03NyAtMTU1IC03NyAtNzQgMCAtMTQzIDUgLTE1NCAxMCAtMTQgOCAtMTkgMjEgLTE5IDUzIDAgMjQgNiA0OSAxMiA1NQo5IDkgNTQgMTIgMTYzIDEwIGwxNTAgLTMgMyAtNDh6Ii8+CjxwYXRoIGQ9Ik01NzU1IDY0ODcgYy01MyAtMjEgLTgzIC00OCAtMTA1IC05MSAtMjUgLTUyIC0yNSAtMTA4IC0xIC0xNjIgNDcKLTEwNCAxODQgLTEzNSAyNjggLTYxIDQxIDM2IDczIDk4IDczIDE0MiAwIDczIC02NSAxNTQgLTEzOCAxNzUgLTQ1IDEyIC01OQoxMiAtOTcgLTN6IG0xMTggLTY5IGMyOSAtMTUgNTcgLTcwIDU3IC0xMTEgMCAtNTMgLTUwIC0xMDYgLTEwNiAtMTE0IC03NyAtMTAKLTEzNCA0MyAtMTM0IDEyNSAwIDkwIDk5IDE0NCAxODMgMTAweiIvPgo8cGF0aCBkPSJNMTI2OTAgNTUxNCBjLTEzOSAtMjkgLTM3MSAtMTcwIC02NjUgLTQwMyAtMTY1IC0xMzEgLTIwMCAtMTY3IC0yNDQKLTI1MiAtNTAgLTk2IC05NyAtMjY2IC0xMTMgLTQxNCBsLTExIC0xMDAgNDEgLTkwIGM1OCAtMTI4IDcyIC0xOTAgODEgLTM1MiA5Ci0xNjIgMTcgLTE4MiA4MyAtMjA3IDM5IC0xNSAzMzEgLTc4IDEyMTMgLTI2NCA1MzUgLTExMyA1NDggLTExNSA1ODggLTk4IDI4CjExIDQ2IDM0IDkyIDExMyA5OCAxNjYgMjI1IDI4MCAzNjkgMzMxIDYyIDIyIDg4IDI2IDIwMSAyNiAxMTcgMCAxMzggLTMgMjEwCi0yOCAxMjMgLTQyIDIyNCAtMTExIDI4OSAtMTk2IDIxIC0yOCA0NCAtNTAgNTIgLTUwIDQ3IDAgLTMwIDExMSAtMTI5IDE4NgotMjY5IDIwNCAtNjM5IDE4NyAtODcwIC0zOCAtNzMgLTcyIC0xMzQgLTE1NCAtMTc1IC0yMzMgLTExIC0yMiAtMzAgLTQ5IC00MgotNjAgLTIxIC0xOSAtMjIgLTE5IC0yMzMgMjMgLTExNyAyNCAtMjIwIDQ2IC0yMjkgNDggLTE1IDUgLTE2IDkgLTIgNDcgNjIKMTc1IDE3NCA4NTAgMTc0IDEwNDcgbDAgMTA3IDU4IC05IGMzNzggLTU5IDEwMDUgLTE0OCAxMDQ3IC0xNDggNTQgMCA5MiAyOQoxMDEgNzYgMTIgNjYgLTY4IDMzMCAtMTQ5IDQ5MCAtNjMgMTI1IC0xMzkgMTc1IC0zNjkgMjQ0IC0xNDIgNDMgLTQxOSAxMTAKLTQ1NCAxMTAgLTUxIDAgLTYwIC0yNyAtMTEzIC0zNTMgLTI4IC0xNjkgLTUxIC0zMTkgLTUxIC0zMzMgbDAgLTI2IC02NyA3CmMtMzggNCAtNzAgOSAtNzIgMTEgLTMgMiAyNCAxMzggNTkgMzAyIDM1IDE2MyA2NiAzMjAgNjggMzQ4IDYgNzEgLTEzIDg3Ci0xMzEgMTA4IC0yNzAgNDggLTQ3OCA1OCAtNjA3IDMweiBtNTE4IC03MSBjMTEwIC0xNyAxNjUgLTMwIDE2OSAtNDAgMyAtNwotMjUgLTE2MCAtNjMgLTMzOCAtNTQgLTI1OCAtNzEgLTMyNSAtODMgLTMyNSAtOSAtMSAtMjM0IDMyIC01MDIgNzEgbC00ODUgNzMKNCA1OCBjNyA5OSAtMzEgMTQ4IC0xMTggMTQ4IC0xNiAwIC0zMCAzIC0zMCA4IDEgMTggMzU1IDI1OSA0NTUgMzA5IDE1NiA3OAozMzEgODggNjUzIDM2eiBtNjI0IC0xMjcgYzE5OSAtNTAgMzQxIC05NiA0MTEgLTEzNCA5NCAtNTEgMTQ2IC0xMzIgMjE1IC0zMzcKNTIgLTE1MiA3MCAtMjQwIDU2IC0yNjMgLTE3IC0yNiAtNDggLTI2IC0yODcgOCAtMjcwIDM4IC02ODIgOTggLTcxOCAxMDYKbC0yNSA1IDQ3IDI4MiBjMjUgMTU1IDUwIDMwMyA1MyAzMzAgNyA0NSA5IDQ3IDQwIDQ3IDE4IDAgMTExIC0yMCAyMDggLTQ0egptLTE2NDUgLTMwMSBjMTYgLTIyIDE0IC03OCAtNyAtMTczIC0xNiAtNzEgLTMyIC04NiAtODkgLTc4IC02NyA5IC0xMjggNDkKLTE0MCA5MSAtMTYgNTggNyAxMjcgNTYgMTY1IDI0IDE5IDM4IDIxIDk3IDE4IDUzIC0zIDcxIC04IDgzIC0yM3ogbS0yODUKLTE4MiBjMTEgLTQyIDc4IC05OCAxMzMgLTExMiAxMDIgLTI2IDE2MSAtNSAxODYgNjQgOCAyMiAyMCAzNSAzMCAzNSAxNiAwCjM5MSAtNTQgNTU0IC04MCAzMyAtNSAxNTUgLTIzIDI3MCAtNDAgMTE2IC0xNyAyMjAgLTMzIDIzMyAtMzUgMjEgLTUgMjIgLTEwCjIyIC05OCAwIC0xMDUgLTE4IC0yNTMgLTYwIC01MDcgLTUwIC0zMDEgLTExMSAtNTczIC0xMzAgLTU4NSAtNCAtMiAtMTU1IDI3Ci0zMzYgNjYgLTE4MSAzOCAtNDY2IDk5IC02MzQgMTM1IC0xODcgNDAgLTMxMSA3MSAtMzIyIDgxIC0xNCAxMyAtMTggMzIgLTE4Cjg3IDAgMTY1IC0yNiAyODMgLTk4IDQzOSBsLTM1IDc4IDEyIDgyIGMyMCAxMzYgNjEgMjk4IDkzIDM2NSAyOCA1OSAzMSA2MyA2MQo2MCAyNSAtMiAzMiAtOSAzOSAtMzV6Ii8+CjxwYXRoIGQ9Ik0xMjkwNSA0NTQ4IGMtMzMgLTE3IC00NSAtNDAgLTQ1IC04MSAwIC03NiAxNSAtODUgMTk3IC0xMTMgMTA0IC0xNgoxMTMgLTE2IDEzNyAtMSAzNSAyMyA0OSA4MCAzMiAxMjIgLTE3IDM5IC00MCA0OCAtMTc2IDcwIC0xMTIgMTggLTExOSAxOAotMTQ1IDN6IG0xNzggLTYyIGM0OSAtNyA5MyAtMTggOTkgLTI0IDEzIC0xMyAzIC01OCAtMTQgLTY1IC0yNiAtOSAtMjQyIDMyCi0yNTUgNDkgLTI0IDMzIDUgNjYgNTIgNTkgMTcgLTMgNzAgLTExIDExOCAtMTl6Ii8+CjxwYXRoIGQ9Ik00ODE1IDQ2MzUgbC0yNSAtMjQgMCAtNjM0IGMwIC02MTAgMSAtNjM2IDE5IC02NTggbDE5IC0yNCA3MjIgMAo3MjIgMCAyNCAyOCAyNCAyOCAwIDYyNCBjMCAzNDMgLTMgNjMxIC02IDY0MCAtMTggNDUgLTIxIDQ1IC03NjkgNDUgbC03MDYgMAotMjQgLTI1eiBtMTQ0MSAtNDYgYzIxIC0xNyAyMSAtMTIxMSAwIC0xMjI4IC05IC04IC0yMDQgLTEwIC03MTIgLTkgbC02OTkgMwowIDYyMCAwIDYyMCA2NTUgNiBjNzAwIDYgNzM2IDUgNzU2IC0xMnoiLz4KPHBhdGggZD0iTTUzODkgNDEwMSBjLTIyIC0xOCAtMjQgLTI2IC0yNCAtMTE2IDAgLTEzNCAxIC0xMzUgMTg1IC0xMzUgMTI0IDAKMTQwIDIgMTY0IDIxIDI1IDE5IDI2IDI1IDI2IDExNSAwIDEzNCAxIDEzNCAtMTg0IDEzNCAtMTI3IDAgLTE0NyAtMiAtMTY3Ci0xOXogbTI5OSAtMTA0IGMyIC00MiAtMiAtNzQgLTkgLTgzIC0xNSAtMTggLTIzOSAtMjAgLTI1NyAtMiAtMTYgMTYgLTE2IDEzMAowIDE0NiA5IDkgNDkgMTIgMTM4IDEwIGwxMjUgLTMgMyAtNjh6Ii8+CjxwYXRoIGQ9Ik01NTIwIDM5OTEgYy02NyAtNSAtODUgLTkgLTg4IC0yMiAtNCAtMjMgMTAgLTI1IDEyNiAtMjEgODAgMyAxMDUgNwoxMDkgMTkgNyAxOCAtMTQgMzMgLTQyIDMxIC0xMSAtMSAtNTggLTQgLTEwNSAtN3oiLz4KPHBhdGggZD0iTTk1MTYgNDExNCBjLTEzIC0xMyAtMTYgLTQyIC0xNiAtMTYzIDAgLTE4NSAtMyAtMTgxIDEyOSAtMTgxIDEzNyAwCjEzMSAtOSAxMzEgMTc4IDAgMTEwIC00IDE2MiAtMTIgMTcwIC0xOSAxOSAtMjEyIDE2IC0yMzIgLTR6IG0xOTIgLTE2NiBsMwotMTI4IC04MSAwIC04MCAwIDAgMTMwIDAgMTMxIDc4IC0zIDc3IC0zIDMgLTEyN3oiLz4KPHBhdGggZD0iTTY2OTUgNDA5NSBjLTIzIC0yMiAtMjUgLTMyIC0yNSAtMTEwIDAgLTc4IDIgLTg4IDI1IC0xMTAgMjMgLTI0IDI5Ci0yNSAxNjUgLTI1IDEyNiAwIDE0MiAyIDE2MCAyMCAyNyAyNyAzMyA1OCAyOCAxNDEgLTYgMTA1IC0xMyAxMDkgLTE5MCAxMDkKLTEzNCAwIC0xNDAgLTEgLTE2MyAtMjV6IG0yOTQgLTM5IGMxMyAtMTUgMTIgLTExMiAtMSAtMTM4IC04IC0xNiAtMjQgLTE4Ci0xMjYgLTE4IC03OSAwIC0xMjIgNCAtMTMwIDEyIC03IDcgLTEyIDM5IC0xMiA3MyAwIDM0IDUgNjYgMTIgNzMgMTggMTggMjQyCjE2IDI1NyAtMnoiLz4KPHBhdGggZD0iTTY3NDUgMzk3OSBjLTE1IC0yMyAxNSAtMzAgMTIxIC0yNyA4OSAyIDEwOSA2IDEwOSAxOCAwIDEyIC0yMCAxNgotMTEyIDE4IC03NCAyIC0xMTQgLTEgLTExOCAtOXoiLz4KPHBhdGggZD0iTTEwOTk0IDQxNDIgYy02NiAtMzIgLTExOSAtODcgLTE1NiAtMTYxIC0xOSAtMzggLTIzIC02MiAtMjMgLTE0MSAwCi04NCAzIC0xMDEgMjggLTE0NyAzNyAtNzIgNzcgLTExNCAxMzYgLTE0NiA3NSAtNDEgMTQ4IC01MiAyMjMgLTMyIDI0NiA2MwozMjkgMzc4IDE0OCA1NjQgLTYxIDYzIC0xMTEgODQgLTIxMCA4OCAtNzggNCAtOTAgMiAtMTQ2IC0yNXogbTI0NCAtNDggYzIwOQotMTA0IDIwNyAtNDEzIC0zIC01MTAgLTE5NiAtOTIgLTQxMyA5NiAtMzY2IDMxNyAxOCA4NSA2OCAxNTEgMTQyIDE4OCA4MSA0MQoxNTIgNDIgMjI3IDV6Ii8+CjxwYXRoIGQ9Ik0xMTEzNSA0MDc2IGMtMjIgLTE2IC0xNSAtNTAgMTEgLTU0IDI1IC00IDQ3IDE5IDM4IDQxIC04IDIyIC0yOSAyOAotNDkgMTN6Ii8+CjxwYXRoIGQ9Ik0xMDk3NyA0MDM0IGMtMTMgLTEzIC03IC01MiA5IC01OCAyMiAtOSA0NiAxMyA0MiAzOCAtMyAyMSAtMzcgMzQKLTUxIDIweiIvPgo8cGF0aCBkPSJNMTEyNjEgMzk4NiBjLTE2IC0yMCAzIC01NiAyOSAtNTYgMjYgMCA0NSAzNiAyOSA1NiAtNiA4IC0xOSAxNCAtMjkKMTQgLTEwIDAgLTIzIC02IC0yOSAtMTR6Ii8+CjxwYXRoIGQ9Ik0xMTA3MCAzOTY3IGMtNjQgLTMyIC05MiAtMTQyIC01MiAtMjA5IDE3IC0zMSA3NyAtNjggMTA4IC02OCAzNyAwCjEwMiA0MSAxMTggNzQgMjAgNDMgMjEgMTA4IDEgMTQ2IC0zMCA1OCAtMTE2IDg3IC0xNzUgNTd6IG0xMTAgLTY3IGMyNyAtMjcKMzUgLTY1IDIwIC0xMDEgLTIzIC01NCAtODQgLTY2IC0xMjUgLTI0IC01MSA1MSAtMTggMTQ1IDUxIDE0NSAyMSAwIDQyIC04IDU0Ci0yMHoiLz4KPHBhdGggZD0iTTEwOTAwIDM4ODYgYy0yNyAtMzMgMTggLTcyIDQ4IC00MiAxMyAxMyAxNCAyMCA2IDM0IC0xNSAyMyAtMzggMjYKLTU0IDh6Ii8+CjxwYXRoIGQ9Ik0xMTMxMSAzODM2IGMtMjAgLTI0IC05IC01MSAxOSAtNTEgMjEgMCAyNSA1IDI1IDMwIDAgMzQgLTI0IDQ1IC00NAoyMXoiLz4KPHBhdGggZD0iTTEwOTM3IDM3MjYgYy0xNCAtMzUgMjMgLTY3IDUwIC00NSA4IDcgMTMgMjIgMTEgMzMgLTQgMjYgLTUyIDM1Ci02MSAxMnoiLz4KPHBhdGggZD0iTTExMjM2IDM2OTQgYy0yMCAtMTkgLTIwIC0yOSAwIC00OCAxMiAtMTIgMjAgLTEzIDM1IC02IDIxIDEyIDI1IDQwCjcgNTggLTE2IDE2IC0yMyAxNSAtNDIgLTR6Ii8+CjxwYXRoIGQ9Ik0xMTA5MiAzNjQ4IGMtMTYgLTE2IC0xNSAtMzMgMiAtNDcgMTEgLTkgMTggLTggMzAgNCA5IDkgMTYgMjAgMTYKMjQgMCA4IC0yMiAzMSAtMzAgMzEgLTMgMCAtMTEgLTUgLTE4IC0xMnoiLz4KPHBhdGggZD0iTTIwMTIgMzg0MCBjLTExMSAtMzAgLTE4OCAtNzUgLTI3MiAtMTYwIC0xMjQgLTEyNCAtMTgwIC0yNjEgLTE4MAotNDM4IDAgLTE3NCA1NSAtMzA4IDE3NSAtNDI3IDExNyAtMTE3IDI0MiAtMTY4IDQxMSAtMTY3IDI2MiAyIDQ4MSAxNzMgNTYwCjQzNyAyNyA4OCAyNCAyNTcgLTQgMzUwIC01OCAxOTAgLTIwOCAzNDQgLTM4OSA0MDEgLTgxIDI1IC0yMTcgMjcgLTMwMSA0egptMjkxIC02OSBjOTEgLTMyIDE0MCAtNjIgMjAyIC0xMjUgMTA4IC0xMTAgMTU5IC0yMzggMTU4IC0zOTYgLTEgLTMwNSAtMjI5Ci01NDAgLTUyMyAtNTQwIC0yMjIgMCAtNDE3IDEzOCAtNDkyIDM0OCAtMjUgNzMgLTM0IDIxMiAtMTkgMjk0IDE5IDEwMCA4MQoyMTYgMTUxIDI4NyA3MSA3MCAxOTIgMTM2IDI4MCAxNTAgNzIgMTMgMTc3IDQgMjQzIC0xOHoiLz4KPHBhdGggZD0iTTIwOTYgMzcwNyBjLTUzIC01MyAtMjMgLTEzNyA0NyAtMTM3IDk1IDAgMTA0IDEzOCAxMCAxNTYgLTI2IDUgLTM3CjEgLTU3IC0xOXogbTcyIC01MCBjNiAtMjggLTE2IC00OSAtMzkgLTM2IC0yMiAxMSAtMjQgMzAgLTcgNDcgMTcgMTcgNDIgMTEKNDYgLTExeiIvPgo8cGF0aCBkPSJNMTgzMyAzNTk4IGMtMzAgLTE0IC00NiAtNTggLTM0IC04OSAyMCAtNTUgNzUgLTcyIDExNiAtMzYgMzggMzMgMzkKODEgMSAxMTQgLTI5IDI1IC00OSAyOCAtODMgMTF6IG02MSAtNTUgYzkgLTIxIC0xNiAtNDYgLTM3IC0zNyAtMTcgNiAtMjMgMzUKLTEwIDQ3IDEyIDEzIDQxIDcgNDcgLTEweiIvPgo8cGF0aCBkPSJNMjM2OSAzNTgxIGMtMzEgLTMyIC0zNCAtNDUgLTE5IC04NiAxMyAtMzQgNTUgLTUwIDkyIC0zNCA1NSAyMyA2Nwo5MyAyMiAxMjggLTM2IDI4IC02MCAyNiAtOTUgLTh6IG03MSAtMzYgYzEwIC0xMiAxMCAtMTggMCAtMzAgLTI1IC0zMCAtNjEgLTcKLTQ2IDMwIDMgOCAxMiAxNSAxOSAxNSA4IDAgMjAgLTcgMjcgLTE1eiIvPgo8cGF0aCBkPSJNMjA2NiAzNDY1IGMtODcgLTMxIC0xNDYgLTExOSAtMTQ2IC0yMjAgMCAtMTMzIDkwIC0yMjUgMjIwIC0yMjUKMTI5IDAgMjI0IDk2IDIyMyAyMjUgMCAxMDQgLTQwIDE3MCAtMTI4IDIxMSAtNTYgMjcgLTExMSAzMCAtMTY5IDl6IG0xMzcgLTU5CmM0NiAtMTkgOTQgLTc3IDEwMiAtMTI0IDE4IC0xMDggLTU2IC0yMDMgLTE1OSAtMjA0IC0xMTcgLTIgLTE5NSAxMDQgLTE2MQoyMTggMjkgOTcgMTI5IDE0OCAyMTggMTEweiIvPgo8cGF0aCBkPSJNMTY5MSAzMzA0IGMtMjggLTM1IC0yNiAtNjkgNCAtOTkgMjggLTI5IDcwIC0zMiAxMDMgLTkgMjkgMjAgMzEgOTMKNCAxMTcgLTMwIDI3IC04NyAyMiAtMTExIC05eiBtODMgLTM2IGMxNCAtMjIgLTEyIC01MiAtMzcgLTQyIC0xNyA2IC0yMyA0NAotMTAgNTggMTEgMTEgMzUgMyA0NyAtMTZ6Ii8+CjxwYXRoIGQ9Ik0yNDgxIDMzMDQgYy0xMiAtMTUgLTIxIC0zNyAtMjEgLTQ5IDAgLTM4IDM3IC03NSA3NiAtNzUgNDUgMCA3NCAyOQo3NCA3NSAwIDcyIC04NiAxMDQgLTEyOSA0OXogbTc4IC0zMyBjMTMgLTI0IC05IC01NyAtMzMgLTQ4IC0xOSA3IC0yMiA1MyAtMwo2MCAyMSA5IDI2IDcgMzYgLTEyeiIvPgo8cGF0aCBkPSJNMTgxNiAzMDM5IGMtMjAgLTE2IC0yNiAtMjkgLTI2IC01OSAwIC0zMCA2IC00MyAyNiAtNTkgMzIgLTI1IDUyCi0yNiA4MiAtNSA0OSAzNCA0NyAxMTAgLTQgMTMzIC0zNSAxNiAtNDcgMTQgLTc4IC0xMHogbTY5IC01OSBjMCAtMjkgLTM4IC00MQotNDggLTE2IC0xMCAyNiA0IDQ3IDI3IDQ0IDE1IC0yIDIxIC0xMCAyMSAtMjh6Ii8+CjxwYXRoIGQ9Ik0yMzkzIDMwNTAgYy01NSAtMjIgLTY1IC04OCAtMjEgLTEzMCAyOCAtMjYgNTggLTI1IDkyIDEgNjMgNTAgNAoxNTkgLTcxIDEyOXogbTQ2IC01NCBjMTUgLTE4IDMgLTQ2IC0yMCAtNDYgLTIyIDAgLTM0IDIyIC0yNSA0NSA3IDE5IDMwIDE5CjQ1IDF6Ii8+CjxwYXRoIGQ9Ik0yMDk0IDI5MTYgYy01NyAtNDggLTI2IC0xMzYgNDggLTEzNiAzNCAwIDc4IDM5IDc4IDY5IDAgMzMgLTIxIDY4Ci00NyA4MCAtMzUgMTYgLTQ5IDE0IC03OSAtMTN6IG03NCAtNTAgYzUgLTI2IC0yNiAtNTAgLTQ1IC0zNSAtNyA2IC0xMyAyMAotMTMgMjkgMCAzNCA1MiAzOCA1OCA2eiIvPgo8cGF0aCBkPSJNODIzNSAzODUwIGMtMjc4IC01NiAtNDc1IC0zMDIgLTQ3OCAtNTk1IC0xIC0xMjAgMTMgLTE4NCA2MyAtMjkwCjk2IC0yMDAgMjgwIC0zMTUgNTAzIC0zMTUgMTQyIDAgMjM0IDMxIDM0NiAxMTYgMTIxIDkxIDIwNiAyNDEgMjMxIDQwOCAxOQoxMjkgLTUgMjU5IC03MiAzODkgLTQ5IDkzIC0xNDQgMTg3IC0yNDAgMjM1IC0xMDQgNTMgLTI0NSA3NCAtMzUzIDUyeiBtMjU4Ci04MSBjMjY5IC05MCA0MTUgLTQwMCAzMjMgLTY4NiAtMTIxIC0zNzcgLTU2NyAtNDk4IC04NDIgLTIyOCAtMTA1IDEwMyAtMTU5CjIzOCAtMTU4IDM5NSAyIDE1NyA1NiAyODUgMTY4IDM5NSAxNDQgMTQxIDMyNSAxODYgNTA5IDEyNHoiLz4KPHBhdGggZD0iTTgyODYgMzcwOSBjLTMxIC0yNCAtMzYgLTgxIC0xMCAtMTE3IDE5IC0yOCA4MyAtMzEgMTA2IC00IDM4IDQzIDI5CjEwOSAtMTggMTMxIC0zNSAxNiAtNDggMTQgLTc4IC0xMHogbTY4IC01MiBjMTYgLTI1IC0xNiAtNTYgLTM4IC0zNyAtMTkgMTUKLTIwIDMyIC00IDQ4IDE1IDE1IDI4IDExIDQyIC0xMXoiLz4KPHBhdGggZD0iTTgwMjMgMzU5OCBjLTI4IC0xMyAtNDUgLTYxIC0zNCAtOTEgMzAgLTc5IDE0NCAtNjAgMTQ0IDI0IDAgMjMgLTgKMzkgLTI3IDU2IC0yOSAyNSAtNDkgMjggLTgzIDExeiBtNTcgLTUzIGMxNyAtMjAgNSAtNDUgLTIwIC00NSAtMjMgMCAtMzUgMjIKLTI2IDQ1IDcgMTkgMzAgMTkgNDYgMHoiLz4KPHBhdGggZD0iTTg1NTUgMzU4NSBjLTE2IC0xNSAtMjUgLTM2IC0yNSAtNTUgMCAtMzUgMzggLTgwIDY3IC04MCAyNyAwIDYzIDI4Cjc0IDU3IDEzIDM2IDEgNzIgLTMyIDg4IC0zOSAyMSAtNTYgMTkgLTg0IC0xMHogbTcyIC00MSBjMyAtOCAtMiAtMjMgLTExIC0zMgotMTUgLTE1IC0xNyAtMTUgLTMzIDAgLTEzIDE0IC0xNCAyMCAtMyAzMiAxNiAyMCAzOSAyMCA0NyAweiIvPgo8cGF0aCBkPSJNODI2MSAzNDY5IGMtNDcgLTE0IC0xMjQgLTk1IC0xMzkgLTE0NSAtMzcgLTEyNiAxMyAtMjQ0IDEyMiAtMjg5CjQ2IC0xOSAxMTggLTIxIDE2MSAtNSAxMzcgNTIgMTkwIDIzOCAxMDMgMzYyIC00NSA2NSAtMTY1IDEwMiAtMjQ3IDc3eiBtMTM1Ci02OCBjMTAyIC00NiAxMjYgLTE4NCA0OCAtMjcwIC0xMTQgLTEyNyAtMzA5IC0xNyAtMjcyIDE1MyAxMiA1NCA0MCA5MCA5MAoxMTUgNTIgMjYgODEgMjYgMTM0IDJ6Ii8+CjxwYXRoIGQ9Ik03OTEzIDMzMjUgYy03NSAtMzIgLTQ4IC0xNDUgMzQgLTE0NSAyMiAwIDM4IDggNTIgMjYgNTIgNjcgLTkgMTUxCi04NiAxMTl6IG01NSAtNjYgYzQgLTMwIC0yMiAtNDYgLTQ0IC0yOCAtMTcgMTQgLTE4IDMxIC0yIDQ3IDE5IDE5IDQzIDkgNDYKLTE5eiIvPgo8cGF0aCBkPSJNODY2NyAzMzEyIGMtOSAtMTAgLTIwIC0zMiAtMjMgLTQ5IC0xMyAtNjUgNzkgLTExMCAxMjYgLTYzIDI2IDI2CjI3IDkwIDIgMTEzIC0yNSAyMyAtODUgMjIgLTEwNSAtMXogbTc3IC00NiBjOSAtMTMgNyAtMjAgLTcgLTMxIC0zNSAtMjYgLTY2CjEyIC0zNSA0MyAxNSAxNSAyOCAxMSA0MiAtMTJ6Ii8+CjxwYXRoIGQ9Ik04MDA1IDMwMzYgYy0yMCAtMjEgLTI2IC0zNCAtMjMgLTYzIDQgLTQ4IDQ1IC04MSA4NCAtNjcgODEgMjggNzkKMTM0IC0zIDE1MCAtMjYgNSAtMzcgMSAtNTggLTIweiBtNzMgLTU0IGM0IC0yOCAtMjQgLTQwIC00NSAtMTkgLTIxIDIxIC05IDQ5CjE5IDQ1IDE1IC0yIDI0IC0xMSAyNiAtMjZ6Ii8+CjxwYXRoIGQ9Ik04NTczIDMwNTAgYy01MCAtMjAgLTU3IC05OSAtMTIgLTEzMyAzNiAtMjYgODQgLTE2IDEwNCAyMyAyMCAzOSAxOQo1NSAtNyA4NCAtMjcgMjkgLTU1IDM4IC04NSAyNnogbTQxIC00NiBjMjEgLTggMjEgLTQzIDAgLTUxIC04IC0zIC0yMyAxIC0zMQoxMCAtMTMgMTMgLTE0IDE5IC0zIDMxIDE0IDE4IDEzIDE4IDM0IDEweiIvPgo8cGF0aCBkPSJNODI5MyAyOTMwIGMtNDcgLTE5IC01NyAtODcgLTE4IC0xMjUgMTMgLTE0IDM2IC0yNSA1MCAtMjUgMzUgMCA3NQo0MiA3NSA3OCAwIDU1IC01NiA5MyAtMTA3IDcyeiBtNTUgLTUyIGMxNiAtMTYgMTUgLTIzIC0zIC00MiAtMjAgLTIwIC00NSAtMTAKLTQ1IDE4IDAgMzYgMjQgNDggNDggMjR6Ii8+CjxwYXRoIGQ9Ik0xNDIxOSAzMzgzIGMtNzggLTI2IC0xNDAgLTgwIC0xNzkgLTE1NyAtMzMgLTY1IC0zNSAtNzUgLTM1IC0xNjUgMAotODEgNCAtMTA0IDI1IC0xNDYgMzQgLTcwIDEwOCAtMTM5IDE3NSAtMTY0IDE2NiAtNjIgMzMzIDEwIDQxNCAxNzkgMjIgNDYgMjYKNjggMjUgMTM3IDAgNzEgLTUgOTAgLTMzIDE0NyAtNzQgMTUwIC0yMzggMjIxIC0zOTIgMTY5eiBtMjE5IC02MiBjNTIgLTI3CjEwMyAtNzcgMTI4IC0xMjcgMjcgLTU0IDI3IC0yMDMgMCAtMjU0IC00NyAtODkgLTE1NCAtMTYwIC0yNDAgLTE2MCAtOTYgMAotMTk4IDY0IC0yNDMgMTUzIC01NyAxMTQgLTM3IDI0MyA1MyAzMzQgODMgODMgMjAzIDEwNSAzMDIgNTR6Ii8+CjxwYXRoIGQ9Ik0xNDMyMCAzMjk2IGMtMjcgLTMzIDE4IC03MiA0OCAtNDIgMTMgMTMgMTQgMjAgNiAzNCAtMTUgMjMgLTM4IDI2Ci01NCA4eiIvPgo8cGF0aCBkPSJNMTQxNzAgMzI1NSBjLTE5IC0yMyAtOCAtNTAgMjAgLTUwIDE2IDAgMjYgNiAyOCAxOCA0IDE4IC0xNCA0NyAtMjgKNDcgLTQgMCAtMTMgLTcgLTIwIC0xNXoiLz4KPHBhdGggZD0iTTE0NDYxIDMyMTYgYy0yNiAtMzEgMTQgLTcxIDQ1IC00NSA4IDcgMTQgMjIgMTIgMzMgLTQgMjYgLTQwIDMzCi01NyAxMnoiLz4KPHBhdGggZD0iTTE0MjkyIDMyMDAgYy0xMTggLTI4IC0xNDAgLTIxMSAtMzIgLTI2OCA0MSAtMjEgMTE2IC0xMCAxNTEgMjQgNjgKNjUgNTggMTg4IC0xOSAyMjggLTQxIDIxIC02NCAyNCAtMTAwIDE2eiBtNjcgLTY1IGM3NyAtMzkgNDIgLTE2NSAtNDQgLTE2NQotMjkgMCAtNzUgNTUgLTc1IDkwIDAgMjIgOSA0MSAyOSA2MSAzMyAzMyA1MCAzNSA5MCAxNHoiLz4KPHBhdGggZD0iTTE0MDkxIDMxMDYgYy0yNiAtMzEgMTQgLTcxIDQ1IC00NSA4IDcgMTQgMjIgMTIgMzMgLTQgMjYgLTQwIDMzCi01NyAxMnoiLz4KPHBhdGggZD0iTTE0NTExIDMwNjEgYy0yMiAtMjIgLTE5IC00NiA1IC01NSAzOCAtMTQgNjIgMzcgMzAgNjMgLTEyIDEwIC0xOSA4Ci0zNSAtOHoiLz4KPHBhdGggZD0iTTE0MTM3IDI5NTQgYy0xMyAtMTMgLTcgLTUyIDggLTU4IDI3IC0xMCA0NiA1IDQzIDMzIC0zIDI2IC0zNSA0MQotNTEgMjV6Ii8+CjxwYXRoIGQ9Ik0xNDQzMCAyOTE2IGMtMjcgLTMzIDE4IC03MiA0OCAtNDIgMTMgMTMgMTQgMjAgNiAzNCAtMTUgMjMgLTM4IDI2Ci01NCA4eiIvPgo8cGF0aCBkPSJNMTQyODEgMjg3MSBjLTcgLTUgLTExIC0xNyAtOSAtMjcgNCAtMjUgNTEgLTI2IDU2IC0yIDQgMjAgLTI5IDQwCi00NyAyOXoiLz4KPC9nPgo8L3N2Zz4K"></div>
+
+  <footer>
+    <span>83 areas to color</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Things That Go</span>
+  </footer>
+</div>
+
+</body>
+</html>

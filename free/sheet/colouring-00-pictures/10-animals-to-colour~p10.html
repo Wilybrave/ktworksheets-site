@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="sheet-kind" content="form">
+<title>Animals to Color — Quiet Pages</title>
+<style>
+  :root { --font: Georgia, "Times New Roman", serif; }
+
+  /* Page margins live HERE only — body padding stays 0 for print so the two
+     don't stack and eat the sheet. */
+  @page { size: letter portrait; margin: 0.45in 0.5in; }
+
+  /*
+   * THE PALETTE. The same one the shop wears (kitchen-table/BRAND.md): warm
+   * near-black ink, one accent, pine kept back for the answer key.
+   *
+   * WHY A SHEET HAS COLOR AT ALL. Every sheet was pure grayscale — #000 rules,
+   * #333 subtitles, #f0f0f0 boxes — which is what you get by never deciding.
+   * The paper is the product and it looked like a fax. A printer set to
+   * grayscale, or one that has no color to give, renders all of this as the
+   * greys it already had, so nothing below costs a parent anything they were
+   * not already spending.
+   *
+   * WHAT STAYS BLACK, ON PURPOSE:
+   *   - anything drawn to be written on (rules, name lines, answer boxes)
+   *   - anything drawn to be traced or colored in (line art, letter guides)
+   *   - the confidence rings, which have to survive a mono laser
+   * Color marks the sheet's own furniture — its rule, its numbering, its
+   * boxes — and never the part a child puts a pencil through.
+   */
+  :root {
+    --ink:    #16130F;
+    --muted:  #6B635A;
+    --rule:   #CFC3B2;
+    --guide:  #BCAE9C;
+    --accent: #C0511D;
+    --tint:   #F7EDE4;
+    --slate:  #2E5A78;
+    --tintslate: #E9EFF4;
+    --deep:   #2C4A45;
+    --tintdeep: #ECF1EF;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font);
+    color: #000; background: #fff;
+    font-size: 12pt; line-height: 1.3;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+
+  /* ORDER MATTERS. This generic rule must come BEFORE the @media screen block:
+     same specificity, so whichever is declared last wins. With it after, the
+     on-screen preview stretches to the viewport instead of 8.5in — print is
+     unaffected, but the proof you check before printing is wrong. */
+  .page { width: 100%; }
+  .page + .page { page-break-before: always; }
+
+  @media screen {
+    body { padding: 0.5in; background: #ddd; }
+    .page {
+      background: #fff; padding: 0.45in 0.5in;
+      width: 8.5in; min-height: 11in;
+      margin: 0 auto 24px; box-shadow: 0 2px 10px rgba(0,0,0,.3);
+    }
+  }
+
+  /* ------------------------------------------------------------- header */
+  header { border-bottom: 3px double var(--accent); padding-bottom: 6px; }
+  header.cont { border-bottom: 1px solid var(--rule); }
+  h1 { font-size: 16pt; margin: 0 0 1px; letter-spacing: .01em; }
+  .sub { font-size: 10pt; font-style: italic; color: var(--muted); margin: 0; }
+
+  .nameline { display: flex; gap: 26px; font-size: 10.5pt; margin: 11px 0 12px; }
+  .nameline span { flex: 1; border-bottom: 1px solid var(--ink); padding-bottom: 1px; }
+  .nameline span.short { flex: 0 0 1.9in; }
+
+  .directions {
+    font-size: 10.5pt; line-height: 1.35;
+    background: var(--tint); border-left: 4px solid var(--accent);
+    padding: 7px 10px; margin: 12px 0 14px;
+  }
+  .directions b { letter-spacing: .03em; }
+  .tip { font-style: italic; margin-top: 3px; }
+
+  /* ------------------------------------------------- problems and grids */
+  .grid { display: grid; gap: 13px 16px; margin-top: 4px; }
+  .prob { page-break-inside: avoid; display: flex; gap: 5px; align-items: flex-start; }
+  .pn { font-weight: bold; font-size: 11pt; min-width: .28in; flex: 0 0 auto; color: var(--accent); }
+  .pbody { flex: 1; min-width: 0; }
+
+  /* Digits need lining figures and even widths whatever the body font is. */
+  .num, .vert, .horiz { font-family: "Trebuchet MS", "Segoe UI", Tahoma, Verdana, sans-serif; font-variant-numeric: lining-nums tabular-nums; }
+
+  /* A stacked column algorithm.
+     Two grid columns — operator, then digits — because a floated or absolutely
+     positioned operator overlaps the digits as soon as the numbers get wide,
+     and "324" with a + sitting on the 3 is unreadable. The grid also lets the
+     rule under the last operand span BOTH columns, which is how it is written
+     by hand. The rule is heavy: it is the line you write the answer beneath. */
+  .vert {
+    display: inline-grid; grid-template-columns: auto auto;
+    font-size: 15pt; line-height: 1.3; text-align: right;
+  }
+  .vert > span { padding: 0 0 1px 0; }
+  .vert .op { text-align: left; padding-right: .16in; }
+  .vert .last { border-bottom: 2.5px solid var(--ink); padding-bottom: 3px; }
+  .vert .ans { height: .4in; }
+  /* Partial-products working, for 2-digit x 1-digit before the short method. */
+  .vert .part { font-size: 11pt; color: var(--muted); }
+  /* A row of worked examples that fade — see lib/formats.js faded(). The
+     caption is what makes the fade legible: without it the third one looks like
+     a question somebody forgot to number. */
+  .egrow { display: flex; gap: .34in; align-items: flex-start; margin: 0 0 4px; }
+  .eg { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; }
+  .eglab { font-size: 8.5pt; color: var(--slate); letter-spacing: .02em; }
+
+  /* The carried digits. Small and grey so the sum still reads as the sum, and
+     tight to the row below it so a carry sits ON the column it goes into. */
+  .vert .carry { font-size: 9pt; color: var(--slate); line-height: 1; padding: 0 0 1px 0; }
+
+  .horiz { font-size: 14pt; white-space: nowrap; }
+
+  /* Row numbers in a word list. Gray and small: they are there so a list can be
+     dictated ("number seven") and marked without counting down the page, and
+     they must not compete with the word itself. */
+  .wn { color: var(--muted); font-size: 9pt; }
+
+  /* The box an answer goes in. inline-block so it can sit mid-sentence. */
+  .abox {
+    display: inline-block; border: 1.6px solid var(--slate); border-radius: 3px;
+    vertical-align: middle; margin: 0 3px; position: relative; background: #fff;
+  }
+  /* Scoped to the box: as a bare ".alab" it pinned any generator's own .alab
+     to the bottom of the page (life-07-signs-and-forms 40, 2026-09-24). */
+  .abox > .alab {
+    position: absolute; bottom: 1px; left: 0; right: 0;
+    text-align: center; font-size: 7pt; color: var(--muted); font-style: italic;
+  }
+
+  /* Confidence marks. The rings are drawn with a border and a gradient rather
+     than an SVG so they stay inline with the question text at any font size,
+     and print black on a mono laser without relying on a background image. */
+  .conf { float: right; margin: 2px 0 0 8px; white-space: nowrap; }
+  .cring {
+    display: inline-block; width: 11px; height: 11px; margin-left: 4px;
+    border: 1.4px solid var(--slate); border-radius: 50%; vertical-align: middle;
+  }
+  .cring-full { background: var(--accent); }
+  .cring-half { background: linear-gradient(90deg, var(--accent) 50%, #fff 50%); }
+  .cring-none { background: #fff; }
+  ol.qs.hasconf li { overflow: hidden; }
+
+  .conflegend {
+    border: 1.2px solid var(--rule); border-radius: 4px;
+    padding: 3px 8px; margin: 0 0 7px;
+    font-size: 8.5pt; color: var(--muted); display: flex; gap: 14px; align-items: center;
+  }
+  .conftitle { font-weight: 700; color: var(--ink); }
+  .confitem { white-space: nowrap; }
+
+  .work {
+    border: 1.4px dashed var(--rule); border-radius: 4px;
+    margin: 6px 0 2px; position: relative;
+  }
+  /* The label S.work() puts in the box: a DIRECT child only. As ".work span"
+     it also caught every span inside any generator's own .work content and
+     stacked them all at the top-left corner (math-11-grade6 47, 2026-09-23). */
+  .work > span {
+    position: absolute; top: 3px; left: 6px;
+    font-size: 8pt; color: var(--muted); font-style: italic;
+  }
+
+  /* ------------------------------------------------------ writing lines */
+  /* Primary rule: solid top, dashed midline, heavy baseline. Capitals reach
+     the top line, lowercase bodies sit under the dashed one. */
+  .write {
+    position: relative; height: 0.375in;
+    margin: 6px 0 0 .3in;
+    border-top: 1px solid var(--rule); border-bottom: 2px solid var(--ink);
+  }
+  .write.flush { margin-left: 0; }
+  .write + .write { margin-top: .17in; }
+  .write::after {
+    content: ""; position: absolute; left: 0; right: 0; top: 50%;
+    border-top: 1px dashed var(--guide);
+  }
+
+  /* ------------------------------------------------------- question list */
+  ol.qs { margin: 0; padding: 0 0 0 .34in; }
+  ol.qs li { margin-bottom: 13px; page-break-inside: avoid; }
+  ol.qs li::marker { font-weight: bold; font-size: 11pt; color: var(--accent); }
+  .qt { display: block; }
+
+  .mcq { display: grid; gap: 3px 14px; margin: 5px 0 2px .12in; font-size: 11pt; }
+  .opt { white-space: nowrap; }
+
+  /* -------------------------------------------------------------- tables */
+  .tbl { border-collapse: collapse; margin: 8px 0; font-size: 11pt; width: 100%; }
+  .tbl th, .tbl td { border: 1.4px solid var(--ink); padding: 5px 8px; text-align: left; }
+  .tbl th { color: var(--slate); }
+  .tbl th { background: var(--tint); font-size: 10pt; letter-spacing: .02em; }
+  .tbl td.blank { height: .34in; }
+  .tbl.narrow { width: auto; }
+  .tbl.center td, .tbl.center th { text-align: center; }
+
+  /* ------------------------------------------------------------ passages */
+  .passage {
+    border: 1.5px solid var(--slate); border-radius: 4px;
+    padding: 11px 14px; margin-bottom: 12px;
+    font-size: 11.5pt; line-height: 1.55;
+  }
+  .passage h2 { font-size: 13pt; margin: 0 0 6px; color: var(--deep); }
+  .passage p { margin: 0 0 8px; }
+  .passage p:last-child { margin-bottom: 0; }
+  .passage .byline { font-size: 9.5pt; font-style: italic; color: var(--muted); margin-bottom: 8px; }
+  /* Numbered paragraphs, so a question can say "in paragraph 2". */
+  .passage p.np { position: relative; padding-left: .3in; }
+  .passage p.np::before {
+    content: attr(data-p); position: absolute; left: 0; top: 0;
+    font-size: 9pt; color: var(--accent); font-weight: bold;
+  }
+
+  .wordbank {
+    border: 1.5px dashed var(--slate); border-radius: 4px;
+    padding: 8px 12px; margin: 10px 0 12px;
+    font-size: 11.5pt; text-align: center;
+  }
+  .wordbank b { display: block; font-size: 9.5pt; letter-spacing: .06em;
+    text-transform: uppercase; margin-bottom: 4px; color: var(--accent); }
+  .wordbank span { display: inline-block; margin: 2px 11px; }
+
+  .note {
+    border-left: 4px solid var(--deep); background: var(--tintdeep);
+    padding: 7px 11px; margin: 10px 0; font-size: 10.5pt;
+  }
+  .note b { letter-spacing: .02em; }
+
+  /* -------------------------------------------------------------- footer */
+  /* THE WORDMARK SITS IN THE FOOTER THAT WAS ALREADY THERE, so it costs no
+     height at all — a sheet that fitted before fits now. Upright where the rest
+     of the line is italic, and a size down: it is a signature, not a message,
+     and it must never compete with "Score: ___ / 10". */
+  .brand { font-style: normal; font-size: 7.5pt; letter-spacing: .04em;
+    color: var(--accent); align-self: center; }
+
+  footer {
+    margin-top: 14px; padding-top: 6px; border-top: 1px solid var(--rule);
+    font-size: 9pt; font-style: italic; color: var(--muted);
+    display: flex; justify-content: space-between;
+  }
+
+  /* ---------------------------------------------------------- answer key */
+  .keybadge {
+    display: inline-block; border: 2px solid var(--deep); color: var(--deep); padding: 2px 9px;
+    font-size: 9.5pt; font-weight: bold; letter-spacing: .08em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .key .why {
+    display: block; font-size: 9pt; font-style: italic; color: var(--muted); margin-top: 1px;
+  }
+  /* Highlight rather than underline: <u> in a key marks WHAT CHANGED, and an
+     underline under a comma is invisible. */
+  .key u { text-decoration: none; background: var(--tint); padding: 0 2px; font-weight: bold; }
+  .keygrid .pbody { font-family: "Trebuchet MS", "Segoe UI", Tahoma, Verdana, sans-serif; font-size: 12pt; }
+  /* A key's pictures scale to their column: at 1fr a wide drawing pushed a
+     three-column key 92px off the paper (art-04-drawing 10, 2026-09-24). */
+  .keygrid svg { max-width: 100%; height: auto; }
+  .keylist .qt { font-weight: normal; }
+
+  /*
+   * The guide page. Four lines per question, and the ASK line is the one that
+   * gets used at the table, so it is the one with a rule beside it — a parent
+   * scanning this page in ten seconds should land on the follow-up question
+   * and nothing else.
+   */
+  .guide { padding-left: .3in; }
+  .guide li { margin-bottom: 11px; page-break-inside: avoid; }
+  .guide .gq { font-weight: bold; font-size: 11pt; margin-bottom: 3px; }
+  /* 9pt, matching the key's own why line, because the guide page is the
+     binding constraint on every open sheet: four lines per question against a
+     key's one, and at 10pt a sheet with seven questions ran onto a second
+     side. Found by measuring, not chosen. (No backticks in here — this CSS
+     lives inside a template literal and one would close it.) */
+  .guide .glook, .guide .gthin, .guide .gstrong {
+    font-size: 9pt; line-height: 1.3; margin-top: 1px;
+  }
+  .guide .gthin { color: var(--muted); }
+  .guide .gstrong { color: var(--muted); font-style: italic; }
+  .guide .gask {
+    font-size: 9.5pt; line-height: 1.3; margin-top: 3px;
+    border-left: 3px solid var(--slate); padding-left: 7px;
+  }
+  .key .qs li { margin-bottom: 9px; }
+
+  /*
+   * INLINE-BLOCK, NOT BLOCK, AND THIS WAS WRONG FOR A LONG TIME. A block-level
+   * svg ignores text-align: center on its parent and sits flush left — so 117
+   * sheets across 35 packs said "centre this diagram" and got a left-aligned
+   * one. Twenty-five of them were origami and paper-plane fold sequences, where
+   * the whole page is diagrams.
+   *
+   * Nobody spotted it because a left-flush diagram looks deliberate; it only
+   * reads as wrong next to a centered one, and no sheet has both.
+   *
+   * inline-block makes text-align do what every one of those authors meant,
+   * and leaves a diagram in a left-aligned container exactly where it was.
+   * vertical-align: top kills the baseline gap that inline elements otherwise
+   * leave underneath them, which would have pushed long pages over.
+   */
+  svg { display: inline-block; vertical-align: top; }
+  svg.inline { vertical-align: middle; }
+
+  .pic { text-align: center; margin-top: .06in; }
+  /* Bounded by HEIGHT as well as width: these are portrait-ish bitmaps and a
+     width-only rule pushes the tallest ones onto a second side. */
+  img.animal { display: block; margin: 0 auto; max-width: 100%; max-height: 8.1in;
+    width: auto; height: auto; }
+  /* Page one also carries the name line, the directions and the tip, so its
+     picture gets less room. Sized at 8.1in like the rest it printed onto a
+     second side — fits.js caught it. */
+  /*
+   * THE FIRST PAGE USED TO GET 7.05in BECAUSE A TIP SAT ABOVE THE PICTURE.
+   * That cost the first drawing 13% of its height — on the page most likely to
+   * be printed as a sample and the one a child does first. The tip was good
+   * advice ("start with the biggest shape and work outwards") and it was
+   * written for the adult, so it moved to the pack index, which the adult reads
+   * before printing. The one-line dir stays, because it says what the picture
+   * IS and costs a single line.
+   */
+  img.animal.first { max-height: 7.8in; }
+
+</style>
+</head>
+<body>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>A Whale</h1>
+    <p class="sub">Quiet Pages &middot; Page 10 of 12</p>
+  </header>
+
+
+
+  <div class="pic"><img class="animal" alt="an outline drawing of a whale to color in" src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBzdGFuZGFsb25lPSJubyI/Pgo8IURPQ1RZUEUgc3ZnIFBVQkxJQyAiLS8vVzNDLy9EVEQgU1ZHIDIwMDEwOTA0Ly9FTiIKICJodHRwOi8vd3d3LnczLm9yZy9UUi8yMDAxL1JFQy1TVkctMjAwMTA5MDQvRFREL3N2ZzEwLmR0ZCI+CjxzdmcgdmVyc2lvbj0iMS4wIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciCiB3aWR0aD0iMTM2MC4wMDAwMDBwdCIgaGVpZ2h0PSIxMTU2LjAwMDAwMHB0IiB2aWV3Qm94PSIwIDAgMTM2MC4wMDAwMDAgMTE1Ni4wMDAwMDAiCiBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJ4TWlkWU1pZCBtZWV0Ij4KPG1ldGFkYXRhPgpDcmVhdGVkIGJ5IHBvdHJhY2UgMS4xNiwgd3JpdHRlbiBieSBQZXRlciBTZWxpbmdlciAyMDAxLTIwMTkKPC9tZXRhZGF0YT4KPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMC4wMDAwMDAsMTE1Ni4wMDAwMDApIHNjYWxlKDAuMTAwMDAwLC0wLjEwMDAwMCkiCmZpbGw9IiMwMDAwMDAiIHN0cm9rZT0ibm9uZSI+CjxwYXRoIGQ9Ik00NDg5IDEwMDA2IGMtMTI1IC00OCAtMjE4IC0xNTYgLTI1NCAtMjkzIC0zOCAtMTQ2IC0xMSAtMjc2IDExMAotNTE4IDc2IC0xNTMgMTI1IC0yNjQgMTI1IC0yODIgMCAtNCAtMzcgMzEgLTgyIDc4IC0xMzIgMTM2IC0yNDIgMjAyIC0zOTcKMjM1IC0xNTUgMzMgLTMwNiAtOSAtNDAwIC0xMTIgLTUzIC01OCAtNzEgLTEwNSAtNzEgLTE4OCAwIC02OSAxNyAtMTExIDY0Ci0xNjQgNjkgLTc2IDE3MyAtMTAyIDMzMyAtODIgMTIwIDE0IDE5NyAzIDI5MiAtNDIgODIgLTM5IDE5MyAtMTQ5IDIzOSAtMjM1CjI1IC00OCA3MiAtMTY0IDcyIC0xNzggMCAtMSAtMTUwIC01IC0zMzIgLTggLTM1OCAtNiAtNTEwIC0xOCAtODAzIC02NyAtMTIyMQotMjAzIC0yMTM2IC04MzcgLTI1MzkgLTE3NjIgLTE2MSAtMzY5IC0yMzYgLTczMCAtMjM2IC0xMTM0IDAgLTIwNSAxMiAtMzQyCjQxIC00ODkgMjUgLTEyMyA1MyAtMTg4IDEwOSAtMjQ2IDM0IC0zNSA0NiAtNTggNjEgLTExOCA0NSAtMTY3IDE2MSAtNDE2IDI3NgotNTkxIDQ4MiAtNzI4IDEzODYgLTEyNDMgMjcwMiAtMTUzOSA3NTAgLTE2OSAxNjkyIC0yNjUgMjQyOSAtMjQ3IDE0MjggMzQKMjY5NiAzNzcgMzYyNyA5ODEgNTIzIDM0MCA5NTIgNzc3IDEyNTQgMTI3OCAxNDEgMjM0IDI3OSA1MzcgMzY4IDgwNyAxOSA1Nwo2NyAyMzMgMTA4IDM5MCA0MCAxNTcgODMgMzExIDk1IDM0MiA1MiAxMzkgMTE5IDE5NiAzMzAgMjc4IDMwMSAxMTcgNDg3IDIzNwo2NDAgNDExIDE0MiAxNjAgMjUwIDM2MiAzMDAgNTU5IDQzIDE2OSA1NCAyNjAgNTQgNDUwIDAgMzM2IC00OSA1MDkgLTE0MyA1MTIKLTQ4IDIgLTczIC0xNyAtMTIxIC04OCAtMjUgLTM2IC03NiAtOTYgLTExNSAtMTMzIC0xMDcgLTEwMSAtMjExIC0xNDggLTQ5NAotMjIxIC0zMzcgLTg3IC00OTEgLTE1NyAtNjU5IC0zMDEgLTY5IC02MCAtMTY2IC0xNzMgLTE5OSAtMjMzIC05IC0xNiAtMTcgLTgKLTU5IDY0IC02MSAxMDMgLTE3NyAyMjggLTI4MCAzMDIgLTExOCA4NSAtMjU1IDE0OCAtNDk0IDIyOCAtMzcxIDEyNSAtNDc0CjE5MiAtNjA2IDM5NSAtNTUgODMgLTg1IDEwMyAtMTM3IDg5IC00MSAtMTIgLTcxIC01NyAtMTAyIC0xNTQgLTQxIC0xMzIgLTU4Ci0yODQgLTUyIC00NjAgMTAgLTI0NCA1NiAtNDIzIDE2MiAtNjI4IDc2IC0xNDYgMTUyIC0yNDcgMjgwIC0zNzEgMTM2IC0xMzIKMjcwIC0yMjMgNDk2IC0zMzcgMTg1IC05MyAyMzMgLTEyOCAyNjAgLTE4OSAyNCAtNTEgMjQgLTg0IC0xIC0xNzggLTUwIC0xOTYKLTIxNiAtNDI0IC0zODkgLTUzNSAtMTM3IC04NyAtMjYyIC0xMjkgLTQxOCAtMTM5IC0yNjcgLTE2IC01MzEgODUgLTg0NiAzMjQKLTEzNSAxMDMgLTQ3NyA0NDUgLTcxNyA3MTggLTU5MCA2NzIgLTk1NiAxMDE0IC0xMzg3IDEyOTggLTYyMyA0MTAgLTEyODYgNjM2Ci0yMTA4IDcxNyAtNjAgNiAtMTExIDEzIC0xMTQgMTYgLTkgOSAzMiAxMzMgNzEgMjEzIDgxIDE2NCAyNDcgMjk2IDQwMyAzMjAKMzMgNSAxMTcgNiAxODYgNCAxMjEgLTUgMTI4IC01IDE4NyAyMiAxMTIgNTAgMTY4IDE0MCAxNjAgMjU3IC04IDExNCAtNjggMTk2Ci0xODYgMjUxIC0xNTggNzQgLTM2NiAzNSAtNTUyIC0xMDMgLTU1IC00MSAtNzQgLTYzIC0xMDMgLTExOCAtNjIgLTEyMCAtNTgKLTEyNCAzOSAtMzMgMTUxIDE0MCAyNDcgMTkzIDM5MCAyMTQgNjEgOSA4MiA4IDEzOCAtNyAxMjUgLTM0IDIwMCAtMTE0IDIwMQotMjE1IDAgLTc2IC0yOCAtMTI3IC05MCAtMTY2IGwtNDggLTMwIC0xNzEgLTEgYy0xOTAgMCAtMjI0IC03IC0zMzEgLTYyIC0xODAKLTk0IC0zMjAgLTI5OCAtMzY0IC01MjkgbC0xNSAtODMgLTM2IDAgLTM3IDAgLTE3IDgzIGMtMTAgNDcgLTM3IDEyMiAtNjMgMTc3Ci0zOCA3OSAtNjAgMTA5IC0xMjggMTc3IC0xNDIgMTQzIC0yNzMgMTg3IC00OTAgMTY1IC03NiAtOCAtMTI0IC04IC0xNTUgLTEKLTE2MSAzNiAtMjEyIDIwOCAtOTYgMzI0IDY1IDY1IDEzNyA4OCAyNTYgODMgMTA0IC01IDE3MCAtMjYgMjc3IC04OSA4MiAtNDkKMjA5IC0xNzkgMjgxIC0yODkgOTAgLTEzOCA5MiAtMTQxIDEwMyAtMTM1IDE0IDkgMTEgODQgLTYgMTY3IC0yNSAxMjEgLTY0CjIyNCAtMTQ2IDM5NiAtMTAwIDIwNyAtMTI0IDI4MiAtMTIzIDM4NyAyIDE3MiA4OSAzMDAgMjMzIDM0MSAyMDIgNTkgMzgwCi0xMTUgMzgxIC0zNzIgMCAtMTAzIC0xNCAtMTY3IC04MSAtMzc0IC05MiAtMjgyIC0xMzIgLTQ4MCAtOTYgLTQ4MCAxMSAwIDExOAoxNjcgMTI1IDE5NiAyIDcgLTcgMTQgLTIwIDE2IC0xMiAyIC0yNCAxMSAtMjYgMjAgLTIgOSAxNyA2NCA0MiAxMjIgNjQgMTUxCjEwNSAyODUgMTIzIDQwNSAxNCA5NSAxNCAxMTEgLTIgMTk1IC0yNyAxNTEgLTEwMyAyNjQgLTIxNiAzMjIgLTQ1IDIzIC02OSAyOAotMTQ0IDMxIC01OSAyIC0xMDIgLTIgLTEyNiAtMTF6IG0tNjcgLTE4NzUgYzc0IC00MyAzNTUgLTU1IDQyMyAtMTkgMjggMTUgNDMKMTQgMjA1IC04IDgwMSAtMTA4IDE0MjIgLTM0NSAyMDE3IC03NzEgMzg0IC0yNzQgNjcxIC01NDkgMTIzNyAtMTE4OCA0MjgKLTQ4MiA2OTkgLTczNCA5NTEgLTg4NCA0NDQgLTI2NCA4NzAgLTI1OSAxMjEzIDE0IDI1OCAyMDcgNDI1IDU4NSAzMzcgNzYyCi0zNyA3MyAtODkgMTExIC0zMDUgMjIzIC0yMTcgMTEyIC0zNTUgMjA2IC00NzQgMzIzIC0yNzUgMjcxIC00MzMgNjc2IC00MTEKMTA1NyA3IDEyOCAzNSAyODIgNjYgMzY1IDI4IDc2IDQ2IDczIDEwMiAtMTggNTEgLTgyIDE0NiAtMTc5IDIyNyAtMjM0IDgxCi01NCAxNzYgLTk1IDQwNSAtMTczIDMyMiAtMTEwIDQzNSAtMTcwIDU3OCAtMzA5IDk2IC05MyAxNTUgLTE3MyAyMDkgLTI4NiAyMgotNDcgNDYgLTg1IDUzIC04NSA2IDAgMzUgNDAgNjQgODggMTE2IDE5NiAyODkgMzQwIDUyMyA0MzYgNDggMjAgMTgzIDYxIDI5OQo5MSAzNjggOTUgNTEwIDE3NiA2NDIgMzY1IDU5IDg0IDgxIDk2IDk4IDUzIDQwIC0xMDMgNjAgLTMxMSA0OSAtNTAxIC0yMgotMzcwIC0xNDQgLTY2OCAtMzczIC05MDkgLTEzMSAtMTM3IC0zMDEgLTI0MyAtNTUwIC0zNDMgLTE3NCAtNjggLTIyMSAtOTQKLTI3OCAtMTQ3IC05NCAtODcgLTEyOCAtMTcyIC0yMTcgLTUzMyAtMzQgLTEzNSAtODQgLTMxNSAtMTEyIC00MDAgLTIyMyAtNjc0Ci02MDggLTEyNDUgLTExNTAgLTE3MDYgLTE2NiAtMTQxIC0yMzYgLTE4OCAtMzQ1IC0yMzEgLTQ2MSAtMTg0IC0xMDc4IC0yNzQKLTE2NjQgLTI0NSBsLTIyNiAxMiAtNjggNzIgYy0xMzYgMTQ0IC0yMzAgMjc2IC01NDAgNzU4IC0xNzggMjc3IC0zMzkgNDYwCi01MjcgNTk5IC0yMjggMTcwIC00ODQgMjUyIC02OTUgMjIzIC04MSAtMTEgLTEyNSAtMjUgLTEyNSAtNDAgMCAtNCA1MSAtNwoxMTMgLTcgMzA1IC0xIDU3OSAtMTI2IDgzNyAtMzg1IDE0MyAtMTQyIDIxOCAtMjQzIDQzMSAtNTc3IDkzIC0xNDQgMTkyIC0yOTUKMjIxIC0zMzUgMTMzIC0xODYgMzIzIC0zOTEgNDg1IC01MjMgNzUgLTYyIDk3IC05NSA4OCAtMTM2IC0yOCAtMTI2IC00NTQKLTIwMCAtODMwIC0xNDUgLTYwNiA5MCAtMTA1NyAzOTIgLTEzMjkgODkxIC02NCAxMTggLTEwNCAyMTMgLTE5NyA0NjcgLTc3CjIxMSAtMTI1IDMxNyAtMTcxIDM3MiAtNTAgNjAgLTU2IDMxIC0xNSAtNjYgMjAgLTQ2IDY4IC0xNzYgMTA3IC0yOTAgODMgLTI0NgoxMTYgLTMzMSAxNzAgLTQzOCAzMyAtNjYgMzcgLTgwIDIzIC04MCAtMzMgMCAtNTUyIDE4MCAtNzU4IDI2MyAtMzEzIDEyNgotNDc2IDIwMCAtODM3IDM4MSAtMTg0IDkyIC0zMzEgMTYwIC0zMzQgMTU0IC0zIC01IC00IC0xMSAtMyAtMTIgMiAtMSAzOCAtMjMKNzkgLTQ4IDM1NyAtMjE3IDk0MyAtNDgzIDE0MzUgLTY1MSAyMTMgLTczIDM2MCAtMTIwIDQyNiAtMTM3IDM5IC0xMSA0OSAtMTkKODcgLTgxIDEwNSAtMTY2IDMzNCAtNDA2IDQ1NyAtNDc3IDI4IC0xNiAxNCAtMTUgLTEzMiA5IC0xMTM4IDE4MyAtMjE4OCA1NTMKLTI5NTMgMTA0MSAtMTgxIDExNiAtNTA2IDM2NSAtNTE4IDM5NyAtMSA0IDI4IDEzIDY1IDIwIDk4IDE4IDI2MCA2NiAzNTQgMTA2CjExOCA1MCAyMTEgMTA4IDI4OCAxODAgbDY3IDY0IDI4IC0zNSBjNTEgLTY1IDEwNyAtNzAgOTIgLTkgLTEwIDM5IC05NyAxMjcKLTE1OCAxNjAgLTY0IDM1IC0xNzAgNDMgLTE3NiAxMiAtMyAtMTIgNyAtMjIgMzUgLTMzIDgzIC0zMyAxMTMgLTQ3IDExMyAtNTUKMCAtMTggLTE1MCAtMTMxIC0yMzAgLTE3MyAtNTU5IC0yOTMgLTE2OTQgLTI3MCAtMjM2NiA0OCAtMTAwIDQ3IC0xOTkgMTExCi0yNDAgMTU0IC02NCA2OCAtOTMgMTcwIC0xMTkgNDI3IC0yNSAyNDIgLTE4IDQ0OCAyNiA3MTAgMTI1IDc1MSA1NDEgMTM4NQoxMTg5IDE4MTEgNjE1IDQwNCAxNDIxIDYyNSAyMzE3IDYzMyAxNDMgMSAxNjYgLTEgMTk1IC0xOHogbS0zMTkzIC0zODY4IGw4MwotMjggNDUgLTg5IGMxNjYgLTMzMCA0OTUgLTY4OCA4ODEgLTk1OSA0MTYgLTI5MiA5NjggLTU2MyAxNTU2IC03NjMgMTY1IC01Ngo1OTUgLTE4MyA2MjQgLTE4NSAxMSAwIDEyIC0yIDQgLTYgLTI1IC0xMCAtNDg2IDgxIC03NzcgMTUzIC0xMDAxIDI1MCAtMTcwNAo2MDUgLTIxOTIgMTEwNyAtMTI2IDEyOSAtMjczIDMxNiAtMzQxIDQzNSAtODIgMTM5IC0xODcgMzcwIC0yMDcgNDU0IGwtNyAyOAoxMjMgLTU5IGM2OCAtMzMgMTYyIC03MiAyMDggLTg4eiBtNDAxIC0xMDggYzE0MCAtMjggMzM5IC01NSA0MDMgLTU1IDQwIDAgNDQKLTMgOTAgLTY1IDEwOCAtMTQ1IDM1NSAtMzgwIDU2NyAtNTM3IDE3NiAtMTMwIDUxNCAtMzMzIDcwNSAtNDIzIDM5IC0xOCAxMTUKLTU0IDE3MCAtODAgMjIxIC0xMDQgNjE3IC0yNTUgOTMwIC0zNTUgNjk5IC0yMjIgMTYwNSAtMzc3IDI0MDYgLTQxMiAyNTMgLTExCjMzMyAtOCAzMTMgMTIgLTUgNSAtMTA4IDE0IC0yMjkgMjAgLTEzMjAgNjYgLTI1MzIgMzUyIC0zNTIwIDgyOSAtNDYyIDIyNAotODA2IDQ1NSAtMTA5MyA3MzYgLTExMiAxMDggLTIzMiAyNDMgLTIzMiAyNTggMCA0IDkxIDYgMjAzIDUgMTI3IDAgMjY3IDYKMzc2IDE3IGwxNzMgMTcgNTIgLTQ5IGM0NjIgLTQ0MyAxMzU4IC04OTQgMjMyNiAtMTE3MiA0MzcgLTEyNSA5NjkgLTIzOCAxMzA1Ci0yNzcgNDQgLTUgOTcgLTI1IDIwMCAtNzQgMTk5IC05NiAzODMgLTE1MyA1OTUgLTE4NSA0MTIgLTYyIDgyNiA3IDkyMiAxNTMKMjMgMzUgMjMgMTE1IDEgMTUzIC0xMCAxNyAtNjQgNjkgLTEyMCAxMTYgLTU3IDQ3IC0xMDMgODcgLTEwMyA4OCAwIDEgMTM4IDAKMzA4IC0zIDI0MiAtNCAzNDYgLTEgNDkyIDEyIDMxMCAyOSA2MTkgOTAgODYwIDE2OSA1OCAxOSAxMDYgMzQgMTA4IDMyIDggLTcKLTMwMCAtMTgzIC00OTMgLTI4MCAtNDA3IC0yMDUgLTc1MyAtMzMzIC0xMjMwIC00NTUgLTcwMyAtMTgwIC0xNDA1IC0yNTkKLTIxODUgLTI0NyAtNjg1IDExIC05ODggNDUgLTE0NjUgMTY3IC01MTEgMTMwIC05MTcgMjcxIC0xMzQzIDQ2NyAtODM5IDM4NQotMTM4NiA4MjggLTE3MDEgMTM3OCAtMjggNDkgLTUxIDkyIC01MSA5NiAwIDMgMzAgLTIgNjggLTEyIDM3IC0xMSAxMjMgLTMwCjE5MiAtNDR6Ii8+CjxwYXRoIGQ9Ik00MTQ1IDYyOTYgYy0zNiAtMTYgLTcxIC01MyAtNjEgLTY0IDQgLTQgNDcgLTcgOTQgLTcgMTAzIC0xIDE3MgotMjcgMjQ2IC05NSA2MyAtNTggODcgLTM5IDQ3IDM4IC01NiAxMDkgLTIyMiAxNzQgLTMyNiAxMjh6Ii8+CjxwYXRoIGQ9Ik00MDI0IDU4NjUgYy0xMzcgLTMwIC0yNTIgLTEyMiAtMzE4IC0yNTUgLTEzMSAtMjY1IC00MiAtNTcyIDIwMQotNjk0IDI5NSAtMTQ4IDYzMyAxMDAgNjMzIDQ2NCAwIDE5MSAtOTggMzY4IC0yNDggNDQ4IC00OCAyNiAtMTY2IDU1IC0yMDIgNTEKLTMgMCAtMzIgLTcgLTY2IC0xNHogbTIzMSAtOTcgYzU0IC0yOCAxMjkgLTEwMSAxNjMgLTE1OCA0MCAtNjggNTUgLTE0NSA0OQotMjU0IC0zIC01NiAtMTIgLTEyMiAtMjIgLTE0OCAtMTkgLTUzIC00MSAtNzcgLTI4IC0zMSA0IDE1IDcgNjIgNyAxMDMgLTIgOTcKLTMwIDE2NCAtOTMgMjIzIC0xNTYgMTQ2IC0zNzQgNzYgLTQzNyAtMTQxIC0yMSAtNzIgLTE1IC0xODkgMTQgLTI1NCAyNSAtNTcKODMgLTEyMyAxMzEgLTE0OSBsMzYgLTIwIC00NSA3IGMtMTAyIDE1IC0yMTggMTAzIC0yNjkgMjA1IC02MyAxMjYgLTYzIDI3MyAwCjQwOCA1MiAxMTQgMTEzIDE3NCAyMTggMjE4IDc4IDMzIDIwMiAyOSAyNzYgLTl6IG01OCAtMzA5IGMyOCAtMTMgNDcgLTQ4IDQ3Ci04NSAwIC0yOSAtNDkgLTg0IC03NSAtODQgLTUzIDAgLTEwNiA2OSAtODkgMTE2IDIwIDU1IDY2IDc2IDExNyA1M3oiLz4KPC9nPgo8L3N2Zz4K"></div>
+
+  <footer>
+    <span>5 closed areas</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Whale</span>
+  </footer>
+</div>
+
+</body>
+</html>

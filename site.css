@@ -20,8 +20,10 @@
   .panel { background:var(--paper); border:2.5px solid var(--ink);
     padding:1.4rem 1.5rem; margin:1.2rem 0; }
   .panel.raised { box-shadow:6px 6px 0 var(--ink); }
+  /* A heading, underlined — not a box. Boxed, the section labels read as
+     buttons that did nothing (Wil, 2026-09-26). */
   .tab { display:inline-block; font-size:.72rem; font-weight:700; letter-spacing:.12em;
-    text-transform:uppercase; border:2px solid var(--ink); padding:.15rem .5rem;
+    text-transform:uppercase; border-bottom:2px solid var(--ink); padding:0 0 .2rem;
     margin-bottom:.9rem; }
 
   h1 { font-size:1.9rem; line-height:1.1; margin:0 0 .5rem; font-weight:700; }

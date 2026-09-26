@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="sheet-kind" content="worksheet">
+<title>The Cross Face — What They Did Not Know</title>
+<style>
+  :root { --font: Georgia, "Times New Roman", serif; }
+
+  /* Page margins live HERE only — body padding stays 0 for print so the two
+     don't stack and eat the sheet. */
+  @page { size: letter portrait; margin: 0.45in 0.5in; }
+
+  /*
+   * THE PALETTE. The same one the shop wears (kitchen-table/BRAND.md): warm
+   * near-black ink, one accent, pine kept back for the answer key.
+   *
+   * WHY A SHEET HAS COLOR AT ALL. Every sheet was pure grayscale — #000 rules,
+   * #333 subtitles, #f0f0f0 boxes — which is what you get by never deciding.
+   * The paper is the product and it looked like a fax. A printer set to
+   * grayscale, or one that has no color to give, renders all of this as the
+   * greys it already had, so nothing below costs a parent anything they were
+   * not already spending.
+   *
+   * WHAT STAYS BLACK, ON PURPOSE:
+   *   - anything drawn to be written on (rules, name lines, answer boxes)
+   *   - anything drawn to be traced or colored in (line art, letter guides)
+   *   - the confidence rings, which have to survive a mono laser
+   * Color marks the sheet's own furniture — its rule, its numbering, its
+   * boxes — and never the part a child puts a pencil through.
+   */
+  :root {
+    --ink:    #16130F;
+    --muted:  #6B635A;
+    --rule:   #CFC3B2;
+    --guide:  #BCAE9C;
+    --accent: #C0511D;
+    --tint:   #F7EDE4;
+    --slate:  #2E5A78;
+    --tintslate: #E9EFF4;
+    --deep:   #2C4A45;
+    --tintdeep: #ECF1EF;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font);
+    color: #000; background: #fff;
+    font-size: 12pt; line-height: 1.3;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+
+  /* ORDER MATTERS. This generic rule must come BEFORE the @media screen block:
+     same specificity, so whichever is declared last wins. With it after, the
+     on-screen preview stretches to the viewport instead of 8.5in — print is
+     unaffected, but the proof you check before printing is wrong. */
+  .page { width: 100%; }
+  .page + .page { page-break-before: always; }
+
+  @media screen {
+    body { padding: 0.5in; background: #ddd; }
+    .page {
+      background: #fff; padding: 0.45in 0.5in;
+      width: 8.5in; min-height: 11in;
+      margin: 0 auto 24px; box-shadow: 0 2px 10px rgba(0,0,0,.3);
+    }
+  }
+
+  /* ------------------------------------------------------------- header */
+  header { border-bottom: 3px double var(--accent); padding-bottom: 6px; }
+  header.cont { border-bottom: 1px solid var(--rule); }
+  h1 { font-size: 16pt; margin: 0 0 1px; letter-spacing: .01em; }
+  .sub { font-size: 10pt; font-style: italic; color: var(--muted); margin: 0; }
+
+  .nameline { display: flex; gap: 26px; font-size: 10.5pt; margin: 11px 0 12px; }
+  .nameline span { flex: 1; border-bottom: 1px solid var(--ink); padding-bottom: 1px; }
+  .nameline span.short { flex: 0 0 1.9in; }
+
+  .directions {
+    font-size: 10.5pt; line-height: 1.35;
+    background: var(--tint); border-left: 4px solid var(--accent);
+    padding: 7px 10px; margin: 12px 0 14px;
+  }
+  .directions b { letter-spacing: .03em; }
+  .tip { font-style: italic; margin-top: 3px; }
+
+  /* ------------------------------------------------- problems and grids */
+  .grid { display: grid; gap: 13px 16px; margin-top: 4px; }
+  .prob { page-break-inside: avoid; display: flex; gap: 5px; align-items: flex-start; }
+  .pn { font-weight: bold; font-size: 11pt; min-width: .28in; flex: 0 0 auto; color: var(--accent); }
+  .pbody { flex: 1; min-width: 0; }
+
+  /* Digits need lining figures and even widths whatever the body font is. */
+  .num, .vert, .horiz { font-family: "Trebuchet MS", "Segoe UI", Tahoma, Verdana, sans-serif; font-variant-numeric: lining-nums tabular-nums; }
+
+  /* A stacked column algorithm.
+     Two grid columns — operator, then digits — because a floated or absolutely
+     positioned operator overlaps the digits as soon as the numbers get wide,
+     and "324" with a + sitting on the 3 is unreadable. The grid also lets the
+     rule under the last operand span BOTH columns, which is how it is written
+     by hand. The rule is heavy: it is the line you write the answer beneath. */
+  .vert {
+    display: inline-grid; grid-template-columns: auto auto;
+    font-size: 15pt; line-height: 1.3; text-align: right;
+  }
+  .vert > span { padding: 0 0 1px 0; }
+  .vert .op { text-align: left; padding-right: .16in; }
+  .vert .last { border-bottom: 2.5px solid var(--ink); padding-bottom: 3px; }
+  .vert .ans { height: .4in; }
+  /* Partial-products working, for 2-digit x 1-digit before the short method. */
+  .vert .part { font-size: 11pt; color: var(--muted); }
+  /* A row of worked examples that fade — see lib/formats.js faded(). The
+     caption is what makes the fade legible: without it the third one looks like
+     a question somebody forgot to number. */
+  .egrow { display: flex; gap: .34in; align-items: flex-start; margin: 0 0 4px; }
+  .eg { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; }
+  .eglab { font-size: 8.5pt; color: var(--slate); letter-spacing: .02em; }
+
+  /* The carried digits. Small and grey so the sum still reads as the sum, and
+     tight to the row below it so a carry sits ON the column it goes into. */
+  .vert .carry { font-size: 9pt; color: var(--slate); line-height: 1; padding: 0 0 1px 0; }
+
+  .horiz { font-size: 14pt; white-space: nowrap; }
+
+  /* Row numbers in a word list. Gray and small: they are there so a list can be
+     dictated ("number seven") and marked without counting down the page, and
+     they must not compete with the word itself. */
+  .wn { color: var(--muted); font-size: 9pt; }
+
+  /* The box an answer goes in. inline-block so it can sit mid-sentence. */
+  .abox {
+    display: inline-block; border: 1.6px solid var(--slate); border-radius: 3px;
+    vertical-align: middle; margin: 0 3px; position: relative; background: #fff;
+  }
+  /* Scoped to the box: as a bare ".alab" it pinned any generator's own .alab
+     to the bottom of the page (life-07-signs-and-forms 40, 2026-09-24). */
+  .abox > .alab {
+    position: absolute; bottom: 1px; left: 0; right: 0;
+    text-align: center; font-size: 7pt; color: var(--muted); font-style: italic;
+  }
+
+  /* Confidence marks. The rings are drawn with a border and a gradient rather
+     than an SVG so they stay inline with the question text at any font size,
+     and print black on a mono laser without relying on a background image. */
+  .conf { float: right; margin: 2px 0 0 8px; white-space: nowrap; }
+  .cring {
+    display: inline-block; width: 11px; height: 11px; margin-left: 4px;
+    border: 1.4px solid var(--slate); border-radius: 50%; vertical-align: middle;
+  }
+  .cring-full { background: var(--accent); }
+  .cring-half { background: linear-gradient(90deg, var(--accent) 50%, #fff 50%); }
+  .cring-none { background: #fff; }
+  ol.qs.hasconf li { overflow: hidden; }
+
+  .conflegend {
+    border: 1.2px solid var(--rule); border-radius: 4px;
+    padding: 3px 8px; margin: 0 0 7px;
+    font-size: 8.5pt; color: var(--muted); display: flex; gap: 14px; align-items: center;
+  }
+  .conftitle { font-weight: 700; color: var(--ink); }
+  .confitem { white-space: nowrap; }
+
+  .work {
+    border: 1.4px dashed var(--rule); border-radius: 4px;
+    margin: 6px 0 2px; position: relative;
+  }
+  /* The label S.work() puts in the box: a DIRECT child only. As ".work span"
+     it also caught every span inside any generator's own .work content and
+     stacked them all at the top-left corner (math-11-grade6 47, 2026-09-23). */
+  .work > span {
+    position: absolute; top: 3px; left: 6px;
+    font-size: 8pt; color: var(--muted); font-style: italic;
+  }
+
+  /* ------------------------------------------------------ writing lines */
+  /* Primary rule: solid top, dashed midline, heavy baseline. Capitals reach
+     the top line, lowercase bodies sit under the dashed one. */
+  .write {
+    position: relative; height: 0.375in;
+    margin: 6px 0 0 .3in;
+    border-top: 1px solid var(--rule); border-bottom: 2px solid var(--ink);
+  }
+  .write.flush { margin-left: 0; }
+  .write + .write { margin-top: .17in; }
+  .write::after {
+    content: ""; position: absolute; left: 0; right: 0; top: 50%;
+    border-top: 1px dashed var(--guide);
+  }
+
+  /* ------------------------------------------------------- question list */
+  ol.qs { margin: 0; padding: 0 0 0 .34in; }
+  ol.qs li { margin-bottom: 13px; page-break-inside: avoid; }
+  ol.qs li::marker { font-weight: bold; font-size: 11pt; color: var(--accent); }
+  .qt { display: block; }
+
+  .mcq { display: grid; gap: 3px 14px; margin: 5px 0 2px .12in; font-size: 11pt; }
+  .opt { white-space: nowrap; }
+
+  /* -------------------------------------------------------------- tables */
+  .tbl { border-collapse: collapse; margin: 8px 0; font-size: 11pt; width: 100%; }
+  .tbl th, .tbl td { border: 1.4px solid var(--ink); padding: 5px 8px; text-align: left; }
+  .tbl th { color: var(--slate); }
+  .tbl th { background: var(--tint); font-size: 10pt; letter-spacing: .02em; }
+  .tbl td.blank { height: .34in; }
+  .tbl.narrow { width: auto; }
+  .tbl.center td, .tbl.center th { text-align: center; }
+
+  /* ------------------------------------------------------------ passages */
+  .passage {
+    border: 1.5px solid var(--slate); border-radius: 4px;
+    padding: 11px 14px; margin-bottom: 12px;
+    font-size: 11.5pt; line-height: 1.55;
+  }
+  .passage h2 { font-size: 13pt; margin: 0 0 6px; color: var(--deep); }
+  .passage p { margin: 0 0 8px; }
+  .passage p:last-child { margin-bottom: 0; }
+  .passage .byline { font-size: 9.5pt; font-style: italic; color: var(--muted); margin-bottom: 8px; }
+  /* Numbered paragraphs, so a question can say "in paragraph 2". */
+  .passage p.np { position: relative; padding-left: .3in; }
+  .passage p.np::before {
+    content: attr(data-p); position: absolute; left: 0; top: 0;
+    font-size: 9pt; color: var(--accent); font-weight: bold;
+  }
+
+  .wordbank {
+    border: 1.5px dashed var(--slate); border-radius: 4px;
+    padding: 8px 12px; margin: 10px 0 12px;
+    font-size: 11.5pt; text-align: center;
+  }
+  .wordbank b { display: block; font-size: 9.5pt; letter-spacing: .06em;
+    text-transform: uppercase; margin-bottom: 4px; color: var(--accent); }
+  .wordbank span { display: inline-block; margin: 2px 11px; }
+
+  .note {
+    border-left: 4px solid var(--deep); background: var(--tintdeep);
+    padding: 7px 11px; margin: 10px 0; font-size: 10.5pt;
+  }
+  .note b { letter-spacing: .02em; }
+
+  /* -------------------------------------------------------------- footer */
+  /* THE WORDMARK SITS IN THE FOOTER THAT WAS ALREADY THERE, so it costs no
+     height at all — a sheet that fitted before fits now. Upright where the rest
+     of the line is italic, and a size down: it is a signature, not a message,
+     and it must never compete with "Score: ___ / 10". */
+  .brand { font-style: normal; font-size: 7.5pt; letter-spacing: .04em;
+    color: var(--accent); align-self: center; }
+
+  footer {
+    margin-top: 14px; padding-top: 6px; border-top: 1px solid var(--rule);
+    font-size: 9pt; font-style: italic; color: var(--muted);
+    display: flex; justify-content: space-between;
+  }
+
+  /* ---------------------------------------------------------- answer key */
+  .keybadge {
+    display: inline-block; border: 2px solid var(--deep); color: var(--deep); padding: 2px 9px;
+    font-size: 9.5pt; font-weight: bold; letter-spacing: .08em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .key .why {
+    display: block; font-size: 9pt; font-style: italic; color: var(--muted); margin-top: 1px;
+  }
+  /* Highlight rather than underline: <u> in a key marks WHAT CHANGED, and an
+     underline under a comma is invisible. */
+  .key u { text-decoration: none; background: var(--tint); padding: 0 2px; font-weight: bold; }
+  .keygrid .pbody { font-family: "Trebuchet MS", "Segoe UI", Tahoma, Verdana, sans-serif; font-size: 12pt; }
+  /* A key's pictures scale to their column: at 1fr a wide drawing pushed a
+     three-column key 92px off the paper (art-04-drawing 10, 2026-09-24). */
+  .keygrid svg { max-width: 100%; height: auto; }
+  .keylist .qt { font-weight: normal; }
+
+  /*
+   * The guide page. Four lines per question, and the ASK line is the one that
+   * gets used at the table, so it is the one with a rule beside it — a parent
+   * scanning this page in ten seconds should land on the follow-up question
+   * and nothing else.
+   */
+  .guide { padding-left: .3in; }
+  .guide li { margin-bottom: 11px; page-break-inside: avoid; }
+  .guide .gq { font-weight: bold; font-size: 11pt; margin-bottom: 3px; }
+  /* 9pt, matching the key's own why line, because the guide page is the
+     binding constraint on every open sheet: four lines per question against a
+     key's one, and at 10pt a sheet with seven questions ran onto a second
+     side. Found by measuring, not chosen. (No backticks in here — this CSS
+     lives inside a template literal and one would close it.) */
+  .guide .glook, .guide .gthin, .guide .gstrong {
+    font-size: 9pt; line-height: 1.3; margin-top: 1px;
+  }
+  .guide .gthin { color: var(--muted); }
+  .guide .gstrong { color: var(--muted); font-style: italic; }
+  .guide .gask {
+    font-size: 9.5pt; line-height: 1.3; margin-top: 3px;
+    border-left: 3px solid var(--slate); padding-left: 7px;
+  }
+  .key .qs li { margin-bottom: 9px; }
+
+  /*
+   * INLINE-BLOCK, NOT BLOCK, AND THIS WAS WRONG FOR A LONG TIME. A block-level
+   * svg ignores text-align: center on its parent and sits flush left — so 117
+   * sheets across 35 packs said "centre this diagram" and got a left-aligned
+   * one. Twenty-five of them were origami and paper-plane fold sequences, where
+   * the whole page is diagrams.
+   *
+   * Nobody spotted it because a left-flush diagram looks deliberate; it only
+   * reads as wrong next to a centered one, and no sheet has both.
+   *
+   * inline-block makes text-align do what every one of those authors meant,
+   * and leaves a diagram in a left-aligned container exactly where it was.
+   * vertical-align: top kills the baseline gap that inline elements otherwise
+   * leave underneath them, which would have pushed long pages over.
+   */
+  svg { display: inline-block; vertical-align: top; }
+  svg.inline { vertical-align: middle; }
+
+</style>
+</head>
+<body>
+
+<div class="page ">
+  <header>
+    
+    <h1>The Cross Face</h1>
+    <p class="sub">What They Did Not Know · Read this one out loud · Page 1 of 2</p>
+  </header>
+  <div class="nameline">
+    <span>Name</span>
+    <span class="short">Date</span>
+  </div>
+  <div class="directions">
+    <b>DIRECTIONS:</b> <b>Read it aloud, twice.</b> Don't explain: the questions do that.
+  </div>
+
+<div class="plan" style="display:flex;align-items:stretch;gap:.08in;margin:.02in 0 .1in"><div style="flex:1;display:flex;align-items:center;gap:.07in;border:1.8px solid var(--ink);border-radius:5px;padding:.05in .08in"><span style="flex:0 0 auto;display:inline-block;width:.26in;height:.26in;line-height:.26in;border-radius:50%;background:var(--ink);color:#fff;text-align:center;font-weight:700;font-size:11pt">1</span><span style="font-size:10.5pt;font-weight:700;line-height:1.2">A grown-up reads the story out loud, twice</span></div><div style="align-self:center;font-size:16pt;font-weight:700;color:var(--ink)">&rarr;</div><div style="flex:1;display:flex;align-items:center;gap:.07in;border:1.8px solid var(--ink);border-radius:5px;padding:.05in .08in"><span style="flex:0 0 auto;display:inline-block;width:.26in;height:.26in;line-height:.26in;border-radius:50%;background:var(--ink);color:#fff;text-align:center;font-weight:700;font-size:11pt">2</span><span style="font-size:10.5pt;font-weight:700;line-height:1.2">Draw it in the box</span></div><div style="align-self:center;font-size:16pt;font-weight:700;color:var(--ink)">&rarr;</div><div style="flex:1;display:flex;align-items:center;gap:.07in;border:1.8px solid var(--ink);border-radius:5px;padding:.05in .08in"><span style="flex:0 0 auto;display:inline-block;width:.26in;height:.26in;line-height:.26in;border-radius:50%;background:var(--ink);color:#fff;text-align:center;font-weight:700;font-size:11pt">3</span><span style="font-size:10.5pt;font-weight:700;line-height:1.2">Turn over: 4 questions to ask</span></div></div><div class="passage" style="font-size:14pt;line-height:1.75;max-width:5.6in;margin:.06in auto 0"><p style="margin:0 0 .12in">Ada was doing a jigsaw on the floor. She had done all of it except one piece,
+     and the piece would not go in.</p><p style="margin:0 0 .12in">She turned it round. She turned it round again. Her mouth went flat and her
+     eyebrows came down.</p><p style="margin:0 0 .12in">Her little brother Sam came in with a book. He saw her face. He stood still for
+     a moment, and then he went back out and sat on the stairs.</p><p style="margin:0 0 .12in">Ada found the right way round. The last piece went in.</p><p style="margin:0 0 .12in">She looked up to show somebody.</p><p style="margin:0 0 .12in">There was nobody there.</p></div>
+  <div class="note" style="margin-top:.1in">Draw Ada&rsquo;s face when she had one piece left. Then draw it again when she looked up.</div>
+  <div style="border:1.4px solid var(--rule);border-radius:4px;height:1.80in;margin-top:.07in"></div>
+
+  <footer>
+    <span>Read it twice, out loud</span>
+    <span class="brand">Kitchen Table</span>
+    <span>The Cross Face</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>The Cross Face &mdash; Ask These</h1>
+    <p class="sub">What They Did Not Know · The child answers out loud · Page 2 of 2</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Ask in order. Write down their exact words.
+    <div class="tip">Stuck on 3? Ask 2 again.</div>
+  </div>
+
+<ol class="qs"><li><span class="qt" style="font-size:12.5pt">What was Ada doing on the floor?</span><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt" style="font-size:12.5pt">Sam saw Ada&rsquo;s face and went away. <b>What did he not know</b> about what she was doing?</span><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt" style="font-size:12.5pt">Sam went and sat on the stairs. <b>What did he think</b> Ada&rsquo;s face meant?</span><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt" style="font-size:12.5pt">What is one thing Ada could have said that would have changed his mind?</span><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Their words, not a tidier version</span>
+    <span class="brand">Kitchen Table</span>
+    <span>The Cross Face</span>
+  </footer>
+</div>
+
+</body>
+</html>

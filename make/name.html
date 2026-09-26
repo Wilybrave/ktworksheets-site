@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Name tracing — type your own — Kitchen Table Worksheets</title>
+<meta name="description" content="Type a name and print it to trace, in print or cursive. No account, no email.">
+<meta name="theme-color" content="#EDEDEA">
+<link rel="stylesheet" href="/site.css">
+</head>
+<body class="t-plain">
+<div class="desk g-weave"></div>
+<main>
+  <div class="top">
+    <div class="plate"><a class="mark" href="/"><svg width="26" height="26" viewBox="0 0 100 100" aria-hidden="true"><path d="M6 30 L94 30 L94 41 L6 41 Z" fill="currentColor"/><path d="M20 41 L31 41 L28 92 L23 92 Z" fill="currentColor"/><path d="M69 41 L80 41 L77 92 L72 92 Z" fill="currentColor"/><path d="M26 72 L74 72 L74 79 L26 79 Z" fill="currentColor"/><path d="M36 48 L62 48 L62 51.4 L36 51.4 Z" fill="currentColor"/><path d="M36 56 L62 56 L62 59.4 L36 59.4 Z" fill="currentColor"/><path d="M36 64 L52 64 L52 67.4 L36 67.4 Z" fill="currentColor"/></svg> Kitchen Table</a></div>
+    <button class="bucket" type="button" onclick="ktDesk()" title="Change the desk"
+      aria-label="Change the desk"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"
+  fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M4 9 L12 3 L20 9 L12 15 Z"/>
+  <path d="M4 9 V13 L12 19 L20 13 V9"/>
+  <path d="M21.5 15.5 c0 1.1 -0.8 1.9 -1.7 1.9 s-1.7 -0.8 -1.7 -1.9 c0 -1.1 1.7 -3 1.7 -3 s1.7 1.9 1.7 3 Z"/>
+</svg></button>
+  </div>
+  <div class="panel raised">
+    <h1>Name tracing</h1>
+    <p class="lede">Their own name, to trace and then write. Type it below and it redraws as you go — the same letterforms
+    the printed packs use.</p>
+  </div>
+
+  <div class="panel js-only">
+    <span class="tab">The name</span>
+    <div class="form">
+      <label>Name <input id="nm" type="text" maxlength="24" value="Milo" autocomplete="off"
+        spellcheck="false"></label>
+      <label>Lines <input id="rw" type="number" min="2" max="10" value="6"></label>
+      <span class="radios">
+        <label><input type="radio" name="st" value="print" checked> Print</label>
+        <label><input type="radio" name="st" value="cursive"> Cursive</label>
+      </span>
+    </div>
+    <p class="muted" id="nmsg" hidden></p>
+    <p style="margin-top:1.1rem">
+      <a class="btn primary" href="#" onclick="return ktNamerPrint()">Print it</a>
+    </p>
+    <div class="paper" style="margin-top:1rem"><iframe id="f-namer" title="Name tracing sheet"></iframe></div>
+  </div>
+
+  <div class="panel no-js">
+    <span class="tab">Needs JavaScript</span>
+    <p style="margin-top:0">This one draws in the browser, so it needs script switched on. The
+    rest of the free worksheets are plain pages and do not.</p>
+  </div>
+
+  <div class="panel">
+    <span class="tab">In the app</span>
+    <p style="margin-top:0">The app does this too, plus the whole ladder around it — first name
+    and full name, at pre-K ruling and at school ruling.</p>
+    <div class="more"><a href="/make/">All 12 makers</a><a href="/free/">Free worksheets</a></div>
+  </div>
+
+  <script src="/make/namer.js" defer></script>
+  
+  <nav class="foot">
+    <a href="/">Home</a>
+    <a href="/about.html">About</a>
+    <a href="/why.html">Why worksheets</a>
+    <a href="/support.html">Support</a>
+    <a href="/privacy.html">Privacy</a>
+    <a href="/terms.html">Terms</a>
+  </nav>
+</main>
+<script src="/site.js" defer></script>
+</body>
+</html>

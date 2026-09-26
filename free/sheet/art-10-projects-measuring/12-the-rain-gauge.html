@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="sheet-kind" content="open">
+<title>The Rain Gauge — Making</title>
+<style>
+  :root { --font: Georgia, "Times New Roman", serif; }
+
+  /* Page margins live HERE only — body padding stays 0 for print so the two
+     don't stack and eat the sheet. */
+  @page { size: letter portrait; margin: 0.45in 0.5in; }
+
+  /*
+   * THE PALETTE. The same one the shop wears (kitchen-table/BRAND.md): warm
+   * near-black ink, one accent, pine kept back for the answer key.
+   *
+   * WHY A SHEET HAS COLOR AT ALL. Every sheet was pure grayscale — #000 rules,
+   * #333 subtitles, #f0f0f0 boxes — which is what you get by never deciding.
+   * The paper is the product and it looked like a fax. A printer set to
+   * grayscale, or one that has no color to give, renders all of this as the
+   * greys it already had, so nothing below costs a parent anything they were
+   * not already spending.
+   *
+   * WHAT STAYS BLACK, ON PURPOSE:
+   *   - anything drawn to be written on (rules, name lines, answer boxes)
+   *   - anything drawn to be traced or colored in (line art, letter guides)
+   *   - the confidence rings, which have to survive a mono laser
+   * Color marks the sheet's own furniture — its rule, its numbering, its
+   * boxes — and never the part a child puts a pencil through.
+   */
+  :root {
+    --ink:    #16130F;
+    --muted:  #6B635A;
+    --rule:   #CFC3B2;
+    --guide:  #BCAE9C;
+    --accent: #C0511D;
+    --tint:   #F7EDE4;
+    --slate:  #2E5A78;
+    --tintslate: #E9EFF4;
+    --deep:   #2C4A45;
+    --tintdeep: #ECF1EF;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font);
+    color: #000; background: #fff;
+    font-size: 12pt; line-height: 1.3;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+
+  /* ORDER MATTERS. This generic rule must come BEFORE the @media screen block:
+     same specificity, so whichever is declared last wins. With it after, the
+     on-screen preview stretches to the viewport instead of 8.5in — print is
+     unaffected, but the proof you check before printing is wrong. */
+  .page { width: 100%; }
+  .page + .page { page-break-before: always; }
+
+  @media screen {
+    body { padding: 0.5in; background: #ddd; }
+    .page {
+      background: #fff; padding: 0.45in 0.5in;
+      width: 8.5in; min-height: 11in;
+      margin: 0 auto 24px; box-shadow: 0 2px 10px rgba(0,0,0,.3);
+    }
+  }
+
+  /* ------------------------------------------------------------- header */
+  header { border-bottom: 3px double var(--accent); padding-bottom: 6px; }
+  header.cont { border-bottom: 1px solid var(--rule); }
+  h1 { font-size: 16pt; margin: 0 0 1px; letter-spacing: .01em; }
+  .sub { font-size: 10pt; font-style: italic; color: var(--muted); margin: 0; }
+
+  .nameline { display: flex; gap: 26px; font-size: 10.5pt; margin: 11px 0 12px; }
+  .nameline span { flex: 1; border-bottom: 1px solid var(--ink); padding-bottom: 1px; }
+  .nameline span.short { flex: 0 0 1.9in; }
+
+  .directions {
+    font-size: 10.5pt; line-height: 1.35;
+    background: var(--tint); border-left: 4px solid var(--accent);
+    padding: 7px 10px; margin: 12px 0 14px;
+  }
+  .directions b { letter-spacing: .03em; }
+  .tip { font-style: italic; margin-top: 3px; }
+
+  /* ------------------------------------------------- problems and grids */
+  .grid { display: grid; gap: 13px 16px; margin-top: 4px; }
+  .prob { page-break-inside: avoid; display: flex; gap: 5px; align-items: flex-start; }
+  .pn { font-weight: bold; font-size: 11pt; min-width: .28in; flex: 0 0 auto; color: var(--accent); }
+  .pbody { flex: 1; min-width: 0; }
+
+  /* Digits need lining figures and even widths whatever the body font is. */
+  .num, .vert, .horiz { font-family: "Trebuchet MS", "Segoe UI", Tahoma, Verdana, sans-serif; font-variant-numeric: lining-nums tabular-nums; }
+
+  /* A stacked column algorithm.
+     Two grid columns — operator, then digits — because a floated or absolutely
+     positioned operator overlaps the digits as soon as the numbers get wide,
+     and "324" with a + sitting on the 3 is unreadable. The grid also lets the
+     rule under the last operand span BOTH columns, which is how it is written
+     by hand. The rule is heavy: it is the line you write the answer beneath. */
+  .vert {
+    display: inline-grid; grid-template-columns: auto auto;
+    font-size: 15pt; line-height: 1.3; text-align: right;
+  }
+  .vert > span { padding: 0 0 1px 0; }
+  .vert .op { text-align: left; padding-right: .16in; }
+  .vert .last { border-bottom: 2.5px solid var(--ink); padding-bottom: 3px; }
+  .vert .ans { height: .4in; }
+  /* Partial-products working, for 2-digit x 1-digit before the short method. */
+  .vert .part { font-size: 11pt; color: var(--muted); }
+  /* A row of worked examples that fade — see lib/formats.js faded(). The
+     caption is what makes the fade legible: without it the third one looks like
+     a question somebody forgot to number. */
+  .egrow { display: flex; gap: .34in; align-items: flex-start; margin: 0 0 4px; }
+  .eg { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; }
+  .eglab { font-size: 8.5pt; color: var(--slate); letter-spacing: .02em; }
+
+  /* The carried digits. Small and grey so the sum still reads as the sum, and
+     tight to the row below it so a carry sits ON the column it goes into. */
+  .vert .carry { font-size: 9pt; color: var(--slate); line-height: 1; padding: 0 0 1px 0; }
+
+  .horiz { font-size: 14pt; white-space: nowrap; }
+
+  /* Row numbers in a word list. Gray and small: they are there so a list can be
+     dictated ("number seven") and marked without counting down the page, and
+     they must not compete with the word itself. */
+  .wn { color: var(--muted); font-size: 9pt; }
+
+  /* The box an answer goes in. inline-block so it can sit mid-sentence. */
+  .abox {
+    display: inline-block; border: 1.6px solid var(--slate); border-radius: 3px;
+    vertical-align: middle; margin: 0 3px; position: relative; background: #fff;
+  }
+  /* Scoped to the box: as a bare ".alab" it pinned any generator's own .alab
+     to the bottom of the page (life-07-signs-and-forms 40, 2026-09-24). */
+  .abox > .alab {
+    position: absolute; bottom: 1px; left: 0; right: 0;
+    text-align: center; font-size: 7pt; color: var(--muted); font-style: italic;
+  }
+
+  /* Confidence marks. The rings are drawn with a border and a gradient rather
+     than an SVG so they stay inline with the question text at any font size,
+     and print black on a mono laser without relying on a background image. */
+  .conf { float: right; margin: 2px 0 0 8px; white-space: nowrap; }
+  .cring {
+    display: inline-block; width: 11px; height: 11px; margin-left: 4px;
+    border: 1.4px solid var(--slate); border-radius: 50%; vertical-align: middle;
+  }
+  .cring-full { background: var(--accent); }
+  .cring-half { background: linear-gradient(90deg, var(--accent) 50%, #fff 50%); }
+  .cring-none { background: #fff; }
+  ol.qs.hasconf li { overflow: hidden; }
+
+  .conflegend {
+    border: 1.2px solid var(--rule); border-radius: 4px;
+    padding: 3px 8px; margin: 0 0 7px;
+    font-size: 8.5pt; color: var(--muted); display: flex; gap: 14px; align-items: center;
+  }
+  .conftitle { font-weight: 700; color: var(--ink); }
+  .confitem { white-space: nowrap; }
+
+  .work {
+    border: 1.4px dashed var(--rule); border-radius: 4px;
+    margin: 6px 0 2px; position: relative;
+  }
+  /* The label S.work() puts in the box: a DIRECT child only. As ".work span"
+     it also caught every span inside any generator's own .work content and
+     stacked them all at the top-left corner (math-11-grade6 47, 2026-09-23). */
+  .work > span {
+    position: absolute; top: 3px; left: 6px;
+    font-size: 8pt; color: var(--muted); font-style: italic;
+  }
+
+  /* ------------------------------------------------------ writing lines */
+  /* Primary rule: solid top, dashed midline, heavy baseline. Capitals reach
+     the top line, lowercase bodies sit under the dashed one. */
+  .write {
+    position: relative; height: 0.375in;
+    margin: 6px 0 0 .3in;
+    border-top: 1px solid var(--rule); border-bottom: 2px solid var(--ink);
+  }
+  .write.flush { margin-left: 0; }
+  .write + .write { margin-top: .17in; }
+  .write::after {
+    content: ""; position: absolute; left: 0; right: 0; top: 50%;
+    border-top: 1px dashed var(--guide);
+  }
+
+  /* ------------------------------------------------------- question list */
+  ol.qs { margin: 0; padding: 0 0 0 .34in; }
+  ol.qs li { margin-bottom: 13px; page-break-inside: avoid; }
+  ol.qs li::marker { font-weight: bold; font-size: 11pt; color: var(--accent); }
+  .qt { display: block; }
+
+  .mcq { display: grid; gap: 3px 14px; margin: 5px 0 2px .12in; font-size: 11pt; }
+  .opt { white-space: nowrap; }
+
+  /* -------------------------------------------------------------- tables */
+  .tbl { border-collapse: collapse; margin: 8px 0; font-size: 11pt; width: 100%; }
+  .tbl th, .tbl td { border: 1.4px solid var(--ink); padding: 5px 8px; text-align: left; }
+  .tbl th { color: var(--slate); }
+  .tbl th { background: var(--tint); font-size: 10pt; letter-spacing: .02em; }
+  .tbl td.blank { height: .34in; }
+  .tbl.narrow { width: auto; }
+  .tbl.center td, .tbl.center th { text-align: center; }
+
+  /* ------------------------------------------------------------ passages */
+  .passage {
+    border: 1.5px solid var(--slate); border-radius: 4px;
+    padding: 11px 14px; margin-bottom: 12px;
+    font-size: 11.5pt; line-height: 1.55;
+  }
+  .passage h2 { font-size: 13pt; margin: 0 0 6px; color: var(--deep); }
+  .passage p { margin: 0 0 8px; }
+  .passage p:last-child { margin-bottom: 0; }
+  .passage .byline { font-size: 9.5pt; font-style: italic; color: var(--muted); margin-bottom: 8px; }
+  /* Numbered paragraphs, so a question can say "in paragraph 2". */
+  .passage p.np { position: relative; padding-left: .3in; }
+  .passage p.np::before {
+    content: attr(data-p); position: absolute; left: 0; top: 0;
+    font-size: 9pt; color: var(--accent); font-weight: bold;
+  }
+
+  .wordbank {
+    border: 1.5px dashed var(--slate); border-radius: 4px;
+    padding: 8px 12px; margin: 10px 0 12px;
+    font-size: 11.5pt; text-align: center;
+  }
+  .wordbank b { display: block; font-size: 9.5pt; letter-spacing: .06em;
+    text-transform: uppercase; margin-bottom: 4px; color: var(--accent); }
+  .wordbank span { display: inline-block; margin: 2px 11px; }
+
+  .note {
+    border-left: 4px solid var(--deep); background: var(--tintdeep);
+    padding: 7px 11px; margin: 10px 0; font-size: 10.5pt;
+  }
+  .note b { letter-spacing: .02em; }
+
+  /* -------------------------------------------------------------- footer */
+  /* THE WORDMARK SITS IN THE FOOTER THAT WAS ALREADY THERE, so it costs no
+     height at all — a sheet that fitted before fits now. Upright where the rest
+     of the line is italic, and a size down: it is a signature, not a message,
+     and it must never compete with "Score: ___ / 10". */
+  .brand { font-style: normal; font-size: 7.5pt; letter-spacing: .04em;
+    color: var(--accent); align-self: center; }
+
+  footer {
+    margin-top: 14px; padding-top: 6px; border-top: 1px solid var(--rule);
+    font-size: 9pt; font-style: italic; color: var(--muted);
+    display: flex; justify-content: space-between;
+  }
+
+  /* ---------------------------------------------------------- answer key */
+  .keybadge {
+    display: inline-block; border: 2px solid var(--deep); color: var(--deep); padding: 2px 9px;
+    font-size: 9.5pt; font-weight: bold; letter-spacing: .08em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .key .why {
+    display: block; font-size: 9pt; font-style: italic; color: var(--muted); margin-top: 1px;
+  }
+  /* Highlight rather than underline: <u> in a key marks WHAT CHANGED, and an
+     underline under a comma is invisible. */
+  .key u { text-decoration: none; background: var(--tint); padding: 0 2px; font-weight: bold; }
+  .keygrid .pbody { font-family: "Trebuchet MS", "Segoe UI", Tahoma, Verdana, sans-serif; font-size: 12pt; }
+  /* A key's pictures scale to their column: at 1fr a wide drawing pushed a
+     three-column key 92px off the paper (art-04-drawing 10, 2026-09-24). */
+  .keygrid svg { max-width: 100%; height: auto; }
+  .keylist .qt { font-weight: normal; }
+
+  /*
+   * The guide page. Four lines per question, and the ASK line is the one that
+   * gets used at the table, so it is the one with a rule beside it — a parent
+   * scanning this page in ten seconds should land on the follow-up question
+   * and nothing else.
+   */
+  .guide { padding-left: .3in; }
+  .guide li { margin-bottom: 11px; page-break-inside: avoid; }
+  .guide .gq { font-weight: bold; font-size: 11pt; margin-bottom: 3px; }
+  /* 9pt, matching the key's own why line, because the guide page is the
+     binding constraint on every open sheet: four lines per question against a
+     key's one, and at 10pt a sheet with seven questions ran onto a second
+     side. Found by measuring, not chosen. (No backticks in here — this CSS
+     lives inside a template literal and one would close it.) */
+  .guide .glook, .guide .gthin, .guide .gstrong {
+    font-size: 9pt; line-height: 1.3; margin-top: 1px;
+  }
+  .guide .gthin { color: var(--muted); }
+  .guide .gstrong { color: var(--muted); font-style: italic; }
+  .guide .gask {
+    font-size: 9.5pt; line-height: 1.3; margin-top: 3px;
+    border-left: 3px solid var(--slate); padding-left: 7px;
+  }
+  .key .qs li { margin-bottom: 9px; }
+
+  /*
+   * INLINE-BLOCK, NOT BLOCK, AND THIS WAS WRONG FOR A LONG TIME. A block-level
+   * svg ignores text-align: center on its parent and sits flush left — so 117
+   * sheets across 35 packs said "centre this diagram" and got a left-aligned
+   * one. Twenty-five of them were origami and paper-plane fold sequences, where
+   * the whole page is diagrams.
+   *
+   * Nobody spotted it because a left-flush diagram looks deliberate; it only
+   * reads as wrong next to a centered one, and no sheet has both.
+   *
+   * inline-block makes text-align do what every one of those authors meant,
+   * and leaves a diagram in a left-aligned container exactly where it was.
+   * vertical-align: top kills the baseline gap that inline elements otherwise
+   * leave underneath them, which would have pushed long pages over.
+   */
+  svg { display: inline-block; vertical-align: top; }
+  svg.inline { vertical-align: middle; }
+
+  .page.g1 .tbl td { font-size: 12pt; padding-top: 7px; padding-bottom: 7px; line-height: 1.38; }
+  .page.g1 .tbl th { font-size: 10.5pt; padding-top: 6px; padding-bottom: 6px; }
+  .page.g1 .tbl td.blank { height: 0.45999999999999996in; }
+  .page.g1 .write + .write { margin-top: 0.25in; }
+  .page.g1 ol.qs li { margin-bottom: 19px; }
+  .page.g1 ol.qs .qt { font-size: 12pt; }
+  .page.g2 .tbl td { font-size: 12.5pt; padding-top: 12px; padding-bottom: 12px; line-height: 1.38; }
+  .page.g2 .tbl th { font-size: 10.5pt; padding-top: 6px; padding-bottom: 6px; }
+  .page.g2 .tbl td.blank { height: 0.62in; }
+  .page.g2 .write + .write { margin-top: 0.33in; }
+  .page.g2 ol.qs li { margin-bottom: 25px; }
+  .page.g2 ol.qs .qt { font-size: 12.5pt; }
+  .page.g3 .tbl td { font-size: 13pt; padding-top: 17px; padding-bottom: 17px; line-height: 1.38; }
+  .page.g3 .tbl th { font-size: 10.5pt; padding-top: 6px; padding-bottom: 6px; }
+  .page.g3 .tbl td.blank { height: 0.78in; }
+  .page.g3 .write + .write { margin-top: 0.41in; }
+  .page.g3 ol.qs li { margin-bottom: 31px; }
+  .page.g3 ol.qs .qt { font-size: 13pt; }
+  .page.g4 .tbl td { font-size: 13.5pt; padding-top: 22px; padding-bottom: 22px; line-height: 1.38; }
+  .page.g4 .tbl th { font-size: 10.5pt; padding-top: 6px; padding-bottom: 6px; }
+  .page.g4 .tbl td.blank { height: 0.94in; }
+  .page.g4 .write + .write { margin-top: 0.45in; }
+  .page.g4 ol.qs li { margin-bottom: 37px; }
+  .page.g4 ol.qs .qt { font-size: 13.5pt; }
+  .page.g5 .tbl td { font-size: 14pt; padding-top: 27px; padding-bottom: 27px; line-height: 1.38; }
+  .page.g5 .tbl th { font-size: 10.5pt; padding-top: 6px; padding-bottom: 6px; }
+  .page.g5 .tbl td.blank { height: 1.1in; }
+  .page.g5 .write + .write { margin-top: 0.45in; }
+  .page.g5 ol.qs li { margin-bottom: 43px; }
+  .page.g5 ol.qs .qt { font-size: 14pt; }
+  .page.g6 .tbl td { font-size: 14.5pt; padding-top: 32px; padding-bottom: 32px; line-height: 1.38; }
+  .page.g6 .tbl th { font-size: 10.5pt; padding-top: 6px; padding-bottom: 6px; }
+  .page.g6 .tbl td.blank { height: 1.26in; }
+  .page.g6 .write + .write { margin-top: 0.45in; }
+  .page.g6 ol.qs li { margin-bottom: 49px; }
+  .page.g6 ol.qs .qt { font-size: 14.5pt; }
+  .rules { font-size: 10pt; background: #FAF7F2; border: 1px solid var(--rule);
+           padding: 6px 9px; margin: 0 0 9px; }
+
+  .find { font-size: 10.5pt; line-height: 1.38; background: #FFFDF7;
+          border-left: 4px solid var(--accent); border-top: 1px solid var(--rule);
+          border-right: 1px solid var(--rule); border-bottom: 1px solid var(--rule);
+          padding: 8px 11px; margin: 10px 0; }
+
+  .two { display: grid; grid-template-columns: 1fr 1.1fr; gap: 16px; margin: 10px 0; align-items: start; }
+  .fig { text-align: center; }
+  .fig svg { display: block; margin: 0 auto; max-width: 100%; height: auto; }
+  .fig.wide svg { max-width: 4.2in; }
+  /* fill pass: the bottle big enough to see the dimples, the steps beside it */
+  .two.bottle { grid-template-columns: 1fr 1fr; }
+  .two.bottle .fig svg { width: auto; height: 5.4in; }
+  .two.bottle .btext { font-size: 12pt; line-height: 1.4; }
+  .btext { font-size: 10pt; line-height: 1.36; }
+
+  /* True size — the whole point of a scale is that its marks are where they
+     say they are, so nothing here gets a percentage width. */
+  .strips { display: flex; justify-content: center; gap: 22px; margin: 12px 0; align-items: flex-start; }
+  .scell svg { display: block; }
+
+  table.mag td, table.mag th { font-size: 10pt; padding: 4px 5px; text-align: center; }
+  table.mag td:first-child, table.mag th:first-child { text-align: left; }
+
+  table.log td:first-child { width: 1.1in; }
+  table.log td:nth-child(2) { width: 1.6in; }
+  table.log td { height: 0.32in; }
+
+</style>
+</head>
+<body>
+
+<div class="page g1">
+  <header>
+    
+    <h1>The Rain Gauge</h1>
+    <p class="sub">Making &middot; Projects &middot; Page 1 of 6</p>
+  </header>
+  <div class="nameline">
+    <span>Name</span>
+    <span class="short">Date</span>
+  </div>
+  <div class="directions">
+    <b>DIRECTIONS:</b> Answer question 1 in pen before you read the box.
+  </div>
+
+
+  <div class="rules"><b>Scissors only, with a grown-up in the room.</b> If a step seems to want a knife, snip or fold instead.</div>
+
+  <div class="note"><b>What you need:</b> a plastic bottle &middot; a jar &middot; scissors &middot; tape &middot; a ruler &middot; card &middot; small stones &middot; a pencil.</div>
+
+  <ol class="qs" start="1"><li><span class="qt">A washing-up bowl and an egg cup are both left out in the same shower of rain. Which one ends up with deeper water in it?</span><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+  <div class="find"><b>Neither: the same.</b> The bowl catches more, but spreads it over more floor, and the two cancel. <b>So rain is measured as a depth, not an amount</b>: half an inch in a thimble or a pool.</div>
+
+  <div class="fig wide"><svg viewBox="0 0 340 190" width="100%"
+  role="img" aria-label="a wide container and a narrow one after the same shower, with the water at exactly the same depth in both">
+  <path d="M18,44 L150,44 L150,168 L18,168 z" fill="#FFFFFF" stroke="#3A3A3A" stroke-width="2.2"/>
+  <path d="M20,120 L148,120 L148,166 L20,166 z" fill="#DFE6E8" stroke="none"/>
+  <path d="M232,44 L288,44 L288,168 L232,168 z" fill="#FFFFFF" stroke="#3A3A3A" stroke-width="2.2"/>
+  <path d="M234,120 L286,120 L286,166 L234,166 z" fill="#DFE6E8" stroke="none"/>
+  <path d="M10,120 L330,120" fill="none" stroke="#C0511D" stroke-width="1.8" stroke-dasharray="7 5"/>
+  <path d="M162,120 L162,168" fill="none" stroke="#C0511D" stroke-width="1.6"/>
+  <path d="M157,120 L167,120 M157,168 L167,168" fill="none" stroke="#C0511D" stroke-width="1.6"/>
+  <text x="184" y="148" font-size="12.5" fill="#C0511D" text-anchor="middle">same</text>
+  <text x="184" y="164" font-size="12.5" fill="#C0511D" text-anchor="middle">depth</text>
+  <text x="84" y="34" font-size="12" fill="#6A6A6A" text-anchor="middle">wide</text>
+  <text x="260" y="34" font-size="12" fill="#6A6A6A" text-anchor="middle">narrow</text>
+  <text x="84" y="186" font-size="11" fill="#8A8A8A" text-anchor="middle">lots of water</text>
+  <text x="260" y="186" font-size="11" fill="#8A8A8A" text-anchor="middle">much less water</text>
+</svg></div>
+
+  <div class="note"><b>Test it.</b> Put two <b>straight-sided</b> containers of very different widths out
+  in the next shower, away from the house. Measure the depth in each.</div>
+
+  <footer>
+    <span>Why your bottle lies &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>The rain gauge</span>
+  </footer>
+</div>
+
+<div class="page g6">
+  <header class="cont">
+    
+    <h1>Why a Bottle Lies</h1>
+    <p class="sub">Making &middot; Projects &middot; Page 2 of 6</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Cut the top off the bottle and turn it upside down into the base. Then read this.
+  </div>
+
+
+  <div class="find"><b>A bottle does not have straight sides.</b> Its dimpled bottom and curved shoulder make a ruler read wrong at both ends.</div>
+
+  <div class="two bottle">
+    <div class="fig"><svg viewBox="0 0 340 250" width="100%"
+  role="img" aria-label="a drinks bottle cut through, showing the dimpled bottom and curved shoulder where the scale would lie, and the straight middle where it does not">
+  <path d="M120,16 L180,16 L180,34 C180,58 214,66 214,104 L214,214
+           C214,232 196,238 150,238 C104,238 86,232 86,214 L86,104
+           C86,66 120,58 120,34 z"
+        fill="#FAF7F2" stroke="#3A3A3A" stroke-width="2.2" stroke-linejoin="round"/>
+  <path d="M88,214 C96,196 120,206 150,206 C180,206 204,196 212,214"
+        fill="#FFFFFF" stroke="#3A3A3A" stroke-width="2"/>
+  <path d="M88,146 L212,146" fill="none" stroke="#C0511D" stroke-width="2" stroke-dasharray="6 4"/>
+  <path d="M234,104 L234,146" fill="none" stroke="#8A8A8A" stroke-width="1.5"/>
+  <path d="M229,104 L239,104 M229,146 L239,146" fill="none" stroke="#8A8A8A" stroke-width="1.5"/>
+  <path d="M234,146 L234,206" fill="none" stroke="#8A8A8A" stroke-width="1.5"/>
+  <path d="M229,206 L239,206" fill="none" stroke="#8A8A8A" stroke-width="1.5"/>
+  <text x="246" y="128" font-size="11.5" fill="#8A8A8A" text-anchor="start">shoulder</text>
+  <text x="246" y="144" font-size="11.5" fill="#8A8A8A" text-anchor="start">curves in</text>
+  
+  <text x="246" y="176" font-size="11.5" fill="#C0511D" text-anchor="start">the straight</text>
+  <text x="246" y="192" font-size="11.5" fill="#C0511D" text-anchor="start">middle &mdash;</text>
+  <text x="246" y="208" font-size="11.5" fill="#C0511D" text-anchor="start">use only this</text>
+  <text x="150" y="230" font-size="11" fill="#8A8A8A" text-anchor="middle">dimples</text>
+  <text x="76" y="150" font-size="11.5" fill="#C0511D" text-anchor="end">zero</text>
+  <text x="76" y="164" font-size="11.5" fill="#C0511D" text-anchor="end">here</text>
+</svg></div>
+    <div class="btext"><b>The fix is to move the nought.</b><br><br>
+    <b>1.</b> Cut the bottle across the shoulder. Turn the top upside down and drop it into the base
+    &mdash; that is your funnel, and it is waterproof, which a card one would not be.<br><br>
+    <b>2.</b> Drop a few small stones in the bottom so the wind cannot take it.<br><br>
+    <b>3.</b> Pour water in until it is <b>above the dimples and into the straight part</b>, and the
+    stones are covered.<br><br>
+    <b>4.</b> Mark that line. <b>That is nought</b>, not the bottom of the bottle.<br><br>
+    <b>5.</b> Every reading from now on is measured up from that mark, and you empty back down to it
+    rather than emptying it out.</div>
+  </div>
+
+  <div class="note"><b>The page 3 strips tape on the outside</b>, zero on your mark, on anything with a
+  straight middle.</div>
+
+  <footer>
+    <span>The scales are on page 3 &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Why a bottle lies</span>
+  </footer>
+</div>
+
+<div class="page g6">
+  <header class="cont">
+    
+    <h1>Four Scales</h1>
+    <p class="sub">Making &middot; Projects &middot; Page 3 of 6</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Cut out ONE (page 4 says which). Tape it on with the 0 line on your mark.
+  </div>
+
+
+  <div class="note"><b>Funnel and collector the same width? Use &times;1</b> (real inches). A wider funnel
+  makes the water climb faster: page 4 works out which strip.</div>
+
+  <div class="strips">
+    <div class="scell"><svg viewBox="-3 -3 126 560"
+    width="120" height="554"
+    role="img" aria-label="a rainfall scale for a gauge that magnifies 1 times, marked in inches of rain">
+    <rect x="0" y="0" width="120" height="553.5999999999999" rx="3" fill="white" stroke="#C0511D" stroke-width="2" stroke-linejoin="round"/>
+    <path d="M0,535.60 L24,535.60" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <path d="M0,526.00 L7,526.00" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,516.40 L7,516.40" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,506.80 L7,506.80" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,497.20 L7,497.20" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,487.60 L24,487.60" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="491.60" font-size="10.5" fill="#3A3A3A" text-anchor="start">0.5</text>
+    <path d="M0,478.00 L7,478.00" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,468.40 L7,468.40" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,458.80 L7,458.80" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,449.20 L7,449.20" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,439.60 L24,439.60" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="443.60" font-size="10.5" fill="#3A3A3A" text-anchor="start">1.0</text>
+    <path d="M0,430.00 L7,430.00" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,420.40 L7,420.40" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,410.80 L7,410.80" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,401.20 L7,401.20" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,391.60 L24,391.60" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="395.60" font-size="10.5" fill="#3A3A3A" text-anchor="start">1.5</text>
+    <path d="M0,382.00 L7,382.00" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,372.40 L7,372.40" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,362.80 L7,362.80" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,353.20 L7,353.20" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,343.60 L24,343.60" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="347.60" font-size="10.5" fill="#3A3A3A" text-anchor="start">2.0</text>
+    <path d="M0,334.00 L7,334.00" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,324.40 L7,324.40" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,314.80 L7,314.80" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,305.20 L7,305.20" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,295.60 L24,295.60" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="299.60" font-size="10.5" fill="#3A3A3A" text-anchor="start">2.5</text>
+    <path d="M0,286.00 L7,286.00" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,276.40 L7,276.40" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,266.80 L7,266.80" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,257.20 L7,257.20" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,247.60 L24,247.60" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="251.60" font-size="10.5" fill="#3A3A3A" text-anchor="start">3.0</text>
+    <path d="M0,238.00 L7,238.00" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,228.40 L7,228.40" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,218.80 L7,218.80" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,209.20 L7,209.20" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,199.60 L24,199.60" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="203.60" font-size="10.5" fill="#3A3A3A" text-anchor="start">3.5</text>
+    <path d="M0,190.00 L7,190.00" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,180.40 L7,180.40" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,170.80 L7,170.80" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,161.20 L7,161.20" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,151.60 L24,151.60" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="155.60" font-size="10.5" fill="#3A3A3A" text-anchor="start">4.0</text>
+    <path d="M0,142.00 L7,142.00" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,132.40 L7,132.40" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,122.80 L7,122.80" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,113.20 L7,113.20" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,103.60 L24,103.60" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="107.60" font-size="10.5" fill="#3A3A3A" text-anchor="start">4.5</text>
+    <path d="M0,94.00 L7,94.00" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,84.40 L7,84.40" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,74.80 L7,74.80" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,65.20 L7,65.20" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,55.60 L24,55.60" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="59.60" font-size="10.5" fill="#3A3A3A" text-anchor="start">5.0</text>
+    <path d="M0,46.00 L7,46.00" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,535.5999999999999 L120,535.5999999999999" fill="none" stroke="#C0511D" stroke-width="2"/>
+    <text x="60" y="551.5999999999999" font-size="11" fill="#C0511D" text-anchor="middle">0</text>
+    <text x="60" y="22" font-size="14" fill="#C0511D" text-anchor="middle" font-weight="bold">&times;1</text>
+    <text x="60" y="35" font-size="8.5" fill="#8A8A8A" text-anchor="middle">inches of rain</text>
+  </svg></div>
+    <div class="scell"><svg viewBox="-3 -3 126 560"
+    width="120" height="554"
+    role="img" aria-label="a rainfall scale for a gauge that magnifies 2 times, marked in inches of rain">
+    <rect x="0" y="0" width="120" height="553.5999999999999" rx="3" fill="white" stroke="#C0511D" stroke-width="2" stroke-linejoin="round"/>
+    <path d="M0,535.60 L24,535.60" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <path d="M0,527.92 L7,527.92" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,520.24 L7,520.24" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,512.56 L7,512.56" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,504.88 L7,504.88" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,497.20 L24,497.20" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="501.20" font-size="10.5" fill="#3A3A3A" text-anchor="start">0.2</text>
+    <path d="M0,489.52 L7,489.52" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,481.84 L7,481.84" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,474.16 L7,474.16" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,466.48 L7,466.48" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,458.80 L24,458.80" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="462.80" font-size="10.5" fill="#3A3A3A" text-anchor="start">0.4</text>
+    <path d="M0,451.12 L7,451.12" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,443.44 L7,443.44" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,435.76 L7,435.76" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,428.08 L7,428.08" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,420.40 L24,420.40" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="424.40" font-size="10.5" fill="#3A3A3A" text-anchor="start">0.6</text>
+    <path d="M0,412.72 L7,412.72" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,405.04 L7,405.04" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,397.36 L7,397.36" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,389.68 L7,389.68" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,382.00 L24,382.00" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="386.00" font-size="10.5" fill="#3A3A3A" text-anchor="start">0.8</text>
+    <path d="M0,374.32 L7,374.32" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,366.64 L7,366.64" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,358.96 L7,358.96" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,351.28 L7,351.28" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,343.60 L24,343.60" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="347.60" font-size="10.5" fill="#3A3A3A" text-anchor="start">1.0</text>
+    <path d="M0,335.92 L7,335.92" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,328.24 L7,328.24" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,320.56 L7,320.56" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,312.88 L7,312.88" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,305.20 L24,305.20" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="309.20" font-size="10.5" fill="#3A3A3A" text-anchor="start">1.2</text>
+    <path d="M0,297.52 L7,297.52" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,289.84 L7,289.84" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,282.16 L7,282.16" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,274.48 L7,274.48" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,266.80 L24,266.80" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="270.80" font-size="10.5" fill="#3A3A3A" text-anchor="start">1.4</text>
+    <path d="M0,259.12 L7,259.12" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,251.44 L7,251.44" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,243.76 L7,243.76" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,236.08 L7,236.08" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,228.40 L24,228.40" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="232.40" font-size="10.5" fill="#3A3A3A" text-anchor="start">1.6</text>
+    <path d="M0,220.72 L7,220.72" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,213.04 L7,213.04" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,205.36 L7,205.36" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,197.68 L7,197.68" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,190.00 L24,190.00" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="194.00" font-size="10.5" fill="#3A3A3A" text-anchor="start">1.8</text>
+    <path d="M0,182.32 L7,182.32" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,174.64 L7,174.64" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,166.96 L7,166.96" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,159.28 L7,159.28" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,151.60 L24,151.60" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="155.60" font-size="10.5" fill="#3A3A3A" text-anchor="start">2.0</text>
+    <path d="M0,143.92 L7,143.92" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,136.24 L7,136.24" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,128.56 L7,128.56" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,120.88 L7,120.88" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,113.20 L24,113.20" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="117.20" font-size="10.5" fill="#3A3A3A" text-anchor="start">2.2</text>
+    <path d="M0,105.52 L7,105.52" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,97.84 L7,97.84" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,90.16 L7,90.16" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,82.48 L7,82.48" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,74.80 L24,74.80" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="78.80" font-size="10.5" fill="#3A3A3A" text-anchor="start">2.4</text>
+    <path d="M0,67.12 L7,67.12" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,59.44 L7,59.44" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,51.76 L7,51.76" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,44.08 L7,44.08" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,535.5999999999999 L120,535.5999999999999" fill="none" stroke="#C0511D" stroke-width="2"/>
+    <text x="60" y="551.5999999999999" font-size="11" fill="#C0511D" text-anchor="middle">0</text>
+    <text x="60" y="22" font-size="14" fill="#C0511D" text-anchor="middle" font-weight="bold">&times;2</text>
+    <text x="60" y="35" font-size="8.5" fill="#8A8A8A" text-anchor="middle">inches of rain</text>
+  </svg></div>
+    <div class="scell"><svg viewBox="-3 -3 126 560"
+    width="120" height="554"
+    role="img" aria-label="a rainfall scale for a gauge that magnifies 3 times, marked in inches of rain">
+    <rect x="0" y="0" width="120" height="553.5999999999999" rx="3" fill="white" stroke="#C0511D" stroke-width="2" stroke-linejoin="round"/>
+    <path d="M0,535.60 L24,535.60" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <path d="M0,529.84 L7,529.84" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,524.08 L7,524.08" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,518.32 L7,518.32" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,512.56 L7,512.56" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,506.80 L24,506.80" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="510.80" font-size="10.5" fill="#3A3A3A" text-anchor="start">0.1</text>
+    <path d="M0,501.04 L7,501.04" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,495.28 L7,495.28" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,489.52 L7,489.52" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,483.76 L7,483.76" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,478.00 L24,478.00" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="482.00" font-size="10.5" fill="#3A3A3A" text-anchor="start">0.2</text>
+    <path d="M0,472.24 L7,472.24" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,466.48 L7,466.48" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,460.72 L7,460.72" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,454.96 L7,454.96" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,449.20 L24,449.20" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="453.20" font-size="10.5" fill="#3A3A3A" text-anchor="start">0.3</text>
+    <path d="M0,443.44 L7,443.44" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,437.68 L7,437.68" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,431.92 L7,431.92" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,426.16 L7,426.16" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,420.40 L24,420.40" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="424.40" font-size="10.5" fill="#3A3A3A" text-anchor="start">0.4</text>
+    <path d="M0,414.64 L7,414.64" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,408.88 L7,408.88" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,403.12 L7,403.12" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,397.36 L7,397.36" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,391.60 L24,391.60" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="395.60" font-size="10.5" fill="#3A3A3A" text-anchor="start">0.5</text>
+    <path d="M0,385.84 L7,385.84" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,380.08 L7,380.08" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,374.32 L7,374.32" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,368.56 L7,368.56" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,362.80 L24,362.80" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="366.80" font-size="10.5" fill="#3A3A3A" text-anchor="start">0.6</text>
+    <path d="M0,357.04 L7,357.04" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,351.28 L7,351.28" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,345.52 L7,345.52" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,339.76 L7,339.76" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,334.00 L24,334.00" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="338.00" font-size="10.5" fill="#3A3A3A" text-anchor="start">0.7</text>
+    <path d="M0,328.24 L7,328.24" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,322.48 L7,322.48" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,316.72 L7,316.72" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,310.96 L7,310.96" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,305.20 L24,305.20" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="309.20" font-size="10.5" fill="#3A3A3A" text-anchor="start">0.8</text>
+    <path d="M0,299.44 L7,299.44" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,293.68 L7,293.68" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,287.92 L7,287.92" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,282.16 L7,282.16" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,276.40 L24,276.40" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="280.40" font-size="10.5" fill="#3A3A3A" text-anchor="start">0.9</text>
+    <path d="M0,270.64 L7,270.64" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,264.88 L7,264.88" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,259.12 L7,259.12" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,253.36 L7,253.36" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,247.60 L24,247.60" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="251.60" font-size="10.5" fill="#3A3A3A" text-anchor="start">1.0</text>
+    <path d="M0,241.84 L7,241.84" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,236.08 L7,236.08" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,230.32 L7,230.32" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,224.56 L7,224.56" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,218.80 L24,218.80" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="222.80" font-size="10.5" fill="#3A3A3A" text-anchor="start">1.1</text>
+    <path d="M0,213.04 L7,213.04" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,207.28 L7,207.28" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,201.52 L7,201.52" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,195.76 L7,195.76" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,190.00 L24,190.00" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="194.00" font-size="10.5" fill="#3A3A3A" text-anchor="start">1.2</text>
+    <path d="M0,184.24 L7,184.24" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,178.48 L7,178.48" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,172.72 L7,172.72" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,166.96 L7,166.96" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,161.20 L24,161.20" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="165.20" font-size="10.5" fill="#3A3A3A" text-anchor="start">1.3</text>
+    <path d="M0,155.44 L7,155.44" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,149.68 L7,149.68" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,143.92 L7,143.92" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,138.16 L7,138.16" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,132.40 L24,132.40" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="136.40" font-size="10.5" fill="#3A3A3A" text-anchor="start">1.4</text>
+    <path d="M0,126.64 L7,126.64" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,120.88 L7,120.88" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,115.12 L7,115.12" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,109.36 L7,109.36" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,103.60 L24,103.60" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="107.60" font-size="10.5" fill="#3A3A3A" text-anchor="start">1.5</text>
+    <path d="M0,97.84 L7,97.84" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,92.08 L7,92.08" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,86.32 L7,86.32" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,80.56 L7,80.56" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,74.80 L24,74.80" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="78.80" font-size="10.5" fill="#3A3A3A" text-anchor="start">1.6</text>
+    <path d="M0,69.04 L7,69.04" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,63.28 L7,63.28" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,57.52 L7,57.52" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,51.76 L7,51.76" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,46.00 L24,46.00" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="50.00" font-size="10.5" fill="#3A3A3A" text-anchor="start">1.7</text>
+    <path d="M0,535.5999999999999 L120,535.5999999999999" fill="none" stroke="#C0511D" stroke-width="2"/>
+    <text x="60" y="551.5999999999999" font-size="11" fill="#C0511D" text-anchor="middle">0</text>
+    <text x="60" y="22" font-size="14" fill="#C0511D" text-anchor="middle" font-weight="bold">&times;3</text>
+    <text x="60" y="35" font-size="8.5" fill="#8A8A8A" text-anchor="middle">inches of rain</text>
+  </svg></div>
+    <div class="scell"><svg viewBox="-3 -3 126 560"
+    width="120" height="554"
+    role="img" aria-label="a rainfall scale for a gauge that magnifies 4 times, marked in inches of rain">
+    <rect x="0" y="0" width="120" height="553.5999999999999" rx="3" fill="white" stroke="#C0511D" stroke-width="2" stroke-linejoin="round"/>
+    <path d="M0,535.60 L24,535.60" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <path d="M0,527.92 L7,527.92" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,520.24 L7,520.24" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,512.56 L7,512.56" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,504.88 L7,504.88" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,497.20 L24,497.20" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="501.20" font-size="10.5" fill="#3A3A3A" text-anchor="start">0.1</text>
+    <path d="M0,489.52 L7,489.52" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,481.84 L7,481.84" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,474.16 L7,474.16" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,466.48 L7,466.48" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,458.80 L24,458.80" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="462.80" font-size="10.5" fill="#3A3A3A" text-anchor="start">0.2</text>
+    <path d="M0,451.12 L7,451.12" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,443.44 L7,443.44" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,435.76 L7,435.76" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,428.08 L7,428.08" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,420.40 L24,420.40" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="424.40" font-size="10.5" fill="#3A3A3A" text-anchor="start">0.3</text>
+    <path d="M0,412.72 L7,412.72" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,405.04 L7,405.04" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,397.36 L7,397.36" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,389.68 L7,389.68" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,382.00 L24,382.00" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="386.00" font-size="10.5" fill="#3A3A3A" text-anchor="start">0.4</text>
+    <path d="M0,374.32 L7,374.32" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,366.64 L7,366.64" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,358.96 L7,358.96" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,351.28 L7,351.28" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,343.60 L24,343.60" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="347.60" font-size="10.5" fill="#3A3A3A" text-anchor="start">0.5</text>
+    <path d="M0,335.92 L7,335.92" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,328.24 L7,328.24" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,320.56 L7,320.56" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,312.88 L7,312.88" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,305.20 L24,305.20" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="309.20" font-size="10.5" fill="#3A3A3A" text-anchor="start">0.6</text>
+    <path d="M0,297.52 L7,297.52" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,289.84 L7,289.84" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,282.16 L7,282.16" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,274.48 L7,274.48" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,266.80 L24,266.80" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="270.80" font-size="10.5" fill="#3A3A3A" text-anchor="start">0.7</text>
+    <path d="M0,259.12 L7,259.12" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,251.44 L7,251.44" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,243.76 L7,243.76" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,236.08 L7,236.08" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,228.40 L24,228.40" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="232.40" font-size="10.5" fill="#3A3A3A" text-anchor="start">0.8</text>
+    <path d="M0,220.72 L7,220.72" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,213.04 L7,213.04" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,205.36 L7,205.36" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,197.68 L7,197.68" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,190.00 L24,190.00" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="194.00" font-size="10.5" fill="#3A3A3A" text-anchor="start">0.9</text>
+    <path d="M0,182.32 L7,182.32" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,174.64 L7,174.64" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,166.96 L7,166.96" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,159.28 L7,159.28" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,151.60 L24,151.60" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="155.60" font-size="10.5" fill="#3A3A3A" text-anchor="start">1.0</text>
+    <path d="M0,143.92 L7,143.92" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,136.24 L7,136.24" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,128.56 L7,128.56" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,120.88 L7,120.88" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,113.20 L24,113.20" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="117.20" font-size="10.5" fill="#3A3A3A" text-anchor="start">1.1</text>
+    <path d="M0,105.52 L7,105.52" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,97.84 L7,97.84" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,90.16 L7,90.16" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,82.48 L7,82.48" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,74.80 L24,74.80" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="78.80" font-size="10.5" fill="#3A3A3A" text-anchor="start">1.2</text>
+    <path d="M0,67.12 L7,67.12" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,59.44 L7,59.44" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,51.76 L7,51.76" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,44.08 L7,44.08" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,535.5999999999999 L120,535.5999999999999" fill="none" stroke="#C0511D" stroke-width="2"/>
+    <text x="60" y="551.5999999999999" font-size="11" fill="#C0511D" text-anchor="middle">0</text>
+    <text x="60" y="22" font-size="14" fill="#C0511D" text-anchor="middle" font-weight="bold">&times;4</text>
+    <text x="60" y="35" font-size="8.5" fill="#8A8A8A" text-anchor="middle">inches of rain</text>
+  </svg></div>
+  </div>
+
+
+
+  <footer>
+    <span>Which one is yours? &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Four scales</span>
+  </footer>
+</div>
+
+<div class="page g1">
+  <header class="cont">
+    
+    <h1>Making It Read Bigger</h1>
+    <p class="sub">Making &middot; Projects &middot; Page 4 of 6</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Measure across the widest part of the funnel&rsquo;s mouth, through the center, then the collector.
+  </div>
+
+
+  <div class="find"><b>Catch it wide, collect it narrow, and the reading grows</b>, which makes small rain easy to read. <b>It grows by the SQUARE of the widths:</b> a funnel twice as wide reads <b>four</b> times as much; three times as wide, nine.</div>
+
+  <table class="tbl mag">
+    <thead><tr><th>Funnel across</th><th>1.5 in</th><th>2 in</th><th>2.5 in</th><th>3 in</th><th>3.5 in</th></tr></thead>
+    <tbody><tr><td><b>3 in</b></td><td>&times;4.0</td><td>&times;2.3</td><td>&times;1.4</td><td>&times;1.0</td><td>&times;0.7</td></tr><tr><td><b>3.5 in</b></td><td>&times;5.4</td><td>&times;3.1</td><td>&times;2.0</td><td>&times;1.4</td><td>&times;1.0</td></tr><tr><td><b>4 in</b></td><td>&times;7.1</td><td>&times;4.0</td><td>&times;2.6</td><td>&times;1.8</td><td>&times;1.3</td></tr><tr><td><b>4.5 in</b></td><td>&times;9.0</td><td>&times;5.1</td><td>&times;3.2</td><td>&times;2.3</td><td>&times;1.7</td></tr></tbody>
+  </table>
+
+  <div class="note"><b>Round to the nearest strip on page 3.</b> A two-liter bottle (4.2 in) into a jam
+  jar (2.6 in) gives 2.6: the &times;3 strip <b>under-reads by about a
+  seventh</b>. Close enough for a garden.</div>
+
+  <div class="note"><b>Under &times;1?</b> Swap the funnel and collector. <b>Over &times;4?</b> A storm
+  overflows it: use a wider jar.</div>
+
+  <ol class="qs" start="2"><li><span class="qt">Measure your own two and work out your number. Show the division and the squaring separately, so you can see which step did the work.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Where it goes &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Making it read bigger</span>
+  </footer>
+</div>
+
+<div class="page g5">
+  <header class="cont">
+    
+    <h1>Where It Goes</h1>
+    <p class="sub">Making &middot; Projects &middot; Page 5 of 6</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Pick the spot before you start. Moving it later spoils the log.
+  </div>
+
+
+  <table class="tbl ">
+    <thead><tr><th>Do this</th><th>Because</th></tr></thead>
+    <tbody><tr><td><b>Out in the open, well away from anything tall</b></td><td>At least twice as far away as the thing is high. A wall, a fence or a hedge makes a pocket of still air on one side and a gust on the other, and rain does not fall straight down through either.</td></tr><tr><td><b>Never under the eaves, a branch or a washing line</b></td><td>It will read nothing at all in a light shower and then get a fortnight’s worth in one drip when the gutter overflows.</td></tr><tr><td><b>Rim about a foot off the ground</b></td><td>Lower and rain bouncing off the ground splashes back INTO it. Higher and the wind starts carrying drops over the top instead of into it.</td></tr><tr><td><b>Rim level, and check it again after a windy night</b></td><td>A tilted mouth is a smaller mouth as far as falling rain is concerned, so it under-reads — and it will not tell you it is doing it.</td></tr><tr><td><b>The same spot every time</b></td><td>The whole value of a rain log is comparing one week with another. Move the gauge and you have started a new log.</td></tr></tbody>
+  </table>
+
+  <div class="find"><b>Why twice the height away?</b> Wind lifts over a wall and tumbles behind it, carrying rain to one side. Far enough away, it flattens out again.</div>
+
+  <footer>
+    <span>The log &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Where it goes</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>The Log</h1>
+    <p class="sub">Making &middot; Projects &middot; Page 6 of 6</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Read it at the same time every day, dry days too. Then empty it to your zero mark.
+  </div>
+
+
+  <table class="tbl log">
+    <thead><tr><th>Date</th><th>Rain since yesterday</th><th>What the sky did</th></tr></thead>
+    <tbody><tr><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr><tr><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr><tr><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr><tr><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr><tr><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr><tr><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr><tr><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr><tr><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr><tr><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr><tr><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr><tr><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr><tr><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr></tbody>
+  </table>
+
+  <ol class="qs" start="3"><li><span class="qt">Add up a whole week. Now find out what the forecast said for that week, and compare. If they disagree, which do you trust, and why?</span><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Did the heaviest day come with the darkest sky? Look down your two right-hand columns before you answer.</span><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Done &mdash; leave it out</span>
+    <span class="brand">Kitchen Table</span>
+    <span>The log</span>
+  </footer>
+</div>
+
+</body>
+</html>

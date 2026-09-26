@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="sheet-kind" content="worksheet">
+<title>The Four Numbers — Life Skills</title>
+<style>
+  :root { --font: "Trebuchet MS", "Segoe UI", Tahoma, Verdana, sans-serif; }
+
+  /* Page margins live HERE only — body padding stays 0 for print so the two
+     don't stack and eat the sheet. */
+  @page { size: letter portrait; margin: 0.45in 0.5in; }
+
+  /*
+   * THE PALETTE. The same one the shop wears (kitchen-table/BRAND.md): warm
+   * near-black ink, one accent, pine kept back for the answer key.
+   *
+   * WHY A SHEET HAS COLOR AT ALL. Every sheet was pure grayscale — #000 rules,
+   * #333 subtitles, #f0f0f0 boxes — which is what you get by never deciding.
+   * The paper is the product and it looked like a fax. A printer set to
+   * grayscale, or one that has no color to give, renders all of this as the
+   * greys it already had, so nothing below costs a parent anything they were
+   * not already spending.
+   *
+   * WHAT STAYS BLACK, ON PURPOSE:
+   *   - anything drawn to be written on (rules, name lines, answer boxes)
+   *   - anything drawn to be traced or colored in (line art, letter guides)
+   *   - the confidence rings, which have to survive a mono laser
+   * Color marks the sheet's own furniture — its rule, its numbering, its
+   * boxes — and never the part a child puts a pencil through.
+   */
+  :root {
+    --ink:    #16130F;
+    --muted:  #6B635A;
+    --rule:   #CFC3B2;
+    --guide:  #BCAE9C;
+    --accent: #C0511D;
+    --tint:   #F7EDE4;
+    --slate:  #2E5A78;
+    --tintslate: #E9EFF4;
+    --deep:   #2C4A45;
+    --tintdeep: #ECF1EF;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font);
+    color: #000; background: #fff;
+    font-size: 12pt; line-height: 1.3;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+
+  /* ORDER MATTERS. This generic rule must come BEFORE the @media screen block:
+     same specificity, so whichever is declared last wins. With it after, the
+     on-screen preview stretches to the viewport instead of 8.5in — print is
+     unaffected, but the proof you check before printing is wrong. */
+  .page { width: 100%; }
+  .page + .page { page-break-before: always; }
+
+  @media screen {
+    body { padding: 0.5in; background: #ddd; }
+    .page {
+      background: #fff; padding: 0.45in 0.5in;
+      width: 8.5in; min-height: 11in;
+      margin: 0 auto 24px; box-shadow: 0 2px 10px rgba(0,0,0,.3);
+    }
+  }
+
+  /* ------------------------------------------------------------- header */
+  header { border-bottom: 3px double var(--accent); padding-bottom: 6px; }
+  header.cont { border-bottom: 1px solid var(--rule); }
+  h1 { font-size: 16pt; margin: 0 0 1px; letter-spacing: .01em; }
+  .sub { font-size: 10pt; font-style: italic; color: var(--muted); margin: 0; }
+
+  .nameline { display: flex; gap: 26px; font-size: 10.5pt; margin: 11px 0 12px; }
+  .nameline span { flex: 1; border-bottom: 1px solid var(--ink); padding-bottom: 1px; }
+  .nameline span.short { flex: 0 0 1.9in; }
+
+  .directions {
+    font-size: 10.5pt; line-height: 1.35;
+    background: var(--tint); border-left: 4px solid var(--accent);
+    padding: 7px 10px; margin: 12px 0 14px;
+  }
+  .directions b { letter-spacing: .03em; }
+  .tip { font-style: italic; margin-top: 3px; }
+
+  /* ------------------------------------------------- problems and grids */
+  .grid { display: grid; gap: 13px 16px; margin-top: 4px; }
+  .prob { page-break-inside: avoid; display: flex; gap: 5px; align-items: flex-start; }
+  .pn { font-weight: bold; font-size: 11pt; min-width: .28in; flex: 0 0 auto; color: var(--accent); }
+  .pbody { flex: 1; min-width: 0; }
+
+  /* Digits need lining figures and even widths whatever the body font is. */
+  .num, .vert, .horiz { font-family: "Trebuchet MS", "Segoe UI", Tahoma, Verdana, sans-serif; font-variant-numeric: lining-nums tabular-nums; }
+
+  /* A stacked column algorithm.
+     Two grid columns — operator, then digits — because a floated or absolutely
+     positioned operator overlaps the digits as soon as the numbers get wide,
+     and "324" with a + sitting on the 3 is unreadable. The grid also lets the
+     rule under the last operand span BOTH columns, which is how it is written
+     by hand. The rule is heavy: it is the line you write the answer beneath. */
+  .vert {
+    display: inline-grid; grid-template-columns: auto auto;
+    font-size: 15pt; line-height: 1.3; text-align: right;
+  }
+  .vert > span { padding: 0 0 1px 0; }
+  .vert .op { text-align: left; padding-right: .16in; }
+  .vert .last { border-bottom: 2.5px solid var(--ink); padding-bottom: 3px; }
+  .vert .ans { height: .4in; }
+  /* Partial-products working, for 2-digit x 1-digit before the short method. */
+  .vert .part { font-size: 11pt; color: var(--muted); }
+  /* A row of worked examples that fade — see lib/formats.js faded(). The
+     caption is what makes the fade legible: without it the third one looks like
+     a question somebody forgot to number. */
+  .egrow { display: flex; gap: .34in; align-items: flex-start; margin: 0 0 4px; }
+  .eg { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; }
+  .eglab { font-size: 8.5pt; color: var(--slate); letter-spacing: .02em; }
+
+  /* The carried digits. Small and grey so the sum still reads as the sum, and
+     tight to the row below it so a carry sits ON the column it goes into. */
+  .vert .carry { font-size: 9pt; color: var(--slate); line-height: 1; padding: 0 0 1px 0; }
+
+  .horiz { font-size: 14pt; white-space: nowrap; }
+
+  /* Row numbers in a word list. Gray and small: they are there so a list can be
+     dictated ("number seven") and marked without counting down the page, and
+     they must not compete with the word itself. */
+  .wn { color: var(--muted); font-size: 9pt; }
+
+  /* The box an answer goes in. inline-block so it can sit mid-sentence. */
+  .abox {
+    display: inline-block; border: 1.6px solid var(--slate); border-radius: 3px;
+    vertical-align: middle; margin: 0 3px; position: relative; background: #fff;
+  }
+  /* Scoped to the box: as a bare ".alab" it pinned any generator's own .alab
+     to the bottom of the page (life-07-signs-and-forms 40, 2026-09-24). */
+  .abox > .alab {
+    position: absolute; bottom: 1px; left: 0; right: 0;
+    text-align: center; font-size: 7pt; color: var(--muted); font-style: italic;
+  }
+
+  /* Confidence marks. The rings are drawn with a border and a gradient rather
+     than an SVG so they stay inline with the question text at any font size,
+     and print black on a mono laser without relying on a background image. */
+  .conf { float: right; margin: 2px 0 0 8px; white-space: nowrap; }
+  .cring {
+    display: inline-block; width: 11px; height: 11px; margin-left: 4px;
+    border: 1.4px solid var(--slate); border-radius: 50%; vertical-align: middle;
+  }
+  .cring-full { background: var(--accent); }
+  .cring-half { background: linear-gradient(90deg, var(--accent) 50%, #fff 50%); }
+  .cring-none { background: #fff; }
+  ol.qs.hasconf li { overflow: hidden; }
+
+  .conflegend {
+    border: 1.2px solid var(--rule); border-radius: 4px;
+    padding: 3px 8px; margin: 0 0 7px;
+    font-size: 8.5pt; color: var(--muted); display: flex; gap: 14px; align-items: center;
+  }
+  .conftitle { font-weight: 700; color: var(--ink); }
+  .confitem { white-space: nowrap; }
+
+  .work {
+    border: 1.4px dashed var(--rule); border-radius: 4px;
+    margin: 6px 0 2px; position: relative;
+  }
+  /* The label S.work() puts in the box: a DIRECT child only. As ".work span"
+     it also caught every span inside any generator's own .work content and
+     stacked them all at the top-left corner (math-11-grade6 47, 2026-09-23). */
+  .work > span {
+    position: absolute; top: 3px; left: 6px;
+    font-size: 8pt; color: var(--muted); font-style: italic;
+  }
+
+  /* ------------------------------------------------------ writing lines */
+  /* Primary rule: solid top, dashed midline, heavy baseline. Capitals reach
+     the top line, lowercase bodies sit under the dashed one. */
+  .write {
+    position: relative; height: 0.375in;
+    margin: 6px 0 0 .3in;
+    border-top: 1px solid var(--rule); border-bottom: 2px solid var(--ink);
+  }
+  .write.flush { margin-left: 0; }
+  .write + .write { margin-top: .17in; }
+  .write::after {
+    content: ""; position: absolute; left: 0; right: 0; top: 50%;
+    border-top: 1px dashed var(--guide);
+  }
+
+  /* ------------------------------------------------------- question list */
+  ol.qs { margin: 0; padding: 0 0 0 .34in; }
+  ol.qs li { margin-bottom: 13px; page-break-inside: avoid; }
+  ol.qs li::marker { font-weight: bold; font-size: 11pt; color: var(--accent); }
+  .qt { display: block; }
+
+  .mcq { display: grid; gap: 3px 14px; margin: 5px 0 2px .12in; font-size: 11pt; }
+  .opt { white-space: nowrap; }
+
+  /* -------------------------------------------------------------- tables */
+  .tbl { border-collapse: collapse; margin: 8px 0; font-size: 11pt; width: 100%; }
+  .tbl th, .tbl td { border: 1.4px solid var(--ink); padding: 5px 8px; text-align: left; }
+  .tbl th { color: var(--slate); }
+  .tbl th { background: var(--tint); font-size: 10pt; letter-spacing: .02em; }
+  .tbl td.blank { height: .34in; }
+  .tbl.narrow { width: auto; }
+  .tbl.center td, .tbl.center th { text-align: center; }
+
+  /* ------------------------------------------------------------ passages */
+  .passage {
+    border: 1.5px solid var(--slate); border-radius: 4px;
+    padding: 11px 14px; margin-bottom: 12px;
+    font-size: 11.5pt; line-height: 1.55;
+  }
+  .passage h2 { font-size: 13pt; margin: 0 0 6px; color: var(--deep); }
+  .passage p { margin: 0 0 8px; }
+  .passage p:last-child { margin-bottom: 0; }
+  .passage .byline { font-size: 9.5pt; font-style: italic; color: var(--muted); margin-bottom: 8px; }
+  /* Numbered paragraphs, so a question can say "in paragraph 2". */
+  .passage p.np { position: relative; padding-left: .3in; }
+  .passage p.np::before {
+    content: attr(data-p); position: absolute; left: 0; top: 0;
+    font-size: 9pt; color: var(--accent); font-weight: bold;
+  }
+
+  .wordbank {
+    border: 1.5px dashed var(--slate); border-radius: 4px;
+    padding: 8px 12px; margin: 10px 0 12px;
+    font-size: 11.5pt; text-align: center;
+  }
+  .wordbank b { display: block; font-size: 9.5pt; letter-spacing: .06em;
+    text-transform: uppercase; margin-bottom: 4px; color: var(--accent); }
+  .wordbank span { display: inline-block; margin: 2px 11px; }
+
+  .note {
+    border-left: 4px solid var(--deep); background: var(--tintdeep);
+    padding: 7px 11px; margin: 10px 0; font-size: 10.5pt;
+  }
+  .note b { letter-spacing: .02em; }
+
+  /* -------------------------------------------------------------- footer */
+  /* THE WORDMARK SITS IN THE FOOTER THAT WAS ALREADY THERE, so it costs no
+     height at all — a sheet that fitted before fits now. Upright where the rest
+     of the line is italic, and a size down: it is a signature, not a message,
+     and it must never compete with "Score: ___ / 10". */
+  .brand { font-style: normal; font-size: 7.5pt; letter-spacing: .04em;
+    color: var(--accent); align-self: center; }
+
+  footer {
+    margin-top: 14px; padding-top: 6px; border-top: 1px solid var(--rule);
+    font-size: 9pt; font-style: italic; color: var(--muted);
+    display: flex; justify-content: space-between;
+  }
+
+  /* ---------------------------------------------------------- answer key */
+  .keybadge {
+    display: inline-block; border: 2px solid var(--deep); color: var(--deep); padding: 2px 9px;
+    font-size: 9.5pt; font-weight: bold; letter-spacing: .08em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .key .why {
+    display: block; font-size: 9pt; font-style: italic; color: var(--muted); margin-top: 1px;
+  }
+  /* Highlight rather than underline: <u> in a key marks WHAT CHANGED, and an
+     underline under a comma is invisible. */
+  .key u { text-decoration: none; background: var(--tint); padding: 0 2px; font-weight: bold; }
+  .keygrid .pbody { font-family: "Trebuchet MS", "Segoe UI", Tahoma, Verdana, sans-serif; font-size: 12pt; }
+  /* A key's pictures scale to their column: at 1fr a wide drawing pushed a
+     three-column key 92px off the paper (art-04-drawing 10, 2026-09-24). */
+  .keygrid svg { max-width: 100%; height: auto; }
+  .keylist .qt { font-weight: normal; }
+
+  /*
+   * The guide page. Four lines per question, and the ASK line is the one that
+   * gets used at the table, so it is the one with a rule beside it — a parent
+   * scanning this page in ten seconds should land on the follow-up question
+   * and nothing else.
+   */
+  .guide { padding-left: .3in; }
+  .guide li { margin-bottom: 11px; page-break-inside: avoid; }
+  .guide .gq { font-weight: bold; font-size: 11pt; margin-bottom: 3px; }
+  /* 9pt, matching the key's own why line, because the guide page is the
+     binding constraint on every open sheet: four lines per question against a
+     key's one, and at 10pt a sheet with seven questions ran onto a second
+     side. Found by measuring, not chosen. (No backticks in here — this CSS
+     lives inside a template literal and one would close it.) */
+  .guide .glook, .guide .gthin, .guide .gstrong {
+    font-size: 9pt; line-height: 1.3; margin-top: 1px;
+  }
+  .guide .gthin { color: var(--muted); }
+  .guide .gstrong { color: var(--muted); font-style: italic; }
+  .guide .gask {
+    font-size: 9.5pt; line-height: 1.3; margin-top: 3px;
+    border-left: 3px solid var(--slate); padding-left: 7px;
+  }
+  .key .qs li { margin-bottom: 9px; }
+
+  /*
+   * INLINE-BLOCK, NOT BLOCK, AND THIS WAS WRONG FOR A LONG TIME. A block-level
+   * svg ignores text-align: center on its parent and sits flush left — so 117
+   * sheets across 35 packs said "centre this diagram" and got a left-aligned
+   * one. Twenty-five of them were origami and paper-plane fold sequences, where
+   * the whole page is diagrams.
+   *
+   * Nobody spotted it because a left-flush diagram looks deliberate; it only
+   * reads as wrong next to a centered one, and no sheet has both.
+   *
+   * inline-block makes text-align do what every one of those authors meant,
+   * and leaves a diagram in a left-aligned container exactly where it was.
+   * vertical-align: top kills the baseline gap that inline elements otherwise
+   * leave underneath them, which would have pushed long pages over.
+   */
+  svg { display: inline-block; vertical-align: top; }
+  svg.inline { vertical-align: middle; }
+
+  .receipt {
+    border: 2px solid var(--slate); border-radius: 3px;
+    padding: .1in .13in; margin: .06in 0;
+    font-family: 'Courier New', Courier, monospace; font-size: 11pt;
+    break-inside: avoid;
+  }
+  .rhead { text-align: center; font-weight: bold; letter-spacing: .06em; font-size: 11.5pt; }
+  .rrule { border-top: 1px dashed var(--slate); margin: .05in 0; }
+  .rrow { display: grid; grid-template-columns: .38in 1fr 1.05in; align-items: center; padding: 1.5px 0; }
+  .rn em { font-style: normal; color: var(--muted); font-size: 9.5pt; }
+  .ra { text-align: right; }
+  .rtot { font-weight: bold; }
+  .rchg { border-top: 1px solid var(--slate); margin-top: 3px; padding-top: 3px; }
+  .amtbox {
+    display: inline-block; height: .21in; border-bottom: 1.5px solid var(--slate);
+    vertical-align: -2px;
+  }
+  .rgrid { display: grid; grid-template-columns: 1fr 1fr; gap: .14in; }
+
+  .ladder { border: 1.5px solid var(--slate); padding: .06in .1in; margin: .07in 0; break-inside: avoid; }
+  .lrow, .lhead {
+    display: grid; grid-template-columns: 1in .55in 1in 1fr; align-items: center;
+    gap: .06in; padding: 2px 0;
+  }
+  .lhead { font-size: 9pt; color: var(--muted); border-bottom: 1px solid var(--slate); }
+  .lrow { font-size: 11.5pt; }
+  .ltot { border-top: 1px solid var(--slate); margin-top: 2px; padding-top: 3px; }
+  .lto, .lfrom { font-variant-numeric: lining-nums tabular-nums; }
+  .ljump { font-weight: bold; }
+  .larr svg { vertical-align: middle; }
+
+  /* Fill pass, 2026-09-24: a page tagged r1-r3 had room, so its receipts and
+     ladders are printed bigger and more open. */
+  
+  .page.r1 .receipt { font-size: 11.75pt; padding: 0.13in .15in; }
+  .page.r1 .rhead { font-size: 12.25pt; }
+  .page.r1 .rrow { padding: 4px 0; }
+  .page.r1 .lrow { font-size: 12pt; padding: 5px 0; }
+  .page.r1 .amtbox { height: 0.26in; }
+  .page.r2 .receipt { font-size: 12.5pt; padding: 0.16in .15in; }
+  .page.r2 .rhead { font-size: 13pt; }
+  .page.r2 .rrow { padding: 6.5px 0; }
+  .page.r2 .lrow { font-size: 12.5pt; padding: 8px 0; }
+  .page.r2 .amtbox { height: 0.31in; }
+  .page.r3 .receipt { font-size: 13.25pt; padding: 0.19in .15in; }
+  .page.r3 .rhead { font-size: 13.75pt; }
+  .page.r3 .rrow { padding: 9px 0; }
+  .page.r3 .lrow { font-size: 13pt; padding: 11px 0; }
+  .page.r3 .amtbox { height: 0.36in; }
+
+  .rules { border: 1.5px solid var(--accent); padding: .07in .1in; margin: .06in 0 .1in; font-size: 10.5pt; line-height: 1.45; }
+  .look { font-size: 10.5pt; margin: .07in 0 .04in; }
+  .four { display: grid; grid-template-columns: repeat(4, 1fr); gap: .06in; margin: .05in 0; }
+  .four span { border: 1px solid var(--slate); padding: 3px 5px; font-size: 9.5pt; }
+  .say { margin: .06in 0 .1in; }
+  .sayrow { padding: 3px 0; font-size: 11pt; }
+  .sn { font-family: 'Courier New', Courier, monospace; }
+  .pad { min-height: .2in; }
+
+</style>
+</head>
+<body>
+
+<div class="page ">
+  <header>
+    
+    <h1>The Four Numbers</h1>
+    <p class="sub">Life Skills &middot; Money &middot; Page 1 of 4</p>
+  </header>
+  <div class="nameline">
+    <span>Name</span>
+    <span class="short">Date</span>
+  </div>
+  <div class="directions">
+    <b>DIRECTIONS:</b> Work out each line, then the total, then the change. <b>@ each</b> is the price for ONE.
+  </div>
+
+
+  <div class="rules"><b>Four numbers, every time you buy something.</b>
+  <div class="four">
+    <span><b>1</b> what it costs</span>
+    <span><b>2</b> what you handed over</span>
+    <span><b>3</b> what you should get back</span>
+    <span><b>4</b> what you actually got</span>
+  </div>
+  Number 4 is the one nobody checks, and it is money in your pocket.</div>
+
+  <div class="receipt">
+    <div class="rhead">CORNER STORE</div>
+    <div class="rrule"></div>
+      <div class="rrow">
+        <span class="rq">3&times;</span>
+        <span class="rn">notebook <em>@ $1.79 each</em></span>
+        <span class="ra"><span class="amtbox" style="width:0.85in"></span></span>
+      </div>
+      <div class="rrow">
+        <span class="rq">2&times;</span>
+        <span class="rn">apples <em>@ $3.49 each</em></span>
+        <span class="ra"><span class="amtbox" style="width:0.85in"></span></span>
+      </div>
+      <div class="rrow">
+        <span class="rq">2&times;</span>
+        <span class="rn">rice <em>@ $2.59 each</em></span>
+        <span class="ra"><span class="amtbox" style="width:0.85in"></span></span>
+      </div>
+    <div class="rrule"></div>
+    <div class="rrow rtot">
+      <span class="rq"></span><span class="rn">TOTAL</span>
+      <span class="ra"><span class="amtbox" style="width:0.85in"></span></span>
+    </div>
+    <div class="rrow"><span class="rq"></span><span class="rn">You handed over</span>
+      <span class="ra">$20.00</span></div>
+    <div class="rrow rchg"><span class="rq"></span><span class="rn">You should get back</span>
+      <span class="ra"><span class="amtbox" style="width:0.85in"></span></span></div>
+  </div>
+
+  <ol class="qs" start="1"><li><span class="qt">Which line on the receipt cost the most altogether? It is not the most expensive <em>thing</em> &mdash; look at the line, not the price each.</span><div class="write"></div><div class="write"></div></li><li><span class="qt">If you had handed over a $10 bill instead, would it have been enough? Show how you know.</span><div class="work" style="height:1.6in"><span>Show your work</span></div></li></ol>
+
+
+  <footer>
+    <span>Keep going on page 2 &rarr; &middot; set 202</span>
+    <span class="brand">Kitchen Table</span>
+    <span>One transaction</span>
+  </footer>
+</div>
+
+<div class="page r1">
+  <header class="cont">
+    
+    <h1>Count Up, Not Down</h1>
+    <p class="sub">Life Skills &middot; Money &middot; Page 2 of 4</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Read the worked one, then finish the two below.
+  </div>
+
+
+  <div class="rules"><b>Do not take away. Climb.</b> Start at what it cost and count up to what you
+  handed over: to the next ten cents, then the next dollar, then the note.</div>
+
+  <p class="look"><b>Worked out for you.</b> The basket came to $17.25 and you handed over
+  $20.00.</p>
+
+  <div class="ladder">
+    <div class="lhead"><span>Start at</span><span></span><span>Go up to</span><span>That jump</span></div>
+    <div class="lrow">
+      <span class="lfrom">$17.25</span>
+      <span class="larr"><svg class="inline" viewBox="0 0 56 18" width="56" height="18" role="img" aria-label="up to" xmlns="http://www.w3.org/2000/svg"><line x1="2" y1="12" x2="46" y2="12" stroke="#16130F" stroke-width="1.5" stroke-linecap="round"/><path d="M54,12 l-8,-4.5 v9 z" fill="#16130F"/></svg></span>
+      <span class="lto">$17.30</span>
+      <span class="ljump">$0.05</span>
+    </div>
+    <div class="lrow">
+      <span class="lfrom">$17.30</span>
+      <span class="larr"><svg class="inline" viewBox="0 0 56 18" width="56" height="18" role="img" aria-label="up to" xmlns="http://www.w3.org/2000/svg"><line x1="2" y1="12" x2="46" y2="12" stroke="#16130F" stroke-width="1.5" stroke-linecap="round"/><path d="M54,12 l-8,-4.5 v9 z" fill="#16130F"/></svg></span>
+      <span class="lto">$18.00</span>
+      <span class="ljump">$0.70</span>
+    </div>
+    <div class="lrow">
+      <span class="lfrom">$18.00</span>
+      <span class="larr"><svg class="inline" viewBox="0 0 56 18" width="56" height="18" role="img" aria-label="up to" xmlns="http://www.w3.org/2000/svg"><line x1="2" y1="12" x2="46" y2="12" stroke="#16130F" stroke-width="1.5" stroke-linecap="round"/><path d="M54,12 l-8,-4.5 v9 z" fill="#16130F"/></svg></span>
+      <span class="lto">$20.00</span>
+      <span class="ljump">$2.00</span>
+    </div>
+    <div class="lrow ltot">
+      <span class="lfrom"></span><span class="larr"></span>
+      <span class="lto">Add the jumps</span>
+      <span class="ljump"><b>$2.75</b></span>
+    </div>
+  </div>
+
+  <p class="look">So the change is <b>$2.75</b>.</p>
+
+  <p class="look"><b>Your turn.</b> Fill in the right-hand column, then add it up.</p>
+
+  <div class="ladder">
+    <div class="lhead"><span>Start at</span><span></span><span>Go up to</span><span>That jump</span></div>
+    <div class="lrow">
+      <span class="lfrom">$7.86</span>
+      <span class="larr"><svg class="inline" viewBox="0 0 56 18" width="56" height="18" role="img" aria-label="up to" xmlns="http://www.w3.org/2000/svg"><line x1="2" y1="12" x2="46" y2="12" stroke="#16130F" stroke-width="1.5" stroke-linecap="round"/><path d="M54,12 l-8,-4.5 v9 z" fill="#16130F"/></svg></span>
+      <span class="lto">$7.90</span>
+      <span class="ljump"><span class="amtbox" style="width:0.8in"></span></span>
+    </div>
+    <div class="lrow">
+      <span class="lfrom">$7.90</span>
+      <span class="larr"><svg class="inline" viewBox="0 0 56 18" width="56" height="18" role="img" aria-label="up to" xmlns="http://www.w3.org/2000/svg"><line x1="2" y1="12" x2="46" y2="12" stroke="#16130F" stroke-width="1.5" stroke-linecap="round"/><path d="M54,12 l-8,-4.5 v9 z" fill="#16130F"/></svg></span>
+      <span class="lto">$8.00</span>
+      <span class="ljump"><span class="amtbox" style="width:0.8in"></span></span>
+    </div>
+    <div class="lrow">
+      <span class="lfrom">$8.00</span>
+      <span class="larr"><svg class="inline" viewBox="0 0 56 18" width="56" height="18" role="img" aria-label="up to" xmlns="http://www.w3.org/2000/svg"><line x1="2" y1="12" x2="46" y2="12" stroke="#16130F" stroke-width="1.5" stroke-linecap="round"/><path d="M54,12 l-8,-4.5 v9 z" fill="#16130F"/></svg></span>
+      <span class="lto">$10.00</span>
+      <span class="ljump"><span class="amtbox" style="width:0.8in"></span></span>
+    </div>
+    <div class="lrow ltot">
+      <span class="lfrom"></span><span class="larr"></span>
+      <span class="lto">Add the jumps</span>
+      <span class="ljump"><span class="amtbox" style="width:0.8in"></span></span>
+    </div>
+  </div>
+  <div class="ladder">
+    <div class="lhead"><span>Start at</span><span></span><span>Go up to</span><span>That jump</span></div>
+    <div class="lrow">
+      <span class="lfrom">$17.95</span>
+      <span class="larr"><svg class="inline" viewBox="0 0 56 18" width="56" height="18" role="img" aria-label="up to" xmlns="http://www.w3.org/2000/svg"><line x1="2" y1="12" x2="46" y2="12" stroke="#16130F" stroke-width="1.5" stroke-linecap="round"/><path d="M54,12 l-8,-4.5 v9 z" fill="#16130F"/></svg></span>
+      <span class="lto">$18.00</span>
+      <span class="ljump"><span class="amtbox" style="width:0.8in"></span></span>
+    </div>
+    <div class="lrow">
+      <span class="lfrom">$18.00</span>
+      <span class="larr"><svg class="inline" viewBox="0 0 56 18" width="56" height="18" role="img" aria-label="up to" xmlns="http://www.w3.org/2000/svg"><line x1="2" y1="12" x2="46" y2="12" stroke="#16130F" stroke-width="1.5" stroke-linecap="round"/><path d="M54,12 l-8,-4.5 v9 z" fill="#16130F"/></svg></span>
+      <span class="lto">$20.00</span>
+      <span class="ljump"><span class="amtbox" style="width:0.8in"></span></span>
+    </div>
+    <div class="lrow ltot">
+      <span class="lfrom"></span><span class="larr"></span>
+      <span class="lto">Add the jumps</span>
+      <span class="ljump"><span class="amtbox" style="width:0.8in"></span></span>
+    </div>
+  </div>
+
+
+  <footer>
+    <span>Keep going on page 3 &rarr; &middot; set 202</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Counting up</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>Three Trips</h1>
+    <p class="sub">Life Skills &middot; Money &middot; Page 3 of 4</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Fill in the total, then the change, for each trip.
+  </div>
+
+
+  <div class="rgrid">
+    <div class="receipt">
+    <div class="rhead">CORNER STORE</div>
+    <div class="rrule"></div>
+      <div class="rrow">
+        <span class="rq">2&times;</span>
+        <span class="rn">yogurt <em>@ $0.89 each</em></span>
+        <span class="ra">$1.78</span>
+      </div>
+      <div class="rrow">
+        <span class="rq">2&times;</span>
+        <span class="rn">apples <em>@ $3.49 each</em></span>
+        <span class="ra">$6.98</span>
+      </div>
+    <div class="rrule"></div>
+    <div class="rrow rtot">
+      <span class="rq"></span><span class="rn">TOTAL</span>
+      <span class="ra"><span class="amtbox" style="width:0.85in"></span></span>
+    </div>
+    <div class="rrow"><span class="rq"></span><span class="rn">You handed over</span>
+      <span class="ra">$10.00</span></div>
+    <div class="rrow rchg"><span class="rq"></span><span class="rn">You should get back</span>
+      <span class="ra"><span class="amtbox" style="width:0.85in"></span></span></div>
+  </div>
+    <div class="receipt">
+    <div class="rhead">CORNER STORE</div>
+    <div class="rrule"></div>
+      <div class="rrow">
+        <span class="rq">2&times;</span>
+        <span class="rn">tomato sauce <em>@ $1.89 each</em></span>
+        <span class="ra">$3.78</span>
+      </div>
+      <div class="rrow">
+        <span class="rq">1&times;</span>
+        <span class="rn">apple juice</span>
+        <span class="ra">$2.49</span>
+      </div>
+    <div class="rrule"></div>
+    <div class="rrow rtot">
+      <span class="rq"></span><span class="rn">TOTAL</span>
+      <span class="ra"><span class="amtbox" style="width:0.85in"></span></span>
+    </div>
+    <div class="rrow"><span class="rq"></span><span class="rn">You handed over</span>
+      <span class="ra">$10.00</span></div>
+    <div class="rrow rchg"><span class="rq"></span><span class="rn">You should get back</span>
+      <span class="ra"><span class="amtbox" style="width:0.85in"></span></span></div>
+  </div>
+    <div class="receipt">
+    <div class="rhead">CORNER STORE</div>
+    <div class="rrule"></div>
+      <div class="rrow">
+        <span class="rq">2&times;</span>
+        <span class="rn">soap <em>@ $1.49 each</em></span>
+        <span class="ra">$2.98</span>
+      </div>
+      <div class="rrow">
+        <span class="rq">1&times;</span>
+        <span class="rn">tomato sauce</span>
+        <span class="ra">$1.89</span>
+      </div>
+    <div class="rrule"></div>
+    <div class="rrow rtot">
+      <span class="rq"></span><span class="rn">TOTAL</span>
+      <span class="ra"><span class="amtbox" style="width:0.85in"></span></span>
+    </div>
+    <div class="rrow"><span class="rq"></span><span class="rn">You handed over</span>
+      <span class="ra">$10.00</span></div>
+    <div class="rrow rchg"><span class="rq"></span><span class="rn">You should get back</span>
+      <span class="ra"><span class="amtbox" style="width:0.85in"></span></span></div>
+  </div>
+    <div class="pad"></div>
+  </div>
+
+  <ol class="qs" start="3"><li><span class="qt">Trip 3 is the only one where you get back more than you spent. Without adding anything up, how could you have known that just by looking?</span><div class="write"></div><div class="write"></div></li><li><span class="qt">You buy the trip 1 basket twice. Do you still get change from $10.00? Say why.</span><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+
+  <footer>
+    <span>One more overleaf &rarr; &middot; set 202</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Three trips</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>The Coins in Your Hand</h1>
+    <p class="sub">Life Skills &middot; Money &middot; Page 4 of 4</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> The change is right. Count it as it arrives.
+  </div>
+
+
+  <div class="rules"><b>Change comes small coins first, up to the next dollar, then the notes.</b> It is
+  the ladder said out loud, so you can check it as it lands.</div>
+
+  <p class="look">The basket came to <b>$17.53</b>. You hand over
+  <b>$20.00</b>. Write what the person behind the counter says as they put each piece
+  into your hand:</p>
+
+  <div class="say">
+    <div class="sayrow"><span class="sn">&ldquo;$17.53&hellip;</span>
+      <span class="amtbox" style="width:1.5in"></span><span class="sn">&rdquo;</span></div>
+    <div class="sayrow"><span class="sn">&ldquo;$17.60&hellip;</span>
+      <span class="amtbox" style="width:1.5in"></span><span class="sn">&rdquo;</span></div>
+    <div class="sayrow"><span class="sn">&ldquo;$18.00&hellip;</span>
+      <span class="amtbox" style="width:1.5in"></span><span class="sn">&rdquo;</span></div>
+  </div>
+
+  <ol class="qs" start="5"><li><span class="qt">Somebody hands you your change all at once, in a lump, without counting it. What should you do before you walk away?</span><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">You are owed 90&cent; and you are given three quarters and a dime. Is that right? How much are you short, and how would you say it politely?</span><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Why is it easier to notice a mistake while the change is being counted out than after you have put it in your pocket?</span><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+
+  <footer>
+    <span>Answer key overleaf &middot; set 202</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Checking it</span>
+  </footer>
+</div>
+
+</body>
+</html>

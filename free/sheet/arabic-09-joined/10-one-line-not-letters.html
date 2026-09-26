@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="sheet-kind" content="worksheet">
+<title>One Line, Not Letters — Arabic</title>
+<style>
+  :root { --font: Georgia, "Times New Roman", serif; }
+
+  /* Page margins live HERE only — body padding stays 0 for print so the two
+     don't stack and eat the sheet. */
+  @page { size: letter portrait; margin: 0.45in 0.5in; }
+
+  /*
+   * THE PALETTE. The same one the shop wears (kitchen-table/BRAND.md): warm
+   * near-black ink, one accent, pine kept back for the answer key.
+   *
+   * WHY A SHEET HAS COLOR AT ALL. Every sheet was pure grayscale — #000 rules,
+   * #333 subtitles, #f0f0f0 boxes — which is what you get by never deciding.
+   * The paper is the product and it looked like a fax. A printer set to
+   * grayscale, or one that has no color to give, renders all of this as the
+   * greys it already had, so nothing below costs a parent anything they were
+   * not already spending.
+   *
+   * WHAT STAYS BLACK, ON PURPOSE:
+   *   - anything drawn to be written on (rules, name lines, answer boxes)
+   *   - anything drawn to be traced or colored in (line art, letter guides)
+   *   - the confidence rings, which have to survive a mono laser
+   * Color marks the sheet's own furniture — its rule, its numbering, its
+   * boxes — and never the part a child puts a pencil through.
+   */
+  :root {
+    --ink:    #16130F;
+    --muted:  #6B635A;
+    --rule:   #CFC3B2;
+    --guide:  #BCAE9C;
+    --accent: #C0511D;
+    --tint:   #F7EDE4;
+    --slate:  #2E5A78;
+    --tintslate: #E9EFF4;
+    --deep:   #2C4A45;
+    --tintdeep: #ECF1EF;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font);
+    color: #000; background: #fff;
+    font-size: 12pt; line-height: 1.3;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+
+  /* ORDER MATTERS. This generic rule must come BEFORE the @media screen block:
+     same specificity, so whichever is declared last wins. With it after, the
+     on-screen preview stretches to the viewport instead of 8.5in — print is
+     unaffected, but the proof you check before printing is wrong. */
+  .page { width: 100%; }
+  .page + .page { page-break-before: always; }
+
+  @media screen {
+    body { padding: 0.5in; background: #ddd; }
+    .page {
+      background: #fff; padding: 0.45in 0.5in;
+      width: 8.5in; min-height: 11in;
+      margin: 0 auto 24px; box-shadow: 0 2px 10px rgba(0,0,0,.3);
+    }
+  }
+
+  /* ------------------------------------------------------------- header */
+  header { border-bottom: 3px double var(--accent); padding-bottom: 6px; }
+  header.cont { border-bottom: 1px solid var(--rule); }
+  h1 { font-size: 16pt; margin: 0 0 1px; letter-spacing: .01em; }
+  .sub { font-size: 10pt; font-style: italic; color: var(--muted); margin: 0; }
+
+  .nameline { display: flex; gap: 26px; font-size: 10.5pt; margin: 11px 0 12px; }
+  .nameline span { flex: 1; border-bottom: 1px solid var(--ink); padding-bottom: 1px; }
+  .nameline span.short { flex: 0 0 1.9in; }
+
+  .directions {
+    font-size: 10.5pt; line-height: 1.35;
+    background: var(--tint); border-left: 4px solid var(--accent);
+    padding: 7px 10px; margin: 12px 0 14px;
+  }
+  .directions b { letter-spacing: .03em; }
+  .tip { font-style: italic; margin-top: 3px; }
+
+  /* ------------------------------------------------- problems and grids */
+  .grid { display: grid; gap: 13px 16px; margin-top: 4px; }
+  .prob { page-break-inside: avoid; display: flex; gap: 5px; align-items: flex-start; }
+  .pn { font-weight: bold; font-size: 11pt; min-width: .28in; flex: 0 0 auto; color: var(--accent); }
+  .pbody { flex: 1; min-width: 0; }
+
+  /* Digits need lining figures and even widths whatever the body font is. */
+  .num, .vert, .horiz { font-family: "Trebuchet MS", "Segoe UI", Tahoma, Verdana, sans-serif; font-variant-numeric: lining-nums tabular-nums; }
+
+  /* A stacked column algorithm.
+     Two grid columns — operator, then digits — because a floated or absolutely
+     positioned operator overlaps the digits as soon as the numbers get wide,
+     and "324" with a + sitting on the 3 is unreadable. The grid also lets the
+     rule under the last operand span BOTH columns, which is how it is written
+     by hand. The rule is heavy: it is the line you write the answer beneath. */
+  .vert {
+    display: inline-grid; grid-template-columns: auto auto;
+    font-size: 15pt; line-height: 1.3; text-align: right;
+  }
+  .vert > span { padding: 0 0 1px 0; }
+  .vert .op { text-align: left; padding-right: .16in; }
+  .vert .last { border-bottom: 2.5px solid var(--ink); padding-bottom: 3px; }
+  .vert .ans { height: .4in; }
+  /* Partial-products working, for 2-digit x 1-digit before the short method. */
+  .vert .part { font-size: 11pt; color: var(--muted); }
+  /* A row of worked examples that fade — see lib/formats.js faded(). The
+     caption is what makes the fade legible: without it the third one looks like
+     a question somebody forgot to number. */
+  .egrow { display: flex; gap: .34in; align-items: flex-start; margin: 0 0 4px; }
+  .eg { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; }
+  .eglab { font-size: 8.5pt; color: var(--slate); letter-spacing: .02em; }
+
+  /* The carried digits. Small and grey so the sum still reads as the sum, and
+     tight to the row below it so a carry sits ON the column it goes into. */
+  .vert .carry { font-size: 9pt; color: var(--slate); line-height: 1; padding: 0 0 1px 0; }
+
+  .horiz { font-size: 14pt; white-space: nowrap; }
+
+  /* Row numbers in a word list. Gray and small: they are there so a list can be
+     dictated ("number seven") and marked without counting down the page, and
+     they must not compete with the word itself. */
+  .wn { color: var(--muted); font-size: 9pt; }
+
+  /* The box an answer goes in. inline-block so it can sit mid-sentence. */
+  .abox {
+    display: inline-block; border: 1.6px solid var(--slate); border-radius: 3px;
+    vertical-align: middle; margin: 0 3px; position: relative; background: #fff;
+  }
+  /* Scoped to the box: as a bare ".alab" it pinned any generator's own .alab
+     to the bottom of the page (life-07-signs-and-forms 40, 2026-09-24). */
+  .abox > .alab {
+    position: absolute; bottom: 1px; left: 0; right: 0;
+    text-align: center; font-size: 7pt; color: var(--muted); font-style: italic;
+  }
+
+  /* Confidence marks. The rings are drawn with a border and a gradient rather
+     than an SVG so they stay inline with the question text at any font size,
+     and print black on a mono laser without relying on a background image. */
+  .conf { float: right; margin: 2px 0 0 8px; white-space: nowrap; }
+  .cring {
+    display: inline-block; width: 11px; height: 11px; margin-left: 4px;
+    border: 1.4px solid var(--slate); border-radius: 50%; vertical-align: middle;
+  }
+  .cring-full { background: var(--accent); }
+  .cring-half { background: linear-gradient(90deg, var(--accent) 50%, #fff 50%); }
+  .cring-none { background: #fff; }
+  ol.qs.hasconf li { overflow: hidden; }
+
+  .conflegend {
+    border: 1.2px solid var(--rule); border-radius: 4px;
+    padding: 3px 8px; margin: 0 0 7px;
+    font-size: 8.5pt; color: var(--muted); display: flex; gap: 14px; align-items: center;
+  }
+  .conftitle { font-weight: 700; color: var(--ink); }
+  .confitem { white-space: nowrap; }
+
+  .work {
+    border: 1.4px dashed var(--rule); border-radius: 4px;
+    margin: 6px 0 2px; position: relative;
+  }
+  /* The label S.work() puts in the box: a DIRECT child only. As ".work span"
+     it also caught every span inside any generator's own .work content and
+     stacked them all at the top-left corner (math-11-grade6 47, 2026-09-23). */
+  .work > span {
+    position: absolute; top: 3px; left: 6px;
+    font-size: 8pt; color: var(--muted); font-style: italic;
+  }
+
+  /* ------------------------------------------------------ writing lines */
+  /* Primary rule: solid top, dashed midline, heavy baseline. Capitals reach
+     the top line, lowercase bodies sit under the dashed one. */
+  .write {
+    position: relative; height: 0.375in;
+    margin: 6px 0 0 .3in;
+    border-top: 1px solid var(--rule); border-bottom: 2px solid var(--ink);
+  }
+  .write.flush { margin-left: 0; }
+  .write + .write { margin-top: .17in; }
+  .write::after {
+    content: ""; position: absolute; left: 0; right: 0; top: 50%;
+    border-top: 1px dashed var(--guide);
+  }
+
+  /* ------------------------------------------------------- question list */
+  ol.qs { margin: 0; padding: 0 0 0 .34in; }
+  ol.qs li { margin-bottom: 13px; page-break-inside: avoid; }
+  ol.qs li::marker { font-weight: bold; font-size: 11pt; color: var(--accent); }
+  .qt { display: block; }
+
+  .mcq { display: grid; gap: 3px 14px; margin: 5px 0 2px .12in; font-size: 11pt; }
+  .opt { white-space: nowrap; }
+
+  /* -------------------------------------------------------------- tables */
+  .tbl { border-collapse: collapse; margin: 8px 0; font-size: 11pt; width: 100%; }
+  .tbl th, .tbl td { border: 1.4px solid var(--ink); padding: 5px 8px; text-align: left; }
+  .tbl th { color: var(--slate); }
+  .tbl th { background: var(--tint); font-size: 10pt; letter-spacing: .02em; }
+  .tbl td.blank { height: .34in; }
+  .tbl.narrow { width: auto; }
+  .tbl.center td, .tbl.center th { text-align: center; }
+
+  /* ------------------------------------------------------------ passages */
+  .passage {
+    border: 1.5px solid var(--slate); border-radius: 4px;
+    padding: 11px 14px; margin-bottom: 12px;
+    font-size: 11.5pt; line-height: 1.55;
+  }
+  .passage h2 { font-size: 13pt; margin: 0 0 6px; color: var(--deep); }
+  .passage p { margin: 0 0 8px; }
+  .passage p:last-child { margin-bottom: 0; }
+  .passage .byline { font-size: 9.5pt; font-style: italic; color: var(--muted); margin-bottom: 8px; }
+  /* Numbered paragraphs, so a question can say "in paragraph 2". */
+  .passage p.np { position: relative; padding-left: .3in; }
+  .passage p.np::before {
+    content: attr(data-p); position: absolute; left: 0; top: 0;
+    font-size: 9pt; color: var(--accent); font-weight: bold;
+  }
+
+  .wordbank {
+    border: 1.5px dashed var(--slate); border-radius: 4px;
+    padding: 8px 12px; margin: 10px 0 12px;
+    font-size: 11.5pt; text-align: center;
+  }
+  .wordbank b { display: block; font-size: 9.5pt; letter-spacing: .06em;
+    text-transform: uppercase; margin-bottom: 4px; color: var(--accent); }
+  .wordbank span { display: inline-block; margin: 2px 11px; }
+
+  .note {
+    border-left: 4px solid var(--deep); background: var(--tintdeep);
+    padding: 7px 11px; margin: 10px 0; font-size: 10.5pt;
+  }
+  .note b { letter-spacing: .02em; }
+
+  /* -------------------------------------------------------------- footer */
+  /* THE WORDMARK SITS IN THE FOOTER THAT WAS ALREADY THERE, so it costs no
+     height at all — a sheet that fitted before fits now. Upright where the rest
+     of the line is italic, and a size down: it is a signature, not a message,
+     and it must never compete with "Score: ___ / 10". */
+  .brand { font-style: normal; font-size: 7.5pt; letter-spacing: .04em;
+    color: var(--accent); align-self: center; }
+
+  footer {
+    margin-top: 14px; padding-top: 6px; border-top: 1px solid var(--rule);
+    font-size: 9pt; font-style: italic; color: var(--muted);
+    display: flex; justify-content: space-between;
+  }
+
+  /* ---------------------------------------------------------- answer key */
+  .keybadge {
+    display: inline-block; border: 2px solid var(--deep); color: var(--deep); padding: 2px 9px;
+    font-size: 9.5pt; font-weight: bold; letter-spacing: .08em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .key .why {
+    display: block; font-size: 9pt; font-style: italic; color: var(--muted); margin-top: 1px;
+  }
+  /* Highlight rather than underline: <u> in a key marks WHAT CHANGED, and an
+     underline under a comma is invisible. */
+  .key u { text-decoration: none; background: var(--tint); padding: 0 2px; font-weight: bold; }
+  .keygrid .pbody { font-family: "Trebuchet MS", "Segoe UI", Tahoma, Verdana, sans-serif; font-size: 12pt; }
+  /* A key's pictures scale to their column: at 1fr a wide drawing pushed a
+     three-column key 92px off the paper (art-04-drawing 10, 2026-09-24). */
+  .keygrid svg { max-width: 100%; height: auto; }
+  .keylist .qt { font-weight: normal; }
+
+  /*
+   * The guide page. Four lines per question, and the ASK line is the one that
+   * gets used at the table, so it is the one with a rule beside it — a parent
+   * scanning this page in ten seconds should land on the follow-up question
+   * and nothing else.
+   */
+  .guide { padding-left: .3in; }
+  .guide li { margin-bottom: 11px; page-break-inside: avoid; }
+  .guide .gq { font-weight: bold; font-size: 11pt; margin-bottom: 3px; }
+  /* 9pt, matching the key's own why line, because the guide page is the
+     binding constraint on every open sheet: four lines per question against a
+     key's one, and at 10pt a sheet with seven questions ran onto a second
+     side. Found by measuring, not chosen. (No backticks in here — this CSS
+     lives inside a template literal and one would close it.) */
+  .guide .glook, .guide .gthin, .guide .gstrong {
+    font-size: 9pt; line-height: 1.3; margin-top: 1px;
+  }
+  .guide .gthin { color: var(--muted); }
+  .guide .gstrong { color: var(--muted); font-style: italic; }
+  .guide .gask {
+    font-size: 9.5pt; line-height: 1.3; margin-top: 3px;
+    border-left: 3px solid var(--slate); padding-left: 7px;
+  }
+  .key .qs li { margin-bottom: 9px; }
+
+  /*
+   * INLINE-BLOCK, NOT BLOCK, AND THIS WAS WRONG FOR A LONG TIME. A block-level
+   * svg ignores text-align: center on its parent and sits flush left — so 117
+   * sheets across 35 packs said "centre this diagram" and got a left-aligned
+   * one. Twenty-five of them were origami and paper-plane fold sequences, where
+   * the whole page is diagrams.
+   *
+   * Nobody spotted it because a left-flush diagram looks deliberate; it only
+   * reads as wrong next to a centered one, and no sheet has both.
+   *
+   * inline-block makes text-align do what every one of those authors meant,
+   * and leaves a diagram in a left-aligned container exactly where it was.
+   * vertical-align: top kills the baseline gap that inline elements otherwise
+   * leave underneath them, which would have pushed long pages over.
+   */
+  svg { display: inline-block; vertical-align: top; }
+  svg.inline { vertical-align: middle; }
+
+  .pair { display: grid; grid-template-columns: 1fr; gap: 6px; text-align: center;
+    border: 2.2px solid var(--ink); border-radius: 9px; padding: 12px; margin: 10px 0; }
+  .pair .cap { font-size: 10.5pt; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+  .forms { border-collapse: collapse; width: 100%; margin: 8px 0; }
+  .forms th { border: 1.8px solid var(--ink); background: var(--tint); padding: 5px 6px;
+    font-size: 9pt; text-align: center; }
+  .forms td { border: 1.4px solid var(--rule); padding: 10px 6px; text-align: center; }
+  .forms td.nm { font-size: 10.5pt; text-align: left; }
+  .six { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 8px 0; }
+  .six div { border: 2px solid var(--ink); border-radius: 8px; padding: 14px 2px; text-align: center; }
+  .six .nm { display: block; font-size: 13pt; color: var(--muted); margin-top: 3px; }
+  .wline { display: grid; grid-template-columns: 1fr 3in; gap: 12px; align-items: center;
+    border: 2.2px solid var(--ink); border-radius: 9px; padding: 18px 13px; margin: 14px 0; font-size: 12pt; }
+  .wline .lines { border-bottom: 1.6px solid var(--ink); height: .5in; margin-top: 12px; }
+  .fam { border-collapse: collapse; width: 100%; margin: 6px 0; }
+  .fam td { border: 1.4px solid var(--rule); padding: 9px 10px; font-size: 12pt; }
+  .fam td.w { text-align: center; width: 1.5in; }
+  .tick { display: inline-block; width: .3in; height: .3in; border: 2.2px solid var(--ink);
+    border-radius: 5px; vertical-align: middle; }
+
+</style>
+</head>
+<body>
+
+<div class="page ">
+  <header>
+    
+    <h1>One Line, Not Letters</h1>
+    <p class="sub">Arabic &middot; One page</p>
+  </header>
+  <div class="nameline">
+    <span>Name</span>
+    <span class="short">Date</span>
+  </div>
+  <div class="directions">
+    <b>DIRECTIONS:</b> The same Arabic word twice: letters apart, then written for real. Read right to left.
+  </div>
+
+
+  <div class="pair">
+    <div class="cap">the letters, standing apart</div>
+    <div><span style="display:inline-flex;flex-direction:row-reverse;align-items:baseline;gap:7px"><svg viewBox="0 0 55.8 100" width="69.2" height="124" role="img" aria-label="Arabic letter kaf, iso form" style="vertical-align:baseline"><path d="M22.6 80Q16.2 80 9 79.4Q1.7 78.8 1.7 78Q1.7 76.3 2.2 73.8Q2.7 71.3 3.3 70.3Q7.2 71.2 13.2 71.8Q19.1 72.4 24.5 72.4Q29.8 72.4 35.2 71.9Q40.6 71.4 46 70.4Q45 64.5 44 58.5Q43 52.6 41.9 46.7Q41.3 43.5 40.7 39.6Q40 35.8 39.5 32Q39 28.3 38.7 25.3Q38.4 22.3 38.4 20.8Q38.4 17.5 39.9 15.6Q41.4 13.7 45 12.9Q45.5 14.8 46.6 18.3Q47.6 21.8 48.5 24.8L45.9 27Q49.8 63.4 49.8 69.2Q49.8 72 48.8 74.2Q47.8 76.3 46.2 78.3Q40.7 79.1 34.8 79.5Q28.8 80 22.6 80M18 60.6Q16.7 60.6 16.2 60Q15.7 59.4 15.7 58.6Q18.3 58.4 20.8 57.5Q23.2 56.6 24.9 55.4Q25.7 54.9 26.3 54.3Q26.8 53.8 27.1 53.2Q22.4 53.1 19.8 52.3Q17.2 51.4 17.2 48.4Q17.2 46.8 18.4 45Q19.6 43.2 21.4 41.9Q23.2 40.6 25 40.6Q27.6 40.6 28.4 43.4L26.8 44.1Q26.3 43.6 25.6 43.6Q24.8 43.6 23.7 44.4Q22.5 45.2 21.6 46.3Q20.7 47.4 20.5 48.5Q22.2 49.3 24.8 49.5Q27.4 49.8 28.7 50.7Q29.6 51.3 29.6 52.6Q29.6 53.9 27.7 55.8Q25.8 57.7 23.1 59.1Q20.4 60.6 18 60.6" fill="#16130F"/></svg><svg viewBox="0 0 77.2 100" width="95.7" height="124" role="img" aria-label="Arabic letter teh, iso form" style="vertical-align:baseline"><path d="M31.4 80Q19.6 80 13.3 75.8Q7 71.5 7 63Q7 56.6 8.3 52L11.9 52Q11.8 52.4 11.7 54Q11.6 55.7 11.6 56.9Q11.6 62.7 13.8 65.8Q16 69 20.8 70.7Q25.7 72.4 33.5 72.4Q42.8 72.4 51.7 70.5Q60.6 68.6 67.5 65.3Q67 63.2 66.1 60.5Q65.2 57.7 63.9 54.3Q62 49.3 62 47.6Q62 45.5 63.7 43.3Q65.4 41 68.6 39.2Q70.2 46.6 71.3 52Q72.3 57.3 72.3 60.9Q72.3 64.3 68.8 71.1Q62.2 75.3 52.8 77.7Q43.3 80 31.4 80M43.6 47.2Q41.4 45.5 39.8 43.9Q38.1 42.4 37 41Q37.5 40.5 39.1 38.8Q40.7 37.1 43.4 34.3Q44 34.9 45.6 36.4Q47.1 37.9 49.6 40.3Q47.7 43.3 43.6 47.2M28.6 48.6Q26.4 46.8 24.7 45.3Q23 43.7 21.9 42.5Q24.5 40 28.4 35.7Q29 36.4 30.5 37.9Q32 39.4 34.5 41.7Q33.6 43.2 32.1 44.9Q30.6 46.6 28.6 48.6" fill="#16130F"/></svg><svg viewBox="0 0 23.8 100" width="29.5" height="124" role="img" aria-label="Arabic letter alef, iso form" style="vertical-align:baseline"><path d="M15 79.2L10.4 80Q10.1 62.4 9.5 47.9Q8.8 33.3 7.7 21.8Q7.3 17.7 8.8 15.6Q10.4 13.6 14.3 12.9Q14.7 14.8 15.7 18Q16.6 21.3 17.8 24.8L15.1 27.1Q15.5 34.5 15.7 42.3Q15.8 50.1 15.7 59.1Q15.5 68.1 15 79.2" fill="#16130F"/></svg><svg viewBox="0 0 77.2 100" width="95.7" height="124" role="img" aria-label="Arabic letter beh, iso form" style="vertical-align:baseline"><path d="M31.4 80Q19.6 80 13.3 75.8Q7 71.5 7 63Q7 56.6 8.3 52L11.9 52Q11.8 52.4 11.7 54Q11.6 55.7 11.6 56.9Q11.6 62.7 13.8 65.8Q16 69 20.8 70.7Q25.7 72.4 33.5 72.4Q42.8 72.4 51.7 70.5Q60.6 68.6 67.5 65.3Q67 63.2 66.1 60.5Q65.2 57.7 63.9 54.3Q62 49.3 62 47.6Q62 45.5 63.7 43.3Q65.4 41 68.6 39.2Q70.2 46.6 71.3 52Q72.3 57.3 72.3 60.9Q72.3 64.3 68.8 71.1Q62.2 75.3 52.8 77.7Q43.3 80 31.4 80M38 100.7Q35.8 99 34 97.3Q32.2 95.7 30.8 94.1Q35.3 89.8 37.8 86.8Q41.3 90.5 44.4 93.4Q42 96.7 38 100.7" fill="#16130F"/></svg></span></div>
+  </div>
+  <div class="pair">
+    <div class="cap">the same four letters, written</div>
+    <div><span style="display:inline-flex;flex-direction:row-reverse;align-items:baseline;gap:0px"><svg viewBox="0 0 41.5 100" width="51.5" height="124" role="img" aria-label="Arabic letter kaf, init form" style="vertical-align:baseline"><path d="M0 80Q-0.8 80-0.8 79.2L-0.8 73.2Q-0.8 72.4 0 72.4Q6.9 72.4 12.1 71.7Q17.3 70.9 21.3 69.8Q25.4 68.7 29.5 66.5Q27.7 60.9 22.6 56.1Q20 53.7 16.6 51.4Q13.1 49.1 8.6 46.9Q7.4 47.2 6.1 47.2Q3.5 47.2 1.8 45.4Q0 43.5 0 40.7Q0 39.2 0.5 37Q1 34.9 1.7 33.1Q2.3 31.4 2.6 31.2Q9.3 27.7 14.2 25.3Q19.1 22.9 23.1 21.1Q27 19.3 30.6 17.8Q34.2 16.2 38.2 14.6Q39.7 15.8 39.7 18.4Q39.7 20.7 38.7 22Q37.7 23.3 35.4 24.2Q25.2 28.5 17.3 31.9Q9.3 35.4 3.7 38Q11.3 39.9 18.3 44.1Q25.2 48.4 29.3 53.7Q33.5 58.9 33.5 63.6Q33.5 71.8 24.8 76Q20.6 77.9 14.5 79Q8.3 80 0 80" fill="#16130F"/></svg><svg viewBox="0 0 36 100" width="44.6" height="124" role="img" aria-label="Arabic letter teh, med form" style="vertical-align:baseline"><path d="M0 80Q-0.8 80-0.8 79.2L-0.8 73.2Q-0.8 72.4 0 72.4Q6.2 72.4 10.5 71.8Q14.8 71.3 16.6 70Q17.7 69.3 19.2 66.8Q20.7 64.4 23.6 58.9Q24.5 57.2 26.7 57.2Q27.9 57.2 29.2 58Q28.6 59.5 27.6 61.8Q26.5 64.2 25.6 66.2Q24.7 68.2 24.3 68.6Q27.7 70.7 30.6 71.5Q33.5 72.4 36.9 72.4Q37.7 72.4 37.7 73.2L37.7 79.2Q37.7 80 36.9 80Q27.6 80 21.1 74.2L19.5 76.3Q18.8 77 15.7 77.9Q12.5 78.8 8.3 79.4Q4 80 0 80M27 48.2Q24.8 46.5 23.2 44.9Q21.5 43.4 20.4 42Q20.9 41.5 22.5 39.8Q24.1 38.1 26.8 35.3Q27.4 35.9 29 37.4Q30.5 38.9 33 41.3Q31.1 44.3 27 48.2M12 49.6Q9.8 47.8 8.1 46.3Q6.4 44.7 5.3 43.5Q7.9 41 11.8 36.7Q12.4 37.4 13.9 38.9Q15.4 40.4 17.9 42.7Q17 44.2 15.5 45.9Q14 47.6 12 49.6" fill="#16130F"/></svg><svg viewBox="0 0 25.3 100" width="31.4" height="124" role="img" aria-label="Arabic letter alef, fin form" style="vertical-align:baseline"><path d="M26.2 80Q20.3 80 16.4 77.7Q12.5 75.3 12 71.3Q11.6 67.7 11.2 63.3Q10.7 58.8 10.2 52.7Q9.7 46.6 9.1 38.3Q8.4 29.9 7.6 18.5Q9 17.1 10.7 15.6Q12.4 14.2 14.4 12.9Q14.7 20.7 14.9 28.3Q15.1 35.9 15.3 44.4Q15.4 52.8 15.5 63.1L15.8 69.8Q20.5 72.4 26.2 72.4Q27 72.4 27 73.2L27 79.2Q27 80 26.2 80" fill="#16130F"/></svg><svg viewBox="0 0 77.2 100" width="95.7" height="124" role="img" aria-label="Arabic letter beh, iso form" style="vertical-align:baseline"><path d="M31.4 80Q19.6 80 13.3 75.8Q7 71.5 7 63Q7 56.6 8.3 52L11.9 52Q11.8 52.4 11.7 54Q11.6 55.7 11.6 56.9Q11.6 62.7 13.8 65.8Q16 69 20.8 70.7Q25.7 72.4 33.5 72.4Q42.8 72.4 51.7 70.5Q60.6 68.6 67.5 65.3Q67 63.2 66.1 60.5Q65.2 57.7 63.9 54.3Q62 49.3 62 47.6Q62 45.5 63.7 43.3Q65.4 41 68.6 39.2Q70.2 46.6 71.3 52Q72.3 57.3 72.3 60.9Q72.3 64.3 68.8 71.1Q62.2 75.3 52.8 77.7Q43.3 80 31.4 80M38 100.7Q35.8 99 34 97.3Q32.2 95.7 30.8 94.1Q35.3 89.8 37.8 86.8Q41.3 90.5 44.4 93.4Q42 96.7 38 100.7" fill="#16130F"/></svg></span></div>
+  </div>
+
+  <div class="note"><b>Arabic is written as one joined line.</b> Each letter changes shape to fit where it lands. There is no version where the letters come apart.</div>
+
+  <ol class="qs" start="1"><li><span class="qt">Draw a line under the place in the written version where the line <b>breaks</b>. It breaks once. <i>(Mark it on the second box above.)</i></span></li><li><span class="qt">Four letters went in. How many separate pieces came out? &nbsp;<span class="abox" style="width:0.9in;height:0.42in"><span class="alab">pieces</span></span></span></li></ol>
+
+  <footer>
+    <span>Score: ______ / 2</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Joined up</span>
+  </footer>
+</div>
+
+</body>
+</html>

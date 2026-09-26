@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="sheet-kind" content="worksheet">
+<title>Pi Is a Letter — Greek</title>
+<style>
+  :root { --font: Georgia, "Times New Roman", serif; }
+
+  /* Page margins live HERE only — body padding stays 0 for print so the two
+     don't stack and eat the sheet. */
+  @page { size: letter portrait; margin: 0.45in 0.5in; }
+
+  /*
+   * THE PALETTE. The same one the shop wears (kitchen-table/BRAND.md): warm
+   * near-black ink, one accent, pine kept back for the answer key.
+   *
+   * WHY A SHEET HAS COLOR AT ALL. Every sheet was pure grayscale — #000 rules,
+   * #333 subtitles, #f0f0f0 boxes — which is what you get by never deciding.
+   * The paper is the product and it looked like a fax. A printer set to
+   * grayscale, or one that has no color to give, renders all of this as the
+   * greys it already had, so nothing below costs a parent anything they were
+   * not already spending.
+   *
+   * WHAT STAYS BLACK, ON PURPOSE:
+   *   - anything drawn to be written on (rules, name lines, answer boxes)
+   *   - anything drawn to be traced or colored in (line art, letter guides)
+   *   - the confidence rings, which have to survive a mono laser
+   * Color marks the sheet's own furniture — its rule, its numbering, its
+   * boxes — and never the part a child puts a pencil through.
+   */
+  :root {
+    --ink:    #16130F;
+    --muted:  #6B635A;
+    --rule:   #CFC3B2;
+    --guide:  #BCAE9C;
+    --accent: #C0511D;
+    --tint:   #F7EDE4;
+    --slate:  #2E5A78;
+    --tintslate: #E9EFF4;
+    --deep:   #2C4A45;
+    --tintdeep: #ECF1EF;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font);
+    color: #000; background: #fff;
+    font-size: 12pt; line-height: 1.3;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+
+  /* ORDER MATTERS. This generic rule must come BEFORE the @media screen block:
+     same specificity, so whichever is declared last wins. With it after, the
+     on-screen preview stretches to the viewport instead of 8.5in — print is
+     unaffected, but the proof you check before printing is wrong. */
+  .page { width: 100%; }
+  .page + .page { page-break-before: always; }
+
+  @media screen {
+    body { padding: 0.5in; background: #ddd; }
+    .page {
+      background: #fff; padding: 0.45in 0.5in;
+      width: 8.5in; min-height: 11in;
+      margin: 0 auto 24px; box-shadow: 0 2px 10px rgba(0,0,0,.3);
+    }
+  }
+
+  /* ------------------------------------------------------------- header */
+  header { border-bottom: 3px double var(--accent); padding-bottom: 6px; }
+  header.cont { border-bottom: 1px solid var(--rule); }
+  h1 { font-size: 16pt; margin: 0 0 1px; letter-spacing: .01em; }
+  .sub { font-size: 10pt; font-style: italic; color: var(--muted); margin: 0; }
+
+  .nameline { display: flex; gap: 26px; font-size: 10.5pt; margin: 11px 0 12px; }
+  .nameline span { flex: 1; border-bottom: 1px solid var(--ink); padding-bottom: 1px; }
+  .nameline span.short { flex: 0 0 1.9in; }
+
+  .directions {
+    font-size: 10.5pt; line-height: 1.35;
+    background: var(--tint); border-left: 4px solid var(--accent);
+    padding: 7px 10px; margin: 12px 0 14px;
+  }
+  .directions b { letter-spacing: .03em; }
+  .tip { font-style: italic; margin-top: 3px; }
+
+  /* ------------------------------------------------- problems and grids */
+  .grid { display: grid; gap: 13px 16px; margin-top: 4px; }
+  .prob { page-break-inside: avoid; display: flex; gap: 5px; align-items: flex-start; }
+  .pn { font-weight: bold; font-size: 11pt; min-width: .28in; flex: 0 0 auto; color: var(--accent); }
+  .pbody { flex: 1; min-width: 0; }
+
+  /* Digits need lining figures and even widths whatever the body font is. */
+  .num, .vert, .horiz { font-family: "Trebuchet MS", "Segoe UI", Tahoma, Verdana, sans-serif; font-variant-numeric: lining-nums tabular-nums; }
+
+  /* A stacked column algorithm.
+     Two grid columns — operator, then digits — because a floated or absolutely
+     positioned operator overlaps the digits as soon as the numbers get wide,
+     and "324" with a + sitting on the 3 is unreadable. The grid also lets the
+     rule under the last operand span BOTH columns, which is how it is written
+     by hand. The rule is heavy: it is the line you write the answer beneath. */
+  .vert {
+    display: inline-grid; grid-template-columns: auto auto;
+    font-size: 15pt; line-height: 1.3; text-align: right;
+  }
+  .vert > span { padding: 0 0 1px 0; }
+  .vert .op { text-align: left; padding-right: .16in; }
+  .vert .last { border-bottom: 2.5px solid var(--ink); padding-bottom: 3px; }
+  .vert .ans { height: .4in; }
+  /* Partial-products working, for 2-digit x 1-digit before the short method. */
+  .vert .part { font-size: 11pt; color: var(--muted); }
+  /* A row of worked examples that fade — see lib/formats.js faded(). The
+     caption is what makes the fade legible: without it the third one looks like
+     a question somebody forgot to number. */
+  .egrow { display: flex; gap: .34in; align-items: flex-start; margin: 0 0 4px; }
+  .eg { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; }
+  .eglab { font-size: 8.5pt; color: var(--slate); letter-spacing: .02em; }
+
+  /* The carried digits. Small and grey so the sum still reads as the sum, and
+     tight to the row below it so a carry sits ON the column it goes into. */
+  .vert .carry { font-size: 9pt; color: var(--slate); line-height: 1; padding: 0 0 1px 0; }
+
+  .horiz { font-size: 14pt; white-space: nowrap; }
+
+  /* Row numbers in a word list. Gray and small: they are there so a list can be
+     dictated ("number seven") and marked without counting down the page, and
+     they must not compete with the word itself. */
+  .wn { color: var(--muted); font-size: 9pt; }
+
+  /* The box an answer goes in. inline-block so it can sit mid-sentence. */
+  .abox {
+    display: inline-block; border: 1.6px solid var(--slate); border-radius: 3px;
+    vertical-align: middle; margin: 0 3px; position: relative; background: #fff;
+  }
+  /* Scoped to the box: as a bare ".alab" it pinned any generator's own .alab
+     to the bottom of the page (life-07-signs-and-forms 40, 2026-09-24). */
+  .abox > .alab {
+    position: absolute; bottom: 1px; left: 0; right: 0;
+    text-align: center; font-size: 7pt; color: var(--muted); font-style: italic;
+  }
+
+  /* Confidence marks. The rings are drawn with a border and a gradient rather
+     than an SVG so they stay inline with the question text at any font size,
+     and print black on a mono laser without relying on a background image. */
+  .conf { float: right; margin: 2px 0 0 8px; white-space: nowrap; }
+  .cring {
+    display: inline-block; width: 11px; height: 11px; margin-left: 4px;
+    border: 1.4px solid var(--slate); border-radius: 50%; vertical-align: middle;
+  }
+  .cring-full { background: var(--accent); }
+  .cring-half { background: linear-gradient(90deg, var(--accent) 50%, #fff 50%); }
+  .cring-none { background: #fff; }
+  ol.qs.hasconf li { overflow: hidden; }
+
+  .conflegend {
+    border: 1.2px solid var(--rule); border-radius: 4px;
+    padding: 3px 8px; margin: 0 0 7px;
+    font-size: 8.5pt; color: var(--muted); display: flex; gap: 14px; align-items: center;
+  }
+  .conftitle { font-weight: 700; color: var(--ink); }
+  .confitem { white-space: nowrap; }
+
+  .work {
+    border: 1.4px dashed var(--rule); border-radius: 4px;
+    margin: 6px 0 2px; position: relative;
+  }
+  /* The label S.work() puts in the box: a DIRECT child only. As ".work span"
+     it also caught every span inside any generator's own .work content and
+     stacked them all at the top-left corner (math-11-grade6 47, 2026-09-23). */
+  .work > span {
+    position: absolute; top: 3px; left: 6px;
+    font-size: 8pt; color: var(--muted); font-style: italic;
+  }
+
+  /* ------------------------------------------------------ writing lines */
+  /* Primary rule: solid top, dashed midline, heavy baseline. Capitals reach
+     the top line, lowercase bodies sit under the dashed one. */
+  .write {
+    position: relative; height: 0.375in;
+    margin: 6px 0 0 .3in;
+    border-top: 1px solid var(--rule); border-bottom: 2px solid var(--ink);
+  }
+  .write.flush { margin-left: 0; }
+  .write + .write { margin-top: .17in; }
+  .write::after {
+    content: ""; position: absolute; left: 0; right: 0; top: 50%;
+    border-top: 1px dashed var(--guide);
+  }
+
+  /* ------------------------------------------------------- question list */
+  ol.qs { margin: 0; padding: 0 0 0 .34in; }
+  ol.qs li { margin-bottom: 13px; page-break-inside: avoid; }
+  ol.qs li::marker { font-weight: bold; font-size: 11pt; color: var(--accent); }
+  .qt { display: block; }
+
+  .mcq { display: grid; gap: 3px 14px; margin: 5px 0 2px .12in; font-size: 11pt; }
+  .opt { white-space: nowrap; }
+
+  /* -------------------------------------------------------------- tables */
+  .tbl { border-collapse: collapse; margin: 8px 0; font-size: 11pt; width: 100%; }
+  .tbl th, .tbl td { border: 1.4px solid var(--ink); padding: 5px 8px; text-align: left; }
+  .tbl th { color: var(--slate); }
+  .tbl th { background: var(--tint); font-size: 10pt; letter-spacing: .02em; }
+  .tbl td.blank { height: .34in; }
+  .tbl.narrow { width: auto; }
+  .tbl.center td, .tbl.center th { text-align: center; }
+
+  /* ------------------------------------------------------------ passages */
+  .passage {
+    border: 1.5px solid var(--slate); border-radius: 4px;
+    padding: 11px 14px; margin-bottom: 12px;
+    font-size: 11.5pt; line-height: 1.55;
+  }
+  .passage h2 { font-size: 13pt; margin: 0 0 6px; color: var(--deep); }
+  .passage p { margin: 0 0 8px; }
+  .passage p:last-child { margin-bottom: 0; }
+  .passage .byline { font-size: 9.5pt; font-style: italic; color: var(--muted); margin-bottom: 8px; }
+  /* Numbered paragraphs, so a question can say "in paragraph 2". */
+  .passage p.np { position: relative; padding-left: .3in; }
+  .passage p.np::before {
+    content: attr(data-p); position: absolute; left: 0; top: 0;
+    font-size: 9pt; color: var(--accent); font-weight: bold;
+  }
+
+  .wordbank {
+    border: 1.5px dashed var(--slate); border-radius: 4px;
+    padding: 8px 12px; margin: 10px 0 12px;
+    font-size: 11.5pt; text-align: center;
+  }
+  .wordbank b { display: block; font-size: 9.5pt; letter-spacing: .06em;
+    text-transform: uppercase; margin-bottom: 4px; color: var(--accent); }
+  .wordbank span { display: inline-block; margin: 2px 11px; }
+
+  .note {
+    border-left: 4px solid var(--deep); background: var(--tintdeep);
+    padding: 7px 11px; margin: 10px 0; font-size: 10.5pt;
+  }
+  .note b { letter-spacing: .02em; }
+
+  /* -------------------------------------------------------------- footer */
+  /* THE WORDMARK SITS IN THE FOOTER THAT WAS ALREADY THERE, so it costs no
+     height at all — a sheet that fitted before fits now. Upright where the rest
+     of the line is italic, and a size down: it is a signature, not a message,
+     and it must never compete with "Score: ___ / 10". */
+  .brand { font-style: normal; font-size: 7.5pt; letter-spacing: .04em;
+    color: var(--accent); align-self: center; }
+
+  footer {
+    margin-top: 14px; padding-top: 6px; border-top: 1px solid var(--rule);
+    font-size: 9pt; font-style: italic; color: var(--muted);
+    display: flex; justify-content: space-between;
+  }
+
+  /* ---------------------------------------------------------- answer key */
+  .keybadge {
+    display: inline-block; border: 2px solid var(--deep); color: var(--deep); padding: 2px 9px;
+    font-size: 9.5pt; font-weight: bold; letter-spacing: .08em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .key .why {
+    display: block; font-size: 9pt; font-style: italic; color: var(--muted); margin-top: 1px;
+  }
+  /* Highlight rather than underline: <u> in a key marks WHAT CHANGED, and an
+     underline under a comma is invisible. */
+  .key u { text-decoration: none; background: var(--tint); padding: 0 2px; font-weight: bold; }
+  .keygrid .pbody { font-family: "Trebuchet MS", "Segoe UI", Tahoma, Verdana, sans-serif; font-size: 12pt; }
+  /* A key's pictures scale to their column: at 1fr a wide drawing pushed a
+     three-column key 92px off the paper (art-04-drawing 10, 2026-09-24). */
+  .keygrid svg { max-width: 100%; height: auto; }
+  .keylist .qt { font-weight: normal; }
+
+  /*
+   * The guide page. Four lines per question, and the ASK line is the one that
+   * gets used at the table, so it is the one with a rule beside it — a parent
+   * scanning this page in ten seconds should land on the follow-up question
+   * and nothing else.
+   */
+  .guide { padding-left: .3in; }
+  .guide li { margin-bottom: 11px; page-break-inside: avoid; }
+  .guide .gq { font-weight: bold; font-size: 11pt; margin-bottom: 3px; }
+  /* 9pt, matching the key's own why line, because the guide page is the
+     binding constraint on every open sheet: four lines per question against a
+     key's one, and at 10pt a sheet with seven questions ran onto a second
+     side. Found by measuring, not chosen. (No backticks in here — this CSS
+     lives inside a template literal and one would close it.) */
+  .guide .glook, .guide .gthin, .guide .gstrong {
+    font-size: 9pt; line-height: 1.3; margin-top: 1px;
+  }
+  .guide .gthin { color: var(--muted); }
+  .guide .gstrong { color: var(--muted); font-style: italic; }
+  .guide .gask {
+    font-size: 9.5pt; line-height: 1.3; margin-top: 3px;
+    border-left: 3px solid var(--slate); padding-left: 7px;
+  }
+  .key .qs li { margin-bottom: 9px; }
+
+  /*
+   * INLINE-BLOCK, NOT BLOCK, AND THIS WAS WRONG FOR A LONG TIME. A block-level
+   * svg ignores text-align: center on its parent and sits flush left — so 117
+   * sheets across 35 packs said "centre this diagram" and got a left-aligned
+   * one. Twenty-five of them were origami and paper-plane fold sequences, where
+   * the whole page is diagrams.
+   *
+   * Nobody spotted it because a left-flush diagram looks deliberate; it only
+   * reads as wrong next to a centered one, and no sheet has both.
+   *
+   * inline-block makes text-align do what every one of those authors meant,
+   * and leaves a diagram in a left-aligned container exactly where it was.
+   * vertical-align: top kills the baseline gap that inline elements otherwise
+   * leave underneath them, which would have pushed long pages over.
+   */
+  svg { display: inline-block; vertical-align: top; }
+  svg.inline { vertical-align: middle; }
+
+  .big { border: 3.2px solid var(--ink); border-radius: 12px; padding: 14px; margin: 12px 0;
+    text-align: center; }
+  .big .lab { font-size: 9.5pt; color: var(--muted); letter-spacing: .05em;
+    text-transform: uppercase; margin-top: 4px; }
+  .metrow { display: grid; grid-template-columns: .3in .7in .75in .6in 1fr; gap: 10px; align-items: center;
+    border: 2px solid var(--ink); border-radius: 9px; padding: 7px 10px; margin: 7px 0; }
+  .metrow.head { border: none; padding: 0 10px; font-size: 9pt; color: var(--muted); margin-bottom: 2px; }
+  .metrow .num { font-size: 9.5pt; color: var(--muted); }
+  .metrow .nm { font-size: 12.5pt; }
+  .metrow .sd { font-size: 12.5pt; font-style: italic; }
+  .metrow .bx, .rootrow .bx { display: block; border-bottom: 1.7px solid var(--ink); height: .28in; }
+  .bank { border: 1.8px dashed var(--rule); border-radius: 8px; padding: 8px 11px; margin: 9px 0;
+    font-size: 10pt; line-height: 1.8; }
+  .chart { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 9px 0; }
+  .chart .cell { border: 2px solid var(--rule); border-radius: 8px; padding: 5px 3px; text-align: center; }
+  .chart .cell .n { display: block; font-size: 9pt; margin-top: 2px; }
+  .chart .cell .s { display: block; font-size: 8.5pt; color: var(--muted); }
+  .three { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 10px 0; }
+  .three .col { border: 2.3px solid var(--ink); border-radius: 10px; padding: 10px 10px; }
+  .three .col h4 { margin: 0 0 2px; font-size: 12pt; }
+  .three .col .hint { display: block; font-size: 10pt; color: var(--muted); margin-bottom: 6px; }
+  .pair { display: inline-block; text-align: center; margin: 6px 9px 6px 0; }
+  .pair .to { font-size: 14pt; color: var(--muted); display: block; }
+  .rootrow { display: grid; grid-template-columns: .24in 1.5in 1fr 1fr .9in; gap: 9px; align-items: center;
+    border: 2.1px solid var(--ink); border-radius: 9px; padding: 5px 10px; margin: 6px 0; }
+  .rootrow.head { border: none; padding: 0 10px; font-size: 9pt; color: var(--muted); }
+  .rootrow .num { font-size: 9.5pt; color: var(--muted); }
+  .rootrow .mn { font-size: 10.5pt; }
+  .runrow { border: 2.1px solid var(--ink); border-radius: 9px; padding: 8px 11px; margin: 8px 0; }
+  .runrow .cut { font-size: 9pt; color: var(--muted); margin-top: 4px; }
+  .runrow .bx { border-bottom: 1.7px solid var(--ink); display: inline-block; width: 1.7in; height: .26in; }
+  .vrow { display: grid; grid-template-columns: .75in 1fr 1fr; gap: 10px; align-items: center;
+    border: 2px solid var(--ink); border-radius: 9px; padding: 9px 12px; margin: 8px 0; font-size: 12pt; }
+  .vrow.head { border: none; padding: 0 11px; font-size: 9pt; color: var(--muted); }
+  .note { margin: 9px 0; }
+  ol.qs li { margin-bottom: 8px; }
+
+</style>
+</head>
+<body>
+
+<div class="page ">
+  <header>
+    
+    <h1>Pi Is a Letter</h1>
+    <p class="sub">Greek &middot; Page 1 of 3</p>
+  </header>
+  <div class="nameline">
+    <span>Name</span>
+    <span class="short">Date</span>
+  </div>
+  <div class="directions">
+    <b>DIRECTIONS:</b> Read the page. Page 2 has the work.
+  </div>
+
+<div class="plan" style="display:flex;align-items:stretch;gap:.08in;margin:.02in 0 .1in"><div style="flex:1;display:flex;align-items:center;gap:.07in;border:1.8px solid var(--ink);border-radius:5px;padding:.05in .08in"><span style="flex:0 0 auto;display:inline-block;width:.26in;height:.26in;line-height:.26in;border-radius:50%;background:var(--ink);color:#fff;text-align:center;font-weight:700;font-size:11pt">1</span><span style="font-size:10.5pt;font-weight:700;line-height:1.2">Read about pi</span></div><div style="align-self:center;font-size:16pt;font-weight:700;color:var(--ink)">&rarr;</div><div style="flex:1;display:flex;align-items:center;gap:.07in;border:1.8px solid var(--ink);border-radius:5px;padding:.05in .08in"><span style="flex:0 0 auto;display:inline-block;width:.26in;height:.26in;line-height:.26in;border-radius:50%;background:var(--ink);color:#fff;text-align:center;font-weight:700;font-size:11pt">2</span><span style="font-size:10.5pt;font-weight:700;line-height:1.2">Page 2: nine letters to place</span></div><div style="align-self:center;font-size:16pt;font-weight:700;color:var(--ink)">&rarr;</div><div style="flex:1;display:flex;align-items:center;gap:.07in;border:1.8px solid var(--ink);border-radius:5px;padding:.05in .08in"><span style="flex:0 0 auto;display:inline-block;width:.26in;height:.26in;line-height:.26in;border-radius:50%;background:var(--ink);color:#fff;text-align:center;font-weight:700;font-size:11pt">3</span><span style="font-size:10.5pt;font-weight:700;line-height:1.2">Page 3: four questions</span></div></div>
+  <div class="big" style="border-width:3.8px">
+    <svg viewBox="-4 6 73.9 112" width="99" height="150" role="img" aria-label="π"><path d="M56.8 81.8L56.8 81.8Q58.2 81.8 59.4 81.5Q60.5 81.2 61.2 80.8L61.2 80.8L61.2 87.7Q60.4 88.1 58.7 88.6Q56.9 89 54.6 89L54.6 89Q43.5 89 43.5 76.2L43.5 76.2L43.5 41.7L20.8 41.7L20.8 88L12.1 88L12.1 41.7L1.2 41.7L1.2 37.9L8.4 34.4L62.7 34.4L62.7 41.7L52.2 41.7L52.2 75.6Q52.2 79.1 53.5 80.5Q54.8 81.8 56.8 81.8" fill="#16130F"/></svg>
+    <div class="lab">you have seen this one</div>
+  </div>
+
+  <div class="note"><b>It is a letter.</b> Its name is <b>pi</b>, the sixteenth letter of the Greek
+  alphabet, and it says <b>p</b>. Here is the capital:</div>
+
+  <div class="big"><svg viewBox="-4 6 81.1 112" width="83" height="115" role="img" aria-label="Π"><path d="M18.7 88L9.7 88L9.7 16.6L63.3 16.6L63.3 88L54.4 88L54.4 24.5L18.7 24.5L18.7 88" fill="#16130F"/></svg><div class="lab">capital pi</div></div>
+
+  <div class="note"><b>Your P is this letter</b>, turned round with the loop closed. In 1706 a
+  mathematician named the circle number with the first letter of the Greek word for &ldquo;the way
+  round&rdquo;, like <i>p</i> for perimeter. It was somebody&rsquo;s initial.</div>
+
+  <footer>
+    <span>Nine more you already know &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Pi is a letter</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>Nine More You Have Already Met</h1>
+    <p class="sub">Greek &middot; Page 2 of 3</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Write <b>where you have probably seen</b> each letter. Choose from the list at the bottom.
+  </div>
+
+
+  <div class="metrow head"><div></div><div style="text-align:center">letter</div><div>its name</div><div>says</div><div>where you have seen it</div></div>
+  <div class="metrow">
+    <div class="num">1.</div>
+    <div style="text-align:center"><svg viewBox="-4 6 66.1 112" width="27" height="46" role="img" aria-label="Δ"><path d="M24.5 16.6L33.5 16.6L56.1 82.6L56.1 88L2 88L2 82.5L24.5 16.6M46.2 80.1L33.7 42.9Q32.2 38.4 31 34.2Q29.7 30 28.9 26.4L28.9 26.4Q28 30 26.9 34.2Q25.7 38.3 24.3 42.5L24.3 42.5L11.6 80.1L46.2 80.1" fill="#16130F"/></svg></div>
+    <div class="nm">delta</div>
+    <div class="sd">d</div>
+    <div class="bx"></div>
+  </div>
+  <div class="metrow">
+    <div class="num">2.</div>
+    <div style="text-align:center"><svg viewBox="-4 6 65 112" width="27" height="46" role="img" aria-label="Σ"><path d="M54.6 88L3.6 88L3.6 80.6L27 50.7L4.2 24.1L4.2 16.6L51.7 16.6L51.7 24.6L26.2 24.6Q24.8 24.6 22.4 24.6Q20 24.6 17.8 24.5Q15.6 24.5 14.5 24.5L14.5 24.5L37 50.6L13.5 80.2Q17.3 80.2 21.1 80.2Q24.8 80.1 28.8 80.1L28.8 80.1L54.6 80.1L54.6 88" fill="#16130F"/></svg></div>
+    <div class="nm">sigma</div>
+    <div class="sd">s</div>
+    <div class="bx"></div>
+  </div>
+  <div class="metrow">
+    <div class="num">3.</div>
+    <div style="text-align:center"><svg viewBox="-4 6 70.3 112" width="29" height="46" role="img" aria-label="μ"><path d="M45 34.4L53.8 34.4L53.8 88L46.7 88L45.3 80.8L44.8 80.8Q42.3 84.8 38.3 86.9Q34.3 89 28.7 89L28.7 89Q24.8 89 22 87.8Q19.2 86.5 17.2 84.5L17.2 84.5L16.8 84.5Q17 86.3 17.2 89.3Q17.3 92.3 17.3 96.4L17.3 96.4L17.3 112L8.5 112L8.5 34.4L17.3 34.4L17.3 69Q17.3 81.7 29.3 81.7L29.3 81.7Q38.2 81.7 41.6 76.7Q45 71.7 45 62.3L45 62.3L45 34.4" fill="#16130F"/></svg></div>
+    <div class="nm">mu</div>
+    <div class="sd">m</div>
+    <div class="bx"></div>
+  </div>
+  <div class="metrow">
+    <div class="num">4.</div>
+    <div style="text-align:center"><svg viewBox="-4 6 86.2 112" width="35" height="46" role="img" aria-label="Ω"><path d="M39.1 23.4L39.1 23.4Q27.1 23.4 21.5 29.9Q15.9 36.5 15.9 47.9L15.9 47.9Q15.9 57.9 19.6 66Q23.3 74.1 32.6 80.8L32.6 80.8L32.6 88L3.8 88L3.8 80.1L21.6 80.1Q15.2 75.2 10.8 67Q6.4 58.8 6.4 47.6L6.4 47.6Q6.4 37.8 10.2 30.6Q14 23.4 21.4 19.5Q28.7 15.5 39.1 15.5L39.1 15.5Q49.7 15.5 57 19.4Q64.3 23.3 68.1 30.5Q71.9 37.7 71.9 47.5L71.9 47.5Q71.9 58.7 67.6 67Q63.2 75.2 56.8 80.1L56.8 80.1L74.5 80.1L74.5 88L45.7 88L45.7 80.8Q55 74.2 58.8 66Q62.5 57.8 62.5 47.9L62.5 47.9Q62.5 36.5 56.9 29.9Q51.2 23.4 39.1 23.4" fill="#16130F"/></svg></div>
+    <div class="nm">omega</div>
+    <div class="sd">o</div>
+    <div class="bx"></div>
+  </div>
+  <div class="metrow">
+    <div class="num">5.</div>
+    <div style="text-align:center"><svg viewBox="-4 6 62.2 112" width="26" height="46" role="img" aria-label="λ"><path d="M8.5 88L-0.6 88L22.5 35.4L19.8 27.9Q18.2 23.6 16.3 21.1Q14.4 18.7 10.1 18.7L10.1 18.7Q8.3 18.7 7 18.9Q5.6 19.1 4.5 19.3L4.5 19.3L4.5 12.2Q5.9 11.9 7.6 11.6Q9.3 11.4 11.1 11.4L11.1 11.4Q16.3 11.4 19.5 13.2Q22.6 15 24.8 18.7Q26.9 22.4 28.9 28.2L28.9 28.2L46.2 76.4Q48.1 81.8 51.2 81.8L51.2 81.8Q52 81.8 52.9 81.6Q53.7 81.4 54.2 81.3L54.2 81.3L54.2 87.8Q53.1 88.3 51.7 88.7Q50.2 89 48.5 89L48.5 89Q44.8 89 42.7 87.2Q40.5 85.3 38.9 80.9L38.9 80.9L31.6 60.4Q30.8 58 29.8 55.1Q28.7 52.1 27.9 49.3Q27 46.4 26.6 44.5L26.6 44.5L26.2 44.5Q25.3 48 23.9 52Q22.4 56 20.7 59.9L20.7 59.9L8.5 88" fill="#16130F"/></svg></div>
+    <div class="nm">lambda</div>
+    <div class="sd">l</div>
+    <div class="bx"></div>
+  </div>
+  <div class="metrow">
+    <div class="num">6.</div>
+    <div style="text-align:center"><svg viewBox="-4 6 67.5 112" width="28" height="46" role="img" aria-label="θ"><path d="M54 50.3L54 50.3Q54 62.4 51.6 71.1Q49.1 79.7 43.8 84.4Q38.4 89 29.6 89L29.6 89Q17.2 89 11.4 78.7Q5.5 68.4 5.5 50.3L5.5 50.3Q5.5 38.1 7.9 29.4Q10.3 20.7 15.7 16.1Q21 11.5 29.6 11.5L29.6 11.5Q42.1 11.5 48.1 21.6Q54 31.8 54 50.3M29.6 18.7L29.6 18.7Q22 18.7 18.5 25.4Q14.9 32.2 14.4 45.6L14.4 45.6L45 45.6Q44.5 32.2 40.9 25.4Q37.3 18.7 29.6 18.7M29.6 81.8L29.6 81.8Q37.4 81.8 41.1 74.6Q44.8 67.4 45.1 52.9L45.1 52.9L14.4 52.9Q14.6 67.2 18.2 74.5Q21.7 81.8 29.6 81.8" fill="#16130F"/></svg></div>
+    <div class="nm">theta</div>
+    <div class="sd">th</div>
+    <div class="bx"></div>
+  </div>
+  <div class="metrow">
+    <div class="num">7.</div>
+    <div style="text-align:center"><svg viewBox="-4 6 69.5 112" width="29" height="46" role="img" aria-label="α"><path d="M27.5 89L27.5 89Q17.7 89 11.6 82.1Q5.5 75.1 5.5 61.4L5.5 61.4Q5.5 47.8 11.5 40.6Q17.5 33.4 28.3 33.4L28.3 33.4Q34.2 33.4 38.2 35.4Q42.1 37.5 44.7 41.6L44.7 41.6L45.3 41.6Q45.8 39.9 46.6 37.9Q47.4 35.9 48.5 34.4L48.5 34.4L55.4 34.4Q54.7 36.6 54.1 40.2Q53.5 43.8 53.2 47.8Q52.9 51.8 52.9 55.4L52.9 55.4L52.9 76.2Q52.9 79.3 54.1 80.6Q55.3 81.8 57 81.8L57 81.8Q57.8 81.8 58.7 81.6Q59.6 81.4 60 81.3L60 81.3L60 87.7Q59.3 88.1 57.7 88.6Q56.1 89 54.4 89L54.4 89Q50.7 89 48.4 87.2Q46 85.4 44.9 80.8L44.9 80.8L44.2 80.8Q41.9 84.2 38.1 86.6Q34.3 89 27.5 89M29 81.7L29 81.7Q37.3 81.7 40.8 77Q44.2 72.2 44.2 61.9L44.2 61.9L44.2 61.3Q44.2 51.3 41 46.1Q37.7 40.8 28.9 40.8L28.9 40.8Q21.6 40.8 18.1 46.1Q14.6 51.4 14.6 61.5L14.6 61.5Q14.6 71.5 18.1 76.6Q21.5 81.7 29 81.7" fill="#16130F"/></svg></div>
+    <div class="nm">alpha</div>
+    <div class="sd">a</div>
+    <div class="bx"></div>
+  </div>
+  <div class="metrow">
+    <div class="num">8.</div>
+    <div style="text-align:center"><svg viewBox="-4 6 71.1 112" width="29" height="46" role="img" aria-label="β"><path d="M32.4 11.5L32.4 11.5Q39.1 11.5 44.3 13.6Q49.5 15.8 52.5 20Q55.4 24.2 55.4 30.6L55.4 30.6Q55.4 37.8 51.5 42Q47.6 46.2 40.2 47.4L40.2 47.4L40.2 47.8Q49.3 48.8 54 53.7Q58.6 58.6 58.6 67.7L58.6 67.7Q58.6 78 52.2 83.5Q45.7 89 34.2 89L34.2 89Q28.4 89 24.5 88.1Q20.5 87.2 17.3 85.6L17.3 85.6L17.3 112L8.5 112L8.5 34.5Q8.5 26.4 11.6 21.3Q14.7 16.3 20.1 13.9Q25.5 11.5 32.4 11.5M32.2 18.8L32.2 18.8Q28.2 18.8 24.8 20.2Q21.4 21.6 19.4 25.1Q17.3 28.6 17.3 34.9L17.3 34.9L17.3 77.7Q20.8 79.5 24.6 80.7Q28.3 81.8 33.4 81.8L33.4 81.8Q42 81.8 45.9 78Q49.8 74.1 49.8 67.1L49.8 67.1Q49.8 59.2 45 55.6Q40.2 51.9 32.4 51.9L32.4 51.9L27.1 51.9L27.1 44.5L31.4 44.5Q39.2 44.5 42.8 40.8Q46.4 37.1 46.4 31L46.4 31Q46.4 24.8 42.6 21.8Q38.7 18.8 32.2 18.8" fill="#16130F"/></svg></div>
+    <div class="nm">beta</div>
+    <div class="sd">b</div>
+    <div class="bx"></div>
+  </div>
+  <div class="metrow">
+    <div class="num">9.</div>
+    <div style="text-align:center"><svg viewBox="-4 6 59.8 112" width="25" height="46" role="img" aria-label="γ"><path d="M51.3 34.4L31.5 86.7Q30 90.7 28.9 95.3Q27.8 99.9 27.2 104.3Q26.6 108.6 26.6 112L26.6 112L17.1 112Q17.1 109.2 17.8 105Q18.4 100.8 19.6 96.2Q20.7 91.5 22.2 87.4L22.2 87.4L0.5 34.4L9.6 34.4L20.9 62.5Q22 65.1 23.1 68.3Q24.2 71.5 25.1 74.4Q26 77.3 26.3 79.1L26.3 79.1L26.7 79.1Q27 77.5 27.9 74.5Q28.7 71.5 29.8 68.3Q30.8 65.1 31.6 62.9L31.6 62.9L42.2 34.4L51.3 34.4" fill="#16130F"/></svg></div>
+    <div class="nm">gamma</div>
+    <div class="sd">g</div>
+    <div class="bx"></div>
+  </div>
+
+  <div class="bank"><b>Choose from:</b>
+  a millionth — a microgram, a micrometre &nbsp;&middot;&nbsp; add all of these up &nbsp;&middot;&nbsp; ohms, printed on a resistor &nbsp;&middot;&nbsp; the change in something, in math and science &nbsp;&middot;&nbsp; the first kind of radiation &nbsp;&middot;&nbsp; the second kind &nbsp;&middot;&nbsp; the third kind &nbsp;&middot;&nbsp; the unknown angle in a triangle &nbsp;&middot;&nbsp; the wavelength of a wave</div>
+
+
+
+  <footer>
+    <span>Questions over the leaf &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Pi is a letter</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>What That Means</h1>
+    <p class="sub">Greek &middot; Page 3 of 3</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Answer in your own words.
+  </div>
+
+<ol class="qs" start="10"><li><span class="qt">You have been reading Greek letters for years. Why did nobody tell you that is what they were?</span><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">The three kinds of radiation are called alpha, beta and gamma. Those are the first three letters of the alphabet. What does that tell you about how they were named?</span><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Omega is the <b>last</b> letter. Somebody chose it for the unit of electrical resistance. Guess why, then say whether your guess can be checked.</span><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Write down one other symbol you have met in math or science that you have never known the name of. It does not have to be Greek.</span><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Score: ______ / 13</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Pi is a letter</span>
+  </footer>
+</div>
+
+</body>
+</html>

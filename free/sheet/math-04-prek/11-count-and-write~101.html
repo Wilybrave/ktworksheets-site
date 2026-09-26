@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="sheet-kind" content="worksheet">
+<title>Count and Write</title>
+<style>
+  @page { size: letter portrait; margin: 0.4in 0.45in; }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  :root {
+    --ink:    #16130F;
+    --muted:  #6B635A;
+    --rule:   #CFC3B2;
+    --guide:  #BCAE9C;
+    --accent: #C0511D;
+    --tint:   #F7EDE4;
+    --slate:  #2E5A78;
+    --tintslate: #E9EFF4;
+    --deep:   #2C4A45;
+    --tintdeep: #ECF1EF;
+  }
+
+  body {
+    font-family: Quicksand, 'URW Gothic', 'Century Gothic', sans-serif;
+    color: #000; background: #fff;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+
+  /* ORDER MATTERS. This generic rule must come BEFORE the @media screen block:
+   * both selectors have the same specificity, so whichever is declared last
+   * wins. With it after, it overrode the screen width and the preview stretched
+   * to the viewport — rows scaled up and pages measured 16in tall. Print was
+   * always fine (@media screen doesn't apply), but the on-screen proof lied. */
+  .page { width: 100%; }
+  .page + .page { page-break-before: always; }
+
+  @media screen {
+    body { padding: 0.4in; background: #ddd; }
+    .page {
+      background: #fff; padding: 0.4in 0.45in;
+      width: 8.5in; min-height: 11in;
+      margin: 0 auto 22px; box-shadow: 0 2px 10px rgba(0,0,0,.3);
+    }
+  }
+
+  header {
+    display: flex; align-items: center; gap: 16px;
+    border-bottom: 3px solid var(--slate); padding-bottom: 7px; margin-bottom: 2px;
+  }
+  .bigletter { font-size: 38pt; font-weight: 700; line-height: 1; letter-spacing: .02em; }
+  .htext { flex: 1; }
+  h1 { font-size: 14pt; font-weight: 700; margin: 0 0 2px; }
+  .sub { font-size: 10pt; color: var(--muted); margin: 0; }
+  .nameline {
+    font-size: 9.5pt; color: var(--muted);
+    border-bottom: 1px solid var(--ink); width: 2in;
+    padding-bottom: 1px; align-self: flex-end;
+  }
+
+  .label { font-size: 11.5pt; font-weight: 700; margin: 9px 0 1px; }
+  .label span { font-weight: 400; font-size: 10pt; color: var(--muted); }
+
+  .row { display: block; width: 100%; height: auto; margin-bottom: .06in; }
+  /* Rows that follow the header directly would otherwise jam against its rule. */
+  header + .row { margin-top: .12in; }
+
+  .words {
+    margin-top: 10px; padding-top: 7px; border-top: 1px solid var(--rule);
+    font-size: 12.5pt;
+    display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap;
+  }
+  .words b { font-size: 14pt; }
+  .words em { font-style: normal; color: var(--muted); }
+
+  /* The wordmark rides in the footer line that was already there — see the note
+     in lib/sheet.js. No height, upright, a size down, and never louder than the
+     two slots it sits between. */
+  .brand { font-style: normal; font-size: 7pt; letter-spacing: .04em;
+    color: var(--accent); align-self: center; }
+
+  footer {
+    margin-top: 7px; font-size: 8.5pt; color: var(--muted);
+    display: flex; justify-content: space-between;
+  }
+
+  .chart { display: grid; grid-template-columns: repeat(6, 1fr); gap: 7px; margin-top: 14px; }
+  .cell {
+    border: 2px solid var(--slate); border-radius: 8px; height: 1.35in;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .page.key { background: #fcfcfa; }
+  .page.key header { border-bottom-style: double; border-bottom-width: 3px; }
+  .keylist { font-size: 11pt; line-height: 1.7; }
+  .keylist p { margin: .02in 0; }
+  .keynote { border: 1.5px solid var(--deep); border-radius: 8px; padding: .07in .12in;
+    margin: .1in 0 0; font-size: 10pt; line-height: 1.5; }
+
+  .crow, .frow, .cmprow, .teenrow {
+    display: flex; align-items: center; gap: .22in;
+    border-bottom: 1px solid var(--rule);
+    padding: .1in .02in;
+  }
+  /* The wrapper holds the fixed column position so the arrows and write boxes
+     stay in line while the dot boxes themselves vary in width. */
+  .objwrap { flex: 1; display: flex; }
+  .objbox, .cmpbox {
+    border: 2px solid var(--slate); border-radius: 10px;
+    display: grid; gap: .08in; padding: .1in;
+    place-items: center;
+  }
+  .objbox { width: fit-content; }
+  .cmpbox { flex: 1; justify-content: center; align-content: center; min-height: .82in; }
+  .dot {
+    width: .32in; height: .32in; border-radius: 50%;
+    background: var(--ink); display: block;
+  }
+  /* THE COUNTING ROW UNDER A NUMERAL. .dot is display:block, so it only ever
+   * lays out because something around it does — every other dot row in this
+   * pack sits inside .objbox for exactly that reason. This row had no rule at
+   * all, so once the spans were emitted correctly they stacked into a column
+   * down the page instead of a row to count along. */
+  .counter { display: flex; flex-wrap: wrap; gap: .1in; margin-top: .07in; }
+  .counter.big { gap: .18in; margin-top: .12in; }
+  .counter.big .dot { width: .5in; height: .5in; }
+  .counter.big .zero { font-size: 16pt; }
+  .arrow { font-size: 17pt; color: var(--muted); }
+  .writebox {
+    width: .86in; height: .86in; flex: 0 0 auto;
+    border: 2.5px solid var(--slate); border-radius: 8px;
+    background:
+      linear-gradient(#9a9a9a, #9a9a9a) left 50% / 100% 1px no-repeat;
+  }
+
+  .frame {
+    display: grid; grid-template-columns: repeat(5, .44in);
+    grid-template-rows: repeat(2, .44in);
+    flex: 0 0 auto;
+  }
+  .frame.small { grid-template-columns: repeat(5, .26in); grid-template-rows: repeat(2, .26in); }
+
+  /* Eleven teen rows have to share one sheet, so this row is compact: the
+   * write box is the tallest thing in it and drives the row height. */
+  .teenrow { padding: .055in .02in; gap: .16in; }
+  .teenrow .writebox { width: .62in; height: .62in; }
+  .tf { border: 1.5px solid var(--slate); display: flex; align-items: center; justify-content: center; }
+  .tf.on::after {
+    content: ""; width: 62%; height: 62%; border-radius: 50%; background: var(--ink);
+  }
+
+  .seqrow { display: flex; gap: .1in; margin: .13in 0; justify-content: center; }
+  .seqbox {
+    width: .66in; height: .84in;
+    border: 2px solid var(--slate); border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .seqbox.blank { border-style: dashed; border-color: var(--muted); }
+
+  .teennum { width: .9in; display: flex; justify-content: center; }
+  .teenlabel { flex: 1; font-size: 11.5pt; color: var(--ink); }
+
+  .d2d { margin-top: .1in; }
+  .d2d svg { display: block; width: 100%; height: auto; }
+
+  .mrow {
+    display: flex; align-items: center; gap: .1in;
+    border-bottom: 1px solid var(--rule);
+    padding: .09in .02in;
+  }
+  .mrow .objwrap { flex: 0 1 auto; }
+  .mrow .dot { width: .36in; height: .36in; }
+  .mrow .writebox { width: 1.05in; height: 1.05in; }
+  .sym { flex: 0 0 auto; display: flex; }
+  .sym svg { display: block; }
+  .gonecount {
+    flex: 0 0 auto; width: .5in;
+    display: flex; justify-content: center;
+  }
+  .gonecount svg { display: block; }
+  /* The gap belongs BEFORE the equals sign, so = and the answer box stay
+     together as one statement rather than drifting apart. */
+  .mspace { flex: 1; }
+
+  /*
+   * A crossed-out dot has to be quieter than an intact one. The task is "count
+   * what is LEFT", so the remaining dots must be what the eye lands on — a
+   * heavy dark cross makes the page about what has gone instead.
+   */
+  .dot.gone {
+    background: var(--tint); position: relative;
+  }
+  .dot.gone::after {
+    content: ""; position: absolute; inset: -2px;
+    background:
+      linear-gradient(45deg, transparent 46%, #a0a0a0 46%, #a0a0a0 54%, transparent 54%),
+      linear-gradient(-45deg, transparent 46%, #a0a0a0 46%, #a0a0a0 54%, transparent 54%);
+  }
+
+  /* The glyph engine's default ink is mid-gray, which is right for a letter to
+     be traced and too faint for a numeral that has to be read. */
+  .gonecount path { stroke: #222; }
+  .sym path { stroke: #333; }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <header>
+    <div class="bigletter">&#9679;&#9679;</div>
+    <div class="htext">
+      <h1>Count and Write</h1>
+      <p class="sub">Touch each dot as you count. Then write how many in the box.</p>
+    </div>
+    <div class="nameline">Name</div>
+  </header>
+
+  <div class="crow">
+    <div class="objwrap"><div class="objbox" style="grid-template-columns:repeat(1,0.42in)"><span class="dot"></span></div></div>
+    <div class="arrow">&rarr;</div>
+    <div class="writebox"></div>
+  </div>
+  <div class="crow">
+    <div class="objwrap"><div class="objbox" style="grid-template-columns:repeat(2,0.42in)"><span class="dot"></span><span class="dot"></span></div></div>
+    <div class="arrow">&rarr;</div>
+    <div class="writebox"></div>
+  </div>
+  <div class="crow">
+    <div class="objwrap"><div class="objbox" style="grid-template-columns:repeat(3,0.42in)"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+    <div class="arrow">&rarr;</div>
+    <div class="writebox"></div>
+  </div>
+  <div class="crow">
+    <div class="objwrap"><div class="objbox" style="grid-template-columns:repeat(4,0.42in)"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+    <div class="arrow">&rarr;</div>
+    <div class="writebox"></div>
+  </div>
+  <div class="crow">
+    <div class="objwrap"><div class="objbox" style="grid-template-columns:repeat(5,0.42in)"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+    <div class="arrow">&rarr;</div>
+    <div class="writebox"></div>
+  </div>
+  <div class="crow">
+    <div class="objwrap"><div class="objbox" style="grid-template-columns:repeat(5,0.42in)"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+    <div class="arrow">&rarr;</div>
+    <div class="writebox"></div>
+  </div>
+  <div class="crow">
+    <div class="objwrap"><div class="objbox" style="grid-template-columns:repeat(5,0.42in)"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+    <div class="arrow">&rarr;</div>
+    <div class="writebox"></div>
+  </div>
+  <div class="crow">
+    <div class="objwrap"><div class="objbox" style="grid-template-columns:repeat(5,0.42in)"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+    <div class="arrow">&rarr;</div>
+    <div class="writebox"></div>
+  </div>
+
+  <footer>
+    <span>Set 1 of 2 &middot; set 101</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Count and write</span>
+  </footer>
+</div>
+
+<div class="page">
+  <header>
+    <div class="bigletter">&#9679;&#9679;</div>
+    <div class="htext">
+      <h1>Count and Write</h1>
+      <p class="sub">Touch each dot as you count. Then write how many in the box.</p>
+    </div>
+    <div class="nameline">Name</div>
+  </header>
+
+  <div class="crow">
+    <div class="objwrap"><div class="objbox" style="grid-template-columns:repeat(5,0.42in)"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+    <div class="arrow">&rarr;</div>
+    <div class="writebox"></div>
+  </div>
+  <div class="crow">
+    <div class="objwrap"><div class="objbox" style="grid-template-columns:repeat(3,0.42in)"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+    <div class="arrow">&rarr;</div>
+    <div class="writebox"></div>
+  </div>
+  <div class="crow">
+    <div class="objwrap"><div class="objbox" style="grid-template-columns:repeat(4,0.42in)"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+    <div class="arrow">&rarr;</div>
+    <div class="writebox"></div>
+  </div>
+  <div class="crow">
+    <div class="objwrap"><div class="objbox" style="grid-template-columns:repeat(5,0.42in)"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+    <div class="arrow">&rarr;</div>
+    <div class="writebox"></div>
+  </div>
+  <div class="crow">
+    <div class="objwrap"><div class="objbox" style="grid-template-columns:repeat(5,0.42in)"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+    <div class="arrow">&rarr;</div>
+    <div class="writebox"></div>
+  </div>
+  <div class="crow">
+    <div class="objwrap"><div class="objbox" style="grid-template-columns:repeat(5,0.42in)"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+    <div class="arrow">&rarr;</div>
+    <div class="writebox"></div>
+  </div>
+  <div class="crow">
+    <div class="objwrap"><div class="objbox" style="grid-template-columns:repeat(5,0.42in)"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+    <div class="arrow">&rarr;</div>
+    <div class="writebox"></div>
+  </div>
+  <div class="crow">
+    <div class="objwrap"><div class="objbox" style="grid-template-columns:repeat(5,0.42in)"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+    <div class="arrow">&rarr;</div>
+    <div class="writebox"></div>
+  </div>
+
+  <footer>
+    <span>Set 2 of 2 &middot; set 101</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Count and write</span>
+  </footer>
+</div>
+
+</body>
+</html>

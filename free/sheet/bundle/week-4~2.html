@@ -1,0 +1,663 @@
+<!DOCTYPE html><html><head>
+<meta charset="utf-8">
+<meta name="sheet-kind" content="worksheet">
+<title>My Body</title>
+<style>
+  @page { size: letter portrait; margin: 0.4in 0.45in; }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  :root {
+    --ink:    #16130F;
+    --muted:  #6B635A;
+    --rule:   #CFC3B2;
+    --guide:  #BCAE9C;
+    --accent: #C0511D;
+    --tint:   #F7EDE4;
+    --slate:  #2E5A78;
+    --tintslate: #E9EFF4;
+    --deep:   #2C4A45;
+    --tintdeep: #ECF1EF;
+  }
+
+  body {
+    font-family: Quicksand, 'URW Gothic', 'Century Gothic', sans-serif;
+    color: #000; background: #fff;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+
+  /* ORDER MATTERS. This generic rule must come BEFORE the @media screen block:
+   * both selectors have the same specificity, so whichever is declared last
+   * wins. With it after, it overrode the screen width and the preview stretched
+   * to the viewport — rows scaled up and pages measured 16in tall. Print was
+   * always fine (@media screen doesn't apply), but the on-screen proof lied. */
+  .page { width: 100%; }
+  .page + .page { page-break-before: always; }
+
+  @media screen {
+    body { padding: 0.4in; background: #ddd; }
+    .page {
+      background: #fff; padding: 0.4in 0.45in;
+      width: 8.5in; min-height: 11in;
+      margin: 0 auto 22px; box-shadow: 0 2px 10px rgba(0,0,0,.3);
+    }
+  }
+
+  header {
+    display: flex; align-items: center; gap: 16px;
+    border-bottom: 3px solid var(--slate); padding-bottom: 7px; margin-bottom: 2px;
+  }
+  .bigletter { font-size: 38pt; font-weight: 700; line-height: 1; letter-spacing: .02em; }
+  .htext { flex: 1; }
+  h1 { font-size: 14pt; font-weight: 700; margin: 0 0 2px; }
+  .sub { font-size: 10pt; color: var(--muted); margin: 0; }
+  .nameline {
+    font-size: 9.5pt; color: var(--muted);
+    border-bottom: 1px solid var(--ink); width: 2in;
+    padding-bottom: 1px; align-self: flex-end;
+  }
+
+  .label { font-size: 11.5pt; font-weight: 700; margin: 9px 0 1px; }
+  .label span { font-weight: 400; font-size: 10pt; color: var(--muted); }
+
+  .row { display: block; width: 100%; height: auto; margin-bottom: .06in; }
+  /* Rows that follow the header directly would otherwise jam against its rule. */
+  header + .row { margin-top: .12in; }
+
+  .words {
+    margin-top: 10px; padding-top: 7px; border-top: 1px solid var(--rule);
+    font-size: 12.5pt;
+    display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap;
+  }
+  .words b { font-size: 14pt; }
+  .words em { font-style: normal; color: var(--muted); }
+
+  /* The wordmark rides in the footer line that was already there — see the note
+     in lib/sheet.js. No height, upright, a size down, and never louder than the
+     two slots it sits between. */
+  .brand { font-style: normal; font-size: 7pt; letter-spacing: .04em;
+    color: var(--accent); align-self: center; }
+
+  footer {
+    margin-top: 7px; font-size: 8.5pt; color: var(--muted);
+    display: flex; justify-content: space-between;
+  }
+
+  .chart { display: grid; grid-template-columns: repeat(6, 1fr); gap: 7px; margin-top: 14px; }
+  .cell {
+    border: 2px solid var(--slate); border-radius: 8px; height: 1.35in;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .page.key { background: #fcfcfa; }
+  .page.key header { border-bottom-style: double; border-bottom-width: 3px; }
+  .keylist { font-size: 11pt; line-height: 1.7; }
+  .keylist p { margin: .02in 0; }
+  .keynote { border: 1.5px solid var(--deep); border-radius: 8px; padding: .07in .12in;
+    margin: .1in 0 0; font-size: 10pt; line-height: 1.5; }
+
+  .note {
+    border: 1.5px solid var(--slate); border-radius: 8px;
+    padding: .07in .12in; margin: .06in 0 .1in;
+    font-size: 10pt; color: var(--ink);
+  }
+  svg { display: block; }
+
+  .bigfig { display: flex; justify-content: center; margin: .04in 0 .1in; }
+  .bgrid { display: grid; grid-template-columns: repeat(6, 1fr); gap: .06in; justify-items: center; }
+  .bcell, .ccell, .scell, .wcell, .secell, .lcell, .piece {
+    display: flex; flex-direction: column; align-items: center;
+  }
+  .bcell span, .ccell span, .scell span, .wcell span, .secell span, .lcell span, .piece span {
+    font-size: 10.5pt; color: var(--ink);
+  }
+
+  .crow {
+    display: flex; align-items: center; gap: .3in;
+    border-bottom: 1px solid var(--rule); padding: .08in .02in;
+  }
+  .cq { font-size: 11pt; color: var(--muted); }
+  .bcell .cq { margin-top: .08in; font-size: 10pt; }
+  .bcell .cbox { margin: .03in 0 0; width: 1.1in; height: 1.3in; }
+  .cbox {
+    width: .8in; height: .7in; margin-left: auto;
+    border: 2.5px solid var(--slate); border-radius: 8px;
+    background: linear-gradient(#b5b5b5, #b5b5b5) left 50% / 100% 1px no-repeat;
+  }
+
+  .srow {
+    display: flex; align-items: center; gap: .2in;
+    border-bottom: 1px solid var(--rule); padding: .08in .02in;
+  }
+  .sverb { font-size: 15pt; font-weight: 700; width: 1.1in; }
+  .sex { display: flex; gap: .08in; }
+  .sdraw {
+    margin-left: auto; width: 1.7in; height: 1.3in;
+    border: 2px dashed var(--slate); border-radius: 8px;
+    font-size: 8.5pt; color: var(--muted); padding: .04in;
+  }
+
+  /* Sideways pass 2026-09-24: weather icons 225 -> 219 and seasons 168 -> 162.
+     An icon is its size + 12px, so three weather (3 x 237 + gaps) and four
+     seasons (4 x 180 + gaps) came to 745px and 749px on a 730px page. */
+  .wgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1in .18in; justify-items: center; margin-top: .12in; }
+  .wcell span { font-size: 13pt; font-weight: 700; }
+
+  /* NOT .chart — lib baseCSS already has a .chart, and it is a six-column
+     grid. The seven day rows were being laid out across it and running off
+     the right-hand edge of the paper. */
+  .wchart { margin-top: .1in; }
+  .drow { display: flex; align-items: center; gap: .2in; border-bottom: 1px solid var(--ink); padding: .06in 0; }
+  .dname { font-size: 13pt; width: 2in; }
+  .dbox { width: 3.4in; height: 1in; border: 2.5px solid var(--slate); border-radius: 8px; }
+
+  .segrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: .1in; justify-items: center; margin-top: .12in; }
+  .sedraw { font-size: 11.5pt; font-weight: 700; margin: .18in 0 .02in; }
+  .sebox { width: 1.75in; height: 3.6in; border: 2.5px solid var(--slate); border-radius: 10px; }
+  .secell span { font-size: 14pt; font-weight: 700; }
+
+  .matchgrid { display: grid; grid-template-columns: auto 1fr auto; row-gap: .55in; align-items: center; margin-top: .18in; }
+  .mcell { display: flex; align-items: center; gap: 12px; border: 2px solid var(--ink); border-radius: 10px; padding: 4px 14px; }
+  .mcell.left { justify-content: flex-end; }
+  .mcell.right { justify-content: flex-start; }
+  .mcell span { font-size: 14pt; color: var(--ink); }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--ink); display: block; }
+  .mgap { min-width: 1.7in; }
+
+  .lgrid { display: grid; grid-template-columns: repeat(5, 1fr); gap: .3in .04in; justify-items: center; margin-top: .12in; }
+
+  .boxes { display: flex; gap: .18in; margin-top: .14in; }
+  .sortbox { flex: 1; height: 4.4in; border: 2.5px solid var(--slate); border-radius: 10px; }
+  .bhead { font-size: 13pt; font-weight: 700; text-align: center; padding: .07in 0; border-bottom: 2px solid var(--slate); }
+  .cutline { margin: .2in 0 .12in; border-top: 2.6px dashed var(--accent); text-align: center; }
+  .cutline span { display: inline-block; transform: translateY(-.09in); background: #fff; padding: 0 .1in; font-size: 9pt; color: #666; }
+  .tray { display: flex; flex-wrap: wrap; gap: .08in; }
+  .piece { border: 2px dashed var(--accent); border-radius: 6px; padding: .03in .06in; }
+</style>
+</head><body>
+
+<div class="page">
+  <header>
+    <div class="bigletter">&#9787;</div>
+    <div class="htext">
+      <h1>My Body</h1>
+      <p class="sub">Point to each one on yourself and say its name out loud.</p>
+    </div>
+    <div class="nameline">Name</div>
+  </header>
+  <div class="plan" style="display:flex;align-items:stretch;gap:.08in;margin:.02in 0 .1in"><div style="flex:1;display:flex;align-items:center;gap:.07in;border:1.8px solid var(--ink);border-radius:5px;padding:.05in .08in"><span style="flex:0 0 auto;display:inline-block;width:.26in;height:.26in;line-height:.26in;border-radius:50%;background:var(--ink);color:#fff;text-align:center;font-weight:700;font-size:11pt">1</span><span style="font-size:10.5pt;font-weight:700;line-height:1.2">Point to each on yourself</span></div><div style="align-self:center;font-size:16pt;font-weight:700;color:var(--ink)">&rarr;</div><div style="flex:1;display:flex;align-items:center;gap:.07in;border:1.8px solid var(--ink);border-radius:5px;padding:.05in .08in"><span style="flex:0 0 auto;display:inline-block;width:.26in;height:.26in;line-height:.26in;border-radius:50%;background:var(--ink);color:#fff;text-align:center;font-weight:700;font-size:11pt">2</span><span style="font-size:10.5pt;font-weight:700;line-height:1.2">Say its name out loud</span></div><div style="align-self:center;font-size:16pt;font-weight:700;color:var(--ink)">&rarr;</div><div style="flex:1;display:flex;align-items:center;gap:.07in;border:1.8px solid var(--ink);border-radius:5px;padding:.05in .08in"><span style="flex:0 0 auto;display:inline-block;width:.26in;height:.26in;line-height:.26in;border-radius:50%;background:var(--ink);color:#fff;text-align:center;font-weight:700;font-size:11pt">3</span><span style="font-size:10.5pt;font-weight:700;line-height:1.2">Count: write how many</span></div></div>
+  <div class="bigfig"><svg viewBox="0 0 362 362" height="362" role="img" aria-label="body"><image href="data:image/png;base64,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" x="6" y="6" width="350" height="350"/></svg></div>
+  <div class="bgrid">
+    <div class="bcell"><svg viewBox="0 0 116 116" height="116" role="img" aria-label="eye"><image href="data:image/png;base64,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" x="6" y="6" width="104" height="104"/></svg><span>eye</span><div class="cq">how many?</div><div class="cbox"></div></div>
+    <div class="bcell"><svg viewBox="0 0 116 116" height="116" role="img" aria-label="ear"><image href="data:image/png;base64,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" x="6" y="6" width="104" height="104"/></svg><span>ear</span><div class="cq">how many?</div><div class="cbox"></div></div>
+    <div class="bcell"><svg viewBox="0 0 116 116" height="116" role="img" aria-label="nose"><image href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAFCElEQVR42u3dy27bShBFUZfh///l9tQyJD8kSqyus9bs3kEQkKzNajpI6o1HrW//XS4Ju3h3CQ4d/lv/DwQgYPhFAAFABBAAww0CAAjALL70IwCAAHCbbwUIACAAgACM4UMgAgAIACAAXOEnAQgAIADT+BCIAAACAAgAV/gQiAAAAjCND4EIACAA+A6AAAAC4DsACAAgAPgOgAAAAuA7AAiAYwAIACAAjgEgAI4BIACAAEw9BtgCEABAAAABcAwAAQAEwBYAAgAIwGi2AAQg+BgAAmALAAGwBYAA2AJAAGwBIAC2ABAAWwAIgC0ABMAWAAJgCwABmLgFiAACAAiALQAEIDICIADBbAEIgKMACAAgALYAEAARAAEABMAWAAIQQQQQgOAtAATAUQAEwFEABMBRAATAUQAEwFEABCDpKCACCIAIgAAkRwAEwPcAEABHARAAEQAB8D0ABMD3ABAARwEEABFAABABBAARQAAAAcAWgAAgAggAIoAAIAIIAGOIgAAQvAWIgAAgAggAvgcgAIgAAoAIIACIAAKACCAARBEBASB4CxABAUAEREAAEAEEABFAAMiNAAJAcARsAQKACCAAiAACgAggAIgAAkAgERAAgrcAERAAREAEBAARQAAQAQQAEUAAEAEEABFAABABBAARQAAQAQQAEUAAEAEEABFAABABBAARQAAQAQQAEUAAEAEEABFAABABBAARQAAQAQQAEUAAEAEEABFAABABBAAREAAQAQEAERAAEAEBABEQABABAQAREAAQAQEAERAAEAEBABEQAGgaAQSA4AjYAgQAEUAAEAEEABFAABABAXAJCIwAAkBwBGwBAkA4ERAAfA8QAPA9QADA9wABAJuAAECQJQDgKCAA4CggAOAoIABgCxAAQAAgYAuIOgZ8eC5OO19aS3E2Chl292Cve1MCwDOH3n3of58i7okjwHlDD6fzEfD+wTf8tl4bgDc+2AAMP+63AFj3raSOAY4A3gIeQgTA4Bt2BCBx+A08vgEEDn8Zft8BBCBv+A2+Z8IRIPBGG3oEwPoIjgApb3/DjwAYfhAAaz8IwPi3v+FHAAw/CIC1HwRg/Nvf8FMCAI6BAuDtDwJg7QMBAATAmQ8EwPrPwJdBCQAgAIoPAgBeBgIACADMfPsLQCDnfyKfhYQAqD6eAxsAIAB4+1v/BQAQALz9Y9/+AoDhtwFA/PDH/hjYPw1mENKHIvrPgAiAgf/Lr1Oh10AA8MB/+fVr2LUoAcDQzwmB4f+nhI+A1XSYHnnI10aDZu23ATDwAV9N3qL3XBdvfwEw+KHXxvCHHQGste6X4Q/fAGrDcz7HXhvDH35Rdvkz4avBPe749+Ytz7kNQKBe88DXL7+v2ui6GH4Xp/0WsNxL10QAej1UtcmDbvA92y7SphFwru13/BEAEXj6NUof/OV5FoCdHsAy/C0H3rPsor30oayTBqEMuGfYxevz4Nbw4V+eXQEQgWOuYeeVf3lmBYB+g1CG3rPqomZGoAy9Z9TFzYxAGXzPpQudGYEKH3zPooseG4IKHHzPnpsgBCHD7zlzY4Rg+MrvWRIAMTjhmvtz9bjJjYOww8/0PQcCgC0EAWDy8LvfXPB3Ago9HgyGvv3dX37kHwYRdwSAYW9/w48AAAJg9QcBiFn/QQC8/UEAAAEABGD2+d/6jwAAAgAIACAAgAAAAgAIwCh+BIgAGHDwYE233D+O8gnlpO79Zn3qsgAAAABJRU5ErkJggg==" x="6" y="6" width="104" height="104"/></svg><span>nose</span><div class="cq">how many?</div><div class="cbox"></div></div>
+    <div class="bcell"><svg viewBox="0 0 116 116" height="116" role="img" aria-label="mouth"><image href="data:image/png;base64,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" x="6" y="6" width="104" height="104"/></svg><span>mouth</span><div class="cq">how many?</div><div class="cbox"></div></div>
+    <div class="bcell"><svg viewBox="0 0 116 116" height="116" role="img" aria-label="hand"><image href="data:image/png;base64,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" x="6" y="6" width="104" height="104"/></svg><span>hand</span><div class="cq">how many?</div><div class="cbox"></div></div>
+    <div class="bcell"><svg viewBox="0 0 116 116" height="116" role="img" aria-label="foot"><image href="data:image/png;base64,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" x="6" y="6" width="104" height="104"/></svg><span>foot</span><div class="cq">how many?</div><div class="cbox"></div></div>
+  </div>
+
+  <div class="note"><b>Do it on him, not the paper:</b> point to his ear, then the picture.</div>
+
+
+  <footer>
+    <span>6 parts to name and count</span>
+    <span class="brand">Kitchen Table</span>
+    <span>My body</span>
+  </footer>
+</div>
+
+
+<div style="page-break-before:always"></div>
+
+
+<div class="page">
+  <header>
+    <div class="bigletter">&#9787;&#9787;</div>
+    <div class="htext">
+      <h1>The People in My Home</h1>
+      <p class="sub">Draw everyone who lives in your home. Then count them.</p>
+    </div>
+    <div class="nameline">Name</div>
+  </header>
+
+  <div class="bigbox"></div>
+  <div class="frows">
+    <div class="frow"><span>How many people live here?</span><i class="fbox"></i></div>
+    <div class="frow"><span>How many are grown-ups?</span><i class="fbox"></i></div>
+    <div class="frow"><span>How many are children?</span><i class="fbox"></i></div>
+  </div>
+  <div class="task">
+    <div class="tasktitle">Who is the oldest?</div>
+          <svg class="row" viewBox="0 0 729.6 81.68" width="100%" role="img" aria-label="write here">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="32.84" x2="729.6" y2="32.84" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="60.68" x2="729.6" y2="60.68" stroke="#16130F" stroke-width="2.6"/>
+      </svg>
+    <div class="tasktitle">Something we all do together:</div>
+          <svg class="row" viewBox="0 0 729.6 81.68" width="100%" role="img" aria-label="write here">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="32.84" x2="729.6" y2="32.84" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="60.68" x2="729.6" y2="60.68" stroke="#16130F" stroke-width="2.6"/>
+      </svg>
+  </div>
+
+  <footer>
+    <span>one drawing, three counts</span>
+    <span class="brand">Kitchen Table</span>
+    <span>My family</span>
+  </footer>
+</div>
+
+
+<div style="page-break-before:always"></div>
+
+
+<div class="page ">
+  <header>
+    
+    <h1>Say Exactly What You Mean</h1>
+    <p class="sub">Computing &middot; Unplugged &middot; Page 1 of 5</p>
+  </header>
+  <div class="nameline">
+    <span>Name</span>
+    <span class="short">Date</span>
+  </div>
+  <div class="directions">
+    <b>DIRECTIONS:</b> They did exactly what the words said. Write the last one so it can only mean one thing.
+  </div>
+
+
+
+  <table class="tbl exact">
+    <thead><tr><th style="width:28%">What was said</th><th style="width:34%">What they did &mdash; exactly as told</th><th>Say it so that cannot happen</th></tr></thead>
+    <tbody>
+      <tr><td>Put the jam on the bread.</td><td>Stood the jar of jam on top of the loaf.</td><td class="given">Spread two spoonfuls of jam onto one side of one slice.</td></tr>
+      <tr><td>Wash your hands and dry them on the towel.</td><td>Washed the backs of both hands, for one second, in cold water.</td><td class="given">Wash the front, back and between the fingers with soap for twenty seconds.</td></tr>
+      <tr><td>Draw a line from the dot to the star.</td><td>Drew a line that went all the way around the page first.</td><td class="given">Draw a straight line from the dot to the star.</td></tr>
+      <tr><td>Turn off the light when you leave the room.</td><td>Turned it off, then walked out of a different door and left the other light on.</td><td class="blank"></td></tr>
+    </tbody>
+  </table>
+
+  <ol class="qs" start="1"><li><span class="qt">Write an instruction of your own that could be followed two different ways. Then write the fixed one underneath it.</span><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">The fixed instructions are all <b>longer</b> than the vague ones. Say why that keeps happening.</span><div class="write"></div><div class="write"></div></li></ol>
+
+
+  <footer>
+    <span>Keep going on page 2 &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Two meanings</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>The Shape They Cannot See</h1>
+    <p class="sub">Computing &middot; Unplugged &middot; Page 2 of 5</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Write how to draw this shape. Read it to someone who has not seen it. Words only, no pointing.
+  </div>
+
+
+  <div class="twoup">
+    <div>
+      <div class="cap">The shape &mdash; only you may look at this</div>
+      <svg class="inline" viewBox="0 0 144 144" width="144" height="144" role="img" aria-label="a shape on squared paper" xmlns="http://www.w3.org/2000/svg"><line x1="-12" y1="-12" x2="-12" y2="118" stroke="#CFC3B2" stroke-width="0.7" stroke-linecap="round"/><line x1="14" y1="-12" x2="14" y2="118" stroke="#CFC3B2" stroke-width="0.7" stroke-linecap="round"/><line x1="40" y1="-12" x2="40" y2="118" stroke="#CFC3B2" stroke-width="0.7" stroke-linecap="round"/><line x1="66" y1="-12" x2="66" y2="118" stroke="#CFC3B2" stroke-width="0.7" stroke-linecap="round"/><line x1="92" y1="-12" x2="92" y2="118" stroke="#CFC3B2" stroke-width="0.7" stroke-linecap="round"/><line x1="118" y1="-12" x2="118" y2="118" stroke="#CFC3B2" stroke-width="0.7" stroke-linecap="round"/><line x1="-12" y1="-12" x2="144" y2="-12" stroke="#CFC3B2" stroke-width="0.7" stroke-linecap="round"/><line x1="-12" y1="14" x2="144" y2="14" stroke="#CFC3B2" stroke-width="0.7" stroke-linecap="round"/><line x1="-12" y1="40" x2="144" y2="40" stroke="#CFC3B2" stroke-width="0.7" stroke-linecap="round"/><line x1="-12" y1="66" x2="144" y2="66" stroke="#CFC3B2" stroke-width="0.7" stroke-linecap="round"/><line x1="-12" y1="92" x2="144" y2="92" stroke="#CFC3B2" stroke-width="0.7" stroke-linecap="round"/><line x1="-12" y1="118" x2="144" y2="118" stroke="#CFC3B2" stroke-width="0.7" stroke-linecap="round"/><path d="M14,66 L66,14 L118,66 L118,118 L66,118 L66,66 Z" fill="none" stroke="#C0511D" stroke-width="2.4" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="instrbox">
+      <div class="ilab">Your instructions</div>
+      <div class="irow"><span>1.</span><span class="iline"></span></div>
+      <div class="irow"><span>2.</span><span class="iline"></span></div>
+      <div class="irow"><span>3.</span><span class="iline"></span></div>
+      <div class="irow"><span>4.</span><span class="iline"></span></div>
+      <div class="irow"><span>5.</span><span class="iline"></span></div>
+      <div class="irow"><span>6.</span><span class="iline"></span></div>
+      <div class="irow"><span>7.</span><span class="iline"></span></div>
+      <div class="irow"><span>8.</span><span class="iline"></span></div>
+    </div>
+  </div>
+
+  <div class="twoup">
+    <div>
+      <div class="cap">What they drew</div>
+      <svg class="inline" viewBox="0 0 172 172" width="172" height="172" role="img" aria-label="empty squared paper" xmlns="http://www.w3.org/2000/svg"><line x1="8" y1="8" x2="8" y2="164" stroke="#CFC3B2" stroke-width="0.7" stroke-linecap="round"/><line x1="34" y1="8" x2="34" y2="164" stroke="#CFC3B2" stroke-width="0.7" stroke-linecap="round"/><line x1="60" y1="8" x2="60" y2="164" stroke="#CFC3B2" stroke-width="0.7" stroke-linecap="round"/><line x1="86" y1="8" x2="86" y2="164" stroke="#CFC3B2" stroke-width="0.7" stroke-linecap="round"/><line x1="112" y1="8" x2="112" y2="164" stroke="#CFC3B2" stroke-width="0.7" stroke-linecap="round"/><line x1="138" y1="8" x2="138" y2="164" stroke="#CFC3B2" stroke-width="0.7" stroke-linecap="round"/><line x1="164" y1="8" x2="164" y2="164" stroke="#CFC3B2" stroke-width="0.7" stroke-linecap="round"/><line x1="8" y1="8" x2="164" y2="8" stroke="#CFC3B2" stroke-width="0.7" stroke-linecap="round"/><line x1="8" y1="34" x2="164" y2="34" stroke="#CFC3B2" stroke-width="0.7" stroke-linecap="round"/><line x1="8" y1="60" x2="164" y2="60" stroke="#CFC3B2" stroke-width="0.7" stroke-linecap="round"/><line x1="8" y1="86" x2="164" y2="86" stroke="#CFC3B2" stroke-width="0.7" stroke-linecap="round"/><line x1="8" y1="112" x2="164" y2="112" stroke="#CFC3B2" stroke-width="0.7" stroke-linecap="round"/><line x1="8" y1="138" x2="164" y2="138" stroke="#CFC3B2" stroke-width="0.7" stroke-linecap="round"/><line x1="8" y1="164" x2="164" y2="164" stroke="#CFC3B2" stroke-width="0.7" stroke-linecap="round"/></svg>
+    </div>
+    <div class="afternote">
+      <p>Pictures don&rsquo;t match? Find the first place they differ, fix that instruction, and try again.</p>
+    </div>
+  </div>
+
+
+
+  <footer>
+    <span>Keep going on page 3 &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Instructions</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>Comparing the Two Pictures</h1>
+    <p class="sub">Computing &middot; Unplugged &middot; Page 3 of 5</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> After they have drawn it.
+  </div>
+
+
+  <ol class="qs" start="3"><li><span class="qt">Which instruction went wrong first? Write the number, and what the other person thought it meant.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Did you use the squares to count with? Say why counting squares is safer than saying "a bit further along".</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+
+  <footer>
+    <span>One more overleaf &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Comparing</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>Why Arrows</h1>
+    <p class="sub">Computing &middot; Unplugged &middot; Page 4 of 5</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> The same journey, written twice. Read both.
+  </div>
+
+
+  <div class="rules big">
+  <div class="vsrow">
+    <div class="vs">
+      <b>In words</b>
+      <ol class="wordprog">
+        <li>Go along a bit.</li>
+        <li>Then go up.</li>
+        <li>Now over to the star.</li>
+      </ol>
+      <div class="cap">Three sentences, and about nine ways to obey them.</div>
+    </div>
+    <div class="vs">
+      <b>In arrows</b>
+      <div class="prog">     </div>
+      <div class="cap">Six arrows, and exactly one way to obey them.</div>
+    </div>
+  </div>
+  An arrow has no second meaning. That is why computers are told things this way.</div>
+
+  <ol class="qs" start="5"><li><span class="qt">Write, in arrows, how to get from your bedroom door to your bed. One arrow is one step.</span><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Which is easier to <b>read</b>, the words or the arrows? Which is easier to get <b>right</b>? Say whether that is the same answer.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+
+  <footer>
+    <span>One more overleaf &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Why arrows</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>What Arrows Cannot Say</h1>
+    <p class="sub">Computing &middot; Unplugged &middot; Page 5 of 5</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Answer these.
+  </div>
+
+
+  <ol class="qs" start="7"><li><span class="qt">A recipe is written in words and it usually works. Why do you think that is, when "put the jam on the bread" did not?</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Arrows can only say four things. Write down one instruction you could NOT give a robot with just arrows.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+
+  <footer>
+    <span>Answer key overleaf</span>
+    <span class="brand">Kitchen Table</span>
+    <span>What they cannot say</span>
+  </footer>
+</div>
+
+
+<div style="page-break-before:always"></div>
+
+
+<div class="page ">
+  <header>
+    
+    <h1>What I Would Have To Say</h1>
+    <p class="sub">Life Skills &middot; Staying Safe &middot; Page 1 of 2</p>
+  </header>
+  <div class="nameline">
+    <span>Name</span>
+    <span class="short">Date</span>
+  </div>
+  <div class="directions">
+    <b>DIRECTIONS:</b> Write where you live. Say it out loud each time you write it.
+  </div>
+
+
+  <div class="block">
+    <div class="blab">1. Copy it.</div>
+    <div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div>
+  </div>
+
+  <div class="block">
+    <div class="blab">2. Write it again, a bit faster.</div>
+    <div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div>
+  </div>
+
+  <div class="block fold">
+    <div class="blab">3. Fold the top of this page over. Now write it from memory.</div>
+    <div class="write"></div><div class="write"></div>
+  </div>
+
+  <div class="block">
+    <div class="blab">4. One grown-up&rsquo;s phone number. Ask them for it.</div>
+    <div class="write"></div>
+  </div>
+
+
+  <footer>
+    <span>The card is overleaf &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>What I would say</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>The Card</h1>
+    <p class="sub">Life Skills &middot; Staying Safe &middot; Page 2 of 2</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Fill in the card, cut it out, and put it in the coat you wear.
+  </div>
+
+
+  <div class="card">
+    <div class="cardtitle">If I am lost, please ring</div>
+    <div class="cardline"><span>Grown-up&rsquo;s name</span></div>
+    <div class="cardline"><span>Phone number</span></div>
+    <div class="cardline"><span>My name</span></div>
+    <div class="cardfoot">Fold in half and keep it in a pocket.</div>
+  </div>
+  <p class="cap">Cut along the dashed line.</p>
+
+  <div class="rules">
+    <b>For the grown-up.</b> Check it out of nowhere, in a shop, while something else is going
+    on &mdash; not at the table.
+  </div>
+
+
+  <footer>
+    <span>1 card to cut out</span>
+    <span class="brand">Kitchen Table</span>
+    <span>What I would say</span>
+  </footer>
+</div>
+
+
+<div style="page-break-before:always"></div>
+
+
+<div class="page g6">
+  <header>
+    
+    <h1>Paper That Holds Books</h1>
+    <p class="sub">Making &middot; Crafts &middot; Page 1 of 5</p>
+  </header>
+  <div class="nameline">
+    <span>Name</span>
+    <span class="short">Date</span>
+  </div>
+  <div class="directions">
+    <b>DIRECTIONS:</b> Fold the same paper into three shapes. Build all three before testing any.
+  </div>
+
+
+  <div class="plan" style="display:flex;align-items:stretch;gap:.08in;margin:.02in 0 .1in"><div style="flex:1;display:flex;align-items:center;gap:.07in;border:1.8px solid var(--ink);border-radius:5px;padding:.05in .08in"><span style="flex:0 0 auto;display:inline-block;width:.26in;height:.26in;line-height:.26in;border-radius:50%;background:var(--ink);color:#fff;text-align:center;font-weight:700;font-size:11pt">1</span><span style="font-size:10.5pt;font-weight:700;line-height:1.2">Build the three shapes</span></div><div style="align-self:center;font-size:16pt;font-weight:700;color:var(--ink)">&rarr;</div><div style="flex:1;display:flex;align-items:center;gap:.07in;border:1.8px solid var(--ink);border-radius:5px;padding:.05in .08in"><span style="flex:0 0 auto;display:inline-block;width:.26in;height:.26in;line-height:.26in;border-radius:50%;background:var(--ink);color:#fff;text-align:center;font-weight:700;font-size:11pt">2</span><span style="font-size:10.5pt;font-weight:700;line-height:1.2">Turn over: guess, then test</span></div></div>
+  <div class="rules"><b>Scissors only, with a grown-up in the room.</b> If a step seems to want a knife, snip or fold instead.</div>
+
+  <div class="note"><b>What you need:</b> paper &middot; tape &middot; books &middot; scissors &middot; a ruler &middot; a pencil. Three or four sheets of the same
+  paper; two piles of books a hand-span apart, and more books to load.</div>
+
+  <table class="tbl ">
+    <thead><tr><th>Shape</th><th>How to make it</th></tr></thead>
+    <tbody><tr><td><b>Flat</b></td><td>Lay the sheet flat across the gap between the two piles.</td></tr><tr><td><b>A tube</b></td><td>Roll the sheet into a tube about as thick as your thumb and tape it along the seam. Stand it up on end.</td></tr><tr><td><b>A concertina</b></td><td>Fold the sheet backwards and forwards like a fan, about a finger-width each fold. Lay it across the gap.</td></tr></tbody>
+  </table>
+
+  <div class="note"><b>Use the same paper every time</b>, or you only learn that thick paper is strong.</div>
+
+  <footer>
+    <span>Predict on page 2 &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Paper that holds books</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>Guess First</h1>
+    <p class="sub">Making &middot; Crafts &middot; Page 2 of 5</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Guess all three <b>before you test any</b>, in pen.
+  </div>
+
+
+  <table class="tbl ">
+    <thead><tr><th>Shape</th><th>How many books do you think it will hold?</th><th>How many did it actually hold?</th></tr></thead>
+    <tbody><tr><td>Flat</td><td class="blank"></td><td class="blank"></td></tr><tr><td>A tube</td><td class="blank"></td><td class="blank"></td></tr><tr><td>A concertina</td><td class="blank"></td><td class="blank"></td></tr></tbody>
+  </table>
+
+  <div class="note"><b>One book at a time.</b> Count the last one that stayed up. Not precious books: it
+  goes suddenly.</div>
+
+  <ol class="qs" start="1"><li><span class="qt">Which shape did you think would be strongest, and why did you think that?</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Were you right? Write down what actually happened, even if it is embarrassing.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">How many times more than the flat sheet did the best one hold?</span><div class="write"></div></li></ol>
+
+  <footer>
+    <span>The answer is on page 3 &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Guess first</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>Why It Works</h1>
+    <p class="sub">Making &middot; Crafts &middot; Page 3 of 5</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Read the box, then look at the pictures end-on.
+  </div>
+
+
+  <div class="rules"><b>Same paper, so why stronger?</b> Bend something and the top squashes, the bottom
+  stretches, and the middle does almost nothing. Strength comes from material FAR from the middle. A flat
+  sheet is all middle.</div>
+
+  <div style="text-align:center;margin:12px 0"><svg class="" viewBox="0 0 540 132" width="540" height="132" role="img" aria-label="the same paper seen end-on in three shapes" xmlns="http://www.w3.org/2000/svg"><line x1="30" y1="60" x2="150" y2="60" stroke="#16130F" stroke-width="3" stroke-linecap="round"/><line x1="30" y1="74" x2="150" y2="74" stroke="#C0511D" stroke-width="0.9" stroke-dasharray="3 3" stroke-linecap="round"/><text x="90" y="106" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="11.5" font-weight="700" text-anchor="middle" fill="#16130F">FLAT</text><text x="90" y="122" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="9" font-weight="normal" text-anchor="middle" fill="#16130F">all of it in the middle</text><circle cx="270" cy="60" r="34" fill="none" stroke="#16130F" stroke-width="3"/><circle cx="270" cy="60" r="1.5" fill="#6B635A" stroke="#16130F" stroke-width="0"/><text x="270" y="106" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="11.5" font-weight="700" text-anchor="middle" fill="#16130F">A TUBE</text><text x="270" y="122" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="9" font-weight="normal" text-anchor="middle" fill="#16130F">all of it far from the middle</text><line x1="400" y1="80" x2="416" y2="40" stroke="#16130F" stroke-width="3" stroke-linecap="round"/><line x1="416" y1="40" x2="432" y2="80" stroke="#16130F" stroke-width="3" stroke-linecap="round"/><line x1="432" y1="80" x2="448" y2="40" stroke="#16130F" stroke-width="3" stroke-linecap="round"/><line x1="448" y1="40" x2="464" y2="80" stroke="#16130F" stroke-width="3" stroke-linecap="round"/><line x1="464" y1="80" x2="480" y2="40" stroke="#16130F" stroke-width="3" stroke-linecap="round"/><line x1="480" y1="40" x2="496" y2="80" stroke="#16130F" stroke-width="3" stroke-linecap="round"/><line x1="496" y1="80" x2="512" y2="40" stroke="#16130F" stroke-width="3" stroke-linecap="round"/><line x1="512" y1="40" x2="528" y2="80" stroke="#16130F" stroke-width="3" stroke-linecap="round"/><line x1="394" y1="60" x2="534" y2="60" stroke="#C0511D" stroke-width="0.9" stroke-dasharray="3 3" stroke-linecap="round"/><text x="464" y="106" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="11.5" font-weight="700" text-anchor="middle" fill="#16130F">A CONCERTINA</text><text x="464" y="122" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="9" font-weight="normal" text-anchor="middle" fill="#16130F">above and below, one way only</text></svg></div>
+
+  <div class="note"><b>A tube does it in every direction; a concertina in one.</b> Push a concertina the
+  other way and it folds like a fan.</div>
+
+  <ol class="qs" start="4"><li><span class="qt">Push down on your concertina from the side instead of from above. What happens, and why?</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Why is a tube better than a concertina, using the word <b>middle</b>?</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Keep going on page 4 &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Why it works</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>You Have Seen This Every Day</h1>
+    <p class="sub">Making &middot; Crafts &middot; Page 4 of 5</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Find a real cardboard box. Tear an edge open and look at the cut end.
+  </div>
+
+
+  <div class="note" style="margin-top:2px"><b>Cardboard is a concertina glued between two flat sheets.</b>
+  Crush the wavy bit and it goes flat.</div>
+
+  <ol class="qs" start="6"><li><span class="qt">Draw what the torn edge of the cardboard looks like, end-on.</span><div class="work" style="height:2.9in"><span>Draw it here</span></div></li><li><span class="qt">Squash the wavy layer flat between your fingers and press again. What has changed?</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Name two other things you have seen that are strong because they are tubes.</span><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>One more build on page 5 &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>You have seen this every day</span>
+  </footer>
+</div>
+
+<div class="page g5">
+  <header class="cont">
+    
+    <h1>Build a Bridge</h1>
+    <p class="sub">Making &middot; Crafts &middot; Page 5 of 5</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Span the gap between two chairs with paper and tape, and hold up as much as you can.
+  </div>
+
+
+  <div class="note" style="margin-top:2px"><b>The rules:</b> paper and tape only &middot; it has to span
+  the whole gap on its own &middot; and there is a limit of <b>five sheets</b>, so you cannot win by using
+  more paper. Weigh what it holds, or count books.</div>
+
+  <div class="note"><b>Try at least three:</b> several thin tubes instead of one fat one &middot; tubes
+  taped side by side &middot; a concertina on two tubes &middot; a tube inside a tube.</div>
+
+  <table class="tbl ">
+    <thead><tr><th>What I built</th><th>How much it held</th><th>How it failed</th></tr></thead>
+    <tbody><tr><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr><tr><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr><tr><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr><tr><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr><tr><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr></tbody>
+  </table>
+
+  <div class="rules"><b>Last column: <i>where</i> it broke</b>, not "it broke". The tube crushed at the
+  end, the tape peeled, it rolled, the middle folded.</div>
+
+  <footer>
+    <span>Notes for a grown-up on the last page</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Build a bridge</span>
+  </footer>
+</div>
+
+</body></html>

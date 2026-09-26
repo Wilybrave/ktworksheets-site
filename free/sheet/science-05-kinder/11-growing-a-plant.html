@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="sheet-kind" content="form">
+<title>Grow a Bean</title>
+<style>
+  @page { size: letter portrait; margin: 0.4in 0.45in; }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  :root {
+    --ink:    #16130F;
+    --muted:  #6B635A;
+    --rule:   #CFC3B2;
+    --guide:  #BCAE9C;
+    --accent: #C0511D;
+    --tint:   #F7EDE4;
+    --slate:  #2E5A78;
+    --tintslate: #E9EFF4;
+    --deep:   #2C4A45;
+    --tintdeep: #ECF1EF;
+  }
+
+  body {
+    font-family: Quicksand, 'URW Gothic', 'Century Gothic', sans-serif;
+    color: #000; background: #fff;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+
+  /* ORDER MATTERS. This generic rule must come BEFORE the @media screen block:
+   * both selectors have the same specificity, so whichever is declared last
+   * wins. With it after, it overrode the screen width and the preview stretched
+   * to the viewport — rows scaled up and pages measured 16in tall. Print was
+   * always fine (@media screen doesn't apply), but the on-screen proof lied. */
+  .page { width: 100%; }
+  .page + .page { page-break-before: always; }
+
+  @media screen {
+    body { padding: 0.4in; background: #ddd; }
+    .page {
+      background: #fff; padding: 0.4in 0.45in;
+      width: 8.5in; min-height: 11in;
+      margin: 0 auto 22px; box-shadow: 0 2px 10px rgba(0,0,0,.3);
+    }
+  }
+
+  header {
+    display: flex; align-items: center; gap: 16px;
+    border-bottom: 3px solid var(--slate); padding-bottom: 7px; margin-bottom: 2px;
+  }
+  .bigletter { font-size: 38pt; font-weight: 700; line-height: 1; letter-spacing: .02em; }
+  .htext { flex: 1; }
+  h1 { font-size: 14pt; font-weight: 700; margin: 0 0 2px; }
+  .sub { font-size: 10pt; color: var(--muted); margin: 0; }
+  .nameline {
+    font-size: 9.5pt; color: var(--muted);
+    border-bottom: 1px solid var(--ink); width: 2in;
+    padding-bottom: 1px; align-self: flex-end;
+  }
+
+  .label { font-size: 11.5pt; font-weight: 700; margin: 9px 0 1px; }
+  .label span { font-weight: 400; font-size: 10pt; color: var(--muted); }
+
+  .row { display: block; width: 100%; height: auto; margin-bottom: .06in; }
+  /* Rows that follow the header directly would otherwise jam against its rule. */
+  header + .row { margin-top: .12in; }
+
+  .words {
+    margin-top: 10px; padding-top: 7px; border-top: 1px solid var(--rule);
+    font-size: 12.5pt;
+    display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap;
+  }
+  .words b { font-size: 14pt; }
+  .words em { font-style: normal; color: var(--muted); }
+
+  /* The wordmark rides in the footer line that was already there — see the note
+     in lib/sheet.js. No height, upright, a size down, and never louder than the
+     two slots it sits between. */
+  .brand { font-style: normal; font-size: 7pt; letter-spacing: .04em;
+    color: var(--accent); align-self: center; }
+
+  footer {
+    margin-top: 7px; font-size: 8.5pt; color: var(--muted);
+    display: flex; justify-content: space-between;
+  }
+
+  .chart { display: grid; grid-template-columns: repeat(6, 1fr); gap: 7px; margin-top: 14px; }
+  .cell {
+    border: 2px solid var(--slate); border-radius: 8px; height: 1.35in;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .page.key { background: #fcfcfa; }
+  .page.key header { border-bottom-style: double; border-bottom-width: 3px; }
+  .keylist { font-size: 11pt; line-height: 1.7; }
+  .keylist p { margin: .02in 0; }
+  .keynote { border: 1.5px solid var(--deep); border-radius: 8px; padding: .07in .12in;
+    margin: .1in 0 0; font-size: 10pt; line-height: 1.5; }
+
+  .note { border: 1.5px solid var(--deep); border-radius: 8px; padding: .07in .12in;
+    margin: .06in 0 .1in; font-size: 10pt; color: var(--ink); }
+  svg { display: block; }
+
+  /* tick-box pairs — one label per choice, box on the left of the word */
+  .picks { display: flex; gap: .22in; margin-left: auto; }
+  .pick { display: flex; align-items: center; gap: .07in; font-size: 11.5pt; }
+  .pick i { width: .28in; height: .28in; border: 2.2px solid var(--slate); border-radius: 5px;
+    display: block; flex: 0 0 auto; }
+  .pick.small { font-size: 9pt; color: var(--muted); }
+  .pick.small i { width: .2in; height: .2in; border-width: 1.8px; }
+
+  .needs { display: flex; justify-content: space-around; margin: .2in 0 .14in; }
+  .need { display: flex; flex-direction: column; align-items: center; gap: .05in; }
+  .need span { font-size: 16pt; font-weight: 700; }
+  .need .tick { width: .34in; height: .34in; border: 2.2px solid var(--slate); border-radius: 5px; display: block; }
+
+  .task { border-top: 2.4px solid var(--slate); margin-top: .16in; padding-top: .1in; }
+  .tasktitle { font-size: 11.5pt; font-weight: 700; margin: .1in 0 .03in; }
+  .taskrow { font-size: 11pt; }
+  .twoboxes { display: flex; gap: .2in; }
+  .tbcell { flex: 1; display: flex; flex-direction: column; align-items: center; }
+  .tbcell span { font-size: 10pt; color: var(--muted); }
+  .tbox { width: 100%; height: 2.7in; border: 2.5px solid var(--slate); border-radius: 10px; }
+  .widebox { height: 2.5in; border: 2.5px solid var(--slate); border-radius: 10px; }
+
+  .grid4 { display: flex; gap: .12in; margin-top: .12in; }
+  .gcell { flex: 1; display: flex; flex-direction: column; gap: .04in; }
+  .glabel { font-size: 12pt; font-weight: 700; text-align: center; }
+  .gbox { height: 4.3in; border: 2.5px solid var(--slate); border-radius: 10px; }
+  .gask { font-size: 9.5pt; color: var(--muted); }
+
+  .matchgrid { display: grid; grid-template-columns: auto 1fr auto; row-gap: .34in;
+    align-items: center; margin-top: .3in; }
+  .mcell { display: flex; align-items: center; gap: 14px; border: 2px solid var(--ink);
+    border-radius: 10px; padding: 6px 16px; }
+  .mcell.left { justify-content: flex-end; }
+  .mcell.right { justify-content: flex-start; }
+  .mcell span { font-size: 12.5pt; color: var(--ink); }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--ink); display: block; }
+  .mgap { min-width: 1.5in; }
+
+  .boxes { display: flex; gap: .16in; margin-top: .14in; }
+  .sortbox { flex: 1; height: 6.3in; border: 2.5px solid var(--slate); border-radius: 10px; }
+  .bhead { display: flex; align-items: center; justify-content: center; gap: .08in;
+    font-size: 13pt; font-weight: 700; padding: .05in 0; border-bottom: 2px solid var(--slate); }
+  .cutline { margin: .2in 0 .12in; border-top: 2.6px dashed var(--accent); text-align: center; }
+  .cutline span { display: inline-block; transform: translateY(-.09in); background: #fff;
+    padding: 0 .1in; font-size: 9pt; color: var(--muted); }
+  .tray { display: flex; flex-wrap: wrap; gap: .08in; }
+  .piece { display: flex; flex-direction: column; align-items: center;
+    border: 2px dashed var(--slate); border-radius: 6px; padding: .03in .06in; }
+  .piece span { font-size: 10.5pt; color: var(--ink); }
+
+  .frow { display: flex; align-items: center; gap: .1in;
+    border-bottom: 1px solid var(--rule); padding: .09in .02in; }
+  .fhand, .fobj { flex: 0 0 auto; }
+  .farrow { width: 1.3in; }
+
+  .srow { display: flex; align-items: center; justify-content: space-around;
+    border-bottom: 1px solid var(--rule); padding: .04in 0; }
+  .scell { display: flex; flex-direction: column; align-items: center; }
+  .scell span { font-size: 11.5pt; color: var(--ink); }
+
+  /* The label goes ABOVE the track, not at its right end — on the end it
+     reads like a finish line, which is the one thing the track must not have. */
+  .track { height: .5in; border-bottom: 2.4px solid var(--slate); margin: 0 0 .1in;
+    display: flex; align-items: flex-end; }
+  .tstart { font-size: 8.5pt; color: var(--muted); border-left: 2.4px solid var(--slate); padding-left: .04in; }
+  .tlabel { font-size: 11pt; font-weight: 700; margin-top: .08in; }
+
+  .dngrid { display: flex; gap: .18in; margin-top: .14in; }
+  .dncell { flex: 1; }
+  .dnhead { display: flex; align-items: center; justify-content: center; gap: .08in;
+    font-size: 16pt; font-weight: 700; margin-bottom: .06in; }
+  .dnbox { height: 5in; border: 2.5px solid var(--slate); border-radius: 10px; }
+
+  .wrow { display: flex; align-items: center; gap: .2in;
+    border-bottom: 1px solid var(--rule); padding: .36in .02in; }
+  .wtext { font-size: 17pt; }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <header>
+    <div class="bigletter">&#8593;</div>
+    <div class="htext">
+      <h1>Grow a Bean</h1>
+      <p class="sub">Plant it, then draw it four times. It changes too slowly to watch, so we write it down.</p>
+    </div>
+    <div class="nameline">Name</div>
+  </header>
+  <div class="grid4">
+    <div class="gcell">
+      <div class="glabel">Day 1</div>
+      <div class="gbox"></div>
+      <div class="gask">How tall? ________</div>
+      <label class="pick small"><i></i>watered it</label>
+    </div>
+    <div class="gcell">
+      <div class="glabel">Day 4</div>
+      <div class="gbox"></div>
+      <div class="gask">How tall? ________</div>
+      <label class="pick small"><i></i>watered it</label>
+    </div>
+    <div class="gcell">
+      <div class="glabel">Day 8</div>
+      <div class="gbox"></div>
+      <div class="gask">How tall? ________</div>
+      <label class="pick small"><i></i>watered it</label>
+    </div>
+    <div class="gcell">
+      <div class="glabel">Day 12</div>
+      <div class="gbox"></div>
+      <div class="gask">How tall? ________</div>
+      <label class="pick small"><i></i>watered it</label>
+    </div>
+  </div>
+  <div class="task">
+    <div class="tasktitle">What came out of the bean first &mdash; the root or the leaf?</div>
+          <svg class="row" viewBox="0 0 729.6 72" width="100%" role="img" aria-label="write here">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="29" x2="729.6" y2="29" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="53" x2="729.6" y2="53" stroke="#16130F" stroke-width="2.6"/>
+      </svg>
+    <div class="tasktitle">What would happen if we put it in a dark cupboard?</div>
+          <svg class="row" viewBox="0 0 729.6 72" width="100%" role="img" aria-label="write here">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="29" x2="729.6" y2="29" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="53" x2="729.6" y2="53" stroke="#16130F" stroke-width="2.6"/>
+      </svg>
+  </div>
+
+  <div class="note"><b>You need:</b> a dried bean, a clear cup, damp cotton or soil. Bean against the side so the root shows. Water when the top is dry.</div>
+
+
+  <footer>
+    <span>4 drawings</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Growing a plant</span>
+  </footer>
+</div>
+
+</body>
+</html>

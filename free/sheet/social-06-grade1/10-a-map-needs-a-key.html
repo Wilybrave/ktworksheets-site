@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="sheet-kind" content="worksheet">
+<title>A Map Needs a Key</title>
+<style>
+  @page { size: letter portrait; margin: 0.4in 0.45in; }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  :root {
+    --ink:    #16130F;
+    --muted:  #6B635A;
+    --rule:   #CFC3B2;
+    --guide:  #BCAE9C;
+    --accent: #C0511D;
+    --tint:   #F7EDE4;
+    --slate:  #2E5A78;
+    --tintslate: #E9EFF4;
+    --deep:   #2C4A45;
+    --tintdeep: #ECF1EF;
+  }
+
+  body {
+    font-family: Quicksand, 'URW Gothic', 'Century Gothic', sans-serif;
+    color: #000; background: #fff;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+
+  /* ORDER MATTERS. This generic rule must come BEFORE the @media screen block:
+   * both selectors have the same specificity, so whichever is declared last
+   * wins. With it after, it overrode the screen width and the preview stretched
+   * to the viewport — rows scaled up and pages measured 16in tall. Print was
+   * always fine (@media screen doesn't apply), but the on-screen proof lied. */
+  .page { width: 100%; }
+  .page + .page { page-break-before: always; }
+
+  @media screen {
+    body { padding: 0.4in; background: #ddd; }
+    .page {
+      background: #fff; padding: 0.4in 0.45in;
+      width: 8.5in; min-height: 11in;
+      margin: 0 auto 22px; box-shadow: 0 2px 10px rgba(0,0,0,.3);
+    }
+  }
+
+  header {
+    display: flex; align-items: center; gap: 16px;
+    border-bottom: 3px solid var(--slate); padding-bottom: 7px; margin-bottom: 2px;
+  }
+  .bigletter { font-size: 38pt; font-weight: 700; line-height: 1; letter-spacing: .02em; }
+  .htext { flex: 1; }
+  h1 { font-size: 14pt; font-weight: 700; margin: 0 0 2px; }
+  .sub { font-size: 10pt; color: var(--muted); margin: 0; }
+  .nameline {
+    font-size: 9.5pt; color: var(--muted);
+    border-bottom: 1px solid var(--ink); width: 2in;
+    padding-bottom: 1px; align-self: flex-end;
+  }
+
+  .label { font-size: 11.5pt; font-weight: 700; margin: 9px 0 1px; }
+  .label span { font-weight: 400; font-size: 10pt; color: var(--muted); }
+
+  .row { display: block; width: 100%; height: auto; margin-bottom: .06in; }
+  /* Rows that follow the header directly would otherwise jam against its rule. */
+  header + .row { margin-top: .12in; }
+
+  .words {
+    margin-top: 10px; padding-top: 7px; border-top: 1px solid var(--rule);
+    font-size: 12.5pt;
+    display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap;
+  }
+  .words b { font-size: 14pt; }
+  .words em { font-style: normal; color: var(--muted); }
+
+  /* The wordmark rides in the footer line that was already there — see the note
+     in lib/sheet.js. No height, upright, a size down, and never louder than the
+     two slots it sits between. */
+  .brand { font-style: normal; font-size: 7pt; letter-spacing: .04em;
+    color: var(--accent); align-self: center; }
+
+  footer {
+    margin-top: 7px; font-size: 8.5pt; color: var(--muted);
+    display: flex; justify-content: space-between;
+  }
+
+  .chart { display: grid; grid-template-columns: repeat(6, 1fr); gap: 7px; margin-top: 14px; }
+  .cell {
+    border: 2px solid var(--slate); border-radius: 8px; height: 1.35in;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .page.key { background: #fcfcfa; }
+  .page.key header { border-bottom-style: double; border-bottom-width: 3px; }
+  .keylist { font-size: 11pt; line-height: 1.7; }
+  .keylist p { margin: .02in 0; }
+  .keynote { border: 1.5px solid var(--deep); border-radius: 8px; padding: .07in .12in;
+    margin: .1in 0 0; font-size: 10pt; line-height: 1.5; }
+
+  .note { border: 1.5px solid var(--deep); border-radius: 8px; padding: .07in .12in;
+    margin: .06in 0 .1in; font-size: 10pt; color: var(--ink); }
+  .tasknote { border: 1.5px solid var(--deep); border-radius: 8px; padding: .07in .12in;
+    margin: .1in 0 0; font-size: 10.5pt; }
+  svg { display: block; }
+  svg.inline { display: inline-block; vertical-align: middle; }
+
+  .wqs { margin-top: .06in; }
+  .wq { margin-bottom: .04in; }
+  .wqt { font-size: 11pt; font-weight: 700; margin-bottom: .01in; }
+  .wordbank { border: 1.5px solid var(--accent); border-radius: 8px; padding: .06in .12in;
+    margin-top: .1in; font-size: 11pt; }
+
+  .keyrow { display: flex; align-items: center; gap: .18in;
+    border-bottom: 1px solid var(--rule); padding: .04in 0; }
+  .keysym { flex: 0 0 .85in; display: flex; justify-content: center; }
+  .keyline { flex: 1; }
+
+  .mappic { display: flex; justify-content: center; margin-bottom: .1in; }
+
+  .globerow { display: flex; gap: .26in; align-items: flex-start; }
+  .globepic { flex: 0 0 2.1in; }
+  .globeask { flex: 1; }
+  .gq { font-size: 11pt; font-weight: 700; margin-bottom: .05in; }
+
+  .flatbox { border: 2px solid var(--slate); border-radius: 9px; padding: .08in .13in;
+    margin: .1in 0; }
+  .flattitle { font-size: 12pt; font-weight: 700; margin-bottom: .03in; }
+  .flatbox p { margin: 0; font-size: 10.5pt; }
+
+  /* FILL PASS 2026-09-24: the globe was 2in across with four inches of paper
+   * under it. Only the globe page uses these. */
+  .globepic { flex: 0 0 3.4in; }
+  .globepic svg { width: 100%; height: auto; }
+  .gq { font-size: 13pt; }
+  .globerow .wqt, .globepage .wqt { font-size: 13pt; }
+  .flattitle { font-size: 14pt; }
+  .flatbox p { font-size: 12.5pt; }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <header>
+    <div class="bigletter">&#9906;</div>
+    <div class="htext">
+      <h1>A Map Needs a Key</h1>
+      <p class="sub">Write what each symbol means.</p>
+    </div>
+    <div class="nameline">Name</div>
+  </header>
+
+  <div class="keygrid">
+    <div class="keyrow">
+      <div class="keysym"><svg class="inline" viewBox="0 0 96 84" width="96" height="84" role="img" aria-label="a house" xmlns="http://www.w3.org/2000/svg"><rect x="29.25" y="38.5" width="37.5" height="30" rx="0" fill="#F7EDE4" stroke="#16130F" stroke-width="1.8"/><path d="M24.25,38.5 L48,18.5 L71.75,38.5 Z" fill="#F0DCC9" stroke="#16130F" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
+      <div class="keyline">      <svg class="row" viewBox="0 0 729.6 128.2" width="100%" role="img" aria-label="write what the symbol means">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="50.6" x2="729.6" y2="50.6" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="96.2" x2="729.6" y2="96.2" stroke="#16130F" stroke-width="2.6"/>
+      </svg></div>
+    </div>
+    <div class="keyrow">
+      <div class="keysym"><svg class="inline" viewBox="0 0 96 84" width="96" height="84" role="img" aria-label="a tree" xmlns="http://www.w3.org/2000/svg"><line x1="48" y1="66" x2="48" y2="48.5" stroke="#16130F" stroke-width="3.75" stroke-linecap="round"/><circle cx="48" cy="36" r="17.5" fill="#F0DCC9" stroke="#16130F" stroke-width="1.8"/></svg></div>
+      <div class="keyline">      <svg class="row" viewBox="0 0 729.6 128.2" width="100%" role="img" aria-label="write what the symbol means">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="50.6" x2="729.6" y2="50.6" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="96.2" x2="729.6" y2="96.2" stroke="#16130F" stroke-width="2.6"/>
+      </svg></div>
+    </div>
+    <div class="keyrow">
+      <div class="keysym"><svg class="inline" viewBox="0 0 96 84" width="96" height="84" role="img" aria-label="a shop" xmlns="http://www.w3.org/2000/svg"><rect x="25.5" y="36" width="45" height="32.5" rx="0" fill="#F7EDE4" stroke="#16130F" stroke-width="1.8"/><rect x="21.75" y="26" width="52.5" height="11.25" rx="0" fill="#F0DCC9" stroke="#16130F" stroke-width="1.8"/></svg></div>
+      <div class="keyline">      <svg class="row" viewBox="0 0 729.6 128.2" width="100%" role="img" aria-label="write what the symbol means">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="50.6" x2="729.6" y2="50.6" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="96.2" x2="729.6" y2="96.2" stroke="#16130F" stroke-width="2.6"/>
+      </svg></div>
+    </div>
+    <div class="keyrow">
+      <div class="keysym"><svg class="inline" viewBox="0 0 96 84" width="96" height="84" role="img" aria-label="a school" xmlns="http://www.w3.org/2000/svg"><rect x="15.5" y="33.5" width="65" height="37.5" rx="0" fill="#F7EDE4" stroke="#16130F" stroke-width="2"/><line x1="48" y1="33.5" x2="48" y2="8.5" stroke="#16130F" stroke-width="2.5" stroke-linecap="round"/><path d="M48,8.5 l20,6.25 l-20,6.25 Z" fill="#16130F"/></svg></div>
+      <div class="keyline">      <svg class="row" viewBox="0 0 729.6 128.2" width="100%" role="img" aria-label="write what the symbol means">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="50.6" x2="729.6" y2="50.6" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="96.2" x2="729.6" y2="96.2" stroke="#16130F" stroke-width="2.6"/>
+      </svg></div>
+    </div>
+    <div class="keyrow">
+      <div class="keysym"><svg class="inline" viewBox="0 0 96 84" width="96" height="84" role="img" aria-label="a pond" xmlns="http://www.w3.org/2000/svg"><ellipse cx="48" cy="46" rx="37.5" ry="22.5" fill="#F0DCC9" stroke="#16130F" stroke-width="1.8"/></svg></div>
+      <div class="keyline">      <svg class="row" viewBox="0 0 729.6 128.2" width="100%" role="img" aria-label="write what the symbol means">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="50.6" x2="729.6" y2="50.6" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="96.2" x2="729.6" y2="96.2" stroke="#16130F" stroke-width="2.6"/>
+      </svg></div>
+    </div>
+  </div>
+
+  <div class="wordbank"><b>Word bank:</b> a tree &nbsp;·&nbsp; a pond &nbsp;·&nbsp; a school &nbsp;·&nbsp; a shop &nbsp;·&nbsp; a house</div>
+
+  <div class="tasknote"><b>A symbol is a promise:</b> the square with a roof means a house everywhere on the map.</div>
+
+  <footer>
+    <span>5 symbols</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Maps</span>
+  </footer>
+</div>
+
+<div class="page">
+  <header>
+    <div class="bigletter">&#9635;</div>
+    <div class="htext">
+      <h1>Reading the Map</h1>
+      <p class="sub">Use your key. Dot each one as you count it.</p>
+    </div>
+    <div class="nameline">Name</div>
+  </header>
+
+  <div class="mappic"><svg class="" viewBox="0 0 560 392" width="560" height="392" role="img" aria-label="a map of a neighborhood with streets and buildings" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="556" height="388" rx="0" fill="none" stroke="#16130F" stroke-width="2.4"/><rect x="2" y="105" width="556" height="26" rx="0" fill="#e6e6e6" stroke="#16130F" stroke-width="0"/><line x1="2" y1="118" x2="558" y2="118" stroke="#CFC3B2" stroke-width="1.2" stroke-dasharray="10 8" stroke-linecap="round"/><rect x="22" y="109" width="74" height="18" rx="3" fill="#F7EDE4" stroke="#CFC3B2" stroke-width="1"/><text x="59" y="122" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="9.5" font-weight="bold" text-anchor="middle" fill="#16130F">Oak Street</text><rect x="2" y="255" width="556" height="26" rx="0" fill="#e6e6e6" stroke="#16130F" stroke-width="0"/><line x1="2" y1="268" x2="558" y2="268" stroke="#CFC3B2" stroke-width="1.2" stroke-dasharray="10 8" stroke-linecap="round"/><rect x="22" y="259" width="74" height="18" rx="3" fill="#F7EDE4" stroke="#CFC3B2" stroke-width="1"/><text x="59" y="272" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="9.5" font-weight="bold" text-anchor="middle" fill="#16130F">Pine Street</text><rect x="165" y="2" width="26" height="388" rx="0" fill="#e6e6e6" stroke="#16130F" stroke-width="0"/><line x1="178" y1="2" x2="178" y2="390" stroke="#CFC3B2" stroke-width="1.2" stroke-dasharray="10 8" stroke-linecap="round"/><rect x="167" y="300" width="22" height="76" rx="3" fill="#F7EDE4" stroke="#CFC3B2" stroke-width="1"/><text transform="translate(182,372) rotate(-90)" font-size="9.5" font-weight="bold" text-anchor="start" fill="#16130F">High Street</text><rect x="385" y="2" width="26" height="388" rx="0" fill="#e6e6e6" stroke="#16130F" stroke-width="0"/><line x1="398" y1="2" x2="398" y2="390" stroke="#CFC3B2" stroke-width="1.2" stroke-dasharray="10 8" stroke-linecap="round"/><rect x="387" y="300" width="22" height="76" rx="3" fill="#F7EDE4" stroke="#CFC3B2" stroke-width="1"/><text transform="translate(402,372) rotate(-90)" font-size="9.5" font-weight="bold" text-anchor="start" fill="#16130F">Mill Road</text><rect x="45" y="56" width="30" height="24" rx="0" fill="#F7EDE4" stroke="#16130F" stroke-width="1.8"/><path d="M41,56 L60,40 L79,56 Z" fill="#F0DCC9" stroke="#16130F" stroke-width="1.8" stroke-linejoin="round"/><rect x="103" y="56" width="30" height="24" rx="0" fill="#F7EDE4" stroke="#16130F" stroke-width="1.8"/><path d="M99,56 L118,40 L137,56 Z" fill="#F0DCC9" stroke="#16130F" stroke-width="1.8" stroke-linejoin="round"/><line x1="88" y1="221" x2="88" y2="207" stroke="#16130F" stroke-width="3" stroke-linecap="round"/><circle cx="88" cy="197" r="14" fill="#F0DCC9" stroke="#16130F" stroke-width="1.8"/><rect x="45" y="324" width="30" height="24" rx="0" fill="#F7EDE4" stroke="#16130F" stroke-width="1.8"/><path d="M41,324 L60,308 L79,324 Z" fill="#F0DCC9" stroke="#16130F" stroke-width="1.8" stroke-linejoin="round"/><rect x="104" y="322" width="36" height="26" rx="0" fill="#F7EDE4" stroke="#16130F" stroke-width="1.8"/><rect x="101" y="314" width="42" height="9" rx="0" fill="#F0DCC9" stroke="#16130F" stroke-width="1.8"/><rect x="242" y="50" width="52" height="30" rx="0" fill="#F7EDE4" stroke="#16130F" stroke-width="2"/><line x1="268" y1="50" x2="268" y2="30" stroke="#16130F" stroke-width="2" stroke-linecap="round"/><path d="M268,30 l16,5 l-16,5 Z" fill="#16130F"/><line x1="240" y1="216" x2="240" y2="202" stroke="#16130F" stroke-width="3" stroke-linecap="round"/><circle cx="240" cy="192" r="14" fill="#F0DCC9" stroke="#16130F" stroke-width="1.8"/><line x1="300" y1="221" x2="300" y2="207" stroke="#16130F" stroke-width="3" stroke-linecap="round"/><circle cx="300" cy="197" r="14" fill="#F0DCC9" stroke="#16130F" stroke-width="1.8"/><line x1="270" y1="346" x2="270" y2="332" stroke="#16130F" stroke-width="3" stroke-linecap="round"/><circle cx="270" cy="322" r="14" fill="#F0DCC9" stroke="#16130F" stroke-width="1.8"/><rect x="325" y="324" width="30" height="24" rx="0" fill="#F7EDE4" stroke="#16130F" stroke-width="1.8"/><path d="M321,324 L340,308 L359,324 Z" fill="#F0DCC9" stroke="#16130F" stroke-width="1.8" stroke-linejoin="round"/><ellipse cx="470" cy="62" rx="30" ry="18" fill="#F0DCC9" stroke="#16130F" stroke-width="1.8"/><rect x="445" y="194" width="30" height="24" rx="0" fill="#F7EDE4" stroke="#16130F" stroke-width="1.8"/><path d="M441,194 L460,178 L479,194 Z" fill="#F0DCC9" stroke="#16130F" stroke-width="1.8" stroke-linejoin="round"/><rect x="455" y="324" width="30" height="24" rx="0" fill="#F7EDE4" stroke="#16130F" stroke-width="1.8"/><path d="M451,324 L470,308 L489,324 Z" fill="#F0DCC9" stroke="#16130F" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
+
+  <div class="wqs">
+    <div class="wq"><div class="wqt">How many houses are on the map?</div>      <svg class="row" viewBox="0 0 729.6 73.92" width="100%" role="img" aria-label="write here">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="29.96" x2="729.6" y2="29.96" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="54.92" x2="729.6" y2="54.92" stroke="#16130F" stroke-width="2.6"/>
+      </svg></div>
+    <div class="wq"><div class="wqt">How many trees are on the map?</div>      <svg class="row" viewBox="0 0 729.6 73.92" width="100%" role="img" aria-label="write here">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="29.96" x2="729.6" y2="29.96" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="54.92" x2="729.6" y2="54.92" stroke="#16130F" stroke-width="2.6"/>
+      </svg></div>
+    <div class="wq"><div class="wqt">How many streets are on the map? Count the ones going across AND the ones going up and down.</div>      <svg class="row" viewBox="0 0 729.6 73.92" width="100%" role="img" aria-label="write here">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="29.96" x2="729.6" y2="29.96" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="54.92" x2="729.6" y2="54.92" stroke="#16130F" stroke-width="2.6"/>
+      </svg></div>
+    <div class="wq"><div class="wqt">Which street runs just below the pond?</div>      <svg class="row" viewBox="0 0 729.6 73.92" width="100%" role="img" aria-label="write here">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="29.96" x2="729.6" y2="29.96" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="54.92" x2="729.6" y2="54.92" stroke="#16130F" stroke-width="2.6"/>
+      </svg></div>
+  </div>
+
+  <footer>
+    <span>4 questions</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Maps</span>
+  </footer>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,1075 @@
+<!DOCTYPE html><html><head>
+<meta charset="utf-8">
+<!-- Declared, because everything else on the shelf declares it and the app now
+     reads it. These sets are worksheets in the strict sense the tag means: ten
+     questions with a settled right answer and a key on the second page. They
+     had no tag only because this file writes its own head instead of going
+     through lib/sheet.js doc(), which is where the tag is normally emitted. -->
+<meta name="sheet-kind" content="worksheet">
+<title>Daily Language Review — Grade 5, Set 1</title>
+<style>
+  /* Page margins live HERE only — body padding stays 0 for print
+     so the two don't stack and eat the sheet. */
+  @page { size: letter portrait; margin: 0.45in 0.5in; }
+
+  :root {
+    --ink:    #16130F;
+    --muted:  #6B635A;
+    --rule:   #CFC3B2;
+    --guide:  #BCAE9C;
+    --accent: #C0511D;
+    --tint:   #F7EDE4;
+    --slate:  #2E5A78;
+    --tintslate: #E9EFF4;
+    --deep:   #2C4A45;
+    --tintdeep: #ECF1EF;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body { margin: 0; padding: 0; }
+
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    color: var(--ink);
+    background: #ddd;
+    font-size: 12pt;
+    line-height: 1.3;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Screen-only breathing room. Print uses @page margins instead. */
+  /* ORDER MATTERS. This generic rule must come BEFORE the @media screen block:
+   * same specificity, so whichever is declared last wins. With it after, the
+   * on-screen preview stretched to the viewport instead of 8.5in. Print was
+   * unaffected, but the proof you check before printing was wrong. */
+  .page { width: 100%; }
+  .page + .page { page-break-before: always; }
+
+  @media screen {
+    body { padding: 0.5in; background: #ddd; }
+    .page {
+      background: #fff;
+      padding: 0.45in 0.5in;
+      width: 8.5in;
+      min-height: 11in;
+      margin: 0 auto 24px;
+      box-shadow: 0 2px 10px rgba(0,0,0,.3);
+    }
+  }
+
+  header { border-bottom: 3px double var(--accent); padding-bottom: 6px; margin-bottom: 0; }
+  header.cont { border-bottom-width: 1px; border-bottom-style: solid; }
+
+  h1 { font-size: 16pt; margin: 0 0 1px; letter-spacing: .01em; }
+  .sub { font-size: 10pt; font-style: italic; color: var(--muted); margin: 0; }
+
+  .nameline {
+    display: flex;
+    gap: 26px;
+    font-size: 10.5pt;
+    margin: 11px 0 12px;
+  }
+  .nameline span { flex: 1; border-bottom: 1px solid var(--ink); padding-bottom: 1px; }
+  .nameline span.short { flex: 0 0 2in; }
+
+  .directions {
+    font-size: 10.5pt;
+    line-height: 1.35;
+    background: var(--tint);
+    border-left: 4px solid var(--slate);
+    padding: 7px 10px;
+    margin-bottom: 14px;
+  }
+  .directions b { letter-spacing: .03em; }
+  .cups { font-style: italic; margin-top: 3px; }
+
+  ol { margin: 0; padding: 0; list-style: none; }
+
+  li {
+    margin-bottom: 12px;
+    page-break-inside: avoid;
+  }
+  li::before {
+    content: attr(data-n) ".";
+    font-weight: bold;
+    display: inline-block;
+    width: .3in;
+  }
+
+  .bad {
+    font-family: "Courier New", Courier, monospace;
+    font-size: 11.5pt;
+  }
+
+  /* Primary handwriting lines: solid top rule, dashed midline,
+     heavy baseline — capitals reach the top, lowercase sits
+     in the bottom half. Two strips per sentence. */
+  .write {
+    position: relative;
+    height: .45in;
+    margin: 6px 0 0 .3in;
+    border-top: 1px solid var(--rule);
+    border-bottom: 2px solid var(--slate);
+  }
+  .write + .write { margin-top: .17in; }
+  .write::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    border-top: 1px dashed #9a9a9a;
+  }
+
+  /* ---------- number 1, done for you (2026-09-23) ----------
+   * THE OWNER PRINTED THESE AND SAID THE SHEETS WERE NOT INTUITIVE, and a blind
+   * re-score with the directions hidden agreed: "faulty sentences over blank
+   * lines read as 'copy it'; that the errors must be fixed is not shown", and
+   * at grade 7 "copy, correct or improve are all plausible". So number 1 is
+   * now shown FIXED, written on its line, with every correction lit the way
+   * the key lights it — a child who never reads the directions can see that
+   * the job is to change things, and which kinds of thing. It is a different
+   * class from the key's .fixed on purpose: check.js pairs every .bad with
+   * one .fixed, and the example is not a second answer. */
+  li.done { background: var(--tint); border-left: 4px solid var(--accent);
+    padding: 5px 8px 8px 0; }
+  .donetag { display: inline-block; font-family: Georgia, serif; font-size: 8pt;
+    font-weight: bold; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--accent); border: 1.5px solid var(--accent); padding: 0 5px;
+    margin-left: 8px; vertical-align: 1px; }
+  .write.filled { display: flex; align-items: flex-end; padding: 0 0 1px 6px; }
+  .write.filled::after { z-index: 0; }
+  .fixedlabel { font-size: 8.5pt; font-weight: bold; letter-spacing: .05em;
+    text-transform: uppercase; color: var(--accent); margin-right: 8px;
+    position: relative; z-index: 1; white-space: nowrap; }
+  .donefix { position: relative; z-index: 1; font-style: italic;
+    color: var(--deep); white-space: nowrap; line-height: 1; }
+  .donefix u { text-decoration: none; background: #fff; font-weight: bold;
+    padding: 0 1px; border-bottom: 2px solid var(--accent); }
+
+  .brand { font-style: normal; font-size: 7.5pt; letter-spacing: .04em;
+    color: var(--accent); align-self: center; }
+
+  footer {
+    margin-top: 14px;
+    padding-top: 6px;
+    border-top: 1px solid var(--rule);
+    font-size: 9pt;
+    font-style: italic;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+  }
+
+  /* ---------- answer key ---------- */
+  .key li { margin-bottom: 12px; }
+  .key .fixed u {
+    text-decoration: none;
+    background: var(--tint);
+    padding: 0 2px;
+    font-weight: bold;
+  }
+  .key .why {
+    display: block;
+    margin-left: .3in;
+    font-size: 9.5pt;
+    font-style: italic;
+    color: var(--muted);
+    margin-top: 1px;
+  }
+  .keybadge {
+    display: inline-block;
+    border: 2px solid var(--deep);
+    padding: 2px 9px;
+    font-size: 9.5pt;
+    font-weight: bold;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+</style>
+</head><body>
+
+<!-- ============ PAGE 1 — STUDENT, 1–5 ============ -->
+<div class="page">
+  <header>
+    <h1>Daily Language Review — Set 1</h1>
+    <p class="sub">Grade 5 &nbsp;·&nbsp; Mixed Review &nbsp;·&nbsp; Page 1 of 2</p>
+  </header>
+
+  <div class="nameline">
+    <span>Name</span>
+    <span class="short">Date</span>
+  </div>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Fix every mistake and write the sentence right on the lines. Number 1 is done.
+    <div class="cups"><b>Remember CUPS:</b> Capital letters &nbsp;·&nbsp; Usage (right word) &nbsp;·&nbsp; Punctuation &nbsp;·&nbsp; Spelling</div>
+  </div>
+
+  <ol>
+    <li data-n="1" class="done"><span class="bad">by friday we have finished the whole model and we was proud of it</span><span class="donetag">Done for you</span><div class="write filled"><span class="fixedlabel">Fixed:</span><span class="donefix" style="font-size:12.5pt"><u>B</u>y <u>F</u>riday we <u>had</u> finished the whole model<u>,</u> and we <u>were</u> proud of it<u>.</u></span></div></li>
+    <li data-n="2"><span class="bad">the list of ingredients were on the counter but its missing now</span><div class="write"></div><div class="write"></div></li>
+    <li data-n="3"><span class="bad">we read a poem called the road not taken and a book called hatchet</span><div class="write"></div><div class="write"></div></li>
+    <li data-n="4"><span class="bad">i have never seen so many people neither has my sister</span><div class="write"></div><div class="write"></div></li>
+    <li data-n="5"><span class="bad">after we had ate lunch we walked down to the harbor</span><div class="write"></div><div class="write"></div></li>
+  </ol>
+
+  <footer>
+    <span>Keep going on page 2 &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Set 1</span>
+  </footer>
+</div>
+
+<!-- ============ PAGE 2 — STUDENT, 6–10 ============ -->
+<div class="page">
+  <header class="cont">
+    <h1>Set 1, continued</h1>
+    <p class="sub">Grade 5 &nbsp;·&nbsp; Mixed Review &nbsp;·&nbsp; Page 2 of 2</p>
+  </header>
+
+  <ol style="margin-top:16px">
+    <li data-n="6"><span class="bad">whose going to carry the tent asked marcus</span><div class="write"></div><div class="write"></div></li>
+    <li data-n="7"><span class="bad">the dog wagged its tail and than it ran off with my glove</span><div class="write"></div><div class="write"></div></li>
+    <li data-n="8"><span class="bad">my aunt who lives in denver has flew here twice this year</span><div class="write"></div><div class="write"></div></li>
+    <li data-n="9"><span class="bad">their were fewer chairs then people so we stood at the back</span><div class="write"></div><div class="write"></div></li>
+    <li data-n="10"><span class="bad">the team have practiced all season and they has won every game</span><div class="write"></div><div class="write"></div></li>
+  </ol>
+
+  <footer>
+    <!-- / 9, not / 10: number 1 is the worked example (2026-09-23). -->
+    <span>Score: ______ / 9</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Set 1</span>
+  </footer>
+</div>
+
+<!-- ============ PAGE 3 — ANSWER KEY ============ -->
+
+<div style="page-break-before:always"></div>
+
+
+<div class="page ">
+  <header>
+    
+    <h1>The Line You Drew Was the Wrong Line</h1>
+    <p class="sub">Nothing Was Watching · Page 1 of 4</p>
+  </header>
+  <div class="nameline">
+    <span>Name</span>
+    <span class="short">Date</span>
+  </div>
+  <div class="directions">
+    <b>DIRECTIONS:</b> Your history line held all 300,000 years of people. How much longer is the Earth's story?
+  </div>
+
+
+  <div style="text-align:center;margin:4px 0"><svg class="inline" viewBox="0 0 680 206" width="680" height="206" role="img" aria-label="the whole age of the earth as one strip, with six events marked" xmlns="http://www.w3.org/2000/svg"><rect x="16" y="94" width="650" height="28" rx="0" fill="#f4f4f4" stroke="#16130F" stroke-width="1.2"/><line x1="16" y1="94" x2="16" y2="80" stroke="#16130F" stroke-width="1" stroke-linecap="round"/><text x="13" y="76" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="11" font-weight="normal" text-anchor="start" fill="#16130F">4,540</text><text x="13" y="63" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="10" font-weight="normal" text-anchor="start" fill="#6B635A">Earth forms</text><line x1="136.26" y1="94" x2="136.26" y2="80" stroke="#16130F" stroke-width="1" stroke-linecap="round"/><text x="136.26" y="76" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="11" font-weight="normal" text-anchor="middle" fill="#16130F">3,700</text><text x="136.26" y="63" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="10" font-weight="normal" text-anchor="middle" fill="#6B635A">first life</text><line x1="322.39" y1="94" x2="322.39" y2="136" stroke="#16130F" stroke-width="1" stroke-linecap="round"/><text x="322.39" y="151" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="11" font-weight="normal" text-anchor="middle" fill="#16130F">2,400</text><text x="322.39" y="164" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="10" font-weight="normal" text-anchor="middle" fill="#6B635A">oxygen in the air</text><line x1="588.83" y1="94" x2="588.83" y2="80" stroke="#16130F" stroke-width="1" stroke-linecap="round"/><text x="591.83" y="76" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="11" font-weight="normal" text-anchor="end" fill="#16130F">539</text><text x="591.83" y="63" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="10" font-weight="normal" text-anchor="end" fill="#6B635A">Cambrian explosion</text><line x1="633.07" y1="94" x2="633.07" y2="136" stroke="#16130F" stroke-width="1" stroke-linecap="round"/><text x="636.07" y="151" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="11" font-weight="normal" text-anchor="end" fill="#16130F">230</text><text x="636.07" y="164" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="10" font-weight="normal" text-anchor="end" fill="#6B635A">first dinosaurs</text><line x1="656.55" y1="94" x2="656.55" y2="50" stroke="#16130F" stroke-width="1" stroke-linecap="round"/><text x="659.55" y="46" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="11" font-weight="normal" text-anchor="end" fill="#16130F">66</text><text x="659.55" y="33" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="10" font-weight="normal" text-anchor="end" fill="#6B635A">the asteroid</text><text x="666" y="184" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="11" font-weight="normal" text-anchor="end" fill="#16130F">↑ now</text><text x="340" y="202" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="10" font-weight="normal" text-anchor="middle" fill="#6B635A">millions of years ago · every mark measured, none of it spaced to look nice</text></svg></div>
+
+  <table class="tbl h10">
+    <thead><tr><th>#</th><th></th><th>How long</th><th>In millions of years</th></tr></thead>
+    <tbody><tr><td><span class="pn">1.</span></td><td>All of human history — your old line</td><td>300,000 years</td><td class="blank"></td></tr><tr><td><span class="pn">2.</span></td><td>The age of the Earth</td><td>4,540 million years</td><td class="blank"></td></tr></tbody>
+  </table>
+
+  <ol class="qs" start="3"><li><span class="qt">Divide the second by the first. How many times longer is the Earth's history than the whole of human history?</span><div class="work" style="height:1.5in"><span>Show your work</span></div><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Keep going on page 2 →</span>
+    <span class="brand">Kitchen Table</span>
+    <span>How long is long</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>Now Draw It Properly</h1>
+    <p class="sub">Nothing Was Watching · Page 2 of 4</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> New scale: <b>all 300,000 years of people = 1 centimeter.</b> How long is the Earth's line?
+  </div>
+
+
+  <ol class="qs" start="4"><li><span class="qt">If 300,000 years is 1 cm, how many centimeters is 4,540 million years? Then turn that into meters.</span><div class="work" style="height:2.2in"><span>Show your work</span></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Is there anywhere in your house that long? Where would you have to go to draw it?</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+  <div class="note">Check: about <b>151 meters</b>, a football field and a half. All of writing is
+  the last sixth of a millimeter.</div>
+
+  <footer>
+    <span>Keep going on page 3 →</span>
+    <span class="brand">Kitchen Table</span>
+    <span>How long is long</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>Where Things Land on It</h1>
+    <p class="sub">Nothing Was Watching · Page 3 of 4</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Place each event on the 151 m line, from the left end where the Earth forms: (4,540 − date) ÷ 4,540 × 151 m.
+  </div>
+
+
+  <table class="tbl h10">
+    <thead><tr><th>#</th><th>Event</th><th>Millions of years ago</th><th>How far along the 151 m line (meters)</th></tr></thead>
+    <tbody><tr><td><span class="pn">6.</span></td><td>The first life</td><td>3,700</td><td class="blank"></td></tr><tr><td><span class="pn">7.</span></td><td>Oxygen appears in the air</td><td>2,400</td><td class="blank"></td></tr><tr><td><span class="pn">8.</span></td><td>The Cambrian explosion</td><td>539</td><td class="blank"></td></tr><tr><td><span class="pn">9.</span></td><td>The first dinosaurs</td><td>230</td><td class="blank"></td></tr><tr><td><span class="pn">10.</span></td><td>The asteroid, and the end of the dinosaurs</td><td>66</td><td class="blank"></td></tr></tbody>
+  </table>
+
+  <ol class="qs" start="11"><li><span class="qt">The dinosaurs are the thing most people picture when they hear "long ago". How much of the line is BEFORE the first dinosaur?</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Keep going on page 4 →</span>
+    <span class="brand">Kitchen Table</span>
+    <span>How long is long</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>What Was Happening in the Empty Part</h1>
+    <p class="sub">Nothing Was Watching · Page 4 of 4</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Did nothing happen in the long empty part of the line? Read, then answer.
+  </div>
+
+
+  <div class="note">For the first 3,000 million years, everything alive was a <b>single cell</b>. About 2,400 million
+  years ago, living things began putting <b>oxygen</b> into the air, and it poisoned most of what was alive.</div>
+
+  <ol class="qs" start="12"><li><span class="qt">Somebody says "the Earth is really old — like, dinosaurs old." Using your line, explain what is wrong with that sentence.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Why do you think almost everything you have been taught about the past sits in the last few centimeters? Give a reason that is about EVIDENCE, not about importance.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Score: ______ / 13 (each table is marked as one)</span>
+    <span class="brand">Kitchen Table</span>
+    <span>How long is long</span>
+  </footer>
+</div>
+
+
+<div style="page-break-before:always"></div>
+
+
+<div class="page ">
+  <header>
+    
+    <h1>Before Anyone Sailed</h1>
+    <p class="sub">Grade 5 · First peoples · Page 1 of 3</p>
+  </header>
+  <div class="nameline">
+    <span>Name</span>
+    <span class="short">Date</span>
+  </div>
+  <div class="directions">
+    <b>DIRECTIONS:</b> Hundreds of nations lived here, each fitted to its own land. Read, then fill in the table.
+  </div>
+
+
+  
+  <table class="tbl ">
+    <thead><tr><th>Where they lived</th><th>What the land is like</th><th>How they got food</th><th>What their homes were like</th></tr></thead>
+    <tbody><tr><td><span class="pn">1.</span> the far north (Arctic)</td><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr><tr><td><span class="pn">2.</span> the northwest coast</td><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr><tr><td><span class="pn">3.</span> the dry southwest</td><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr><tr><td><span class="pn">4.</span> the Great Plains</td><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr><tr><td><span class="pn">5.</span> the eastern woodlands</td><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr><tr><td><span class="pn">6.</span> the southeast</td><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr></tbody>
+  </table>
+
+  <footer>
+    <span>Keep going on page 2 →</span>
+    <span class="brand">Kitchen Table</span>
+    <span>First peoples</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>The Land Does the Explaining</h1>
+    <p class="sub">Grade 5 · First peoples · Page 2 of 3</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Give the reason for each answer on page 1. It is nearly always the land.
+  </div>
+
+
+  <div class="note" style="margin-top:2px"><b>People build with what is there:</b> wood where forest was thick, earth or hide
+  where there were no trees. Where corn grew, people stayed and built towns; where the food moved, so did they.</div>
+
+  <ol class="qs" start="7"><li><span class="qt">Why did people on the Plains live in homes that could be taken down and moved?</span><div class="write"></div><div class="write"></div></li><li><span class="qt">Why did people of the northwest coast build large permanent wooden houses?</span><div class="write"></div><div class="write"></div></li><li><span class="qt">Corn, beans and squash were grown together across much of the continent. What does growing your own food let a people do that hunting alone does not?</span><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Nations traded shells, copper, obsidian and food over thousands of miles. What does that tell you about how connected they were?</span><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Keep going on page 3 →</span>
+    <span class="brand">Kitchen Table</span>
+    <span>First peoples</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>Reading a Place</h1>
+    <p class="sub">Grade 5 · First peoples · Page 3 of 3</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Given the land, work out the life.
+  </div>
+
+
+  <div class="note" style="margin-top:2px"><b>A place you have never heard of.</b> Wide grassland, no trees for a
+  hundred miles, hot summers, hard winters, and enormous herds of grazing animals passing through twice a year.</div>
+
+  <ol class="qs" start="11"><li><span class="qt">What would people there eat, and how would they get it?</span><div class="write"></div><div class="write"></div></li><li><span class="qt">What would they build houses out of, and would those houses move?</span><div class="write"></div><div class="write"></div></li><li><span class="qt">Would they be likely to have large permanent towns? Say why.</span><div class="write"></div><div class="write"></div></li><li><span class="qt">Many of these nations still exist today, with governments, courts and members. Why do you think so much teaching about them is written as though they only existed long ago?</span><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Score: ______ / 14</span>
+    <span class="brand">Kitchen Table</span>
+    <span>First peoples</span>
+  </footer>
+</div>
+
+
+<div style="page-break-before:always"></div>
+
+
+<div class="page ">
+  <header>
+    
+    <h1>How Many Weeks</h1>
+    <p class="sub">Money that waits · Page 1 of 2</p>
+  </header>
+  <div class="nameline">
+    <span>Name</span>
+    <span class="short">Date</span>
+  </div>
+  <div class="directions">
+    <b>DIRECTIONS:</b> How many weeks of saving for each? Round up: part of a week is still a week.
+  </div>
+
+
+  <table class="tbl roomy">
+    <thead><tr><th>What it is</th><th>Price</th><th>Saved each week</th><th>How many weeks?</th></tr></thead>
+    <tbody><tr><td><span class="pn">1.</span> A game</td><td>$45</td><td>$5</td><td class="blank"></td></tr><tr><td><span class="pn">2.</span> A pair of trainers</td><td>$60</td><td>$8</td><td class="blank"></td></tr><tr><td><span class="pn">3.</span> A bike</td><td>$130</td><td>$10</td><td class="blank"></td></tr><tr><td><span class="pn">4.</span> A book</td><td>$12</td><td>$5</td><td class="blank"></td></tr></tbody>
+  </table>
+  <div class="test"><b>Say the number out loud.</b> Thirteen weeks is a season: start in the cold, finish in the warm. <b>"Can I afford it?" and "Will I wait that long?" are different questions</b>, and only the second is hard.</div>
+  <div class="note">The bike, one box a week. Cross one off each week.</div>
+  <div class="weeks"><div class="wk"></div><div class="wk"></div><div class="wk"></div><div class="wk"></div><div class="wk"></div><div class="wk"></div><div class="wk"></div><div class="wk"></div><div class="wk"></div><div class="wk"></div><div class="wk"></div><div class="wk"></div><div class="wk"></div></div>
+
+  <footer>
+    <span>Keep going on page 2 →</span>
+    <span class="brand">Kitchen Table</span>
+    <span>How many weeks</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>How Many Weeks — Making It Shorter</h1>
+    <p class="sub">Money that waits · Page 2 of 2</p>
+  </header>
+
+
+
+
+  <ol class="qs" start="5"><li><span class="qt">There are only two ways to make the wait shorter. Write both of them down.</span><div class="write"></div><div class="write"></div></li><li><span class="qt">The bike is $130 and you save $10 a week. Somebody offers you $4 a week for walking their dog. How many weeks now — and how many weeks did that save you?</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">A $45 game and a $12 book, at $5 a week. Say how many weeks each, and then say something true about buying the book first.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Somebody says "I will just get it now and pay it back later." Using the weeks, say what has actually changed and what has not.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Score: ______ / 8</span>
+    <span class="brand">Kitchen Table</span>
+    <span>How many weeks</span>
+  </footer>
+</div>
+
+
+<div style="page-break-before:always"></div>
+
+
+<div class="page g1">
+  <header>
+    
+    <h1>The Rain Gauge</h1>
+    <p class="sub">Making &middot; Projects &middot; Page 1 of 6</p>
+  </header>
+  <div class="nameline">
+    <span>Name</span>
+    <span class="short">Date</span>
+  </div>
+  <div class="directions">
+    <b>DIRECTIONS:</b> Answer question 1 in pen before you read the box.
+  </div>
+
+
+  <div class="rules"><b>Scissors only, with a grown-up in the room.</b> If a step seems to want a knife, snip or fold instead.</div>
+
+  <div class="note"><b>What you need:</b> a plastic bottle &middot; a jar &middot; scissors &middot; tape &middot; a ruler &middot; card &middot; small stones &middot; a pencil.</div>
+
+  <ol class="qs" start="1"><li><span class="qt">A washing-up bowl and an egg cup are both left out in the same shower of rain. Which one ends up with deeper water in it?</span><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+  <div class="find"><b>Neither: the same.</b> The bowl catches more, but spreads it over more floor, and the two cancel. <b>So rain is measured as a depth, not an amount</b>: half an inch in a thimble or a pool.</div>
+
+  <div class="fig wide"><svg viewBox="0 0 340 190" width="100%"
+  role="img" aria-label="a wide container and a narrow one after the same shower, with the water at exactly the same depth in both">
+  <path d="M18,44 L150,44 L150,168 L18,168 z" fill="#FFFFFF" stroke="#3A3A3A" stroke-width="2.2"/>
+  <path d="M20,120 L148,120 L148,166 L20,166 z" fill="#DFE6E8" stroke="none"/>
+  <path d="M232,44 L288,44 L288,168 L232,168 z" fill="#FFFFFF" stroke="#3A3A3A" stroke-width="2.2"/>
+  <path d="M234,120 L286,120 L286,166 L234,166 z" fill="#DFE6E8" stroke="none"/>
+  <path d="M10,120 L330,120" fill="none" stroke="#C0511D" stroke-width="1.8" stroke-dasharray="7 5"/>
+  <path d="M162,120 L162,168" fill="none" stroke="#C0511D" stroke-width="1.6"/>
+  <path d="M157,120 L167,120 M157,168 L167,168" fill="none" stroke="#C0511D" stroke-width="1.6"/>
+  <text x="184" y="148" font-size="12.5" fill="#C0511D" text-anchor="middle">same</text>
+  <text x="184" y="164" font-size="12.5" fill="#C0511D" text-anchor="middle">depth</text>
+  <text x="84" y="34" font-size="12" fill="#6A6A6A" text-anchor="middle">wide</text>
+  <text x="260" y="34" font-size="12" fill="#6A6A6A" text-anchor="middle">narrow</text>
+  <text x="84" y="186" font-size="11" fill="#8A8A8A" text-anchor="middle">lots of water</text>
+  <text x="260" y="186" font-size="11" fill="#8A8A8A" text-anchor="middle">much less water</text>
+</svg></div>
+
+  <div class="note"><b>Test it.</b> Put two <b>straight-sided</b> containers of very different widths out
+  in the next shower, away from the house. Measure the depth in each.</div>
+
+  <footer>
+    <span>Why your bottle lies &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>The rain gauge</span>
+  </footer>
+</div>
+
+<div class="page g6">
+  <header class="cont">
+    
+    <h1>Why a Bottle Lies</h1>
+    <p class="sub">Making &middot; Projects &middot; Page 2 of 6</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Cut the top off the bottle and turn it upside down into the base. Then read this.
+  </div>
+
+
+  <div class="find"><b>A bottle does not have straight sides.</b> Its dimpled bottom and curved shoulder make a ruler read wrong at both ends.</div>
+
+  <div class="two bottle">
+    <div class="fig"><svg viewBox="0 0 340 250" width="100%"
+  role="img" aria-label="a drinks bottle cut through, showing the dimpled bottom and curved shoulder where the scale would lie, and the straight middle where it does not">
+  <path d="M120,16 L180,16 L180,34 C180,58 214,66 214,104 L214,214
+           C214,232 196,238 150,238 C104,238 86,232 86,214 L86,104
+           C86,66 120,58 120,34 z"
+        fill="#FAF7F2" stroke="#3A3A3A" stroke-width="2.2" stroke-linejoin="round"/>
+  <path d="M88,214 C96,196 120,206 150,206 C180,206 204,196 212,214"
+        fill="#FFFFFF" stroke="#3A3A3A" stroke-width="2"/>
+  <path d="M88,146 L212,146" fill="none" stroke="#C0511D" stroke-width="2" stroke-dasharray="6 4"/>
+  <path d="M234,104 L234,146" fill="none" stroke="#8A8A8A" stroke-width="1.5"/>
+  <path d="M229,104 L239,104 M229,146 L239,146" fill="none" stroke="#8A8A8A" stroke-width="1.5"/>
+  <path d="M234,146 L234,206" fill="none" stroke="#8A8A8A" stroke-width="1.5"/>
+  <path d="M229,206 L239,206" fill="none" stroke="#8A8A8A" stroke-width="1.5"/>
+  <text x="246" y="128" font-size="11.5" fill="#8A8A8A" text-anchor="start">shoulder</text>
+  <text x="246" y="144" font-size="11.5" fill="#8A8A8A" text-anchor="start">curves in</text>
+  
+  <text x="246" y="176" font-size="11.5" fill="#C0511D" text-anchor="start">the straight</text>
+  <text x="246" y="192" font-size="11.5" fill="#C0511D" text-anchor="start">middle &mdash;</text>
+  <text x="246" y="208" font-size="11.5" fill="#C0511D" text-anchor="start">use only this</text>
+  <text x="150" y="230" font-size="11" fill="#8A8A8A" text-anchor="middle">dimples</text>
+  <text x="76" y="150" font-size="11.5" fill="#C0511D" text-anchor="end">zero</text>
+  <text x="76" y="164" font-size="11.5" fill="#C0511D" text-anchor="end">here</text>
+</svg></div>
+    <div class="btext"><b>The fix is to move the nought.</b><br><br>
+    <b>1.</b> Cut the bottle across the shoulder. Turn the top upside down and drop it into the base
+    &mdash; that is your funnel, and it is waterproof, which a card one would not be.<br><br>
+    <b>2.</b> Drop a few small stones in the bottom so the wind cannot take it.<br><br>
+    <b>3.</b> Pour water in until it is <b>above the dimples and into the straight part</b>, and the
+    stones are covered.<br><br>
+    <b>4.</b> Mark that line. <b>That is nought</b>, not the bottom of the bottle.<br><br>
+    <b>5.</b> Every reading from now on is measured up from that mark, and you empty back down to it
+    rather than emptying it out.</div>
+  </div>
+
+  <div class="note"><b>The page 3 strips tape on the outside</b>, zero on your mark, on anything with a
+  straight middle.</div>
+
+  <footer>
+    <span>The scales are on page 3 &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Why a bottle lies</span>
+  </footer>
+</div>
+
+<div class="page g6">
+  <header class="cont">
+    
+    <h1>Four Scales</h1>
+    <p class="sub">Making &middot; Projects &middot; Page 3 of 6</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Cut out ONE (page 4 says which). Tape it on with the 0 line on your mark.
+  </div>
+
+
+  <div class="note"><b>Funnel and collector the same width? Use &times;1</b> (real inches). A wider funnel
+  makes the water climb faster: page 4 works out which strip.</div>
+
+  <div class="strips">
+    <div class="scell"><svg viewBox="-3 -3 126 560"
+    width="120" height="554"
+    role="img" aria-label="a rainfall scale for a gauge that magnifies 1 times, marked in inches of rain">
+    <rect x="0" y="0" width="120" height="553.5999999999999" rx="3" fill="white" stroke="#C0511D" stroke-width="2" stroke-linejoin="round"/>
+    <path d="M0,535.60 L24,535.60" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <path d="M0,526.00 L7,526.00" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,516.40 L7,516.40" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,506.80 L7,506.80" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,497.20 L7,497.20" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,487.60 L24,487.60" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="491.60" font-size="10.5" fill="#3A3A3A" text-anchor="start">0.5</text>
+    <path d="M0,478.00 L7,478.00" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,468.40 L7,468.40" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,458.80 L7,458.80" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,449.20 L7,449.20" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,439.60 L24,439.60" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="443.60" font-size="10.5" fill="#3A3A3A" text-anchor="start">1.0</text>
+    <path d="M0,430.00 L7,430.00" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,420.40 L7,420.40" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,410.80 L7,410.80" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,401.20 L7,401.20" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,391.60 L24,391.60" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="395.60" font-size="10.5" fill="#3A3A3A" text-anchor="start">1.5</text>
+    <path d="M0,382.00 L7,382.00" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,372.40 L7,372.40" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,362.80 L7,362.80" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,353.20 L7,353.20" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,343.60 L24,343.60" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="347.60" font-size="10.5" fill="#3A3A3A" text-anchor="start">2.0</text>
+    <path d="M0,334.00 L7,334.00" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,324.40 L7,324.40" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,314.80 L7,314.80" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,305.20 L7,305.20" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,295.60 L24,295.60" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="299.60" font-size="10.5" fill="#3A3A3A" text-anchor="start">2.5</text>
+    <path d="M0,286.00 L7,286.00" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,276.40 L7,276.40" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,266.80 L7,266.80" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,257.20 L7,257.20" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,247.60 L24,247.60" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="251.60" font-size="10.5" fill="#3A3A3A" text-anchor="start">3.0</text>
+    <path d="M0,238.00 L7,238.00" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,228.40 L7,228.40" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,218.80 L7,218.80" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,209.20 L7,209.20" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,199.60 L24,199.60" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="203.60" font-size="10.5" fill="#3A3A3A" text-anchor="start">3.5</text>
+    <path d="M0,190.00 L7,190.00" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,180.40 L7,180.40" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,170.80 L7,170.80" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,161.20 L7,161.20" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,151.60 L24,151.60" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="155.60" font-size="10.5" fill="#3A3A3A" text-anchor="start">4.0</text>
+    <path d="M0,142.00 L7,142.00" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,132.40 L7,132.40" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,122.80 L7,122.80" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,113.20 L7,113.20" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,103.60 L24,103.60" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="107.60" font-size="10.5" fill="#3A3A3A" text-anchor="start">4.5</text>
+    <path d="M0,94.00 L7,94.00" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,84.40 L7,84.40" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,74.80 L7,74.80" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,65.20 L7,65.20" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,55.60 L24,55.60" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="59.60" font-size="10.5" fill="#3A3A3A" text-anchor="start">5.0</text>
+    <path d="M0,46.00 L7,46.00" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,535.5999999999999 L120,535.5999999999999" fill="none" stroke="#C0511D" stroke-width="2"/>
+    <text x="60" y="551.5999999999999" font-size="11" fill="#C0511D" text-anchor="middle">0</text>
+    <text x="60" y="22" font-size="14" fill="#C0511D" text-anchor="middle" font-weight="bold">&times;1</text>
+    <text x="60" y="35" font-size="8.5" fill="#8A8A8A" text-anchor="middle">inches of rain</text>
+  </svg></div>
+    <div class="scell"><svg viewBox="-3 -3 126 560"
+    width="120" height="554"
+    role="img" aria-label="a rainfall scale for a gauge that magnifies 2 times, marked in inches of rain">
+    <rect x="0" y="0" width="120" height="553.5999999999999" rx="3" fill="white" stroke="#C0511D" stroke-width="2" stroke-linejoin="round"/>
+    <path d="M0,535.60 L24,535.60" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <path d="M0,527.92 L7,527.92" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,520.24 L7,520.24" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,512.56 L7,512.56" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,504.88 L7,504.88" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,497.20 L24,497.20" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="501.20" font-size="10.5" fill="#3A3A3A" text-anchor="start">0.2</text>
+    <path d="M0,489.52 L7,489.52" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,481.84 L7,481.84" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,474.16 L7,474.16" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,466.48 L7,466.48" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,458.80 L24,458.80" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="462.80" font-size="10.5" fill="#3A3A3A" text-anchor="start">0.4</text>
+    <path d="M0,451.12 L7,451.12" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,443.44 L7,443.44" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,435.76 L7,435.76" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,428.08 L7,428.08" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,420.40 L24,420.40" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="424.40" font-size="10.5" fill="#3A3A3A" text-anchor="start">0.6</text>
+    <path d="M0,412.72 L7,412.72" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,405.04 L7,405.04" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,397.36 L7,397.36" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,389.68 L7,389.68" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,382.00 L24,382.00" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="386.00" font-size="10.5" fill="#3A3A3A" text-anchor="start">0.8</text>
+    <path d="M0,374.32 L7,374.32" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,366.64 L7,366.64" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,358.96 L7,358.96" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,351.28 L7,351.28" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,343.60 L24,343.60" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="347.60" font-size="10.5" fill="#3A3A3A" text-anchor="start">1.0</text>
+    <path d="M0,335.92 L7,335.92" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,328.24 L7,328.24" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,320.56 L7,320.56" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,312.88 L7,312.88" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,305.20 L24,305.20" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="309.20" font-size="10.5" fill="#3A3A3A" text-anchor="start">1.2</text>
+    <path d="M0,297.52 L7,297.52" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,289.84 L7,289.84" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,282.16 L7,282.16" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,274.48 L7,274.48" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,266.80 L24,266.80" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="270.80" font-size="10.5" fill="#3A3A3A" text-anchor="start">1.4</text>
+    <path d="M0,259.12 L7,259.12" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,251.44 L7,251.44" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,243.76 L7,243.76" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,236.08 L7,236.08" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,228.40 L24,228.40" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="232.40" font-size="10.5" fill="#3A3A3A" text-anchor="start">1.6</text>
+    <path d="M0,220.72 L7,220.72" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,213.04 L7,213.04" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,205.36 L7,205.36" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,197.68 L7,197.68" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,190.00 L24,190.00" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="194.00" font-size="10.5" fill="#3A3A3A" text-anchor="start">1.8</text>
+    <path d="M0,182.32 L7,182.32" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,174.64 L7,174.64" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,166.96 L7,166.96" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,159.28 L7,159.28" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,151.60 L24,151.60" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="155.60" font-size="10.5" fill="#3A3A3A" text-anchor="start">2.0</text>
+    <path d="M0,143.92 L7,143.92" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,136.24 L7,136.24" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,128.56 L7,128.56" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,120.88 L7,120.88" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,113.20 L24,113.20" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="117.20" font-size="10.5" fill="#3A3A3A" text-anchor="start">2.2</text>
+    <path d="M0,105.52 L7,105.52" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,97.84 L7,97.84" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,90.16 L7,90.16" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,82.48 L7,82.48" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,74.80 L24,74.80" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="78.80" font-size="10.5" fill="#3A3A3A" text-anchor="start">2.4</text>
+    <path d="M0,67.12 L7,67.12" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,59.44 L7,59.44" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,51.76 L7,51.76" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,44.08 L7,44.08" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,535.5999999999999 L120,535.5999999999999" fill="none" stroke="#C0511D" stroke-width="2"/>
+    <text x="60" y="551.5999999999999" font-size="11" fill="#C0511D" text-anchor="middle">0</text>
+    <text x="60" y="22" font-size="14" fill="#C0511D" text-anchor="middle" font-weight="bold">&times;2</text>
+    <text x="60" y="35" font-size="8.5" fill="#8A8A8A" text-anchor="middle">inches of rain</text>
+  </svg></div>
+    <div class="scell"><svg viewBox="-3 -3 126 560"
+    width="120" height="554"
+    role="img" aria-label="a rainfall scale for a gauge that magnifies 3 times, marked in inches of rain">
+    <rect x="0" y="0" width="120" height="553.5999999999999" rx="3" fill="white" stroke="#C0511D" stroke-width="2" stroke-linejoin="round"/>
+    <path d="M0,535.60 L24,535.60" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <path d="M0,529.84 L7,529.84" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,524.08 L7,524.08" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,518.32 L7,518.32" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,512.56 L7,512.56" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,506.80 L24,506.80" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="510.80" font-size="10.5" fill="#3A3A3A" text-anchor="start">0.1</text>
+    <path d="M0,501.04 L7,501.04" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,495.28 L7,495.28" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,489.52 L7,489.52" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,483.76 L7,483.76" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,478.00 L24,478.00" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="482.00" font-size="10.5" fill="#3A3A3A" text-anchor="start">0.2</text>
+    <path d="M0,472.24 L7,472.24" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,466.48 L7,466.48" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,460.72 L7,460.72" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,454.96 L7,454.96" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,449.20 L24,449.20" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="453.20" font-size="10.5" fill="#3A3A3A" text-anchor="start">0.3</text>
+    <path d="M0,443.44 L7,443.44" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,437.68 L7,437.68" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,431.92 L7,431.92" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,426.16 L7,426.16" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,420.40 L24,420.40" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="424.40" font-size="10.5" fill="#3A3A3A" text-anchor="start">0.4</text>
+    <path d="M0,414.64 L7,414.64" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,408.88 L7,408.88" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,403.12 L7,403.12" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,397.36 L7,397.36" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,391.60 L24,391.60" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="395.60" font-size="10.5" fill="#3A3A3A" text-anchor="start">0.5</text>
+    <path d="M0,385.84 L7,385.84" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,380.08 L7,380.08" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,374.32 L7,374.32" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,368.56 L7,368.56" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,362.80 L24,362.80" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="366.80" font-size="10.5" fill="#3A3A3A" text-anchor="start">0.6</text>
+    <path d="M0,357.04 L7,357.04" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,351.28 L7,351.28" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,345.52 L7,345.52" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,339.76 L7,339.76" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,334.00 L24,334.00" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="338.00" font-size="10.5" fill="#3A3A3A" text-anchor="start">0.7</text>
+    <path d="M0,328.24 L7,328.24" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,322.48 L7,322.48" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,316.72 L7,316.72" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,310.96 L7,310.96" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,305.20 L24,305.20" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="309.20" font-size="10.5" fill="#3A3A3A" text-anchor="start">0.8</text>
+    <path d="M0,299.44 L7,299.44" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,293.68 L7,293.68" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,287.92 L7,287.92" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,282.16 L7,282.16" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,276.40 L24,276.40" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="280.40" font-size="10.5" fill="#3A3A3A" text-anchor="start">0.9</text>
+    <path d="M0,270.64 L7,270.64" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,264.88 L7,264.88" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,259.12 L7,259.12" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,253.36 L7,253.36" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,247.60 L24,247.60" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="251.60" font-size="10.5" fill="#3A3A3A" text-anchor="start">1.0</text>
+    <path d="M0,241.84 L7,241.84" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,236.08 L7,236.08" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,230.32 L7,230.32" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,224.56 L7,224.56" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,218.80 L24,218.80" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="222.80" font-size="10.5" fill="#3A3A3A" text-anchor="start">1.1</text>
+    <path d="M0,213.04 L7,213.04" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,207.28 L7,207.28" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,201.52 L7,201.52" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,195.76 L7,195.76" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,190.00 L24,190.00" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="194.00" font-size="10.5" fill="#3A3A3A" text-anchor="start">1.2</text>
+    <path d="M0,184.24 L7,184.24" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,178.48 L7,178.48" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,172.72 L7,172.72" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,166.96 L7,166.96" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,161.20 L24,161.20" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="165.20" font-size="10.5" fill="#3A3A3A" text-anchor="start">1.3</text>
+    <path d="M0,155.44 L7,155.44" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,149.68 L7,149.68" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,143.92 L7,143.92" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,138.16 L7,138.16" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,132.40 L24,132.40" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="136.40" font-size="10.5" fill="#3A3A3A" text-anchor="start">1.4</text>
+    <path d="M0,126.64 L7,126.64" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,120.88 L7,120.88" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,115.12 L7,115.12" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,109.36 L7,109.36" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,103.60 L24,103.60" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="107.60" font-size="10.5" fill="#3A3A3A" text-anchor="start">1.5</text>
+    <path d="M0,97.84 L7,97.84" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,92.08 L7,92.08" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,86.32 L7,86.32" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,80.56 L7,80.56" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,74.80 L24,74.80" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="78.80" font-size="10.5" fill="#3A3A3A" text-anchor="start">1.6</text>
+    <path d="M0,69.04 L7,69.04" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,63.28 L7,63.28" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,57.52 L7,57.52" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,51.76 L7,51.76" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,46.00 L24,46.00" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="50.00" font-size="10.5" fill="#3A3A3A" text-anchor="start">1.7</text>
+    <path d="M0,535.5999999999999 L120,535.5999999999999" fill="none" stroke="#C0511D" stroke-width="2"/>
+    <text x="60" y="551.5999999999999" font-size="11" fill="#C0511D" text-anchor="middle">0</text>
+    <text x="60" y="22" font-size="14" fill="#C0511D" text-anchor="middle" font-weight="bold">&times;3</text>
+    <text x="60" y="35" font-size="8.5" fill="#8A8A8A" text-anchor="middle">inches of rain</text>
+  </svg></div>
+    <div class="scell"><svg viewBox="-3 -3 126 560"
+    width="120" height="554"
+    role="img" aria-label="a rainfall scale for a gauge that magnifies 4 times, marked in inches of rain">
+    <rect x="0" y="0" width="120" height="553.5999999999999" rx="3" fill="white" stroke="#C0511D" stroke-width="2" stroke-linejoin="round"/>
+    <path d="M0,535.60 L24,535.60" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <path d="M0,527.92 L7,527.92" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,520.24 L7,520.24" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,512.56 L7,512.56" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,504.88 L7,504.88" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,497.20 L24,497.20" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="501.20" font-size="10.5" fill="#3A3A3A" text-anchor="start">0.1</text>
+    <path d="M0,489.52 L7,489.52" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,481.84 L7,481.84" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,474.16 L7,474.16" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,466.48 L7,466.48" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,458.80 L24,458.80" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="462.80" font-size="10.5" fill="#3A3A3A" text-anchor="start">0.2</text>
+    <path d="M0,451.12 L7,451.12" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,443.44 L7,443.44" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,435.76 L7,435.76" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,428.08 L7,428.08" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,420.40 L24,420.40" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="424.40" font-size="10.5" fill="#3A3A3A" text-anchor="start">0.3</text>
+    <path d="M0,412.72 L7,412.72" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,405.04 L7,405.04" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,397.36 L7,397.36" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,389.68 L7,389.68" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,382.00 L24,382.00" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="386.00" font-size="10.5" fill="#3A3A3A" text-anchor="start">0.4</text>
+    <path d="M0,374.32 L7,374.32" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,366.64 L7,366.64" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,358.96 L7,358.96" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,351.28 L7,351.28" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,343.60 L24,343.60" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="347.60" font-size="10.5" fill="#3A3A3A" text-anchor="start">0.5</text>
+    <path d="M0,335.92 L7,335.92" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,328.24 L7,328.24" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,320.56 L7,320.56" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,312.88 L7,312.88" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,305.20 L24,305.20" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="309.20" font-size="10.5" fill="#3A3A3A" text-anchor="start">0.6</text>
+    <path d="M0,297.52 L7,297.52" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,289.84 L7,289.84" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,282.16 L7,282.16" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,274.48 L7,274.48" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,266.80 L24,266.80" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="270.80" font-size="10.5" fill="#3A3A3A" text-anchor="start">0.7</text>
+    <path d="M0,259.12 L7,259.12" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,251.44 L7,251.44" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,243.76 L7,243.76" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,236.08 L7,236.08" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,228.40 L24,228.40" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="232.40" font-size="10.5" fill="#3A3A3A" text-anchor="start">0.8</text>
+    <path d="M0,220.72 L7,220.72" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,213.04 L7,213.04" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,205.36 L7,205.36" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,197.68 L7,197.68" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,190.00 L24,190.00" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="194.00" font-size="10.5" fill="#3A3A3A" text-anchor="start">0.9</text>
+    <path d="M0,182.32 L7,182.32" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,174.64 L7,174.64" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,166.96 L7,166.96" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,159.28 L7,159.28" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,151.60 L24,151.60" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="155.60" font-size="10.5" fill="#3A3A3A" text-anchor="start">1.0</text>
+    <path d="M0,143.92 L7,143.92" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,136.24 L7,136.24" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,128.56 L7,128.56" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,120.88 L7,120.88" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,113.20 L24,113.20" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="117.20" font-size="10.5" fill="#3A3A3A" text-anchor="start">1.1</text>
+    <path d="M0,105.52 L7,105.52" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,97.84 L7,97.84" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,90.16 L7,90.16" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,82.48 L7,82.48" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,74.80 L24,74.80" fill="none" stroke="#3A3A3A" stroke-width="1.4"/>
+    <text x="29" y="78.80" font-size="10.5" fill="#3A3A3A" text-anchor="start">1.2</text>
+    <path d="M0,67.12 L7,67.12" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,59.44 L7,59.44" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,51.76 L7,51.76" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,44.08 L7,44.08" fill="none" stroke="#3A3A3A" stroke-width="0.8"/>
+    <path d="M0,535.5999999999999 L120,535.5999999999999" fill="none" stroke="#C0511D" stroke-width="2"/>
+    <text x="60" y="551.5999999999999" font-size="11" fill="#C0511D" text-anchor="middle">0</text>
+    <text x="60" y="22" font-size="14" fill="#C0511D" text-anchor="middle" font-weight="bold">&times;4</text>
+    <text x="60" y="35" font-size="8.5" fill="#8A8A8A" text-anchor="middle">inches of rain</text>
+  </svg></div>
+  </div>
+
+
+
+  <footer>
+    <span>Which one is yours? &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Four scales</span>
+  </footer>
+</div>
+
+<div class="page g1">
+  <header class="cont">
+    
+    <h1>Making It Read Bigger</h1>
+    <p class="sub">Making &middot; Projects &middot; Page 4 of 6</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Measure across the widest part of the funnel&rsquo;s mouth, through the center, then the collector.
+  </div>
+
+
+  <div class="find"><b>Catch it wide, collect it narrow, and the reading grows</b>, which makes small rain easy to read. <b>It grows by the SQUARE of the widths:</b> a funnel twice as wide reads <b>four</b> times as much; three times as wide, nine.</div>
+
+  <table class="tbl mag">
+    <thead><tr><th>Funnel across</th><th>1.5 in</th><th>2 in</th><th>2.5 in</th><th>3 in</th><th>3.5 in</th></tr></thead>
+    <tbody><tr><td><b>3 in</b></td><td>&times;4.0</td><td>&times;2.3</td><td>&times;1.4</td><td>&times;1.0</td><td>&times;0.7</td></tr><tr><td><b>3.5 in</b></td><td>&times;5.4</td><td>&times;3.1</td><td>&times;2.0</td><td>&times;1.4</td><td>&times;1.0</td></tr><tr><td><b>4 in</b></td><td>&times;7.1</td><td>&times;4.0</td><td>&times;2.6</td><td>&times;1.8</td><td>&times;1.3</td></tr><tr><td><b>4.5 in</b></td><td>&times;9.0</td><td>&times;5.1</td><td>&times;3.2</td><td>&times;2.3</td><td>&times;1.7</td></tr></tbody>
+  </table>
+
+  <div class="note"><b>Round to the nearest strip on page 3.</b> A two-liter bottle (4.2 in) into a jam
+  jar (2.6 in) gives 2.6: the &times;3 strip <b>under-reads by about a
+  seventh</b>. Close enough for a garden.</div>
+
+  <div class="note"><b>Under &times;1?</b> Swap the funnel and collector. <b>Over &times;4?</b> A storm
+  overflows it: use a wider jar.</div>
+
+  <ol class="qs" start="2"><li><span class="qt">Measure your own two and work out your number. Show the division and the squaring separately, so you can see which step did the work.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Where it goes &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Making it read bigger</span>
+  </footer>
+</div>
+
+<div class="page g5">
+  <header class="cont">
+    
+    <h1>Where It Goes</h1>
+    <p class="sub">Making &middot; Projects &middot; Page 5 of 6</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Pick the spot before you start. Moving it later spoils the log.
+  </div>
+
+
+  <table class="tbl ">
+    <thead><tr><th>Do this</th><th>Because</th></tr></thead>
+    <tbody><tr><td><b>Out in the open, well away from anything tall</b></td><td>At least twice as far away as the thing is high. A wall, a fence or a hedge makes a pocket of still air on one side and a gust on the other, and rain does not fall straight down through either.</td></tr><tr><td><b>Never under the eaves, a branch or a washing line</b></td><td>It will read nothing at all in a light shower and then get a fortnight’s worth in one drip when the gutter overflows.</td></tr><tr><td><b>Rim about a foot off the ground</b></td><td>Lower and rain bouncing off the ground splashes back INTO it. Higher and the wind starts carrying drops over the top instead of into it.</td></tr><tr><td><b>Rim level, and check it again after a windy night</b></td><td>A tilted mouth is a smaller mouth as far as falling rain is concerned, so it under-reads — and it will not tell you it is doing it.</td></tr><tr><td><b>The same spot every time</b></td><td>The whole value of a rain log is comparing one week with another. Move the gauge and you have started a new log.</td></tr></tbody>
+  </table>
+
+  <div class="find"><b>Why twice the height away?</b> Wind lifts over a wall and tumbles behind it, carrying rain to one side. Far enough away, it flattens out again.</div>
+
+  <footer>
+    <span>The log &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Where it goes</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>The Log</h1>
+    <p class="sub">Making &middot; Projects &middot; Page 6 of 6</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Read it at the same time every day, dry days too. Then empty it to your zero mark.
+  </div>
+
+
+  <table class="tbl log">
+    <thead><tr><th>Date</th><th>Rain since yesterday</th><th>What the sky did</th></tr></thead>
+    <tbody><tr><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr><tr><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr><tr><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr><tr><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr><tr><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr><tr><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr><tr><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr><tr><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr><tr><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr><tr><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr><tr><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr><tr><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr></tbody>
+  </table>
+
+  <ol class="qs" start="3"><li><span class="qt">Add up a whole week. Now find out what the forecast said for that week, and compare. If they disagree, which do you trust, and why?</span><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Did the heaviest day come with the darkest sky? Look down your two right-hand columns before you answer.</span><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Done &mdash; leave it out</span>
+    <span class="brand">Kitchen Table</span>
+    <span>The log</span>
+  </footer>
+</div>
+
+</body></html>

@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="sheet-kind" content="form">
+<title>Trace the Five — Spanish</title>
+<style>
+  @page { size: letter portrait; margin: 0.4in 0.45in; }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  :root {
+    --ink:    #16130F;
+    --muted:  #6B635A;
+    --rule:   #CFC3B2;
+    --guide:  #BCAE9C;
+    --accent: #C0511D;
+    --tint:   #F7EDE4;
+    --slate:  #2E5A78;
+    --tintslate: #E9EFF4;
+    --deep:   #2C4A45;
+    --tintdeep: #ECF1EF;
+  }
+
+  body {
+    font-family: Quicksand, 'URW Gothic', 'Century Gothic', sans-serif;
+    color: #000; background: #fff;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+
+  /* ORDER MATTERS. This generic rule must come BEFORE the @media screen block:
+   * both selectors have the same specificity, so whichever is declared last
+   * wins. With it after, it overrode the screen width and the preview stretched
+   * to the viewport — rows scaled up and pages measured 16in tall. Print was
+   * always fine (@media screen doesn't apply), but the on-screen proof lied. */
+  .page { width: 100%; }
+  .page + .page { page-break-before: always; }
+
+  @media screen {
+    body { padding: 0.4in; background: #ddd; }
+    .page {
+      background: #fff; padding: 0.4in 0.45in;
+      width: 8.5in; min-height: 11in;
+      margin: 0 auto 22px; box-shadow: 0 2px 10px rgba(0,0,0,.3);
+    }
+  }
+
+  header {
+    display: flex; align-items: center; gap: 16px;
+    border-bottom: 3px solid var(--slate); padding-bottom: 7px; margin-bottom: 2px;
+  }
+  .bigletter { font-size: 38pt; font-weight: 700; line-height: 1; letter-spacing: .02em; }
+  .htext { flex: 1; }
+  h1 { font-size: 14pt; font-weight: 700; margin: 0 0 2px; }
+  .sub { font-size: 10pt; color: var(--muted); margin: 0; }
+  .nameline {
+    font-size: 9.5pt; color: var(--muted);
+    border-bottom: 1px solid var(--ink); width: 2in;
+    padding-bottom: 1px; align-self: flex-end;
+  }
+
+  .label { font-size: 11.5pt; font-weight: 700; margin: 9px 0 1px; }
+  .label span { font-weight: 400; font-size: 10pt; color: var(--muted); }
+
+  .row { display: block; width: 100%; height: auto; margin-bottom: .06in; }
+  /* Rows that follow the header directly would otherwise jam against its rule. */
+  header + .row { margin-top: .12in; }
+
+  .words {
+    margin-top: 10px; padding-top: 7px; border-top: 1px solid var(--rule);
+    font-size: 12.5pt;
+    display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap;
+  }
+  .words b { font-size: 14pt; }
+  .words em { font-style: normal; color: var(--muted); }
+
+  /* The wordmark rides in the footer line that was already there — see the note
+     in lib/sheet.js. No height, upright, a size down, and never louder than the
+     two slots it sits between. */
+  .brand { font-style: normal; font-size: 7pt; letter-spacing: .04em;
+    color: var(--accent); align-self: center; }
+
+  footer {
+    margin-top: 7px; font-size: 8.5pt; color: var(--muted);
+    display: flex; justify-content: space-between;
+  }
+
+  .chart { display: grid; grid-template-columns: repeat(6, 1fr); gap: 7px; margin-top: 14px; }
+  .cell {
+    border: 2px solid var(--slate); border-radius: 8px; height: 1.35in;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .page.key { background: #fcfcfa; }
+  .page.key header { border-bottom-style: double; border-bottom-width: 3px; }
+  .keylist { font-size: 11pt; line-height: 1.7; }
+  .keylist p { margin: .02in 0; }
+  .keynote { border: 1.5px solid var(--deep); border-radius: 8px; padding: .07in .12in;
+    margin: .1in 0 0; font-size: 10pt; line-height: 1.5; }
+
+  /* Everything is oversized. A four-year-old is looking at letter SHAPES, and
+     a vowel set at 14pt is a smudge rather than an object. */
+  .srow { display: grid; grid-template-columns: 1.15in 1fr; gap: 14px;
+    align-items: center; border: 2.4px solid var(--ink); border-radius: 11px;
+    padding: 10px 14px; margin: 11px 0; }
+  .srow .letter { text-align: center; }
+  .grown { font-size: 11pt; line-height: 1.45; }
+  .grown b { font-size: 13pt; }
+  .grown .lead { display: block; font-size: 8.5pt; letter-spacing: .09em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 3px; }
+  .say { display: flex; align-items: center; gap: 9px; margin-top: 6px;
+    font-size: 10.5pt; color: var(--muted); }
+  .tick { display: inline-block; width: .32in; height: .32in;
+    border: 2.4px solid var(--ink); border-radius: 5px; flex: none; }
+  .wrow { display: grid; grid-template-columns: 1.8in 1fr; gap: 18px;
+    align-items: center; border: 2.4px solid var(--ink); border-radius: 11px;
+    padding: 16px 16px; margin: 16px 0; }
+  .wrow .pic { text-align: center; }
+  .wrow .word { font-size: 72pt; font-weight: 700; font-style: italic;
+    letter-spacing: .07em; line-height: 1; }
+  .wrow .ask { font-size: 12pt; color: var(--muted); margin-top: 5px; }
+  .closing { border: 2.4px solid var(--ink); border-radius: 11px;
+    padding: 12px 14px; margin-top: 15px; font-size: 12pt; }
+
+  /* ---- sheets 20-60 ---- */
+  .tlabel { font-size: 12pt; margin: 12px 0 2px; }
+  .tlabel b { font-size: 19pt; }
+  .tlabel span { color: var(--muted); font-size: 10.5pt; }
+  .prow { border: 2.4px solid var(--ink); border-radius: 11px; padding: 9px 12px 11px;
+    margin: 12px 0; display: grid; grid-template-columns: 1.1in 1fr; gap: 14px; align-items: center; }
+  .prow .v { text-align: center; }
+  .prow .pics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 9px; }
+  .prow .pics > div { text-align: center; }
+  .prow .pics .tick { display: block; margin: 6px auto 0; width: .44in; height: .44in; }
+  .cols { display: grid; grid-template-columns: repeat(5, 1fr); gap: 7px; margin: 10px 0; }
+  .cols .col { border: 2.4px solid var(--ink); border-radius: 10px; min-height: 6.2in; padding: 5px 3px; }
+  .cols .col .h { text-align: center; border-bottom: 2px solid var(--ink); padding-bottom: 3px; margin-bottom: 4px; }
+  .cutgrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; margin: 10px 0; }
+  .cutgrid > div { border: 2px dashed var(--rule); padding: 16px 3px 16px; text-align: center; }
+  .cutgrid .es { display: block; font-size: 14pt; font-style: italic; margin-top: 3px; }
+  .bingo { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; margin: 11px 0; }
+  .bingo > div { border: 2.4px solid var(--ink); border-radius: 10px; padding: 10px 3px 12px;
+    text-align: center; }
+  .bingo .es { display: block; font-size: 13pt; font-style: italic; color: var(--muted); margin-top: 3px; }
+  .vrow { border: 2.4px solid var(--ink); border-radius: 11px; padding: 9px 13px; margin: 12px 0;
+    display: grid; grid-template-columns: 2.1in 1fr; gap: 14px; align-items: center; }
+  .vrow .es { font-size: 38pt; font-weight: 700; font-style: italic; letter-spacing: .05em; }
+  .vrow .boxes { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+  .vrow .boxes > div { border: 2.4px solid var(--ink); border-radius: 8px; text-align: center;
+    padding: 4px 0 6px; }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <header>
+    <div class="bigletter">a e i</div>
+    <div class="htext">
+      <h1>Trace the Five</h1>
+      <p class="sub">Start on the dot, follow the dashes. A grown-up says the sound each time.</p>
+    </div>
+    <div class="nameline">Name</div>
+  </header>
+
+  <div class="tlabel"><b>a</b> <span>&mdash; say the sound while they trace. As in <i>father</i>.</span></div>
+      <svg class="row" viewBox="0 0 729.6 190.2" width="100%" role="img" aria-label="writing line for a">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="74.6" x2="729.6" y2="74.6" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="144.2" x2="729.6" y2="144.2" stroke="#16130F" stroke-width="2.6"/>
+        <g transform="translate(37.67 5) scale(139.2)"><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round"/><path d="M.46 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.25" cy="0.5" r="0.02" fill="#C0511D"/></g>
+        <g transform="translate(154.6 5) scale(139.2)"><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.04 0.03"/><path d="M.46 .5 V1" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.04 0.03"/><circle cx="0.25" cy="0.5" r="0.02" fill="#C0511D"/></g>
+        <g transform="translate(271.53 5) scale(139.2)"><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.04 0.03"/><path d="M.46 .5 V1" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.04 0.03"/><circle cx="0.25" cy="0.5" r="0.02" fill="#C0511D"/></g>
+        <g transform="translate(388.47 5) scale(139.2)"><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.04 0.03"/><path d="M.46 .5 V1" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.04 0.03"/><circle cx="0.25" cy="0.5" r="0.02" fill="#C0511D"/></g>
+        <g transform="translate(505.4 5) scale(139.2)"><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.04 0.03"/><path d="M.46 .5 V1" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.04 0.03"/><circle cx="0.25" cy="0.5" r="0.02" fill="#C0511D"/></g>
+        <g transform="translate(622.33 5) scale(139.2)"><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.04 0.03"/><path d="M.46 .5 V1" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.04 0.03"/><circle cx="0.25" cy="0.5" r="0.02" fill="#C0511D"/></g>
+      </svg>
+  <div class="tlabel"><b>e</b> <span>&mdash; say the sound while they trace. As in <i>bed</i>.</span></div>
+      <svg class="row" viewBox="0 0 729.6 190.2" width="100%" role="img" aria-label="writing line for e">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="74.6" x2="729.6" y2="74.6" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="144.2" x2="729.6" y2="144.2" stroke="#16130F" stroke-width="2.6"/>
+        <g transform="translate(39.06 5) scale(139.2)"><path d="M.04 .75 H.45 A.21 .25 0 1 0 .38 .93" fill="none" stroke="#C0511D" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.04" cy="0.75" r="0.02" fill="#C0511D"/></g>
+        <g transform="translate(155.99 5) scale(139.2)"><path d="M.04 .75 H.45 A.21 .25 0 1 0 .38 .93" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.04 0.03"/><circle cx="0.04" cy="0.75" r="0.02" fill="#C0511D"/></g>
+        <g transform="translate(272.93 5) scale(139.2)"><path d="M.04 .75 H.45 A.21 .25 0 1 0 .38 .93" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.04 0.03"/><circle cx="0.04" cy="0.75" r="0.02" fill="#C0511D"/></g>
+        <g transform="translate(389.86 5) scale(139.2)"><path d="M.04 .75 H.45 A.21 .25 0 1 0 .38 .93" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.04 0.03"/><circle cx="0.04" cy="0.75" r="0.02" fill="#C0511D"/></g>
+        <g transform="translate(506.79 5) scale(139.2)"><path d="M.04 .75 H.45 A.21 .25 0 1 0 .38 .93" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.04 0.03"/><circle cx="0.04" cy="0.75" r="0.02" fill="#C0511D"/></g>
+        <g transform="translate(623.73 5) scale(139.2)"><path d="M.04 .75 H.45 A.21 .25 0 1 0 .38 .93" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.04 0.03"/><circle cx="0.04" cy="0.75" r="0.02" fill="#C0511D"/></g>
+      </svg>
+  <div class="tlabel"><b>i</b> <span>&mdash; say the sound while they trace. As in <i>see</i>.</span></div>
+      <svg class="row" viewBox="0 0 729.6 190.2" width="100%" role="img" aria-label="writing line for i">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="74.6" x2="729.6" y2="74.6" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="144.2" x2="729.6" y2="144.2" stroke="#16130F" stroke-width="2.6"/>
+        <g transform="translate(54.37 5) scale(139.2)"><path d="M.13 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.13" cy="0.34" r="0.02" fill="#C0511D"/><circle cx="0.13" cy="0.5" r="0.02" fill="#C0511D"/></g>
+        <g transform="translate(171.3 5) scale(139.2)"><path d="M.13 .5 V1" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.04 0.03"/><circle cx="0.13" cy="0.34" r="0.02" fill="#B09A88"/><circle cx="0.13" cy="0.5" r="0.02" fill="#C0511D"/></g>
+        <g transform="translate(288.24 5) scale(139.2)"><path d="M.13 .5 V1" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.04 0.03"/><circle cx="0.13" cy="0.34" r="0.02" fill="#B09A88"/><circle cx="0.13" cy="0.5" r="0.02" fill="#C0511D"/></g>
+        <g transform="translate(405.17 5) scale(139.2)"><path d="M.13 .5 V1" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.04 0.03"/><circle cx="0.13" cy="0.34" r="0.02" fill="#B09A88"/><circle cx="0.13" cy="0.5" r="0.02" fill="#C0511D"/></g>
+        <g transform="translate(522.1 5) scale(139.2)"><path d="M.13 .5 V1" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.04 0.03"/><circle cx="0.13" cy="0.34" r="0.02" fill="#B09A88"/><circle cx="0.13" cy="0.5" r="0.02" fill="#C0511D"/></g>
+        <g transform="translate(639.04 5) scale(139.2)"><path d="M.13 .5 V1" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.04 0.03"/><circle cx="0.13" cy="0.34" r="0.02" fill="#B09A88"/><circle cx="0.13" cy="0.5" r="0.02" fill="#C0511D"/></g>
+      </svg>
+
+  <footer>
+    <span>Two more over the leaf</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Trace the five</span>
+  </footer>
+</div>
+
+<div class="page">
+  <header>
+    <div class="bigletter">o u</div>
+    <div class="htext">
+      <h1>And Two More</h1>
+      <p class="sub">Same again. Say the sound, then let them say it back.</p>
+    </div>
+  </header>
+
+  <div class="tlabel"><b>o</b> <span>&mdash; say the sound while they trace. As in <i>more</i>.</span></div>
+      <svg class="row" viewBox="0 0 729.6 140.8" width="100%" role="img" aria-label="writing line for o">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="55.4" x2="729.6" y2="55.4" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="105.8" x2="729.6" y2="105.8" stroke="#16130F" stroke-width="2.6"/>
+        <g transform="translate(47.27 5) scale(100.8)"><path d="M.25 .5 A.22 .25 0 0 0 .25 1 A.22 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.03" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.25" cy="0.5" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(164.2 5) scale(100.8)"><path d="M.25 .5 A.22 .25 0 0 0 .25 1 A.22 .25 0 0 0 .25 .5" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.25" cy="0.5" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(281.13 5) scale(100.8)"><path d="M.25 .5 A.22 .25 0 0 0 .25 1 A.22 .25 0 0 0 .25 .5" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.25" cy="0.5" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(398.07 5) scale(100.8)"><path d="M.25 .5 A.22 .25 0 0 0 .25 1 A.22 .25 0 0 0 .25 .5" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.25" cy="0.5" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(515 5) scale(100.8)"><path d="M.25 .5 A.22 .25 0 0 0 .25 1 A.22 .25 0 0 0 .25 .5" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.25" cy="0.5" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(631.93 5) scale(100.8)"><path d="M.25 .5 A.22 .25 0 0 0 .25 1 A.22 .25 0 0 0 .25 .5" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.25" cy="0.5" r="0.03" fill="#C0511D"/></g>
+      </svg>
+      <svg class="row" viewBox="0 0 729.6 140.8" width="100%" role="img" aria-label="writing line for o">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="55.4" x2="729.6" y2="55.4" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="105.8" x2="729.6" y2="105.8" stroke="#16130F" stroke-width="2.6"/>
+        <g transform="translate(47.27 5) scale(100.8)"><path d="M.25 .5 A.22 .25 0 0 0 .25 1 A.22 .25 0 0 0 .25 .5" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.25" cy="0.5" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(164.2 5) scale(100.8)"><path d="M.25 .5 A.22 .25 0 0 0 .25 1 A.22 .25 0 0 0 .25 .5" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.25" cy="0.5" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(281.13 5) scale(100.8)"><path d="M.25 .5 A.22 .25 0 0 0 .25 1 A.22 .25 0 0 0 .25 .5" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.25" cy="0.5" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(398.07 5) scale(100.8)"><path d="M.25 .5 A.22 .25 0 0 0 .25 1 A.22 .25 0 0 0 .25 .5" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.25" cy="0.5" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(515 5) scale(100.8)"><path d="M.25 .5 A.22 .25 0 0 0 .25 1 A.22 .25 0 0 0 .25 .5" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.25" cy="0.5" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(631.93 5) scale(100.8)"><path d="M.25 .5 A.22 .25 0 0 0 .25 1 A.22 .25 0 0 0 .25 .5" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.25" cy="0.5" r="0.03" fill="#C0511D"/></g>
+      </svg>
+  <div class="tlabel"><b>u</b> <span>&mdash; say the sound while they trace. As in <i>moon</i>.</span></div>
+      <svg class="row" viewBox="0 0 729.6 140.8" width="100%" role="img" aria-label="writing line for u">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="55.4" x2="729.6" y2="55.4" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="105.8" x2="729.6" y2="105.8" stroke="#16130F" stroke-width="2.6"/>
+        <g transform="translate(47.27 5) scale(100.8)"><path d="M.04 .5 V.75 A.21 .25 0 0 0 .46 .75" fill="none" stroke="#C0511D" stroke-width="0.03" stroke-linecap="round" stroke-linejoin="round"/><path d="M.46 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.03" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.04" cy="0.5" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(164.2 5) scale(100.8)"><path d="M.04 .5 V.75 A.21 .25 0 0 0 .46 .75" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><path d="M.46 .5 V1" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.04" cy="0.5" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(281.13 5) scale(100.8)"><path d="M.04 .5 V.75 A.21 .25 0 0 0 .46 .75" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><path d="M.46 .5 V1" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.04" cy="0.5" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(398.07 5) scale(100.8)"><path d="M.04 .5 V.75 A.21 .25 0 0 0 .46 .75" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><path d="M.46 .5 V1" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.04" cy="0.5" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(515 5) scale(100.8)"><path d="M.04 .5 V.75 A.21 .25 0 0 0 .46 .75" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><path d="M.46 .5 V1" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.04" cy="0.5" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(631.93 5) scale(100.8)"><path d="M.04 .5 V.75 A.21 .25 0 0 0 .46 .75" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><path d="M.46 .5 V1" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.04" cy="0.5" r="0.03" fill="#C0511D"/></g>
+      </svg>
+      <svg class="row" viewBox="0 0 729.6 140.8" width="100%" role="img" aria-label="writing line for u">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="55.4" x2="729.6" y2="55.4" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="105.8" x2="729.6" y2="105.8" stroke="#16130F" stroke-width="2.6"/>
+        <g transform="translate(47.27 5) scale(100.8)"><path d="M.04 .5 V.75 A.21 .25 0 0 0 .46 .75" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><path d="M.46 .5 V1" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.04" cy="0.5" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(164.2 5) scale(100.8)"><path d="M.04 .5 V.75 A.21 .25 0 0 0 .46 .75" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><path d="M.46 .5 V1" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.04" cy="0.5" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(281.13 5) scale(100.8)"><path d="M.04 .5 V.75 A.21 .25 0 0 0 .46 .75" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><path d="M.46 .5 V1" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.04" cy="0.5" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(398.07 5) scale(100.8)"><path d="M.04 .5 V.75 A.21 .25 0 0 0 .46 .75" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><path d="M.46 .5 V1" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.04" cy="0.5" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(515 5) scale(100.8)"><path d="M.04 .5 V.75 A.21 .25 0 0 0 .46 .75" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><path d="M.46 .5 V1" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.04" cy="0.5" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(631.93 5) scale(100.8)"><path d="M.04 .5 V.75 A.21 .25 0 0 0 .46 .75" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><path d="M.46 .5 V1" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.04" cy="0.5" r="0.03" fill="#C0511D"/></g>
+      </svg>
+  <div class="closing"><b>Five letters that never change their sound</b>, unlike the English <i>a</i> in <i>cat</i> and <i>cake</i>.</div>
+
+  <footer>
+    <span>a e i o u</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Trace the five</span>
+  </footer>
+</div>
+
+</body>
+</html>

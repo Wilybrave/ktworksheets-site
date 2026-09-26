@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="sheet-kind" content="worksheet">
+<title>Four Directions — Hindi</title>
+<style>
+  :root { --font: Georgia, "Times New Roman", serif; }
+
+  /* Page margins live HERE only — body padding stays 0 for print so the two
+     don't stack and eat the sheet. */
+  @page { size: letter portrait; margin: 0.45in 0.5in; }
+
+  /*
+   * THE PALETTE. The same one the shop wears (kitchen-table/BRAND.md): warm
+   * near-black ink, one accent, pine kept back for the answer key.
+   *
+   * WHY A SHEET HAS COLOR AT ALL. Every sheet was pure grayscale — #000 rules,
+   * #333 subtitles, #f0f0f0 boxes — which is what you get by never deciding.
+   * The paper is the product and it looked like a fax. A printer set to
+   * grayscale, or one that has no color to give, renders all of this as the
+   * greys it already had, so nothing below costs a parent anything they were
+   * not already spending.
+   *
+   * WHAT STAYS BLACK, ON PURPOSE:
+   *   - anything drawn to be written on (rules, name lines, answer boxes)
+   *   - anything drawn to be traced or colored in (line art, letter guides)
+   *   - the confidence rings, which have to survive a mono laser
+   * Color marks the sheet's own furniture — its rule, its numbering, its
+   * boxes — and never the part a child puts a pencil through.
+   */
+  :root {
+    --ink:    #16130F;
+    --muted:  #6B635A;
+    --rule:   #CFC3B2;
+    --guide:  #BCAE9C;
+    --accent: #C0511D;
+    --tint:   #F7EDE4;
+    --slate:  #2E5A78;
+    --tintslate: #E9EFF4;
+    --deep:   #2C4A45;
+    --tintdeep: #ECF1EF;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font);
+    color: #000; background: #fff;
+    font-size: 12pt; line-height: 1.3;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+
+  /* ORDER MATTERS. This generic rule must come BEFORE the @media screen block:
+     same specificity, so whichever is declared last wins. With it after, the
+     on-screen preview stretches to the viewport instead of 8.5in — print is
+     unaffected, but the proof you check before printing is wrong. */
+  .page { width: 100%; }
+  .page + .page { page-break-before: always; }
+
+  @media screen {
+    body { padding: 0.5in; background: #ddd; }
+    .page {
+      background: #fff; padding: 0.45in 0.5in;
+      width: 8.5in; min-height: 11in;
+      margin: 0 auto 24px; box-shadow: 0 2px 10px rgba(0,0,0,.3);
+    }
+  }
+
+  /* ------------------------------------------------------------- header */
+  header { border-bottom: 3px double var(--accent); padding-bottom: 6px; }
+  header.cont { border-bottom: 1px solid var(--rule); }
+  h1 { font-size: 16pt; margin: 0 0 1px; letter-spacing: .01em; }
+  .sub { font-size: 10pt; font-style: italic; color: var(--muted); margin: 0; }
+
+  .nameline { display: flex; gap: 26px; font-size: 10.5pt; margin: 11px 0 12px; }
+  .nameline span { flex: 1; border-bottom: 1px solid var(--ink); padding-bottom: 1px; }
+  .nameline span.short { flex: 0 0 1.9in; }
+
+  .directions {
+    font-size: 10.5pt; line-height: 1.35;
+    background: var(--tint); border-left: 4px solid var(--accent);
+    padding: 7px 10px; margin: 12px 0 14px;
+  }
+  .directions b { letter-spacing: .03em; }
+  .tip { font-style: italic; margin-top: 3px; }
+
+  /* ------------------------------------------------- problems and grids */
+  .grid { display: grid; gap: 13px 16px; margin-top: 4px; }
+  .prob { page-break-inside: avoid; display: flex; gap: 5px; align-items: flex-start; }
+  .pn { font-weight: bold; font-size: 11pt; min-width: .28in; flex: 0 0 auto; color: var(--accent); }
+  .pbody { flex: 1; min-width: 0; }
+
+  /* Digits need lining figures and even widths whatever the body font is. */
+  .num, .vert, .horiz { font-family: "Trebuchet MS", "Segoe UI", Tahoma, Verdana, sans-serif; font-variant-numeric: lining-nums tabular-nums; }
+
+  /* A stacked column algorithm.
+     Two grid columns — operator, then digits — because a floated or absolutely
+     positioned operator overlaps the digits as soon as the numbers get wide,
+     and "324" with a + sitting on the 3 is unreadable. The grid also lets the
+     rule under the last operand span BOTH columns, which is how it is written
+     by hand. The rule is heavy: it is the line you write the answer beneath. */
+  .vert {
+    display: inline-grid; grid-template-columns: auto auto;
+    font-size: 15pt; line-height: 1.3; text-align: right;
+  }
+  .vert > span { padding: 0 0 1px 0; }
+  .vert .op { text-align: left; padding-right: .16in; }
+  .vert .last { border-bottom: 2.5px solid var(--ink); padding-bottom: 3px; }
+  .vert .ans { height: .4in; }
+  /* Partial-products working, for 2-digit x 1-digit before the short method. */
+  .vert .part { font-size: 11pt; color: var(--muted); }
+  /* A row of worked examples that fade — see lib/formats.js faded(). The
+     caption is what makes the fade legible: without it the third one looks like
+     a question somebody forgot to number. */
+  .egrow { display: flex; gap: .34in; align-items: flex-start; margin: 0 0 4px; }
+  .eg { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; }
+  .eglab { font-size: 8.5pt; color: var(--slate); letter-spacing: .02em; }
+
+  /* The carried digits. Small and grey so the sum still reads as the sum, and
+     tight to the row below it so a carry sits ON the column it goes into. */
+  .vert .carry { font-size: 9pt; color: var(--slate); line-height: 1; padding: 0 0 1px 0; }
+
+  .horiz { font-size: 14pt; white-space: nowrap; }
+
+  /* Row numbers in a word list. Gray and small: they are there so a list can be
+     dictated ("number seven") and marked without counting down the page, and
+     they must not compete with the word itself. */
+  .wn { color: var(--muted); font-size: 9pt; }
+
+  /* The box an answer goes in. inline-block so it can sit mid-sentence. */
+  .abox {
+    display: inline-block; border: 1.6px solid var(--slate); border-radius: 3px;
+    vertical-align: middle; margin: 0 3px; position: relative; background: #fff;
+  }
+  /* Scoped to the box: as a bare ".alab" it pinned any generator's own .alab
+     to the bottom of the page (life-07-signs-and-forms 40, 2026-09-24). */
+  .abox > .alab {
+    position: absolute; bottom: 1px; left: 0; right: 0;
+    text-align: center; font-size: 7pt; color: var(--muted); font-style: italic;
+  }
+
+  /* Confidence marks. The rings are drawn with a border and a gradient rather
+     than an SVG so they stay inline with the question text at any font size,
+     and print black on a mono laser without relying on a background image. */
+  .conf { float: right; margin: 2px 0 0 8px; white-space: nowrap; }
+  .cring {
+    display: inline-block; width: 11px; height: 11px; margin-left: 4px;
+    border: 1.4px solid var(--slate); border-radius: 50%; vertical-align: middle;
+  }
+  .cring-full { background: var(--accent); }
+  .cring-half { background: linear-gradient(90deg, var(--accent) 50%, #fff 50%); }
+  .cring-none { background: #fff; }
+  ol.qs.hasconf li { overflow: hidden; }
+
+  .conflegend {
+    border: 1.2px solid var(--rule); border-radius: 4px;
+    padding: 3px 8px; margin: 0 0 7px;
+    font-size: 8.5pt; color: var(--muted); display: flex; gap: 14px; align-items: center;
+  }
+  .conftitle { font-weight: 700; color: var(--ink); }
+  .confitem { white-space: nowrap; }
+
+  .work {
+    border: 1.4px dashed var(--rule); border-radius: 4px;
+    margin: 6px 0 2px; position: relative;
+  }
+  /* The label S.work() puts in the box: a DIRECT child only. As ".work span"
+     it also caught every span inside any generator's own .work content and
+     stacked them all at the top-left corner (math-11-grade6 47, 2026-09-23). */
+  .work > span {
+    position: absolute; top: 3px; left: 6px;
+    font-size: 8pt; color: var(--muted); font-style: italic;
+  }
+
+  /* ------------------------------------------------------ writing lines */
+  /* Primary rule: solid top, dashed midline, heavy baseline. Capitals reach
+     the top line, lowercase bodies sit under the dashed one. */
+  .write {
+    position: relative; height: 0.375in;
+    margin: 6px 0 0 .3in;
+    border-top: 1px solid var(--rule); border-bottom: 2px solid var(--ink);
+  }
+  .write.flush { margin-left: 0; }
+  .write + .write { margin-top: .17in; }
+  .write::after {
+    content: ""; position: absolute; left: 0; right: 0; top: 50%;
+    border-top: 1px dashed var(--guide);
+  }
+
+  /* ------------------------------------------------------- question list */
+  ol.qs { margin: 0; padding: 0 0 0 .34in; }
+  ol.qs li { margin-bottom: 13px; page-break-inside: avoid; }
+  ol.qs li::marker { font-weight: bold; font-size: 11pt; color: var(--accent); }
+  .qt { display: block; }
+
+  .mcq { display: grid; gap: 3px 14px; margin: 5px 0 2px .12in; font-size: 11pt; }
+  .opt { white-space: nowrap; }
+
+  /* -------------------------------------------------------------- tables */
+  .tbl { border-collapse: collapse; margin: 8px 0; font-size: 11pt; width: 100%; }
+  .tbl th, .tbl td { border: 1.4px solid var(--ink); padding: 5px 8px; text-align: left; }
+  .tbl th { color: var(--slate); }
+  .tbl th { background: var(--tint); font-size: 10pt; letter-spacing: .02em; }
+  .tbl td.blank { height: .34in; }
+  .tbl.narrow { width: auto; }
+  .tbl.center td, .tbl.center th { text-align: center; }
+
+  /* ------------------------------------------------------------ passages */
+  .passage {
+    border: 1.5px solid var(--slate); border-radius: 4px;
+    padding: 11px 14px; margin-bottom: 12px;
+    font-size: 11.5pt; line-height: 1.55;
+  }
+  .passage h2 { font-size: 13pt; margin: 0 0 6px; color: var(--deep); }
+  .passage p { margin: 0 0 8px; }
+  .passage p:last-child { margin-bottom: 0; }
+  .passage .byline { font-size: 9.5pt; font-style: italic; color: var(--muted); margin-bottom: 8px; }
+  /* Numbered paragraphs, so a question can say "in paragraph 2". */
+  .passage p.np { position: relative; padding-left: .3in; }
+  .passage p.np::before {
+    content: attr(data-p); position: absolute; left: 0; top: 0;
+    font-size: 9pt; color: var(--accent); font-weight: bold;
+  }
+
+  .wordbank {
+    border: 1.5px dashed var(--slate); border-radius: 4px;
+    padding: 8px 12px; margin: 10px 0 12px;
+    font-size: 11.5pt; text-align: center;
+  }
+  .wordbank b { display: block; font-size: 9.5pt; letter-spacing: .06em;
+    text-transform: uppercase; margin-bottom: 4px; color: var(--accent); }
+  .wordbank span { display: inline-block; margin: 2px 11px; }
+
+  .note {
+    border-left: 4px solid var(--deep); background: var(--tintdeep);
+    padding: 7px 11px; margin: 10px 0; font-size: 10.5pt;
+  }
+  .note b { letter-spacing: .02em; }
+
+  /* -------------------------------------------------------------- footer */
+  /* THE WORDMARK SITS IN THE FOOTER THAT WAS ALREADY THERE, so it costs no
+     height at all — a sheet that fitted before fits now. Upright where the rest
+     of the line is italic, and a size down: it is a signature, not a message,
+     and it must never compete with "Score: ___ / 10". */
+  .brand { font-style: normal; font-size: 7.5pt; letter-spacing: .04em;
+    color: var(--accent); align-self: center; }
+
+  footer {
+    margin-top: 14px; padding-top: 6px; border-top: 1px solid var(--rule);
+    font-size: 9pt; font-style: italic; color: var(--muted);
+    display: flex; justify-content: space-between;
+  }
+
+  /* ---------------------------------------------------------- answer key */
+  .keybadge {
+    display: inline-block; border: 2px solid var(--deep); color: var(--deep); padding: 2px 9px;
+    font-size: 9.5pt; font-weight: bold; letter-spacing: .08em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .key .why {
+    display: block; font-size: 9pt; font-style: italic; color: var(--muted); margin-top: 1px;
+  }
+  /* Highlight rather than underline: <u> in a key marks WHAT CHANGED, and an
+     underline under a comma is invisible. */
+  .key u { text-decoration: none; background: var(--tint); padding: 0 2px; font-weight: bold; }
+  .keygrid .pbody { font-family: "Trebuchet MS", "Segoe UI", Tahoma, Verdana, sans-serif; font-size: 12pt; }
+  /* A key's pictures scale to their column: at 1fr a wide drawing pushed a
+     three-column key 92px off the paper (art-04-drawing 10, 2026-09-24). */
+  .keygrid svg { max-width: 100%; height: auto; }
+  .keylist .qt { font-weight: normal; }
+
+  /*
+   * The guide page. Four lines per question, and the ASK line is the one that
+   * gets used at the table, so it is the one with a rule beside it — a parent
+   * scanning this page in ten seconds should land on the follow-up question
+   * and nothing else.
+   */
+  .guide { padding-left: .3in; }
+  .guide li { margin-bottom: 11px; page-break-inside: avoid; }
+  .guide .gq { font-weight: bold; font-size: 11pt; margin-bottom: 3px; }
+  /* 9pt, matching the key's own why line, because the guide page is the
+     binding constraint on every open sheet: four lines per question against a
+     key's one, and at 10pt a sheet with seven questions ran onto a second
+     side. Found by measuring, not chosen. (No backticks in here — this CSS
+     lives inside a template literal and one would close it.) */
+  .guide .glook, .guide .gthin, .guide .gstrong {
+    font-size: 9pt; line-height: 1.3; margin-top: 1px;
+  }
+  .guide .gthin { color: var(--muted); }
+  .guide .gstrong { color: var(--muted); font-style: italic; }
+  .guide .gask {
+    font-size: 9.5pt; line-height: 1.3; margin-top: 3px;
+    border-left: 3px solid var(--slate); padding-left: 7px;
+  }
+  .key .qs li { margin-bottom: 9px; }
+
+  /*
+   * INLINE-BLOCK, NOT BLOCK, AND THIS WAS WRONG FOR A LONG TIME. A block-level
+   * svg ignores text-align: center on its parent and sits flush left — so 117
+   * sheets across 35 packs said "centre this diagram" and got a left-aligned
+   * one. Twenty-five of them were origami and paper-plane fold sequences, where
+   * the whole page is diagrams.
+   *
+   * Nobody spotted it because a left-flush diagram looks deliberate; it only
+   * reads as wrong next to a centered one, and no sheet has both.
+   *
+   * inline-block makes text-align do what every one of those authors meant,
+   * and leaves a diagram in a left-aligned container exactly where it was.
+   * vertical-align: top kills the baseline gap that inline elements otherwise
+   * leave underneath them, which would have pushed long pages over.
+   */
+  svg { display: inline-block; vertical-align: top; }
+  svg.inline { vertical-align: middle; }
+
+  .big { text-align: center; margin: 14px 0; }
+  .big .cap { font-size: 10.5pt; color: var(--muted); margin-top: 4px; }
+  .cons { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 10px 0; }
+  .cons > div { border: 2.2px solid var(--ink); border-radius: 9px; padding: 7px 3px 8px; text-align: center; }
+  .cons .rm { display: block; font-size: 10.5pt; margin-top: 2px; }
+  .mrow { display: grid; grid-template-columns: 1.4in 1fr; gap: 14px; align-items: center;
+    border: 2.2px solid var(--ink); border-radius: 9px; padding: 10px 13px; margin: 9px 0; font-size: 12.5pt; }
+  .mrow.big { padding: 18px 14px; margin: 14px 0; font-size: 14pt; }
+  .mrow .g { text-align: center; }
+  .mrow .g em { display: block; font-style: normal; font-size: 12.5pt; font-weight: bold; margin-top: 1px; }
+  .cj { display: grid; grid-template-columns: 1in 24px 1in 24px 1.2in 1fr; gap: 8px; align-items: center;
+    border: 2.2px solid var(--ink); border-radius: 9px; padding: 10px 12px; margin: 9px 0; }
+  .cj .op { text-align: center; font-size: 17pt; color: var(--muted); }
+  .cj .n { font-size: 11pt; }
+  .wrow { display: grid; grid-template-columns: 2.5in 1fr 1fr; gap: 12px; align-items: center;
+    border: 2.2px solid var(--ink); border-radius: 9px; padding: 14px 12px; margin: 12px 0; }
+  .wrow .bx { border-bottom: 1.7px solid var(--ink); height: .5in; }
+  .wrow .lab { font-size: 11pt; color: var(--muted); }
+  .kinds { border-collapse: collapse; width: 100%; margin: 10px 0; }
+  .kinds th, .kinds td { border: 1.6px solid var(--rule); padding: 10px 9px; text-align: left; font-size: 12pt; }
+  .kinds th { font-size: 9.5pt; color: var(--muted); font-weight: normal; }
+  .kinds td.ex { text-align: center; width: 1.1in; }
+  .kinds tr.me td { background: #F4EFE6; }
+
+</style>
+</head>
+<body>
+
+<div class="page ">
+  <header>
+    
+    <h1>Four Directions</h1>
+    <p class="sub">Hindi &middot; Page 1 of 4</p>
+  </header>
+  <div class="nameline">
+    <span>Name</span>
+    <span class="short">Date</span>
+  </div>
+  <div class="directions">
+    <b>DIRECTIONS:</b> Same letter every time. Only the vowel mark hung on it changes.
+  </div>
+
+<div class="plan" style="display:flex;align-items:stretch;gap:.08in;margin:.02in 0 .1in"><div style="flex:1;display:flex;align-items:center;gap:.07in;border:1.8px solid var(--ink);border-radius:5px;padding:.05in .08in"><span style="flex:0 0 auto;display:inline-block;width:.26in;height:.26in;line-height:.26in;border-radius:50%;background:var(--ink);color:#fff;text-align:center;font-weight:700;font-size:11pt">1</span><span style="font-size:10.5pt;font-weight:700;line-height:1.2">Read all eight marks</span></div><div style="align-self:center;font-size:16pt;font-weight:700;color:var(--ink)">&rarr;</div><div style="flex:1;display:flex;align-items:center;gap:.07in;border:1.8px solid var(--ink);border-radius:5px;padding:.05in .08in"><span style="flex:0 0 auto;display:inline-block;width:.26in;height:.26in;line-height:.26in;border-radius:50%;background:var(--ink);color:#fff;text-align:center;font-weight:700;font-size:11pt">2</span><span style="font-size:10.5pt;font-weight:700;line-height:1.2">Page 3: two questions</span></div><div style="align-self:center;font-size:16pt;font-weight:700;color:var(--ink)">&rarr;</div><div style="flex:1;display:flex;align-items:center;gap:.07in;border:1.8px solid var(--ink);border-radius:5px;padding:.05in .08in"><span style="flex:0 0 auto;display:inline-block;width:.26in;height:.26in;line-height:.26in;border-radius:50%;background:var(--ink);color:#fff;text-align:center;font-weight:700;font-size:11pt">3</span><span style="font-size:10.5pt;font-weight:700;line-height:1.2">Page 4: where each mark sits</span></div></div>  <div class="mrow">
+    <div class="g"><svg viewBox="0 -82 76.2 112" width="51.7" height="76" role="img" aria-label="क"><path d="M77.7 -62.2L77.7 -55.1L45.2 -55.1L45.2 -34.9Q50 -39.9 56.9 -39.9L56.9 -39.9Q63.4 -39.9 67.5 -35.75Q71.6 -31.6 71.6 -23.9L71.6 -23.9Q71.6 -19.3 70.1 -14.1Q68.6 -8.9 65.1 -3.9L65.1 -3.9L57.9 -8Q60.4 -11.2 62 -15.4Q63.6 -19.6 63.6 -23.7L63.6 -23.7Q63.6 -28.4 61.65 -30.7Q59.7 -33 56.2 -33L56.2 -33Q50.8 -33 45.2 -25.8L45.2 -25.8L45.2 0L37.1 0L37.1 -17.4Q34.7 -15.4 31.15 -13.6Q27.6 -11.8 22.6 -11.8L22.6 -11.8Q17.9 -11.8 13.75 -13.7Q9.6 -15.6 7.1 -19.45Q4.6 -23.3 4.6 -29L4.6 -29Q4.6 -37 10.1 -41.7Q15.6 -46.4 24.4 -46.4L24.4 -46.4Q26.7 -46.4 29.55 -46.05Q32.4 -45.7 33.9 -45.4L33.9 -45.4L33.3 -38.1Q31.7 -38.5 29.25 -38.8Q26.8 -39.1 24.9 -39.1L24.9 -39.1Q19.1 -39.1 15.9 -36.5Q12.7 -33.9 12.7 -29.2L12.7 -29.2Q12.7 -23.9 15.75 -21.35Q18.8 -18.8 22.8 -18.8L22.8 -18.8Q27.2 -18.8 30.65 -20.9Q34.1 -23 37.1 -26L37.1 -26L37.1 -55.1L0 -55.1L0 -62.2L77.7 -62.2" fill="#16130F"/></svg><em>ka</em></div>
+    <div><b>no mark at all</b> &mdash; the letter on its own - and it already says ka</div>
+  </div>
+  <div class="mrow">
+    <div class="g"><svg viewBox="0 -82 102.1 112" width="69.3" height="76" role="img" aria-label="का"><path d="M77.7 -62.2L77.7 -55.1L45.2 -55.1L45.2 -34.9Q50 -39.9 56.9 -39.9L56.9 -39.9Q63.4 -39.9 67.5 -35.75Q71.6 -31.6 71.6 -23.9L71.6 -23.9Q71.6 -19.3 70.1 -14.1Q68.6 -8.9 65.1 -3.9L65.1 -3.9L57.9 -8Q60.4 -11.2 62 -15.4Q63.6 -19.6 63.6 -23.7L63.6 -23.7Q63.6 -28.4 61.65 -30.7Q59.7 -33 56.2 -33L56.2 -33Q50.8 -33 45.2 -25.8L45.2 -25.8L45.2 0L37.1 0L37.1 -17.4Q34.7 -15.4 31.15 -13.6Q27.6 -11.8 22.6 -11.8L22.6 -11.8Q17.9 -11.8 13.75 -13.7Q9.6 -15.6 7.1 -19.45Q4.6 -23.3 4.6 -29L4.6 -29Q4.6 -37 10.1 -41.7Q15.6 -46.4 24.4 -46.4L24.4 -46.4Q26.7 -46.4 29.55 -46.05Q32.4 -45.7 33.9 -45.4L33.9 -45.4L33.3 -38.1Q31.7 -38.5 29.25 -38.8Q26.8 -39.1 24.9 -39.1L24.9 -39.1Q19.1 -39.1 15.9 -36.5Q12.7 -33.9 12.7 -29.2L12.7 -29.2Q12.7 -23.9 15.75 -21.35Q18.8 -18.8 22.8 -18.8L22.8 -18.8Q27.2 -18.8 30.65 -20.9Q34.1 -23 37.1 -26L37.1 -26L37.1 -55.1L0 -55.1L0 -62.2L77.7 -62.2M103.5 -55.1L93.2 -55.1L93.2 0L85.1 0L85.1 -55.1L76.2 -55.1L76.2 -62.2L103.5 -62.2L103.5 -55.1" fill="#16130F"/></svg><em>kaa</em></div>
+    <div><b>the mark goes after</b> &mdash; a stroke after it</div>
+  </div>
+  <div class="mrow">
+    <div class="g"><svg viewBox="0 -82 102.1 112" width="69.3" height="76" role="img" aria-label="कि"><path d="M8.9 0L8.9 -55.1L0 -55.1L0 -62.2L8 -62.2Q6.8 -64.4 6.05 -66.9Q5.3 -69.4 5.3 -72.4L5.3 -72.4Q5.3 -80.2 11.1 -84.9Q16.9 -89.6 26.6 -89.6L26.6 -89.6Q40.7 -89.6 51.6 -81.95Q62.5 -74.3 70.4 -61.5L70.4 -61.5L62 -61.5Q46.7 -82.4 28.3 -82.4L28.3 -82.4Q21.3 -82.4 17.35 -79.45Q13.4 -76.5 13.4 -71.4L13.4 -71.4Q13.4 -68.4 14.35 -66.15Q15.3 -63.9 16.5 -62.2L16.5 -62.2L27.3 -62.2L27.3 -55.1L17 -55.1L17 0L8.9 0M103.6 -62.2L103.6 -55.1L71.1 -55.1L71.1 -34.9Q75.9 -39.9 82.8 -39.9L82.8 -39.9Q89.3 -39.9 93.4 -35.75Q97.5 -31.6 97.5 -23.9L97.5 -23.9Q97.5 -19.3 96 -14.1Q94.5 -8.9 91 -3.9L91 -3.9L83.8 -8Q86.3 -11.2 87.9 -15.4Q89.5 -19.6 89.5 -23.7L89.5 -23.7Q89.5 -28.4 87.55 -30.7Q85.6 -33 82.1 -33L82.1 -33Q76.7 -33 71.1 -25.8L71.1 -25.8L71.1 0L63 0L63 -17.4Q60.6 -15.4 57.05 -13.6Q53.5 -11.8 48.5 -11.8L48.5 -11.8Q43.8 -11.8 39.65 -13.7Q35.5 -15.6 33 -19.45Q30.5 -23.3 30.5 -29L30.5 -29Q30.5 -37 36 -41.7Q41.5 -46.4 50.3 -46.4L50.3 -46.4Q52.6 -46.4 55.45 -46.05Q58.3 -45.7 59.8 -45.4L59.8 -45.4L59.2 -38.1Q57.6 -38.5 55.15 -38.8Q52.7 -39.1 50.8 -39.1L50.8 -39.1Q45 -39.1 41.8 -36.5Q38.6 -33.9 38.6 -29.2L38.6 -29.2Q38.6 -23.9 41.65 -21.35Q44.7 -18.8 48.7 -18.8L48.7 -18.8Q53.1 -18.8 56.55 -20.9Q60 -23 63 -26L63 -26L63 -55.1L25.9 -55.1L25.9 -62.2L103.6 -62.2" fill="#16130F"/></svg><em>ki</em></div>
+    <div><b>the mark goes before</b> &mdash; a hook BEFORE it, and read second</div>
+  </div>
+  <div class="mrow">
+    <div class="g"><svg viewBox="0 -82 102.1 112" width="69.3" height="76" role="img" aria-label="की"><path d="M77.7 -62.2L77.7 -55.1L45.2 -55.1L45.2 -34.9Q50 -39.9 56.9 -39.9L56.9 -39.9Q63.4 -39.9 67.5 -35.75Q71.6 -31.6 71.6 -23.9L71.6 -23.9Q71.6 -19.3 70.1 -14.1Q68.6 -8.9 65.1 -3.9L65.1 -3.9L57.9 -8Q60.4 -11.2 62 -15.4Q63.6 -19.6 63.6 -23.7L63.6 -23.7Q63.6 -28.4 61.65 -30.7Q59.7 -33 56.2 -33L56.2 -33Q50.8 -33 45.2 -25.8L45.2 -25.8L45.2 0L37.1 0L37.1 -17.4Q34.7 -15.4 31.15 -13.6Q27.6 -11.8 22.6 -11.8L22.6 -11.8Q17.9 -11.8 13.75 -13.7Q9.6 -15.6 7.1 -19.45Q4.6 -23.3 4.6 -29L4.6 -29Q4.6 -37 10.1 -41.7Q15.6 -46.4 24.4 -46.4L24.4 -46.4Q26.7 -46.4 29.55 -46.05Q32.4 -45.7 33.9 -45.4L33.9 -45.4L33.3 -38.1Q31.7 -38.5 29.25 -38.8Q26.8 -39.1 24.9 -39.1L24.9 -39.1Q19.1 -39.1 15.9 -36.5Q12.7 -33.9 12.7 -29.2L12.7 -29.2Q12.7 -23.9 15.75 -21.35Q18.8 -18.8 22.8 -18.8L22.8 -18.8Q27.2 -18.8 30.65 -20.9Q34.1 -23 37.1 -26L37.1 -26L37.1 -55.1L0 -55.1L0 -62.2L77.7 -62.2M85.1 0L85.1 -55.1L76.2 -55.1L76.2 -62.2L84.3 -62.2Q71 -82.4 54.3 -82.4L54.3 -82.4Q47.9 -82.4 44.2 -79.55Q40.5 -76.7 40.5 -71.7L40.5 -71.7Q40.5 -68.4 41.6 -65.95Q42.7 -63.5 44 -61.5L44 -61.5L35.6 -61.5Q34.2 -64.1 33.3 -66.85Q32.4 -69.6 32.4 -72.8L32.4 -72.8Q32.4 -80.4 37.9 -85Q43.4 -89.6 52.8 -89.6L52.8 -89.6Q65.9 -89.6 75.65 -82.35Q85.4 -75.1 92.7 -62.2L92.7 -62.2L103.5 -62.2L103.5 -55.1L93.2 -55.1L93.2 0L85.1 0" fill="#16130F"/></svg><em>kee</em></div>
+    <div><b>the mark goes after</b> &mdash; a hook after it</div>
+  </div>
+  <div class="mrow">
+    <div class="g"><svg viewBox="0 -82 76.2 112" width="51.7" height="76" role="img" aria-label="कु"><path d="M77.7 -62.2L77.7 -55.1L45.2 -55.1L45.2 -34.9Q50 -39.9 56.9 -39.9L56.9 -39.9Q63.4 -39.9 67.5 -35.75Q71.6 -31.6 71.6 -23.9L71.6 -23.9Q71.6 -19.3 70.1 -14.1Q68.6 -8.9 65.1 -3.9L65.1 -3.9L57.9 -8Q60.4 -11.2 62 -15.4Q63.6 -19.6 63.6 -23.7L63.6 -23.7Q63.6 -28.4 61.65 -30.7Q59.7 -33 56.2 -33L56.2 -33Q50.8 -33 45.2 -25.8L45.2 -25.8L45.2 0L37.1 0L37.1 -17.4Q34.7 -15.4 31.15 -13.6Q27.6 -11.8 22.6 -11.8L22.6 -11.8Q17.9 -11.8 13.75 -13.7Q9.6 -15.6 7.1 -19.45Q4.6 -23.3 4.6 -29L4.6 -29Q4.6 -37 10.1 -41.7Q15.6 -46.4 24.4 -46.4L24.4 -46.4Q26.7 -46.4 29.55 -46.05Q32.4 -45.7 33.9 -45.4L33.9 -45.4L33.3 -38.1Q31.7 -38.5 29.25 -38.8Q26.8 -39.1 24.9 -39.1L24.9 -39.1Q19.1 -39.1 15.9 -36.5Q12.7 -33.9 12.7 -29.2L12.7 -29.2Q12.7 -23.9 15.75 -21.35Q18.8 -18.8 22.8 -18.8L22.8 -18.8Q27.2 -18.8 30.65 -20.9Q34.1 -23 37.1 -26L37.1 -26L37.1 -55.1L0 -55.1L0 -62.2L77.7 -62.2M31.9 7.9L29.3 1.2Q34.7 -1.1 40.5 -1.1L40.5 -1.1Q48 -1.1 52.15 2.75Q56.3 6.6 56.3 12.9L56.3 12.9Q56.3 19 51.65 22.9Q47 26.8 38.4 26.8L38.4 26.8Q28.7 26.8 21.65 22.2Q14.6 17.6 8.6 10L8.6 10L14.7 5.7Q18.6 10.5 22.1 13.6Q25.6 16.7 29.55 18.15Q33.5 19.6 38.4 19.6L38.4 19.6Q49 19.6 49 12.2L49 12.2Q49 8.9 46.55 7.3Q44.1 5.7 41 5.7L41 5.7Q38.3 5.7 36.15 6.25Q34 6.8 31.9 7.9L31.9 7.9" fill="#16130F"/></svg><em>ku</em></div>
+    <div><b>the mark goes below</b> &mdash; a tail underneath</div>
+  </div>
+
+  <footer>
+    <span>Three more on page 2 &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Four directions</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>And Three More</h1>
+    <p class="sub">Hindi &middot; Page 2 of 4</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Three more.
+  </div>
+
+  <div class="mrow big">
+    <div class="g"><svg viewBox="0 -82 76.2 112" width="68.0" height="100" role="img" aria-label="कू"><path d="M77.7 -62.2L77.7 -55.1L45.2 -55.1L45.2 -34.9Q50 -39.9 56.9 -39.9L56.9 -39.9Q63.4 -39.9 67.5 -35.75Q71.6 -31.6 71.6 -23.9L71.6 -23.9Q71.6 -19.3 70.1 -14.1Q68.6 -8.9 65.1 -3.9L65.1 -3.9L57.9 -8Q60.4 -11.2 62 -15.4Q63.6 -19.6 63.6 -23.7L63.6 -23.7Q63.6 -28.4 61.65 -30.7Q59.7 -33 56.2 -33L56.2 -33Q50.8 -33 45.2 -25.8L45.2 -25.8L45.2 0L37.1 0L37.1 -17.4Q34.7 -15.4 31.15 -13.6Q27.6 -11.8 22.6 -11.8L22.6 -11.8Q17.9 -11.8 13.75 -13.7Q9.6 -15.6 7.1 -19.45Q4.6 -23.3 4.6 -29L4.6 -29Q4.6 -37 10.1 -41.7Q15.6 -46.4 24.4 -46.4L24.4 -46.4Q26.7 -46.4 29.55 -46.05Q32.4 -45.7 33.9 -45.4L33.9 -45.4L33.3 -38.1Q31.7 -38.5 29.25 -38.8Q26.8 -39.1 24.9 -39.1L24.9 -39.1Q19.1 -39.1 15.9 -36.5Q12.7 -33.9 12.7 -29.2L12.7 -29.2Q12.7 -23.9 15.75 -21.35Q18.8 -18.8 22.8 -18.8L22.8 -18.8Q27.2 -18.8 30.65 -20.9Q34.1 -23 37.1 -26L37.1 -26L37.1 -55.1L0 -55.1L0 -62.2L77.7 -62.2M45.3 17.5L47.8 24.5Q45.3 25.5 42.45 26.15Q39.6 26.8 36.8 26.8L36.8 26.8Q29.3 26.8 25.05 22.85Q20.8 18.9 20.8 12.6L20.8 12.6Q20.8 6.9 25.4 2.9Q30 -1.1 37.9 -1.1L37.9 -1.1Q45.4 -1.1 51 1.7Q56.6 4.5 60.9 9.05Q65.2 13.6 68.6 18.9L68.6 18.9L62.4 22.8Q57 14.5 51.4 10.1Q45.8 5.7 38.5 5.7L38.5 5.7Q33.4 5.7 30.8 7.65Q28.2 9.6 28.2 12.8L28.2 12.8Q28.2 16.6 30.7 18.1Q33.2 19.6 36.3 19.6L36.3 19.6Q39 19.6 41.1 19.05Q43.2 18.5 45.3 17.5L45.3 17.5" fill="#16130F"/></svg><em>koo</em></div>
+    <div><b>the mark goes below</b> &mdash; a bigger tail underneath</div>
+  </div>
+  <div class="mrow big">
+    <div class="g"><svg viewBox="0 -82 76.2 112" width="68.0" height="100" role="img" aria-label="के"><path d="M77.7 -62.2L77.7 -55.1L45.2 -55.1L45.2 -34.9Q50 -39.9 56.9 -39.9L56.9 -39.9Q63.4 -39.9 67.5 -35.75Q71.6 -31.6 71.6 -23.9L71.6 -23.9Q71.6 -19.3 70.1 -14.1Q68.6 -8.9 65.1 -3.9L65.1 -3.9L57.9 -8Q60.4 -11.2 62 -15.4Q63.6 -19.6 63.6 -23.7L63.6 -23.7Q63.6 -28.4 61.65 -30.7Q59.7 -33 56.2 -33L56.2 -33Q50.8 -33 45.2 -25.8L45.2 -25.8L45.2 0L37.1 0L37.1 -17.4Q34.7 -15.4 31.15 -13.6Q27.6 -11.8 22.6 -11.8L22.6 -11.8Q17.9 -11.8 13.75 -13.7Q9.6 -15.6 7.1 -19.45Q4.6 -23.3 4.6 -29L4.6 -29Q4.6 -37 10.1 -41.7Q15.6 -46.4 24.4 -46.4L24.4 -46.4Q26.7 -46.4 29.55 -46.05Q32.4 -45.7 33.9 -45.4L33.9 -45.4L33.3 -38.1Q31.7 -38.5 29.25 -38.8Q26.8 -39.1 24.9 -39.1L24.9 -39.1Q19.1 -39.1 15.9 -36.5Q12.7 -33.9 12.7 -29.2L12.7 -29.2Q12.7 -23.9 15.75 -21.35Q18.8 -18.8 22.8 -18.8L22.8 -18.8Q27.2 -18.8 30.65 -20.9Q34.1 -23 37.1 -26L37.1 -26L37.1 -55.1L0 -55.1L0 -62.2L77.7 -62.2M44.7 -61.5L37.2 -61.5Q35.1 -69.4 33.05 -73.95Q31 -78.5 28.5 -80.4Q26 -82.3 22.6 -82.3L22.6 -82.3Q20.4 -82.3 18.7 -81.85Q17 -81.4 15.6 -80.9L15.6 -80.9L13.2 -88.2Q17.1 -89.6 22.3 -89.6L22.3 -89.6Q27.7 -89.6 31.65 -87.05Q35.6 -84.5 38.75 -78.35Q41.9 -72.2 44.7 -61.5L44.7 -61.5" fill="#16130F"/></svg><em>ke</em></div>
+    <div><b>the mark goes above</b> &mdash; a stroke on the headline</div>
+  </div>
+  <div class="mrow big">
+    <div class="g"><svg viewBox="0 -82 102.1 112" width="91.2" height="100" role="img" aria-label="को"><path d="M77.7 -62.2L77.7 -55.1L45.2 -55.1L45.2 -34.9Q50 -39.9 56.9 -39.9L56.9 -39.9Q63.4 -39.9 67.5 -35.75Q71.6 -31.6 71.6 -23.9L71.6 -23.9Q71.6 -19.3 70.1 -14.1Q68.6 -8.9 65.1 -3.9L65.1 -3.9L57.9 -8Q60.4 -11.2 62 -15.4Q63.6 -19.6 63.6 -23.7L63.6 -23.7Q63.6 -28.4 61.65 -30.7Q59.7 -33 56.2 -33L56.2 -33Q50.8 -33 45.2 -25.8L45.2 -25.8L45.2 0L37.1 0L37.1 -17.4Q34.7 -15.4 31.15 -13.6Q27.6 -11.8 22.6 -11.8L22.6 -11.8Q17.9 -11.8 13.75 -13.7Q9.6 -15.6 7.1 -19.45Q4.6 -23.3 4.6 -29L4.6 -29Q4.6 -37 10.1 -41.7Q15.6 -46.4 24.4 -46.4L24.4 -46.4Q26.7 -46.4 29.55 -46.05Q32.4 -45.7 33.9 -45.4L33.9 -45.4L33.3 -38.1Q31.7 -38.5 29.25 -38.8Q26.8 -39.1 24.9 -39.1L24.9 -39.1Q19.1 -39.1 15.9 -36.5Q12.7 -33.9 12.7 -29.2L12.7 -29.2Q12.7 -23.9 15.75 -21.35Q18.8 -18.8 22.8 -18.8L22.8 -18.8Q27.2 -18.8 30.65 -20.9Q34.1 -23 37.1 -26L37.1 -26L37.1 -55.1L0 -55.1L0 -62.2L77.7 -62.2M103.5 -55.1L93.2 -55.1L93.2 0L85.1 0L85.1 -55.1L76.2 -55.1L76.2 -62.2L103.5 -62.2L103.5 -55.1M92.7 -61.5L85.2 -61.5Q83.1 -69.4 81.05 -73.95Q79 -78.5 76.5 -80.4Q74 -82.3 70.6 -82.3L70.6 -82.3Q68.4 -82.3 66.7 -81.85Q65 -81.4 63.6 -80.9L63.6 -80.9L61.2 -88.2Q65.1 -89.6 70.3 -89.6L70.3 -89.6Q75.7 -89.6 79.65 -87.05Q83.6 -84.5 86.75 -78.35Q89.9 -72.2 92.7 -61.5L92.7 -61.5" fill="#16130F"/></svg><em>ko</em></div>
+    <div><b>the mark goes above and after</b> &mdash; a stroke above and a stroke after</div>
+  </div>
+
+  <footer>
+    <span>One of those was strange &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Four directions</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>The One That Goes Backwards</h1>
+    <p class="sub">Hindi &middot; Page 3 of 4</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Look at the odd one again, then answer.
+  </div>
+
+
+  <div class="big"><svg viewBox="0 -82 102.1 112" width="87.5" height="96" role="img" aria-label="कि"><path d="M8.9 0L8.9 -55.1L0 -55.1L0 -62.2L8 -62.2Q6.8 -64.4 6.05 -66.9Q5.3 -69.4 5.3 -72.4L5.3 -72.4Q5.3 -80.2 11.1 -84.9Q16.9 -89.6 26.6 -89.6L26.6 -89.6Q40.7 -89.6 51.6 -81.95Q62.5 -74.3 70.4 -61.5L70.4 -61.5L62 -61.5Q46.7 -82.4 28.3 -82.4L28.3 -82.4Q21.3 -82.4 17.35 -79.45Q13.4 -76.5 13.4 -71.4L13.4 -71.4Q13.4 -68.4 14.35 -66.15Q15.3 -63.9 16.5 -62.2L16.5 -62.2L27.3 -62.2L27.3 -55.1L17 -55.1L17 0L8.9 0M103.6 -62.2L103.6 -55.1L71.1 -55.1L71.1 -34.9Q75.9 -39.9 82.8 -39.9L82.8 -39.9Q89.3 -39.9 93.4 -35.75Q97.5 -31.6 97.5 -23.9L97.5 -23.9Q97.5 -19.3 96 -14.1Q94.5 -8.9 91 -3.9L91 -3.9L83.8 -8Q86.3 -11.2 87.9 -15.4Q89.5 -19.6 89.5 -23.7L89.5 -23.7Q89.5 -28.4 87.55 -30.7Q85.6 -33 82.1 -33L82.1 -33Q76.7 -33 71.1 -25.8L71.1 -25.8L71.1 0L63 0L63 -17.4Q60.6 -15.4 57.05 -13.6Q53.5 -11.8 48.5 -11.8L48.5 -11.8Q43.8 -11.8 39.65 -13.7Q35.5 -15.6 33 -19.45Q30.5 -23.3 30.5 -29L30.5 -29Q30.5 -37 36 -41.7Q41.5 -46.4 50.3 -46.4L50.3 -46.4Q52.6 -46.4 55.45 -46.05Q58.3 -45.7 59.8 -45.4L59.8 -45.4L59.2 -38.1Q57.6 -38.5 55.15 -38.8Q52.7 -39.1 50.8 -39.1L50.8 -39.1Q45 -39.1 41.8 -36.5Q38.6 -33.9 38.6 -29.2L38.6 -29.2Q38.6 -23.9 41.65 -21.35Q44.7 -18.8 48.7 -18.8L48.7 -18.8Q53.1 -18.8 56.55 -20.9Q60 -23 63 -26L63 -26L63 -55.1L25.9 -55.1L25.9 -62.2L103.6 -62.2" fill="#16130F"/></svg><div class="cap">This says <b>ki</b>.</div></div>
+
+  <div class="note"><b>The hook is on the LEFT, but read SECOND:</b> <i>k</i>, then <i>i</i>. No other script you know writes a sound out of order.</div>
+
+  <ol class="qs" start="1"><li><span class="qt">Write the two sounds of <svg viewBox="0 -82 102.1 112" width="20.1" height="22" role="img" aria-label="कि"><path d="M8.9 0L8.9 -55.1L0 -55.1L0 -62.2L8 -62.2Q6.8 -64.4 6.05 -66.9Q5.3 -69.4 5.3 -72.4L5.3 -72.4Q5.3 -80.2 11.1 -84.9Q16.9 -89.6 26.6 -89.6L26.6 -89.6Q40.7 -89.6 51.6 -81.95Q62.5 -74.3 70.4 -61.5L70.4 -61.5L62 -61.5Q46.7 -82.4 28.3 -82.4L28.3 -82.4Q21.3 -82.4 17.35 -79.45Q13.4 -76.5 13.4 -71.4L13.4 -71.4Q13.4 -68.4 14.35 -66.15Q15.3 -63.9 16.5 -62.2L16.5 -62.2L27.3 -62.2L27.3 -55.1L17 -55.1L17 0L8.9 0M103.6 -62.2L103.6 -55.1L71.1 -55.1L71.1 -34.9Q75.9 -39.9 82.8 -39.9L82.8 -39.9Q89.3 -39.9 93.4 -35.75Q97.5 -31.6 97.5 -23.9L97.5 -23.9Q97.5 -19.3 96 -14.1Q94.5 -8.9 91 -3.9L91 -3.9L83.8 -8Q86.3 -11.2 87.9 -15.4Q89.5 -19.6 89.5 -23.7L89.5 -23.7Q89.5 -28.4 87.55 -30.7Q85.6 -33 82.1 -33L82.1 -33Q76.7 -33 71.1 -25.8L71.1 -25.8L71.1 0L63 0L63 -17.4Q60.6 -15.4 57.05 -13.6Q53.5 -11.8 48.5 -11.8L48.5 -11.8Q43.8 -11.8 39.65 -13.7Q35.5 -15.6 33 -19.45Q30.5 -23.3 30.5 -29L30.5 -29Q30.5 -37 36 -41.7Q41.5 -46.4 50.3 -46.4L50.3 -46.4Q52.6 -46.4 55.45 -46.05Q58.3 -45.7 59.8 -45.4L59.8 -45.4L59.2 -38.1Q57.6 -38.5 55.15 -38.8Q52.7 -39.1 50.8 -39.1L50.8 -39.1Q45 -39.1 41.8 -36.5Q38.6 -33.9 38.6 -29.2L38.6 -29.2Q38.6 -23.9 41.65 -21.35Q44.7 -18.8 48.7 -18.8L48.7 -18.8Q53.1 -18.8 56.55 -20.9Q60 -23 63 -26L63 -26L63 -55.1L25.9 -55.1L25.9 -62.2L103.6 -62.2" fill="#16130F"/></svg> <b>in the order you say them</b>, and then in the order they are written on the page.</span><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Why can you not read this word one mark at a time, left to right, the way you read English?</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Turn over &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Four directions</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>Which Way Does It Go?</h1>
+    <p class="sub">Hindi &middot; Page 4 of 4</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Where does the mark sit: <b>above</b>, <b>below</b>, <b>after</b> or <b>before</b>?
+  </div>
+
+  <div class="mrow big">
+    <div class="g"><svg viewBox="0 -82 102.1 112" width="72.9" height="80" role="img" aria-label="का"><path d="M77.7 -62.2L77.7 -55.1L45.2 -55.1L45.2 -34.9Q50 -39.9 56.9 -39.9L56.9 -39.9Q63.4 -39.9 67.5 -35.75Q71.6 -31.6 71.6 -23.9L71.6 -23.9Q71.6 -19.3 70.1 -14.1Q68.6 -8.9 65.1 -3.9L65.1 -3.9L57.9 -8Q60.4 -11.2 62 -15.4Q63.6 -19.6 63.6 -23.7L63.6 -23.7Q63.6 -28.4 61.65 -30.7Q59.7 -33 56.2 -33L56.2 -33Q50.8 -33 45.2 -25.8L45.2 -25.8L45.2 0L37.1 0L37.1 -17.4Q34.7 -15.4 31.15 -13.6Q27.6 -11.8 22.6 -11.8L22.6 -11.8Q17.9 -11.8 13.75 -13.7Q9.6 -15.6 7.1 -19.45Q4.6 -23.3 4.6 -29L4.6 -29Q4.6 -37 10.1 -41.7Q15.6 -46.4 24.4 -46.4L24.4 -46.4Q26.7 -46.4 29.55 -46.05Q32.4 -45.7 33.9 -45.4L33.9 -45.4L33.3 -38.1Q31.7 -38.5 29.25 -38.8Q26.8 -39.1 24.9 -39.1L24.9 -39.1Q19.1 -39.1 15.9 -36.5Q12.7 -33.9 12.7 -29.2L12.7 -29.2Q12.7 -23.9 15.75 -21.35Q18.8 -18.8 22.8 -18.8L22.8 -18.8Q27.2 -18.8 30.65 -20.9Q34.1 -23 37.1 -26L37.1 -26L37.1 -55.1L0 -55.1L0 -62.2L77.7 -62.2M103.5 -55.1L93.2 -55.1L93.2 0L85.1 0L85.1 -55.1L76.2 -55.1L76.2 -62.2L103.5 -62.2L103.5 -55.1" fill="#16130F"/></svg></div>
+    <div><b>3.</b> The mark sits <span style="border-bottom:1.6px solid var(--ink);display:inline-block;width:2.4in;height:.35in">&nbsp;</span></div>
+  </div>
+  <div class="mrow big">
+    <div class="g"><svg viewBox="0 -82 76.2 112" width="54.4" height="80" role="img" aria-label="कु"><path d="M77.7 -62.2L77.7 -55.1L45.2 -55.1L45.2 -34.9Q50 -39.9 56.9 -39.9L56.9 -39.9Q63.4 -39.9 67.5 -35.75Q71.6 -31.6 71.6 -23.9L71.6 -23.9Q71.6 -19.3 70.1 -14.1Q68.6 -8.9 65.1 -3.9L65.1 -3.9L57.9 -8Q60.4 -11.2 62 -15.4Q63.6 -19.6 63.6 -23.7L63.6 -23.7Q63.6 -28.4 61.65 -30.7Q59.7 -33 56.2 -33L56.2 -33Q50.8 -33 45.2 -25.8L45.2 -25.8L45.2 0L37.1 0L37.1 -17.4Q34.7 -15.4 31.15 -13.6Q27.6 -11.8 22.6 -11.8L22.6 -11.8Q17.9 -11.8 13.75 -13.7Q9.6 -15.6 7.1 -19.45Q4.6 -23.3 4.6 -29L4.6 -29Q4.6 -37 10.1 -41.7Q15.6 -46.4 24.4 -46.4L24.4 -46.4Q26.7 -46.4 29.55 -46.05Q32.4 -45.7 33.9 -45.4L33.9 -45.4L33.3 -38.1Q31.7 -38.5 29.25 -38.8Q26.8 -39.1 24.9 -39.1L24.9 -39.1Q19.1 -39.1 15.9 -36.5Q12.7 -33.9 12.7 -29.2L12.7 -29.2Q12.7 -23.9 15.75 -21.35Q18.8 -18.8 22.8 -18.8L22.8 -18.8Q27.2 -18.8 30.65 -20.9Q34.1 -23 37.1 -26L37.1 -26L37.1 -55.1L0 -55.1L0 -62.2L77.7 -62.2M31.9 7.9L29.3 1.2Q34.7 -1.1 40.5 -1.1L40.5 -1.1Q48 -1.1 52.15 2.75Q56.3 6.6 56.3 12.9L56.3 12.9Q56.3 19 51.65 22.9Q47 26.8 38.4 26.8L38.4 26.8Q28.7 26.8 21.65 22.2Q14.6 17.6 8.6 10L8.6 10L14.7 5.7Q18.6 10.5 22.1 13.6Q25.6 16.7 29.55 18.15Q33.5 19.6 38.4 19.6L38.4 19.6Q49 19.6 49 12.2L49 12.2Q49 8.9 46.55 7.3Q44.1 5.7 41 5.7L41 5.7Q38.3 5.7 36.15 6.25Q34 6.8 31.9 7.9L31.9 7.9" fill="#16130F"/></svg></div>
+    <div><b>4.</b> The mark sits <span style="border-bottom:1.6px solid var(--ink);display:inline-block;width:2.4in;height:.35in">&nbsp;</span></div>
+  </div>
+  <div class="mrow big">
+    <div class="g"><svg viewBox="0 -82 76.2 112" width="54.4" height="80" role="img" aria-label="के"><path d="M77.7 -62.2L77.7 -55.1L45.2 -55.1L45.2 -34.9Q50 -39.9 56.9 -39.9L56.9 -39.9Q63.4 -39.9 67.5 -35.75Q71.6 -31.6 71.6 -23.9L71.6 -23.9Q71.6 -19.3 70.1 -14.1Q68.6 -8.9 65.1 -3.9L65.1 -3.9L57.9 -8Q60.4 -11.2 62 -15.4Q63.6 -19.6 63.6 -23.7L63.6 -23.7Q63.6 -28.4 61.65 -30.7Q59.7 -33 56.2 -33L56.2 -33Q50.8 -33 45.2 -25.8L45.2 -25.8L45.2 0L37.1 0L37.1 -17.4Q34.7 -15.4 31.15 -13.6Q27.6 -11.8 22.6 -11.8L22.6 -11.8Q17.9 -11.8 13.75 -13.7Q9.6 -15.6 7.1 -19.45Q4.6 -23.3 4.6 -29L4.6 -29Q4.6 -37 10.1 -41.7Q15.6 -46.4 24.4 -46.4L24.4 -46.4Q26.7 -46.4 29.55 -46.05Q32.4 -45.7 33.9 -45.4L33.9 -45.4L33.3 -38.1Q31.7 -38.5 29.25 -38.8Q26.8 -39.1 24.9 -39.1L24.9 -39.1Q19.1 -39.1 15.9 -36.5Q12.7 -33.9 12.7 -29.2L12.7 -29.2Q12.7 -23.9 15.75 -21.35Q18.8 -18.8 22.8 -18.8L22.8 -18.8Q27.2 -18.8 30.65 -20.9Q34.1 -23 37.1 -26L37.1 -26L37.1 -55.1L0 -55.1L0 -62.2L77.7 -62.2M44.7 -61.5L37.2 -61.5Q35.1 -69.4 33.05 -73.95Q31 -78.5 28.5 -80.4Q26 -82.3 22.6 -82.3L22.6 -82.3Q20.4 -82.3 18.7 -81.85Q17 -81.4 15.6 -80.9L15.6 -80.9L13.2 -88.2Q17.1 -89.6 22.3 -89.6L22.3 -89.6Q27.7 -89.6 31.65 -87.05Q35.6 -84.5 38.75 -78.35Q41.9 -72.2 44.7 -61.5L44.7 -61.5" fill="#16130F"/></svg></div>
+    <div><b>5.</b> The mark sits <span style="border-bottom:1.6px solid var(--ink);display:inline-block;width:2.4in;height:.35in">&nbsp;</span></div>
+  </div>
+  <div class="mrow big">
+    <div class="g"><svg viewBox="0 -82 102.1 112" width="72.9" height="80" role="img" aria-label="कि"><path d="M8.9 0L8.9 -55.1L0 -55.1L0 -62.2L8 -62.2Q6.8 -64.4 6.05 -66.9Q5.3 -69.4 5.3 -72.4L5.3 -72.4Q5.3 -80.2 11.1 -84.9Q16.9 -89.6 26.6 -89.6L26.6 -89.6Q40.7 -89.6 51.6 -81.95Q62.5 -74.3 70.4 -61.5L70.4 -61.5L62 -61.5Q46.7 -82.4 28.3 -82.4L28.3 -82.4Q21.3 -82.4 17.35 -79.45Q13.4 -76.5 13.4 -71.4L13.4 -71.4Q13.4 -68.4 14.35 -66.15Q15.3 -63.9 16.5 -62.2L16.5 -62.2L27.3 -62.2L27.3 -55.1L17 -55.1L17 0L8.9 0M103.6 -62.2L103.6 -55.1L71.1 -55.1L71.1 -34.9Q75.9 -39.9 82.8 -39.9L82.8 -39.9Q89.3 -39.9 93.4 -35.75Q97.5 -31.6 97.5 -23.9L97.5 -23.9Q97.5 -19.3 96 -14.1Q94.5 -8.9 91 -3.9L91 -3.9L83.8 -8Q86.3 -11.2 87.9 -15.4Q89.5 -19.6 89.5 -23.7L89.5 -23.7Q89.5 -28.4 87.55 -30.7Q85.6 -33 82.1 -33L82.1 -33Q76.7 -33 71.1 -25.8L71.1 -25.8L71.1 0L63 0L63 -17.4Q60.6 -15.4 57.05 -13.6Q53.5 -11.8 48.5 -11.8L48.5 -11.8Q43.8 -11.8 39.65 -13.7Q35.5 -15.6 33 -19.45Q30.5 -23.3 30.5 -29L30.5 -29Q30.5 -37 36 -41.7Q41.5 -46.4 50.3 -46.4L50.3 -46.4Q52.6 -46.4 55.45 -46.05Q58.3 -45.7 59.8 -45.4L59.8 -45.4L59.2 -38.1Q57.6 -38.5 55.15 -38.8Q52.7 -39.1 50.8 -39.1L50.8 -39.1Q45 -39.1 41.8 -36.5Q38.6 -33.9 38.6 -29.2L38.6 -29.2Q38.6 -23.9 41.65 -21.35Q44.7 -18.8 48.7 -18.8L48.7 -18.8Q53.1 -18.8 56.55 -20.9Q60 -23 63 -26L63 -26L63 -55.1L25.9 -55.1L25.9 -62.2L103.6 -62.2" fill="#16130F"/></svg></div>
+    <div><b>6.</b> The mark sits <span style="border-bottom:1.6px solid var(--ink);display:inline-block;width:2.4in;height:.35in">&nbsp;</span></div>
+  </div>
+  <div class="mrow big">
+    <div class="g"><svg viewBox="0 -82 102.1 112" width="72.9" height="80" role="img" aria-label="की"><path d="M77.7 -62.2L77.7 -55.1L45.2 -55.1L45.2 -34.9Q50 -39.9 56.9 -39.9L56.9 -39.9Q63.4 -39.9 67.5 -35.75Q71.6 -31.6 71.6 -23.9L71.6 -23.9Q71.6 -19.3 70.1 -14.1Q68.6 -8.9 65.1 -3.9L65.1 -3.9L57.9 -8Q60.4 -11.2 62 -15.4Q63.6 -19.6 63.6 -23.7L63.6 -23.7Q63.6 -28.4 61.65 -30.7Q59.7 -33 56.2 -33L56.2 -33Q50.8 -33 45.2 -25.8L45.2 -25.8L45.2 0L37.1 0L37.1 -17.4Q34.7 -15.4 31.15 -13.6Q27.6 -11.8 22.6 -11.8L22.6 -11.8Q17.9 -11.8 13.75 -13.7Q9.6 -15.6 7.1 -19.45Q4.6 -23.3 4.6 -29L4.6 -29Q4.6 -37 10.1 -41.7Q15.6 -46.4 24.4 -46.4L24.4 -46.4Q26.7 -46.4 29.55 -46.05Q32.4 -45.7 33.9 -45.4L33.9 -45.4L33.3 -38.1Q31.7 -38.5 29.25 -38.8Q26.8 -39.1 24.9 -39.1L24.9 -39.1Q19.1 -39.1 15.9 -36.5Q12.7 -33.9 12.7 -29.2L12.7 -29.2Q12.7 -23.9 15.75 -21.35Q18.8 -18.8 22.8 -18.8L22.8 -18.8Q27.2 -18.8 30.65 -20.9Q34.1 -23 37.1 -26L37.1 -26L37.1 -55.1L0 -55.1L0 -62.2L77.7 -62.2M85.1 0L85.1 -55.1L76.2 -55.1L76.2 -62.2L84.3 -62.2Q71 -82.4 54.3 -82.4L54.3 -82.4Q47.9 -82.4 44.2 -79.55Q40.5 -76.7 40.5 -71.7L40.5 -71.7Q40.5 -68.4 41.6 -65.95Q42.7 -63.5 44 -61.5L44 -61.5L35.6 -61.5Q34.2 -64.1 33.3 -66.85Q32.4 -69.6 32.4 -72.8L32.4 -72.8Q32.4 -80.4 37.9 -85Q43.4 -89.6 52.8 -89.6L52.8 -89.6Q65.9 -89.6 75.65 -82.35Q85.4 -75.1 92.7 -62.2L92.7 -62.2L103.5 -62.2L103.5 -55.1L93.2 -55.1L93.2 0L85.1 0" fill="#16130F"/></svg></div>
+    <div><b>7.</b> The mark sits <span style="border-bottom:1.6px solid var(--ink);display:inline-block;width:2.4in;height:.35in">&nbsp;</span></div>
+  </div>
+  <div class="mrow big">
+    <div class="g"><svg viewBox="0 -82 102.1 112" width="72.9" height="80" role="img" aria-label="को"><path d="M77.7 -62.2L77.7 -55.1L45.2 -55.1L45.2 -34.9Q50 -39.9 56.9 -39.9L56.9 -39.9Q63.4 -39.9 67.5 -35.75Q71.6 -31.6 71.6 -23.9L71.6 -23.9Q71.6 -19.3 70.1 -14.1Q68.6 -8.9 65.1 -3.9L65.1 -3.9L57.9 -8Q60.4 -11.2 62 -15.4Q63.6 -19.6 63.6 -23.7L63.6 -23.7Q63.6 -28.4 61.65 -30.7Q59.7 -33 56.2 -33L56.2 -33Q50.8 -33 45.2 -25.8L45.2 -25.8L45.2 0L37.1 0L37.1 -17.4Q34.7 -15.4 31.15 -13.6Q27.6 -11.8 22.6 -11.8L22.6 -11.8Q17.9 -11.8 13.75 -13.7Q9.6 -15.6 7.1 -19.45Q4.6 -23.3 4.6 -29L4.6 -29Q4.6 -37 10.1 -41.7Q15.6 -46.4 24.4 -46.4L24.4 -46.4Q26.7 -46.4 29.55 -46.05Q32.4 -45.7 33.9 -45.4L33.9 -45.4L33.3 -38.1Q31.7 -38.5 29.25 -38.8Q26.8 -39.1 24.9 -39.1L24.9 -39.1Q19.1 -39.1 15.9 -36.5Q12.7 -33.9 12.7 -29.2L12.7 -29.2Q12.7 -23.9 15.75 -21.35Q18.8 -18.8 22.8 -18.8L22.8 -18.8Q27.2 -18.8 30.65 -20.9Q34.1 -23 37.1 -26L37.1 -26L37.1 -55.1L0 -55.1L0 -62.2L77.7 -62.2M103.5 -55.1L93.2 -55.1L93.2 0L85.1 0L85.1 -55.1L76.2 -55.1L76.2 -62.2L103.5 -62.2L103.5 -55.1M92.7 -61.5L85.2 -61.5Q83.1 -69.4 81.05 -73.95Q79 -78.5 76.5 -80.4Q74 -82.3 70.6 -82.3L70.6 -82.3Q68.4 -82.3 66.7 -81.85Q65 -81.4 63.6 -80.9L63.6 -80.9L61.2 -88.2Q65.1 -89.6 70.3 -89.6L70.3 -89.6Q75.7 -89.6 79.65 -87.05Q83.6 -84.5 86.75 -78.35Q89.9 -72.2 92.7 -61.5L92.7 -61.5" fill="#16130F"/></svg></div>
+    <div><b>8.</b> The mark sits <span style="border-bottom:1.6px solid var(--ink);display:inline-block;width:2.4in;height:.35in">&nbsp;</span></div>
+  </div>
+
+
+
+  <footer>
+    <span>Above, below, after — and one before</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Four directions</span>
+  </footer>
+</div>
+
+</body>
+</html>

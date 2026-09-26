@@ -1,0 +1,723 @@
+<!DOCTYPE html><html><head>
+<meta charset="utf-8">
+<meta name="sheet-kind" content="worksheet">
+<title>Why Anything Bigger Needs Plumbing — Grade 7</title>
+<style>
+  :root { --font: Georgia, "Times New Roman", serif; }
+
+  /* Page margins live HERE only — body padding stays 0 for print so the two
+     don't stack and eat the sheet. */
+  @page { size: letter portrait; margin: 0.45in 0.5in; }
+
+  /*
+   * THE PALETTE. The same one the shop wears (kitchen-table/BRAND.md): warm
+   * near-black ink, one accent, pine kept back for the answer key.
+   *
+   * WHY A SHEET HAS COLOR AT ALL. Every sheet was pure grayscale — #000 rules,
+   * #333 subtitles, #f0f0f0 boxes — which is what you get by never deciding.
+   * The paper is the product and it looked like a fax. A printer set to
+   * grayscale, or one that has no color to give, renders all of this as the
+   * greys it already had, so nothing below costs a parent anything they were
+   * not already spending.
+   *
+   * WHAT STAYS BLACK, ON PURPOSE:
+   *   - anything drawn to be written on (rules, name lines, answer boxes)
+   *   - anything drawn to be traced or colored in (line art, letter guides)
+   *   - the confidence rings, which have to survive a mono laser
+   * Color marks the sheet's own furniture — its rule, its numbering, its
+   * boxes — and never the part a child puts a pencil through.
+   */
+  :root {
+    --ink:    #16130F;
+    --muted:  #6B635A;
+    --rule:   #CFC3B2;
+    --guide:  #BCAE9C;
+    --accent: #C0511D;
+    --tint:   #F7EDE4;
+    --slate:  #2E5A78;
+    --tintslate: #E9EFF4;
+    --deep:   #2C4A45;
+    --tintdeep: #ECF1EF;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font);
+    color: #000; background: #fff;
+    font-size: 12pt; line-height: 1.3;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+
+  /* ORDER MATTERS. This generic rule must come BEFORE the @media screen block:
+     same specificity, so whichever is declared last wins. With it after, the
+     on-screen preview stretches to the viewport instead of 8.5in — print is
+     unaffected, but the proof you check before printing is wrong. */
+  .page { width: 100%; }
+  .page + .page { page-break-before: always; }
+
+  @media screen {
+    body { padding: 0.5in; background: #ddd; }
+    .page {
+      background: #fff; padding: 0.45in 0.5in;
+      width: 8.5in; min-height: 11in;
+      margin: 0 auto 24px; box-shadow: 0 2px 10px rgba(0,0,0,.3);
+    }
+  }
+
+  /* ------------------------------------------------------------- header */
+  header { border-bottom: 3px double var(--accent); padding-bottom: 6px; }
+  header.cont { border-bottom: 1px solid var(--rule); }
+  h1 { font-size: 16pt; margin: 0 0 1px; letter-spacing: .01em; }
+  .sub { font-size: 10pt; font-style: italic; color: var(--muted); margin: 0; }
+
+  .nameline { display: flex; gap: 26px; font-size: 10.5pt; margin: 11px 0 12px; }
+  .nameline span { flex: 1; border-bottom: 1px solid var(--ink); padding-bottom: 1px; }
+  .nameline span.short { flex: 0 0 1.9in; }
+
+  .directions {
+    font-size: 10.5pt; line-height: 1.35;
+    background: var(--tint); border-left: 4px solid var(--accent);
+    padding: 7px 10px; margin: 12px 0 14px;
+  }
+  .directions b { letter-spacing: .03em; }
+  .tip { font-style: italic; margin-top: 3px; }
+
+  /* ------------------------------------------------- problems and grids */
+  .grid { display: grid; gap: 13px 16px; margin-top: 4px; }
+  .prob { page-break-inside: avoid; display: flex; gap: 5px; align-items: flex-start; }
+  .pn { font-weight: bold; font-size: 11pt; min-width: .28in; flex: 0 0 auto; color: var(--accent); }
+  .pbody { flex: 1; min-width: 0; }
+
+  /* Digits need lining figures and even widths whatever the body font is. */
+  .num, .vert, .horiz { font-family: "Trebuchet MS", "Segoe UI", Tahoma, Verdana, sans-serif; font-variant-numeric: lining-nums tabular-nums; }
+
+  /* A stacked column algorithm.
+     Two grid columns — operator, then digits — because a floated or absolutely
+     positioned operator overlaps the digits as soon as the numbers get wide,
+     and "324" with a + sitting on the 3 is unreadable. The grid also lets the
+     rule under the last operand span BOTH columns, which is how it is written
+     by hand. The rule is heavy: it is the line you write the answer beneath. */
+  .vert {
+    display: inline-grid; grid-template-columns: auto auto;
+    font-size: 15pt; line-height: 1.3; text-align: right;
+  }
+  .vert > span { padding: 0 0 1px 0; }
+  .vert .op { text-align: left; padding-right: .16in; }
+  .vert .last { border-bottom: 2.5px solid var(--ink); padding-bottom: 3px; }
+  .vert .ans { height: .4in; }
+  /* Partial-products working, for 2-digit x 1-digit before the short method. */
+  .vert .part { font-size: 11pt; color: var(--muted); }
+  /* A row of worked examples that fade — see lib/formats.js faded(). The
+     caption is what makes the fade legible: without it the third one looks like
+     a question somebody forgot to number. */
+  .egrow { display: flex; gap: .34in; align-items: flex-start; margin: 0 0 4px; }
+  .eg { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; }
+  .eglab { font-size: 8.5pt; color: var(--slate); letter-spacing: .02em; }
+
+  /* The carried digits. Small and grey so the sum still reads as the sum, and
+     tight to the row below it so a carry sits ON the column it goes into. */
+  .vert .carry { font-size: 9pt; color: var(--slate); line-height: 1; padding: 0 0 1px 0; }
+
+  .horiz { font-size: 14pt; white-space: nowrap; }
+
+  /* Row numbers in a word list. Gray and small: they are there so a list can be
+     dictated ("number seven") and marked without counting down the page, and
+     they must not compete with the word itself. */
+  .wn { color: var(--muted); font-size: 9pt; }
+
+  /* The box an answer goes in. inline-block so it can sit mid-sentence. */
+  .abox {
+    display: inline-block; border: 1.6px solid var(--slate); border-radius: 3px;
+    vertical-align: middle; margin: 0 3px; position: relative; background: #fff;
+  }
+  /* Scoped to the box: as a bare ".alab" it pinned any generator's own .alab
+     to the bottom of the page (life-07-signs-and-forms 40, 2026-09-24). */
+  .abox > .alab {
+    position: absolute; bottom: 1px; left: 0; right: 0;
+    text-align: center; font-size: 7pt; color: var(--muted); font-style: italic;
+  }
+
+  /* Confidence marks. The rings are drawn with a border and a gradient rather
+     than an SVG so they stay inline with the question text at any font size,
+     and print black on a mono laser without relying on a background image. */
+  .conf { float: right; margin: 2px 0 0 8px; white-space: nowrap; }
+  .cring {
+    display: inline-block; width: 11px; height: 11px; margin-left: 4px;
+    border: 1.4px solid var(--slate); border-radius: 50%; vertical-align: middle;
+  }
+  .cring-full { background: var(--accent); }
+  .cring-half { background: linear-gradient(90deg, var(--accent) 50%, #fff 50%); }
+  .cring-none { background: #fff; }
+  ol.qs.hasconf li { overflow: hidden; }
+
+  .conflegend {
+    border: 1.2px solid var(--rule); border-radius: 4px;
+    padding: 3px 8px; margin: 0 0 7px;
+    font-size: 8.5pt; color: var(--muted); display: flex; gap: 14px; align-items: center;
+  }
+  .conftitle { font-weight: 700; color: var(--ink); }
+  .confitem { white-space: nowrap; }
+
+  .work {
+    border: 1.4px dashed var(--rule); border-radius: 4px;
+    margin: 6px 0 2px; position: relative;
+  }
+  /* The label S.work() puts in the box: a DIRECT child only. As ".work span"
+     it also caught every span inside any generator's own .work content and
+     stacked them all at the top-left corner (math-11-grade6 47, 2026-09-23). */
+  .work > span {
+    position: absolute; top: 3px; left: 6px;
+    font-size: 8pt; color: var(--muted); font-style: italic;
+  }
+
+  /* ------------------------------------------------------ writing lines */
+  /* Primary rule: solid top, dashed midline, heavy baseline. Capitals reach
+     the top line, lowercase bodies sit under the dashed one. */
+  .write {
+    position: relative; height: 0.375in;
+    margin: 6px 0 0 .3in;
+    border-top: 1px solid var(--rule); border-bottom: 2px solid var(--ink);
+  }
+  .write.flush { margin-left: 0; }
+  .write + .write { margin-top: .17in; }
+  .write::after {
+    content: ""; position: absolute; left: 0; right: 0; top: 50%;
+    border-top: 1px dashed var(--guide);
+  }
+
+  /* ------------------------------------------------------- question list */
+  ol.qs { margin: 0; padding: 0 0 0 .34in; }
+  ol.qs li { margin-bottom: 13px; page-break-inside: avoid; }
+  ol.qs li::marker { font-weight: bold; font-size: 11pt; color: var(--accent); }
+  .qt { display: block; }
+
+  .mcq { display: grid; gap: 3px 14px; margin: 5px 0 2px .12in; font-size: 11pt; }
+  .opt { white-space: nowrap; }
+
+  /* -------------------------------------------------------------- tables */
+  .tbl { border-collapse: collapse; margin: 8px 0; font-size: 11pt; width: 100%; }
+  .tbl th, .tbl td { border: 1.4px solid var(--ink); padding: 5px 8px; text-align: left; }
+  .tbl th { color: var(--slate); }
+  .tbl th { background: var(--tint); font-size: 10pt; letter-spacing: .02em; }
+  .tbl td.blank { height: .34in; }
+  .tbl.narrow { width: auto; }
+  .tbl.center td, .tbl.center th { text-align: center; }
+
+  /* ------------------------------------------------------------ passages */
+  .passage {
+    border: 1.5px solid var(--slate); border-radius: 4px;
+    padding: 11px 14px; margin-bottom: 12px;
+    font-size: 11.5pt; line-height: 1.55;
+  }
+  .passage h2 { font-size: 13pt; margin: 0 0 6px; color: var(--deep); }
+  .passage p { margin: 0 0 8px; }
+  .passage p:last-child { margin-bottom: 0; }
+  .passage .byline { font-size: 9.5pt; font-style: italic; color: var(--muted); margin-bottom: 8px; }
+  /* Numbered paragraphs, so a question can say "in paragraph 2". */
+  .passage p.np { position: relative; padding-left: .3in; }
+  .passage p.np::before {
+    content: attr(data-p); position: absolute; left: 0; top: 0;
+    font-size: 9pt; color: var(--accent); font-weight: bold;
+  }
+
+  .wordbank {
+    border: 1.5px dashed var(--slate); border-radius: 4px;
+    padding: 8px 12px; margin: 10px 0 12px;
+    font-size: 11.5pt; text-align: center;
+  }
+  .wordbank b { display: block; font-size: 9.5pt; letter-spacing: .06em;
+    text-transform: uppercase; margin-bottom: 4px; color: var(--accent); }
+  .wordbank span { display: inline-block; margin: 2px 11px; }
+
+  .note {
+    border-left: 4px solid var(--deep); background: var(--tintdeep);
+    padding: 7px 11px; margin: 10px 0; font-size: 10.5pt;
+  }
+  .note b { letter-spacing: .02em; }
+
+  /* -------------------------------------------------------------- footer */
+  /* THE WORDMARK SITS IN THE FOOTER THAT WAS ALREADY THERE, so it costs no
+     height at all — a sheet that fitted before fits now. Upright where the rest
+     of the line is italic, and a size down: it is a signature, not a message,
+     and it must never compete with "Score: ___ / 10". */
+  .brand { font-style: normal; font-size: 7.5pt; letter-spacing: .04em;
+    color: var(--accent); align-self: center; }
+
+  footer {
+    margin-top: 14px; padding-top: 6px; border-top: 1px solid var(--rule);
+    font-size: 9pt; font-style: italic; color: var(--muted);
+    display: flex; justify-content: space-between;
+  }
+
+  /* ---------------------------------------------------------- answer key */
+  .keybadge {
+    display: inline-block; border: 2px solid var(--deep); color: var(--deep); padding: 2px 9px;
+    font-size: 9.5pt; font-weight: bold; letter-spacing: .08em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .key .why {
+    display: block; font-size: 9pt; font-style: italic; color: var(--muted); margin-top: 1px;
+  }
+  /* Highlight rather than underline: <u> in a key marks WHAT CHANGED, and an
+     underline under a comma is invisible. */
+  .key u { text-decoration: none; background: var(--tint); padding: 0 2px; font-weight: bold; }
+  .keygrid .pbody { font-family: "Trebuchet MS", "Segoe UI", Tahoma, Verdana, sans-serif; font-size: 12pt; }
+  /* A key's pictures scale to their column: at 1fr a wide drawing pushed a
+     three-column key 92px off the paper (art-04-drawing 10, 2026-09-24). */
+  .keygrid svg { max-width: 100%; height: auto; }
+  .keylist .qt { font-weight: normal; }
+
+  /*
+   * The guide page. Four lines per question, and the ASK line is the one that
+   * gets used at the table, so it is the one with a rule beside it — a parent
+   * scanning this page in ten seconds should land on the follow-up question
+   * and nothing else.
+   */
+  .guide { padding-left: .3in; }
+  .guide li { margin-bottom: 11px; page-break-inside: avoid; }
+  .guide .gq { font-weight: bold; font-size: 11pt; margin-bottom: 3px; }
+  /* 9pt, matching the key's own why line, because the guide page is the
+     binding constraint on every open sheet: four lines per question against a
+     key's one, and at 10pt a sheet with seven questions ran onto a second
+     side. Found by measuring, not chosen. (No backticks in here — this CSS
+     lives inside a template literal and one would close it.) */
+  .guide .glook, .guide .gthin, .guide .gstrong {
+    font-size: 9pt; line-height: 1.3; margin-top: 1px;
+  }
+  .guide .gthin { color: var(--muted); }
+  .guide .gstrong { color: var(--muted); font-style: italic; }
+  .guide .gask {
+    font-size: 9.5pt; line-height: 1.3; margin-top: 3px;
+    border-left: 3px solid var(--slate); padding-left: 7px;
+  }
+  .key .qs li { margin-bottom: 9px; }
+
+  /*
+   * INLINE-BLOCK, NOT BLOCK, AND THIS WAS WRONG FOR A LONG TIME. A block-level
+   * svg ignores text-align: center on its parent and sits flush left — so 117
+   * sheets across 35 packs said "centre this diagram" and got a left-aligned
+   * one. Twenty-five of them were origami and paper-plane fold sequences, where
+   * the whole page is diagrams.
+   *
+   * Nobody spotted it because a left-flush diagram looks deliberate; it only
+   * reads as wrong next to a centered one, and no sheet has both.
+   *
+   * inline-block makes text-align do what every one of those authors meant,
+   * and leaves a diagram in a left-aligned container exactly where it was.
+   * vertical-align: top kills the baseline gap that inline elements otherwise
+   * leave underneath them, which would have pushed long pages over.
+   */
+  svg { display: inline-block; vertical-align: top; }
+  svg.inline { vertical-align: middle; }
+
+  .tbl.h100 td.blank { height: 1.00in; }
+  .tbl.h95 td.blank { height: 0.95in; }
+  .tbl.h80 td.blank { height: 0.80in; }
+  .tbl.h90 td.blank { height: 0.90in; }
+  .tbl.h130 td.blank { height: 1.30in; }
+  .tbl.h55 td.blank { height: 0.55in; }
+  .tbl.h60 td.blank { height: 0.60in; }
+  .tbl.h75 td.blank { height: 0.75in; }
+  ol.qs li { margin-bottom: 7px; }
+  .note { margin: 7px 0; }
+  .cap { font-size: 9.5pt; color: var(--muted); text-align: center; margin-top: 2px; }
+  .wk { font-style: italic; color: #2F5D8A; }
+  .wktag { display: inline-block; font-size: 7pt; font-weight: 700; color: #fff; background: #2F5D8A;
+    border-radius: 3px; padding: 0 3px; line-height: 1.3; }
+
+</style>
+</head><body>
+
+<div class="page ">
+  <header>
+    
+    <h1>Why Anything Bigger Needs Plumbing</h1>
+    <p class="sub">Grade 7 · Building a body · Page 1 of 3</p>
+  </header>
+  <div class="nameline">
+    <span>Name</span>
+    <span class="short">Date</span>
+  </div>
+  <div class="directions">
+    <b>DIRECTIONS:</b> As a living thing grows, its surface cannot keep up with its insides. Read, then answer.
+  </div>
+
+
+  <div class="note" style="margin-top:2px">Diffusion is quick across a hundredth of an inch and hopeless across an
+  inch. So a living thing can stay tiny, stay thin, or build something to carry supplies to the middle.</div>
+
+  <table class="tbl h60">
+    <thead><tr><th>#</th><th>Living thing</th><th>Stay tiny, stay thin, or build plumbing? And how?</th></tr></thead>
+    <tbody><tr><td><span class="wktag">Done for you</span></td><td>an amoeba, one cell across</td><td><span class="wk">Stay tiny. Every part of it is already at the surface, so diffusion is enough on its own.</span></td></tr><tr><td><span class="pn">1.</span></td><td>a flatworm, wide but paper-thin</td><td class="blank"></td></tr><tr><td><span class="pn">2.</span></td><td>a jellyfish, big but mostly water with thin walls</td><td class="blank"></td></tr><tr><td><span class="pn">3.</span></td><td>an insect, with air tubes running to every part inside</td><td class="blank"></td></tr><tr><td><span class="pn">4.</span></td><td>you</td><td class="blank"></td></tr></tbody>
+  </table>
+
+  <ol class="qs" start="5"><li><span class="qt">A flatworm can be an inch wide and is never thick. Say why being flat solves the same problem that your blood solves.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Keep going on page 2 →</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Building a body</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>Five Words, In Order</h1>
+    <p class="sub">Grade 7 · Building a body · Page 2 of 3</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Put the five words in order. Each step can do something the one below cannot.
+  </div>
+
+
+  <div style="text-align:center;margin:4px 0 2px"><svg class="inline" viewBox="0 0 400 120" width="400" height="120" role="img" aria-label="cell, tissue, organ, system, organism" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="24" width="62" height="56" rx="4" fill="#f4f4f4" stroke="#16130F" stroke-width="1.6"/><text x="41" y="18" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="9.5" font-weight="bold" text-anchor="middle" fill="#16130F">cell</text><circle cx="24" cy="40" r="6" fill="#d4d4d4" stroke="#16130F" stroke-width="1.2"/><line x1="74" y1="52" x2="88" y2="52" stroke="#16130F" stroke-width="1.6" stroke-linecap="round"/><line x1="82" y1="48" x2="88" y2="52" stroke="#16130F" stroke-width="1.6" stroke-linecap="round"/><line x1="82" y1="56" x2="88" y2="52" stroke="#16130F" stroke-width="1.6" stroke-linecap="round"/><rect x="92" y="24" width="62" height="56" rx="4" fill="#f4f4f4" stroke="#16130F" stroke-width="1.6"/><text x="123" y="18" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="9.5" font-weight="bold" text-anchor="middle" fill="#16130F">tissue</text><circle cx="106" cy="40" r="6" fill="#d4d4d4" stroke="#16130F" stroke-width="1.2"/><circle cx="122" cy="40" r="6" fill="#d4d4d4" stroke="#16130F" stroke-width="1.2"/><circle cx="106" cy="56" r="6" fill="#d4d4d4" stroke="#16130F" stroke-width="1.2"/><circle cx="122" cy="56" r="6" fill="#d4d4d4" stroke="#16130F" stroke-width="1.2"/><line x1="156" y1="52" x2="170" y2="52" stroke="#16130F" stroke-width="1.6" stroke-linecap="round"/><line x1="164" y1="48" x2="170" y2="52" stroke="#16130F" stroke-width="1.6" stroke-linecap="round"/><line x1="164" y1="56" x2="170" y2="52" stroke="#16130F" stroke-width="1.6" stroke-linecap="round"/><rect x="174" y="24" width="62" height="56" rx="4" fill="#f4f4f4" stroke="#16130F" stroke-width="1.6"/><text x="205" y="18" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="9.5" font-weight="bold" text-anchor="middle" fill="#16130F">organ</text><circle cx="188" cy="40" r="6" fill="#d4d4d4" stroke="#16130F" stroke-width="1.2"/><circle cx="204" cy="40" r="6" fill="#d4d4d4" stroke="#16130F" stroke-width="1.2"/><circle cx="188" cy="56" r="6" fill="#d4d4d4" stroke="#16130F" stroke-width="1.2"/><circle cx="204" cy="56" r="6" fill="#d4d4d4" stroke="#16130F" stroke-width="1.2"/><circle cx="188" cy="72" r="6" fill="#d4d4d4" stroke="#16130F" stroke-width="1.2"/><circle cx="204" cy="72" r="6" fill="#d4d4d4" stroke="#16130F" stroke-width="1.2"/><text x="205" y="74" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="11" font-weight="normal" text-anchor="middle" fill="#16130F">…</text><line x1="238" y1="52" x2="252" y2="52" stroke="#16130F" stroke-width="1.6" stroke-linecap="round"/><line x1="246" y1="48" x2="252" y2="52" stroke="#16130F" stroke-width="1.6" stroke-linecap="round"/><line x1="246" y1="56" x2="252" y2="52" stroke="#16130F" stroke-width="1.6" stroke-linecap="round"/><rect x="256" y="24" width="62" height="56" rx="4" fill="#efefef" stroke="#16130F" stroke-width="1.6"/><text x="287" y="18" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="9.5" font-weight="bold" text-anchor="middle" fill="#16130F">system</text><text x="287" y="56" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="8.5" font-weight="normal" text-anchor="middle" fill="#16130F">organs</text><line x1="320" y1="52" x2="334" y2="52" stroke="#16130F" stroke-width="1.6" stroke-linecap="round"/><line x1="328" y1="48" x2="334" y2="52" stroke="#16130F" stroke-width="1.6" stroke-linecap="round"/><line x1="328" y1="56" x2="334" y2="52" stroke="#16130F" stroke-width="1.6" stroke-linecap="round"/><rect x="338" y="24" width="54" height="56" rx="4" fill="#e8e8e8" stroke="#16130F" stroke-width="1.6"/><text x="365" y="18" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="9.5" font-weight="bold" text-anchor="middle" fill="#16130F">organism</text><text x="365" y="56" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="9" font-weight="normal" text-anchor="middle" fill="#16130F">you</text><text x="200" y="112" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="9" font-weight="normal" text-anchor="middle" fill="#6B635A">each box is made of the one before it, and does something none of them could</text></svg></div>
+
+  <table class="tbl h55">
+    <thead><tr><th>#</th><th>This thing</th><th>Which level is it?</th></tr></thead>
+    <tbody><tr><td><span class="pn">6.</span></td><td>one muscle cell</td><td class="blank"></td></tr><tr><td><span class="pn">7.</span></td><td>a sheet of muscle cells all pulling the same way</td><td class="blank"></td></tr><tr><td><span class="pn">8.</span></td><td>the heart</td><td class="blank"></td></tr><tr><td><span class="pn">9.</span></td><td>the heart, the blood and every vessel, working together</td><td class="blank"></td></tr><tr><td><span class="pn">10.</span></td><td>you</td><td class="blank"></td></tr></tbody>
+  </table>
+
+  <ol class="qs" start="11"><li><span class="qt">A heart is made of muscle tissue, which is made of muscle cells. Say what the heart can do that a bag of loose muscle cells could not — and what that says about the word "organ".</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Keep going on page 3 →</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Building a body</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>Four Problems, Four Systems</h1>
+    <p class="sub">Grade 7 · Building a body · Page 3 of 3</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Being big creates problems a single cell never had. Name the system that solves each.
+  </div>
+
+
+  <table class="tbl h75">
+    <thead><tr><th>#</th><th>The problem a big body has</th><th>Which system solves it, and roughly how</th></tr></thead>
+    <tbody><tr><td><span class="pn">12.</span></td><td>food arrives in lumps far too big to cross any membrane</td><td class="blank"></td></tr><tr><td><span class="pn">13.</span></td><td>the cells in the middle are nowhere near the outside world</td><td class="blank"></td></tr><tr><td><span class="pn">14.</span></td><td>oxygen has to come in and carbon dioxide has to go out, constantly</td><td class="blank"></td></tr><tr><td><span class="pn">15.</span></td><td>waste builds up everywhere at once</td><td class="blank"></td></tr></tbody>
+  </table>
+
+  <ol class="qs" start="16"><li><span class="qt">Every one of those systems ends by bringing something <b>close</b> to a cell and letting go. Say why "close" is the word that matters, and what happens in the last fraction of an inch.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Score: ______ / 16</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Building a body</span>
+  </footer>
+</div>
+
+
+<div style="page-break-before:always"></div>
+
+
+<div class="page ">
+  <header>
+    
+    <h1>Younger Than America</h1>
+    <p class="sub">The map is younger than you think · Page 1 of 2</p>
+  </header>
+  <div class="nameline">
+    <span>Name</span>
+    <span class="short">Date</span>
+  </div>
+  <div class="directions">
+    <b>DIRECTIONS:</b> How old is each country? Take the year from 2026. Then read the box.
+  </div>
+
+
+  <table class="band">
+    <tr><th style="width:32%">The country</th><th style="width:10%">Since</th><th style="width:36%">What happened that year</th><th>How old</th></tr>
+    <tr><td><span class="pn">1.</span> The United States</td><td class="num">1776</td><td style="font-size:9.8pt">independence declared</td><td class="b"></td></tr>
+    <tr><td><span class="pn">2.</span> Italy</td><td class="num">1861</td><td style="font-size:9.8pt">the separate states joined into one kingdom</td><td class="b"></td></tr>
+    <tr><td><span class="pn">3.</span> Germany</td><td class="num">1871</td><td style="font-size:9.8pt">the same, twenty-odd states into one — and see page 2</td><td class="b"></td></tr>
+    <tr><td><span class="pn">4.</span> India and Pakistan</td><td class="num">1947</td><td style="font-size:9.8pt">one colony became two countries in a night</td><td class="b"></td></tr>
+    <tr><td><span class="pn">5.</span> Ghana</td><td class="num">1957</td><td style="font-size:9.8pt">the first colony in sub-Saharan Africa to become independent</td><td class="b"></td></tr>
+    <tr><td><span class="pn">6.</span> Nigeria</td><td class="num">1960</td><td style="font-size:9.8pt">one of seventeen African countries independent in that year alone</td><td class="b"></td></tr>
+    <tr><td><span class="pn">7.</span> Bangladesh</td><td class="num">1971</td><td style="font-size:9.8pt">split from Pakistan after a war</td><td class="b"></td></tr>
+    <tr><td><span class="pn">8.</span> Kazakhstan, Ukraine and 13 others</td><td class="num">1991</td><td style="font-size:9.8pt">the Soviet Union ended and fifteen countries existed</td><td class="b"></td></tr>
+    <tr><td><span class="pn">9.</span> South Sudan</td><td class="num">2011</td><td style="font-size:9.8pt">the newest member of the United Nations</td><td class="b"></td></tr>
+  </table>
+  <div class="test"><b>Now compare the top three.</b> Italy is 165 and Germany is 155. The United States is 250.
+  <br><br><b>Two of the oldest-feeling countries in Europe are younger than America by the better part of a century</b>, and Germany is younger than the American Civil War. That is not a trick of wording. Before those dates the places existed and the countries did not: what was there was dozens of separate states that happened to share a language.</div>
+
+  <footer>
+    <span>Keep going on page 2 →</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Younger than America</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>Younger Than America — The Date Argues Back</h1>
+    <p class="sub">The map is younger than you think · Page 2 of 2</p>
+  </header>
+
+
+
+
+  <div class="test"><b>Ask how old Germany is and you get at least three answers.</b>
+  <br><br><b>1871</b> — the states joined into one country.
+  <br><b>1949</b> — after the Second World War it was divided, and two separate German countries were founded.
+  <br><b>1990</b> — those two joined again, which is when the Germany on today's map began.
+  <br><br>All three are defensible. Which one you pick depends on what you think a country <i>is</i> — a people, a government, or a shape on a map — and there is no way to settle that by looking anything up.</div>
+  <ol class="qs" start="10"><li><span class="qt">Which of the three dates would you use, and why? There is no right answer and there is a right kind of reason.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Say why "how old is this country" is a harder question than "how old is this mountain range".</span><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Somebody says a country is ancient because people have lived there for thousands of years. Say what is right about that and what is wrong with it.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Score: ______ / 12</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Younger than America</span>
+  </footer>
+</div>
+
+
+<div style="page-break-before:always"></div>
+
+
+<div class="page ">
+  <header>
+    
+    <h1>Seven Guesses</h1>
+    <p class="sub">How long does it take? · Page 1 of 2</p>
+  </header>
+  <div class="nameline">
+    <span>Name</span>
+    <span class="short">Date</span>
+  </div>
+  <div class="directions">
+    <b>DIRECTIONS:</b> Play higher-or-lower, 1 to 100, with someone. Write down your guesses.
+    <div class="tip">Always guess the middle of what is left.</div>
+  </div>
+
+
+  <table class="band">
+    <tr><th style="width:16%">Game</th><th>The guesses I made, in order</th><th style="width:16%">How many</th></tr>
+    <tr><td><span class="wktag">Done for you</span><br><span class="wk">they picked 61</span></td><td class="wk">50 <small>(higher)</small> &rarr; 75 <small>(lower)</small> &rarr; 62 <small>(lower)</small> &rarr; 56 <small>(higher)</small> &rarr; 59 <small>(higher)</small> &rarr; 60 <small>(higher)</small> &rarr; 61 <small>(got it!)</small></td><td class="wk">7</td></tr>
+    <tr><td>1</td><td class="b"></td><td class="b"></td></tr><tr><td>2</td><td class="b"></td><td class="b"></td></tr><tr><td>3</td><td class="b"></td><td class="b"></td></tr><tr><td>4</td><td class="b"></td><td class="b"></td></tr>
+  </table>
+  <div class="test"><b>Every guess halves what is left:</b> 100, 50, 25, 13, 7, 4, 2, 1. That is
+  <b>7 guesses</b>, whatever they picked. One at a time could take 100.</div>
+  <div class="note"><b>Fill in:</b> how many halvings to get down to one?</div>
+  <table class="band">
+    <tr><th style="width:44%">Numbers to search</th><th>Guesses, one at a time (worst case)</th><th>Guesses, halving</th></tr>
+    <tr><td><span class="pn">1.</span> 1 to 10</td><td class="num">10</td><td class="b"></td></tr><tr><td><span class="pn">2.</span> 1 to 100</td><td class="num">100</td><td class="b"></td></tr><tr><td><span class="pn">3.</span> 1 to 1,000</td><td class="num">1,000</td><td class="b"></td></tr><tr><td><span class="pn">4.</span> 1 to 10,000</td><td class="num">10,000</td><td class="b"></td></tr><tr><td><span class="pn">5.</span> 1 to 1,000,000</td><td class="num">1,000,000</td><td class="b"></td></tr>
+  </table>
+
+  <footer>
+    <span>Keep going on page 2 →</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Seven guesses</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>Seven Guesses — What the Column Does</h1>
+    <p class="sub">How long does it take? · Page 2 of 2</p>
+  </header>
+
+
+
+
+  <div class="test"><b>Look down your last column.</b> The first column grows ten times each row. Yours grows by about three.</div>
+  <ol class="qs" start="6"><li><span class="qt">A hundred takes 7 guesses and a million takes 20. Say how a task ten thousand times bigger costs only 13 more guesses.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Halving only works if the numbers are in order. Say what "higher or lower" is doing for you that a shuffled pile could not.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">You have 20 guesses and want the biggest range you could still win on. Work out roughly what it is, and say how you got there.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Score: ______ / 8</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Seven guesses</span>
+  </footer>
+</div>
+
+
+<div style="page-break-before:always"></div>
+
+
+<div class="page ">
+  <header>
+    
+    <h1>The Sign Maze</h1>
+    <p class="sub">Grade 7 · Games · Page 1 of 2</p>
+  </header>
+  <div class="nameline">
+    <span>Name</span>
+    <span class="short">Date</span>
+  </div>
+  <div class="directions">
+    <b>DIRECTIONS:</b> Step only on squares whose answer is <b>positive</b>. Go across or down.
+    <div class="tip">Don&rsquo;t work it out. Count the minus signs.</div>
+  </div>
+
+
+  <table class="rmaze p1" style="--c:118px;--h:0.97;--f:13.5pt"><tbody><tr><td class="mend done"><span class="mlab">START</span>(−5) × (−6)<span class="rm-arr rm-r">&rarr;</span></td><td class="done">10 × 5</td><td>3 × (−3)</td><td>(−3) × 8</td><td>63 ÷ (−9)</td><td>3 × (−2)</td></tr><tr><td class="nope">(−13) × 10<span class="rm-x">&#x2717;</span></td><td>8 × 12</td><td>(−72) ÷ 8</td><td>130 ÷ (−10)</td><td>(−3) × 2</td><td>12 × (−3)</td></tr><tr><td>(−12) × 13</td><td>(−3) × (−8)</td><td>(−44) ÷ 11</td><td>10 × (−5)</td><td>(−6) × 2</td><td>20 ÷ (−2)</td></tr><tr><td>91 ÷ (−13)</td><td>(−49) ÷ (−7)</td><td>4 × (−4)</td><td>11 × (−8)</td><td>108 ÷ (−12)</td><td>(−55) ÷ 11</td></tr><tr><td>13 × (−3)</td><td>(−78) ÷ (−13)</td><td>8 × (−9)</td><td>(−12) × 10</td><td>(−32) ÷ 4</td><td>(−8) ÷ 2</td></tr><tr><td>(−27) ÷ 9</td><td>(−110) ÷ (−11)</td><td>100 ÷ 10</td><td>80 ÷ 8</td><td>(−11) × (−12)</td><td class="mend"><span class="mlab">FINISH</span>65 ÷ 5</td></tr></tbody></table>
+  <div class="rm-note"><span class="rm-tag">Done for you</span> <b>(−5) × (−6)</b> = 30 <b class="rm-ok">&#x2713;</b> &rarr; <b>10 × 5</b> = 50 <b class="rm-ok">&#x2713;</b>. &nbsp;<b>(−13) × 10</b> = −130 <b class="rm-no">&#x2717;</b> not that way. Carry on from there.</div>
+
+  <footer>
+    <span>Keep going on page 2 &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>The Sign Maze</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>The Sign Maze — Questions</h1>
+    <p class="sub">Grade 7 · Games · Page 2 of 2</p>
+  </header>
+
+
+
+
+  <div class="tasknote" style="margin-top:4px"><b>Write the squares you stepped on.</b></div>
+  <div class="write rm-first"><span class="rm-hand">(−5) × (−6) &rarr; 10 × 5 &rarr;</span></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div>
+
+  <ol class="qs" start="1"><li><span class="qt">How many of the squares on your route had two minus signs in them?</span><div class="write"></div></li><li><span class="qt">Did you have to work out any of the answers to cross the grid? If not, what did you use instead?</span><div class="write"></div><div class="write"></div></li><li><span class="qt">The rule is the same for &times; and &divide;. Write one multiplication and one division that both give a negative answer, and say what they have in common.</span><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Then check it against the answer page</span>
+    <span class="brand">Kitchen Table</span>
+    <span>The Sign Maze</span>
+  </footer>
+</div>
+
+
+<div style="page-break-before:always"></div>
+
+
+<div class="page ">
+  <header>
+    
+    <h1>The Endings Are One System</h1>
+    <p class="sub">Spanish · Page 1 of 4</p>
+  </header>
+  <div class="nameline">
+    <span>Name</span>
+    <span class="short">Date</span>
+  </div>
+  <div class="directions">
+    <b>DIRECTIONS:</b> Chop <b>-ar</b> off each verb and add the six endings from the wheel. The top row is done.
+  </div>
+
+
+  <div class="wheel"><svg viewBox="0 0 500 248" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="one stem with six endings radiating from it"><line x1="250.0" y1="88.0" x2="250.0" y2="38.0" stroke="#16130F" stroke-width="1.8"/><rect x="196.0" y="21.0" width="108" height="34" rx="6" fill="#fff" stroke="#16130F" stroke-width="2"/><text x="250.0" y="37.0" font-size="13" font-weight="700" text-anchor="middle" fill="#16130F">hablo</text><text x="250.0" y="51.0" font-size="9.5" text-anchor="middle" fill="#6B635A">I</text><line x1="298.5" y1="106.0" x2="376.4" y2="81.0" stroke="#16130F" stroke-width="1.8"/><rect x="322.4" y="64.0" width="108" height="34" rx="6" fill="#fff" stroke="#16130F" stroke-width="2"/><text x="376.4" y="80.0" font-size="13" font-weight="700" text-anchor="middle" fill="#16130F">hablas</text><text x="376.4" y="94.0" font-size="9.5" text-anchor="middle" fill="#6B635A">you</text><line x1="298.5" y1="142.0" x2="376.4" y2="167.0" stroke="#16130F" stroke-width="1.8"/><rect x="322.4" y="150.0" width="108" height="34" rx="6" fill="#fff" stroke="#16130F" stroke-width="2"/><text x="376.4" y="166.0" font-size="13" font-weight="700" text-anchor="middle" fill="#16130F">habla</text><text x="376.4" y="180.0" font-size="9.5" text-anchor="middle" fill="#6B635A">he / she</text><line x1="250.0" y1="160.0" x2="250.0" y2="210.0" stroke="#16130F" stroke-width="1.8"/><rect x="196.0" y="193.0" width="108" height="34" rx="6" fill="#fff" stroke="#16130F" stroke-width="2"/><text x="250.0" y="209.0" font-size="13" font-weight="700" text-anchor="middle" fill="#16130F">hablamos</text><text x="250.0" y="223.0" font-size="9.5" text-anchor="middle" fill="#6B635A">we</text><line x1="201.5" y1="142.0" x2="123.6" y2="167.0" stroke="#16130F" stroke-width="1.8"/><rect x="69.6" y="150.0" width="108" height="34" rx="6" fill="#fff" stroke="#16130F" stroke-width="2"/><text x="123.6" y="166.0" font-size="13" font-weight="700" text-anchor="middle" fill="#16130F">habláis</text><text x="123.6" y="180.0" font-size="9.5" text-anchor="middle" fill="#6B635A">you all</text><line x1="201.5" y1="106.0" x2="123.6" y2="81.0" stroke="#16130F" stroke-width="1.8"/><rect x="69.6" y="64.0" width="108" height="34" rx="6" fill="#fff" stroke="#16130F" stroke-width="2"/><text x="123.6" y="80.0" font-size="13" font-weight="700" text-anchor="middle" fill="#16130F">hablan</text><text x="123.6" y="94.0" font-size="9.5" text-anchor="middle" fill="#6B635A">they</text><ellipse cx="250" cy="124" rx="56" ry="36" fill="#fff" stroke="#16130F" stroke-width="3"/><text x="250" y="130" font-size="17" font-weight="700" text-anchor="middle" fill="#16130F">habl-</text></svg></div>
+
+  <div class="fam">Verbs ending in <b>-ar</b> &mdash; by far the biggest family</div>
+  <table class="vt">
+    <tr><th class="v">verb</th><th>I</th><th>you</th><th>he / she</th><th>we</th><th>you all</th><th>they</th></tr>
+    <tr class="ref"><th class="v">habl<span style="color:var(--muted)">ar</span></th>
+      <td class="f">hablo</td><td class="f">hablas</td><td class="f">habla</td>
+      <td class="f">hablamos</td><td class="f">habláis</td><td class="f">hablan</td></tr>
+    <tr><th class="v">cant<span style="color:var(--muted)">ar</span></th>
+      <td class="blank"></td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><th class="v">trabaj<span style="color:var(--muted)">ar</span></th>
+      <td class="blank"></td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><th class="v">estudi<span style="color:var(--muted)">ar</span></th>
+      <td class="blank"></td><td></td><td></td><td></td><td></td><td></td></tr>
+  </table>
+  <div class="note" style="margin-top:2px"><b>Check down each column:</b> every &ldquo;we&rdquo; ends in <b>-amos</b>.</div>
+
+  <footer>
+    <span>Keep going on page 2 →</span>
+    <span class="brand">Kitchen Table</span>
+    <span>One system</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>The Endings Are One System — The Other Two Families</h1>
+    <p class="sub">Spanish · Page 2 of 4</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Three families: <b>-ar</b>, <b>-er</b>, <b>-ir</b>. Compare the reference rows, then fill in the chart below.
+  </div>
+
+
+  <table class="vt bigref">
+    <tr><th class="v">reference</th><th>I</th><th>you</th><th>he / she</th><th>we</th><th>you all</th><th>they</th></tr>
+    <tr class="ref"><th class="v">habl<span style="color:var(--muted)">ar</span></th>
+      <td class="f">hablo</td><td class="f">habl<u>a</u>s</td><td class="f">habl<u>a</u></td>
+      <td class="f">habl<u>a</u>mos</td><td class="f">habl<u>á</u>is</td><td class="f">habl<u>a</u>n</td></tr>
+    <tr class="ref"><th class="v">com<span style="color:var(--muted)">er</span></th>
+      <td class="f">como</td><td class="f">com<u>e</u>s</td><td class="f">com<u>e</u></td>
+      <td class="f">com<u>e</u>mos</td><td class="f">com<u>é</u>is</td><td class="f">com<u>e</u>n</td></tr>
+    <tr class="ref"><th class="v">viv<span style="color:var(--muted)">ir</span></th>
+      <td class="f">vivo</td><td class="f">viv<u>e</u>s</td><td class="f">viv<u>e</u></td>
+      <td class="f">viv<u>i</u>mos</td><td class="f">viv<u>í</u>s</td><td class="f">viv<u>e</u>n</td></tr>
+  </table>
+  <div class="note" style="margin-top:2px"><b>Notice:</b> <i>I</i> is always <b>-o</b>. <b>-er</b> and <b>-ir</b> differ only in <i>we</i> and <i>you all</i>. The underlined vowel comes from the verb&rsquo;s own ending.</div>
+  <div class="fam">Which family is each one in? Then fill it in.</div>
+  <table class="vt tall">
+    <tr><th class="v">verb</th><th>I</th><th>you</th><th>he / she</th><th>we</th><th>you all</th><th>they</th></tr>
+    <tr><th class="v">beb<span style="color:var(--muted)">er</span></th>
+      <td class="blank"></td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><th class="v">escrib<span style="color:var(--muted)">ir</span></th>
+      <td class="blank"></td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><th class="v">aprend<span style="color:var(--muted)">er</span></th>
+      <td class="blank"></td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><th class="v">abr<span style="color:var(--muted)">ir</span></th>
+      <td class="blank"></td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><th class="v">camin<span style="color:var(--muted)">ar</span></th>
+      <td class="blank"></td><td></td><td></td><td></td><td></td><td></td></tr>
+  </table>
+  <div class="note" style="margin-top:2px"><b>beber</b> to drink &middot; <b>escribir</b> to write &middot; <b>aprender</b> to learn &middot; <b>abrir</b> to open &middot; <b>caminar</b> to walk</div>
+
+  <footer>
+    <span>Keep going on page 3 →</span>
+    <span class="brand">Kitchen Table</span>
+    <span>One system</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>The Endings Are One System — Questions</h1>
+    <p class="sub">Spanish · Page 3 of 4</p>
+  </header>
+
+
+
+<ol class="qs" start="1"><li><span class="qt">Why does Spanish not need the word for <b>I</b> in front of a verb, when English does?</span><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">You see the word <b>cantamos</b> and have never met it. Say who is doing it and how you know, without knowing what the verb means.</span><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">English puts this information in a separate word and Spanish puts it in the ending. Which do you think is easier for a learner, and which is easier for a <b>reader</b>? They may not be the same answer.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">A wheel and a chart hold exactly the same information. Say what each one is <b>better at</b> — they are not better at the same thing.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Keep going on page 4 →</span>
+    <span class="brand">Kitchen Table</span>
+    <span>One system</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>The Endings Are One System — continued</h1>
+    <p class="sub">Spanish · Page 4 of 4</p>
+  </header>
+
+
+
+<ol class="qs" start="5"><li><span class="qt">Which column is the same in all three families, with no exceptions at all?</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt"><b>-er</b> and <b>-ir</b> verbs differ in only two of the six. Which two, and why might a language let two families collapse into one nearly everywhere?</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Score: ______ / 7</span>
+    <span class="brand">Kitchen Table</span>
+    <span>One system</span>
+  </footer>
+</div>
+
+</body></html>

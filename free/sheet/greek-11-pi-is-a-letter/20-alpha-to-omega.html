@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="sheet-kind" content="worksheet">
+<title>Alpha to Omega — Greek</title>
+<style>
+  :root { --font: Georgia, "Times New Roman", serif; }
+
+  /* Page margins live HERE only — body padding stays 0 for print so the two
+     don't stack and eat the sheet. */
+  @page { size: letter portrait; margin: 0.45in 0.5in; }
+
+  /*
+   * THE PALETTE. The same one the shop wears (kitchen-table/BRAND.md): warm
+   * near-black ink, one accent, pine kept back for the answer key.
+   *
+   * WHY A SHEET HAS COLOR AT ALL. Every sheet was pure grayscale — #000 rules,
+   * #333 subtitles, #f0f0f0 boxes — which is what you get by never deciding.
+   * The paper is the product and it looked like a fax. A printer set to
+   * grayscale, or one that has no color to give, renders all of this as the
+   * greys it already had, so nothing below costs a parent anything they were
+   * not already spending.
+   *
+   * WHAT STAYS BLACK, ON PURPOSE:
+   *   - anything drawn to be written on (rules, name lines, answer boxes)
+   *   - anything drawn to be traced or colored in (line art, letter guides)
+   *   - the confidence rings, which have to survive a mono laser
+   * Color marks the sheet's own furniture — its rule, its numbering, its
+   * boxes — and never the part a child puts a pencil through.
+   */
+  :root {
+    --ink:    #16130F;
+    --muted:  #6B635A;
+    --rule:   #CFC3B2;
+    --guide:  #BCAE9C;
+    --accent: #C0511D;
+    --tint:   #F7EDE4;
+    --slate:  #2E5A78;
+    --tintslate: #E9EFF4;
+    --deep:   #2C4A45;
+    --tintdeep: #ECF1EF;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font);
+    color: #000; background: #fff;
+    font-size: 12pt; line-height: 1.3;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+
+  /* ORDER MATTERS. This generic rule must come BEFORE the @media screen block:
+     same specificity, so whichever is declared last wins. With it after, the
+     on-screen preview stretches to the viewport instead of 8.5in — print is
+     unaffected, but the proof you check before printing is wrong. */
+  .page { width: 100%; }
+  .page + .page { page-break-before: always; }
+
+  @media screen {
+    body { padding: 0.5in; background: #ddd; }
+    .page {
+      background: #fff; padding: 0.45in 0.5in;
+      width: 8.5in; min-height: 11in;
+      margin: 0 auto 24px; box-shadow: 0 2px 10px rgba(0,0,0,.3);
+    }
+  }
+
+  /* ------------------------------------------------------------- header */
+  header { border-bottom: 3px double var(--accent); padding-bottom: 6px; }
+  header.cont { border-bottom: 1px solid var(--rule); }
+  h1 { font-size: 16pt; margin: 0 0 1px; letter-spacing: .01em; }
+  .sub { font-size: 10pt; font-style: italic; color: var(--muted); margin: 0; }
+
+  .nameline { display: flex; gap: 26px; font-size: 10.5pt; margin: 11px 0 12px; }
+  .nameline span { flex: 1; border-bottom: 1px solid var(--ink); padding-bottom: 1px; }
+  .nameline span.short { flex: 0 0 1.9in; }
+
+  .directions {
+    font-size: 10.5pt; line-height: 1.35;
+    background: var(--tint); border-left: 4px solid var(--accent);
+    padding: 7px 10px; margin: 12px 0 14px;
+  }
+  .directions b { letter-spacing: .03em; }
+  .tip { font-style: italic; margin-top: 3px; }
+
+  /* ------------------------------------------------- problems and grids */
+  .grid { display: grid; gap: 13px 16px; margin-top: 4px; }
+  .prob { page-break-inside: avoid; display: flex; gap: 5px; align-items: flex-start; }
+  .pn { font-weight: bold; font-size: 11pt; min-width: .28in; flex: 0 0 auto; color: var(--accent); }
+  .pbody { flex: 1; min-width: 0; }
+
+  /* Digits need lining figures and even widths whatever the body font is. */
+  .num, .vert, .horiz { font-family: "Trebuchet MS", "Segoe UI", Tahoma, Verdana, sans-serif; font-variant-numeric: lining-nums tabular-nums; }
+
+  /* A stacked column algorithm.
+     Two grid columns — operator, then digits — because a floated or absolutely
+     positioned operator overlaps the digits as soon as the numbers get wide,
+     and "324" with a + sitting on the 3 is unreadable. The grid also lets the
+     rule under the last operand span BOTH columns, which is how it is written
+     by hand. The rule is heavy: it is the line you write the answer beneath. */
+  .vert {
+    display: inline-grid; grid-template-columns: auto auto;
+    font-size: 15pt; line-height: 1.3; text-align: right;
+  }
+  .vert > span { padding: 0 0 1px 0; }
+  .vert .op { text-align: left; padding-right: .16in; }
+  .vert .last { border-bottom: 2.5px solid var(--ink); padding-bottom: 3px; }
+  .vert .ans { height: .4in; }
+  /* Partial-products working, for 2-digit x 1-digit before the short method. */
+  .vert .part { font-size: 11pt; color: var(--muted); }
+  /* A row of worked examples that fade — see lib/formats.js faded(). The
+     caption is what makes the fade legible: without it the third one looks like
+     a question somebody forgot to number. */
+  .egrow { display: flex; gap: .34in; align-items: flex-start; margin: 0 0 4px; }
+  .eg { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; }
+  .eglab { font-size: 8.5pt; color: var(--slate); letter-spacing: .02em; }
+
+  /* The carried digits. Small and grey so the sum still reads as the sum, and
+     tight to the row below it so a carry sits ON the column it goes into. */
+  .vert .carry { font-size: 9pt; color: var(--slate); line-height: 1; padding: 0 0 1px 0; }
+
+  .horiz { font-size: 14pt; white-space: nowrap; }
+
+  /* Row numbers in a word list. Gray and small: they are there so a list can be
+     dictated ("number seven") and marked without counting down the page, and
+     they must not compete with the word itself. */
+  .wn { color: var(--muted); font-size: 9pt; }
+
+  /* The box an answer goes in. inline-block so it can sit mid-sentence. */
+  .abox {
+    display: inline-block; border: 1.6px solid var(--slate); border-radius: 3px;
+    vertical-align: middle; margin: 0 3px; position: relative; background: #fff;
+  }
+  /* Scoped to the box: as a bare ".alab" it pinned any generator's own .alab
+     to the bottom of the page (life-07-signs-and-forms 40, 2026-09-24). */
+  .abox > .alab {
+    position: absolute; bottom: 1px; left: 0; right: 0;
+    text-align: center; font-size: 7pt; color: var(--muted); font-style: italic;
+  }
+
+  /* Confidence marks. The rings are drawn with a border and a gradient rather
+     than an SVG so they stay inline with the question text at any font size,
+     and print black on a mono laser without relying on a background image. */
+  .conf { float: right; margin: 2px 0 0 8px; white-space: nowrap; }
+  .cring {
+    display: inline-block; width: 11px; height: 11px; margin-left: 4px;
+    border: 1.4px solid var(--slate); border-radius: 50%; vertical-align: middle;
+  }
+  .cring-full { background: var(--accent); }
+  .cring-half { background: linear-gradient(90deg, var(--accent) 50%, #fff 50%); }
+  .cring-none { background: #fff; }
+  ol.qs.hasconf li { overflow: hidden; }
+
+  .conflegend {
+    border: 1.2px solid var(--rule); border-radius: 4px;
+    padding: 3px 8px; margin: 0 0 7px;
+    font-size: 8.5pt; color: var(--muted); display: flex; gap: 14px; align-items: center;
+  }
+  .conftitle { font-weight: 700; color: var(--ink); }
+  .confitem { white-space: nowrap; }
+
+  .work {
+    border: 1.4px dashed var(--rule); border-radius: 4px;
+    margin: 6px 0 2px; position: relative;
+  }
+  /* The label S.work() puts in the box: a DIRECT child only. As ".work span"
+     it also caught every span inside any generator's own .work content and
+     stacked them all at the top-left corner (math-11-grade6 47, 2026-09-23). */
+  .work > span {
+    position: absolute; top: 3px; left: 6px;
+    font-size: 8pt; color: var(--muted); font-style: italic;
+  }
+
+  /* ------------------------------------------------------ writing lines */
+  /* Primary rule: solid top, dashed midline, heavy baseline. Capitals reach
+     the top line, lowercase bodies sit under the dashed one. */
+  .write {
+    position: relative; height: 0.375in;
+    margin: 6px 0 0 .3in;
+    border-top: 1px solid var(--rule); border-bottom: 2px solid var(--ink);
+  }
+  .write.flush { margin-left: 0; }
+  .write + .write { margin-top: .17in; }
+  .write::after {
+    content: ""; position: absolute; left: 0; right: 0; top: 50%;
+    border-top: 1px dashed var(--guide);
+  }
+
+  /* ------------------------------------------------------- question list */
+  ol.qs { margin: 0; padding: 0 0 0 .34in; }
+  ol.qs li { margin-bottom: 13px; page-break-inside: avoid; }
+  ol.qs li::marker { font-weight: bold; font-size: 11pt; color: var(--accent); }
+  .qt { display: block; }
+
+  .mcq { display: grid; gap: 3px 14px; margin: 5px 0 2px .12in; font-size: 11pt; }
+  .opt { white-space: nowrap; }
+
+  /* -------------------------------------------------------------- tables */
+  .tbl { border-collapse: collapse; margin: 8px 0; font-size: 11pt; width: 100%; }
+  .tbl th, .tbl td { border: 1.4px solid var(--ink); padding: 5px 8px; text-align: left; }
+  .tbl th { color: var(--slate); }
+  .tbl th { background: var(--tint); font-size: 10pt; letter-spacing: .02em; }
+  .tbl td.blank { height: .34in; }
+  .tbl.narrow { width: auto; }
+  .tbl.center td, .tbl.center th { text-align: center; }
+
+  /* ------------------------------------------------------------ passages */
+  .passage {
+    border: 1.5px solid var(--slate); border-radius: 4px;
+    padding: 11px 14px; margin-bottom: 12px;
+    font-size: 11.5pt; line-height: 1.55;
+  }
+  .passage h2 { font-size: 13pt; margin: 0 0 6px; color: var(--deep); }
+  .passage p { margin: 0 0 8px; }
+  .passage p:last-child { margin-bottom: 0; }
+  .passage .byline { font-size: 9.5pt; font-style: italic; color: var(--muted); margin-bottom: 8px; }
+  /* Numbered paragraphs, so a question can say "in paragraph 2". */
+  .passage p.np { position: relative; padding-left: .3in; }
+  .passage p.np::before {
+    content: attr(data-p); position: absolute; left: 0; top: 0;
+    font-size: 9pt; color: var(--accent); font-weight: bold;
+  }
+
+  .wordbank {
+    border: 1.5px dashed var(--slate); border-radius: 4px;
+    padding: 8px 12px; margin: 10px 0 12px;
+    font-size: 11.5pt; text-align: center;
+  }
+  .wordbank b { display: block; font-size: 9.5pt; letter-spacing: .06em;
+    text-transform: uppercase; margin-bottom: 4px; color: var(--accent); }
+  .wordbank span { display: inline-block; margin: 2px 11px; }
+
+  .note {
+    border-left: 4px solid var(--deep); background: var(--tintdeep);
+    padding: 7px 11px; margin: 10px 0; font-size: 10.5pt;
+  }
+  .note b { letter-spacing: .02em; }
+
+  /* -------------------------------------------------------------- footer */
+  /* THE WORDMARK SITS IN THE FOOTER THAT WAS ALREADY THERE, so it costs no
+     height at all — a sheet that fitted before fits now. Upright where the rest
+     of the line is italic, and a size down: it is a signature, not a message,
+     and it must never compete with "Score: ___ / 10". */
+  .brand { font-style: normal; font-size: 7.5pt; letter-spacing: .04em;
+    color: var(--accent); align-self: center; }
+
+  footer {
+    margin-top: 14px; padding-top: 6px; border-top: 1px solid var(--rule);
+    font-size: 9pt; font-style: italic; color: var(--muted);
+    display: flex; justify-content: space-between;
+  }
+
+  /* ---------------------------------------------------------- answer key */
+  .keybadge {
+    display: inline-block; border: 2px solid var(--deep); color: var(--deep); padding: 2px 9px;
+    font-size: 9.5pt; font-weight: bold; letter-spacing: .08em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .key .why {
+    display: block; font-size: 9pt; font-style: italic; color: var(--muted); margin-top: 1px;
+  }
+  /* Highlight rather than underline: <u> in a key marks WHAT CHANGED, and an
+     underline under a comma is invisible. */
+  .key u { text-decoration: none; background: var(--tint); padding: 0 2px; font-weight: bold; }
+  .keygrid .pbody { font-family: "Trebuchet MS", "Segoe UI", Tahoma, Verdana, sans-serif; font-size: 12pt; }
+  /* A key's pictures scale to their column: at 1fr a wide drawing pushed a
+     three-column key 92px off the paper (art-04-drawing 10, 2026-09-24). */
+  .keygrid svg { max-width: 100%; height: auto; }
+  .keylist .qt { font-weight: normal; }
+
+  /*
+   * The guide page. Four lines per question, and the ASK line is the one that
+   * gets used at the table, so it is the one with a rule beside it — a parent
+   * scanning this page in ten seconds should land on the follow-up question
+   * and nothing else.
+   */
+  .guide { padding-left: .3in; }
+  .guide li { margin-bottom: 11px; page-break-inside: avoid; }
+  .guide .gq { font-weight: bold; font-size: 11pt; margin-bottom: 3px; }
+  /* 9pt, matching the key's own why line, because the guide page is the
+     binding constraint on every open sheet: four lines per question against a
+     key's one, and at 10pt a sheet with seven questions ran onto a second
+     side. Found by measuring, not chosen. (No backticks in here — this CSS
+     lives inside a template literal and one would close it.) */
+  .guide .glook, .guide .gthin, .guide .gstrong {
+    font-size: 9pt; line-height: 1.3; margin-top: 1px;
+  }
+  .guide .gthin { color: var(--muted); }
+  .guide .gstrong { color: var(--muted); font-style: italic; }
+  .guide .gask {
+    font-size: 9.5pt; line-height: 1.3; margin-top: 3px;
+    border-left: 3px solid var(--slate); padding-left: 7px;
+  }
+  .key .qs li { margin-bottom: 9px; }
+
+  /*
+   * INLINE-BLOCK, NOT BLOCK, AND THIS WAS WRONG FOR A LONG TIME. A block-level
+   * svg ignores text-align: center on its parent and sits flush left — so 117
+   * sheets across 35 packs said "centre this diagram" and got a left-aligned
+   * one. Twenty-five of them were origami and paper-plane fold sequences, where
+   * the whole page is diagrams.
+   *
+   * Nobody spotted it because a left-flush diagram looks deliberate; it only
+   * reads as wrong next to a centered one, and no sheet has both.
+   *
+   * inline-block makes text-align do what every one of those authors meant,
+   * and leaves a diagram in a left-aligned container exactly where it was.
+   * vertical-align: top kills the baseline gap that inline elements otherwise
+   * leave underneath them, which would have pushed long pages over.
+   */
+  svg { display: inline-block; vertical-align: top; }
+  svg.inline { vertical-align: middle; }
+
+  .big { border: 3.2px solid var(--ink); border-radius: 12px; padding: 14px; margin: 12px 0;
+    text-align: center; }
+  .big .lab { font-size: 9.5pt; color: var(--muted); letter-spacing: .05em;
+    text-transform: uppercase; margin-top: 4px; }
+  .metrow { display: grid; grid-template-columns: .3in .7in .75in .6in 1fr; gap: 10px; align-items: center;
+    border: 2px solid var(--ink); border-radius: 9px; padding: 7px 10px; margin: 7px 0; }
+  .metrow.head { border: none; padding: 0 10px; font-size: 9pt; color: var(--muted); margin-bottom: 2px; }
+  .metrow .num { font-size: 9.5pt; color: var(--muted); }
+  .metrow .nm { font-size: 12.5pt; }
+  .metrow .sd { font-size: 12.5pt; font-style: italic; }
+  .metrow .bx, .rootrow .bx { display: block; border-bottom: 1.7px solid var(--ink); height: .28in; }
+  .bank { border: 1.8px dashed var(--rule); border-radius: 8px; padding: 8px 11px; margin: 9px 0;
+    font-size: 10pt; line-height: 1.8; }
+  .chart { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 9px 0; }
+  .chart .cell { border: 2px solid var(--rule); border-radius: 8px; padding: 5px 3px; text-align: center; }
+  .chart .cell .n { display: block; font-size: 9pt; margin-top: 2px; }
+  .chart .cell .s { display: block; font-size: 8.5pt; color: var(--muted); }
+  .three { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 10px 0; }
+  .three .col { border: 2.3px solid var(--ink); border-radius: 10px; padding: 10px 10px; }
+  .three .col h4 { margin: 0 0 2px; font-size: 12pt; }
+  .three .col .hint { display: block; font-size: 10pt; color: var(--muted); margin-bottom: 6px; }
+  .pair { display: inline-block; text-align: center; margin: 6px 9px 6px 0; }
+  .pair .to { font-size: 14pt; color: var(--muted); display: block; }
+  .rootrow { display: grid; grid-template-columns: .24in 1.5in 1fr 1fr .9in; gap: 9px; align-items: center;
+    border: 2.1px solid var(--ink); border-radius: 9px; padding: 5px 10px; margin: 6px 0; }
+  .rootrow.head { border: none; padding: 0 10px; font-size: 9pt; color: var(--muted); }
+  .rootrow .num { font-size: 9.5pt; color: var(--muted); }
+  .rootrow .mn { font-size: 10.5pt; }
+  .runrow { border: 2.1px solid var(--ink); border-radius: 9px; padding: 8px 11px; margin: 8px 0; }
+  .runrow .cut { font-size: 9pt; color: var(--muted); margin-top: 4px; }
+  .runrow .bx { border-bottom: 1.7px solid var(--ink); display: inline-block; width: 1.7in; height: .26in; }
+  .vrow { display: grid; grid-template-columns: .75in 1fr 1fr; gap: 10px; align-items: center;
+    border: 2px solid var(--ink); border-radius: 9px; padding: 9px 12px; margin: 8px 0; font-size: 12pt; }
+  .vrow.head { border: none; padding: 0 11px; font-size: 9pt; color: var(--muted); }
+  .note { margin: 9px 0; }
+  ol.qs li { margin-bottom: 8px; }
+
+</style>
+</head>
+<body>
+
+<div class="page ">
+  <header>
+    
+    <h1>Alpha to Omega</h1>
+    <p class="sub">Greek &middot; Page 1 of 3</p>
+  </header>
+  <div class="nameline">
+    <span>Name</span>
+    <span class="short">Date</span>
+  </div>
+  <div class="directions">
+    <b>DIRECTIONS:</b> All twenty-four, capital then small. Keep this page: the whole pack reads off it.
+  </div>
+
+
+  <div class="chart">
+    <div class="cell"><svg viewBox="-4 6 71.9 112" width="19" height="30" role="img" aria-label="Α"><path d="M63.8 88L54.5 88L45.9 65.9L17.6 65.9L9.1 88L0 88L27.9 16.3L36 16.3L63.8 88M43.2 57.9L35.2 36.3Q34.9 35.5 34.2 33.4Q33.5 31.3 32.9 29.1Q32.2 26.8 31.8 25.6L31.8 25.6Q31.1 28.7 30.2 31.7Q29.3 34.6 28.7 36.3L28.7 36.3L20.6 57.9L43.2 57.9" fill="#16130F"/></svg><svg viewBox="-4 6 69.5 112" width="19" height="30" role="img" aria-label="α"><path d="M27.5 89L27.5 89Q17.7 89 11.6 82.1Q5.5 75.1 5.5 61.4L5.5 61.4Q5.5 47.8 11.5 40.6Q17.5 33.4 28.3 33.4L28.3 33.4Q34.2 33.4 38.2 35.4Q42.1 37.5 44.7 41.6L44.7 41.6L45.3 41.6Q45.8 39.9 46.6 37.9Q47.4 35.9 48.5 34.4L48.5 34.4L55.4 34.4Q54.7 36.6 54.1 40.2Q53.5 43.8 53.2 47.8Q52.9 51.8 52.9 55.4L52.9 55.4L52.9 76.2Q52.9 79.3 54.1 80.6Q55.3 81.8 57 81.8L57 81.8Q57.8 81.8 58.7 81.6Q59.6 81.4 60 81.3L60 81.3L60 87.7Q59.3 88.1 57.7 88.6Q56.1 89 54.4 89L54.4 89Q50.7 89 48.4 87.2Q46 85.4 44.9 80.8L44.9 80.8L44.2 80.8Q41.9 84.2 38.1 86.6Q34.3 89 27.5 89M29 81.7L29 81.7Q37.3 81.7 40.8 77Q44.2 72.2 44.2 61.9L44.2 61.9L44.2 61.3Q44.2 51.3 41 46.1Q37.7 40.8 28.9 40.8L28.9 40.8Q21.6 40.8 18.1 46.1Q14.6 51.4 14.6 61.5L14.6 61.5Q14.6 71.5 18.1 76.6Q21.5 81.7 29 81.7" fill="#16130F"/></svg>
+      <span class="n"><b>1.</b> alpha</span><span class="s">says a</span></div>
+    <div class="cell"><svg viewBox="-4 6 73 112" width="20" height="30" role="img" aria-label="Β"><path d="M9.7 16.6L30.1 16.6Q43.5 16.6 50.4 20.5Q57.2 24.5 57.2 34.3L57.2 34.3Q57.2 40.6 53.7 44.8Q50.2 48.9 43.6 50.1L43.6 50.1L43.6 50.6Q48.1 51.3 51.8 53.2Q55.4 55.1 57.5 58.6Q59.6 62.1 59.6 67.7L59.6 67.7Q59.6 77.4 53 82.7Q46.3 88 34.8 88L34.8 88L9.7 88L9.7 16.6M18.7 47L31.9 47Q41.1 47 44.5 44.1Q47.9 41.1 47.9 35.3L47.9 35.3Q47.9 29.4 43.8 26.8Q39.6 24.3 30.5 24.3L30.5 24.3L18.7 24.3L18.7 47M32.4 54.5L18.7 54.5L18.7 80.4L33.1 80.4Q42.6 80.4 46.3 76.7Q50 73 50 67L50 67Q50 61.4 46.2 58Q42.3 54.5 32.4 54.5L32.4 54.5" fill="#16130F"/></svg><svg viewBox="-4 6 71.1 112" width="19" height="30" role="img" aria-label="β"><path d="M32.4 11.5L32.4 11.5Q39.1 11.5 44.3 13.6Q49.5 15.8 52.5 20Q55.4 24.2 55.4 30.6L55.4 30.6Q55.4 37.8 51.5 42Q47.6 46.2 40.2 47.4L40.2 47.4L40.2 47.8Q49.3 48.8 54 53.7Q58.6 58.6 58.6 67.7L58.6 67.7Q58.6 78 52.2 83.5Q45.7 89 34.2 89L34.2 89Q28.4 89 24.5 88.1Q20.5 87.2 17.3 85.6L17.3 85.6L17.3 112L8.5 112L8.5 34.5Q8.5 26.4 11.6 21.3Q14.7 16.3 20.1 13.9Q25.5 11.5 32.4 11.5M32.2 18.8L32.2 18.8Q28.2 18.8 24.8 20.2Q21.4 21.6 19.4 25.1Q17.3 28.6 17.3 34.9L17.3 34.9L17.3 77.7Q20.8 79.5 24.6 80.7Q28.3 81.8 33.4 81.8L33.4 81.8Q42 81.8 45.9 78Q49.8 74.1 49.8 67.1L49.8 67.1Q49.8 59.2 45 55.6Q40.2 51.9 32.4 51.9L32.4 51.9L27.1 51.9L27.1 44.5L31.4 44.5Q39.2 44.5 42.8 40.8Q46.4 37.1 46.4 31L46.4 31Q46.4 24.8 42.6 21.8Q38.7 18.8 32.2 18.8" fill="#16130F"/></svg>
+      <span class="n"><b>2.</b> beta</span><span class="s">says b</span></div>
+    <div class="cell"><svg viewBox="-4 6 60.4 112" width="16" height="30" role="img" aria-label="Γ"><path d="M9.7 16.6L50 16.6L50 24.6L18.7 24.6L18.7 88L9.7 88L9.7 16.6" fill="#16130F"/></svg><svg viewBox="-4 6 59.8 112" width="16" height="30" role="img" aria-label="γ"><path d="M51.3 34.4L31.5 86.7Q30 90.7 28.9 95.3Q27.8 99.9 27.2 104.3Q26.6 108.6 26.6 112L26.6 112L17.1 112Q17.1 109.2 17.8 105Q18.4 100.8 19.6 96.2Q20.7 91.5 22.2 87.4L22.2 87.4L0.5 34.4L9.6 34.4L20.9 62.5Q22 65.1 23.1 68.3Q24.2 71.5 25.1 74.4Q26 77.3 26.3 79.1L26.3 79.1L26.7 79.1Q27 77.5 27.9 74.5Q28.7 71.5 29.8 68.3Q30.8 65.1 31.6 62.9L31.6 62.9L42.2 34.4L51.3 34.4" fill="#16130F"/></svg>
+      <span class="n"><b>3.</b> gamma</span><span class="s">says g</span></div>
+    <div class="cell"><svg viewBox="-4 6 66.1 112" width="18" height="30" role="img" aria-label="Δ"><path d="M24.5 16.6L33.5 16.6L56.1 82.6L56.1 88L2 88L2 82.5L24.5 16.6M46.2 80.1L33.7 42.9Q32.2 38.4 31 34.2Q29.7 30 28.9 26.4L28.9 26.4Q28 30 26.9 34.2Q25.7 38.3 24.3 42.5L24.3 42.5L11.6 80.1L46.2 80.1" fill="#16130F"/></svg><svg viewBox="-4 6 68.4 112" width="18" height="30" role="img" aria-label="δ"><path d="M31.9 12L31.9 12Q38.8 12 43.7 13.7Q48.6 15.4 52.5 17.4L52.5 17.4L48.7 24.3Q45 22.2 40.8 20.7Q36.6 19.2 31.5 19.2L31.5 19.2Q27 19.2 24.9 21.3Q22.8 23.3 22.8 26.1L22.8 26.1Q22.8 28.5 24.1 30.4Q25.4 32.3 28.4 34.3Q31.3 36.4 36.2 39.1L36.2 39.1Q45.3 44 50.2 49.9Q55 55.7 55 64.4L55 64.4Q55 76.4 48.2 82.7Q41.3 89 30 89L30 89Q22.9 89 17.3 86.4Q11.7 83.8 8.6 78.8Q5.4 73.7 5.4 66.6L5.4 66.6Q5.4 60.2 8.2 55.4Q10.9 50.6 15.7 47.3Q20.4 44.1 26.3 42.4L26.3 42.4Q20.7 39.2 17.3 35.3Q13.9 31.5 13.9 26L13.9 26Q13.9 19.1 19.1 15.5Q24.2 12 31.9 12M33.3 46.2L33.3 46.2Q30.2 46.9 27 48.3Q23.7 49.8 20.9 52.2Q18.1 54.5 16.4 58.1Q14.6 61.6 14.6 66.7L14.6 66.7Q14.6 73.3 18.7 77.5Q22.7 81.7 30 81.7L30 81.7Q37.7 81.7 41.8 77.3Q45.9 72.8 45.9 64.5L45.9 64.5Q45.9 57.7 42.6 53.5Q39.2 49.3 33.3 46.2" fill="#16130F"/></svg>
+      <span class="n"><b>4.</b> delta</span><span class="s">says d</span></div>
+    <div class="cell"><svg viewBox="-4 6 63.6 112" width="17" height="30" role="img" aria-label="Ε"><path d="M49.6 80.1L49.6 88L9.7 88L9.7 16.6L49.6 16.6L49.6 24.5L18.7 24.5L18.7 46.8L47.8 46.8L47.8 54.6L18.7 54.6L18.7 80.1L49.6 80.1" fill="#16130F"/></svg><svg viewBox="-4 6 56.3 112" width="15" height="30" role="img" aria-label="ε"><path d="M29.9 56.5L35.5 56.5L35.5 63.7L28.2 63.7Q13.1 63.7 13.1 72.9L13.1 72.9Q13.1 77.8 17.2 79.8Q21.3 81.8 27.3 81.8L27.3 81.8Q32.9 81.8 37.2 80.5Q41.4 79.2 44.7 77.6L44.7 77.6L44.7 85.3Q41.6 86.9 37.3 88Q33 89 26.8 89L26.8 89Q15.3 89 9.8 84.6Q4.3 80.1 4.3 73.4L4.3 73.4Q4.3 69.4 6 66.9Q7.6 64.3 10.3 62.8Q13 61.2 16.2 60.3L16.2 60.3L16.2 59.8Q11.7 58.4 9 55.5Q6.2 52.5 6.2 47.6L6.2 47.6Q6.2 40.8 12 37.1Q17.7 33.4 26.8 33.4L26.8 33.4Q32.6 33.4 36.8 34.4Q40.9 35.4 44.9 37.2L44.9 37.2L41.6 44.2Q38.3 42.7 34.9 41.7Q31.4 40.7 26.7 40.7L26.7 40.7Q14.6 40.7 14.6 48.3L14.6 48.3Q14.6 52.7 18.8 54.6Q22.9 56.5 29.9 56.5L29.9 56.5" fill="#16130F"/></svg>
+      <span class="n"><b>5.</b> epsilon</span><span class="s">says e</span></div>
+    <div class="cell"><svg viewBox="-4 6 65.2 112" width="17" height="30" role="img" aria-label="Ζ"><path d="M53.3 80L53.3 88L3.8 88L3.8 81.2L41.4 24.6L5 24.6L5 16.6L52.3 16.6L52.3 23.4L14.7 80L53.3 80" fill="#16130F"/></svg><svg viewBox="-4 6 56.4 112" width="15" height="30" role="img" aria-label="ζ"><path d="M45.7 92L45.7 92Q45.7 96.4 43.8 100.4Q41.8 104.3 39.4 107.5L39.4 107.5L30.7 107.5Q33.1 104.3 35 100.7Q36.9 97 36.9 94.3L36.9 94.3Q36.9 92.9 36.1 91.7Q35.3 90.5 32.8 89.5Q30.2 88.4 24.8 87.5L24.8 87.5Q15.3 85.8 10.4 80.7Q5.5 75.5 5.5 65.6L5.5 65.6Q5.5 58.1 7.9 51.9Q10.3 45.6 14.5 40.1Q18.6 34.6 24 29.4Q29.4 24.2 35.3 18.9L35.3 18.9Q34.9 18.9 32.7 19Q30.4 19.1 27.2 19.2Q23.9 19.3 20.5 19.3L20.5 19.3L8.5 19.3L8.5 12L45.7 12L45.7 18.6Q35.4 27.3 29.2 34.2Q22.9 41 19.8 46.5Q16.7 52 15.7 56.5Q14.6 61 14.6 65L14.6 65Q14.6 70.7 16.6 73.7Q18.6 76.6 22.4 78.1Q26.2 79.5 31.6 80.6L31.6 80.6Q39.3 82.2 42.5 85Q45.7 87.7 45.7 92" fill="#16130F"/></svg>
+      <span class="n"><b>6.</b> zeta</span><span class="s">says z</span></div>
+    <div class="cell"><svg viewBox="-4 6 82.1 112" width="22" height="30" role="img" aria-label="Η"><path d="M64.3 16.6L64.3 88L55.3 88L55.3 54.7L18.7 54.7L18.7 88L9.7 88L9.7 16.6L18.7 16.6L18.7 46.8L55.3 46.8L55.3 16.6L64.3 16.6" fill="#16130F"/></svg><svg viewBox="-4 6 69.8 112" width="19" height="30" role="img" aria-label="η"><path d="M34.3 33.4L34.3 33.4Q43.9 33.4 48.8 38.1Q53.7 42.7 53.7 53.1L53.7 53.1L53.7 112L45 112L45 53.7Q45 47.3 42.1 44.1Q39.2 40.8 33 40.8L33 40.8Q24.2 40.8 20.8 45.8Q17.3 50.8 17.3 60.2L17.3 60.2L17.3 88L8.5 88L8.5 34.4L15.6 34.4L16.9 41.7L17.4 41.7Q20 37.5 24.6 35.4Q29.2 33.4 34.3 33.4" fill="#16130F"/></svg>
+      <span class="n"><b>7.</b> eta</span><span class="s">says e</span></div>
+    <div class="cell"><svg viewBox="-4 6 86.1 112" width="23" height="30" role="img" aria-label="Θ"><path d="M72 52.2L72 52.2Q72 63.3 68.3 71.6Q64.5 79.8 57.2 84.4Q49.9 89 39.1 89L39.1 89Q28 89 20.7 84.4Q13.3 79.8 9.7 71.5Q6.1 63.2 6.1 52.1L6.1 52.1Q6.1 41.1 9.7 32.9Q13.3 24.7 20.7 20.1Q28 15.5 39.2 15.5L39.2 15.5Q49.9 15.5 57.2 20Q64.5 24.6 68.3 32.8Q72 41.1 72 52.2M15.6 52.2L15.6 52.2Q15.6 65.7 21.3 73.5Q27 81.2 39.1 81.2L39.1 81.2Q51.3 81.2 56.9 73.5Q62.5 65.7 62.5 52.2L62.5 52.2Q62.5 38.7 56.9 31.1Q51.3 23.4 39.2 23.4L39.2 23.4Q27.1 23.4 21.4 31.1Q15.6 38.7 15.6 52.2M23.9 47.8L54.1 47.8L54.1 55.6L23.9 55.6L23.9 47.8" fill="#16130F"/></svg><svg viewBox="-4 6 67.5 112" width="18" height="30" role="img" aria-label="θ"><path d="M54 50.3L54 50.3Q54 62.4 51.6 71.1Q49.1 79.7 43.8 84.4Q38.4 89 29.6 89L29.6 89Q17.2 89 11.4 78.7Q5.5 68.4 5.5 50.3L5.5 50.3Q5.5 38.1 7.9 29.4Q10.3 20.7 15.7 16.1Q21 11.5 29.6 11.5L29.6 11.5Q42.1 11.5 48.1 21.6Q54 31.8 54 50.3M29.6 18.7L29.6 18.7Q22 18.7 18.5 25.4Q14.9 32.2 14.4 45.6L14.4 45.6L45 45.6Q44.5 32.2 40.9 25.4Q37.3 18.7 29.6 18.7M29.6 81.8L29.6 81.8Q37.4 81.8 41.1 74.6Q44.8 67.4 45.1 52.9L45.1 52.9L14.4 52.9Q14.6 67.2 18.2 74.5Q21.7 81.8 29.6 81.8" fill="#16130F"/></svg>
+      <span class="n"><b>8.</b> theta</span><span class="s">says th</span></div>
+    <div class="cell"><svg viewBox="-4 6 41.9 112" width="11" height="30" role="img" aria-label="Ι"><path d="M29.8 82.8L29.8 88L4 88L4 82.8L12.4 80.9L12.4 23.8L4 21.8L4 16.6L29.8 16.6L29.8 21.8L21.4 23.8L21.4 80.9L29.8 82.8" fill="#16130F"/></svg><svg viewBox="-4 6 42.6 112" width="11" height="30" role="img" aria-label="ι"><path d="M16.9 34.4L16.9 72.2Q16.9 77 18.8 79.4Q20.6 81.8 24.6 81.8L24.6 81.8Q26.8 81.8 29.2 81.5Q31.5 81.1 32.8 80.7L32.8 80.7L32.8 87.4Q31.4 88.1 28.7 88.6Q26 89 23.4 89L23.4 89Q19 89 15.6 87.6Q12.1 86.1 10.2 82.5Q8.2 78.8 8.2 72.3L8.2 72.3L8.2 34.4L16.9 34.4" fill="#16130F"/></svg>
+      <span class="n"><b>9.</b> iota</span><span class="s">says i</span></div>
+    <div class="cell"><svg viewBox="-4 6 69.9 112" width="19" height="30" role="img" aria-label="Κ"><path d="M32.5 47.7L61.9 88L51.3 88L26 53.9L18.7 60.3L18.7 88L9.7 88L9.7 16.6L18.7 16.6L18.7 51.8Q21.7 48.4 24.8 45Q27.9 41.6 31 38.2L31 38.2L50.3 16.6L60.8 16.6L32.5 47.7" fill="#16130F"/></svg><svg viewBox="-4 6 61.4 112" width="16" height="30" role="img" aria-label="κ"><path d="M40.3 34.4L50.9 34.4L30.6 58.1L52.5 88L42 88L24.4 63.8L17.8 69.2L17.8 88L8.5 88L8.5 34.4L17.8 34.4L17.8 48.3Q17.8 52.3 17.6 56.1Q17.4 59.9 17.2 61.9L17.2 61.9L17.4 61.9Q18.3 60.6 19.4 59.3Q20.4 57.9 21.3 56.8L21.3 56.8L40.3 34.4" fill="#16130F"/></svg>
+      <span class="n"><b>10.</b> kappa</span><span class="s">says k</span></div>
+    <div class="cell"><svg viewBox="-4 6 68.8 112" width="18" height="30" role="img" aria-label="Λ"><path d="M25.6 16.6L35 16.6L60.7 88L51.2 88L35.4 43Q33.8 38.3 32.5 34.2Q31.1 30 30.2 26.4L30.2 26.4Q29.5 30 28.2 34.2Q26.8 38.4 25.2 42.9L25.2 42.9L9.5 88L0 88L25.6 16.6" fill="#16130F"/></svg><svg viewBox="-4 6 62.2 112" width="17" height="30" role="img" aria-label="λ"><path d="M8.5 88L-0.6 88L22.5 35.4L19.8 27.9Q18.2 23.6 16.3 21.1Q14.4 18.7 10.1 18.7L10.1 18.7Q8.3 18.7 7 18.9Q5.6 19.1 4.5 19.3L4.5 19.3L4.5 12.2Q5.9 11.9 7.6 11.6Q9.3 11.4 11.1 11.4L11.1 11.4Q16.3 11.4 19.5 13.2Q22.6 15 24.8 18.7Q26.9 22.4 28.9 28.2L28.9 28.2L46.2 76.4Q48.1 81.8 51.2 81.8L51.2 81.8Q52 81.8 52.9 81.6Q53.7 81.4 54.2 81.3L54.2 81.3L54.2 87.8Q53.1 88.3 51.7 88.7Q50.2 89 48.5 89L48.5 89Q44.8 89 42.7 87.2Q40.5 85.3 38.9 80.9L38.9 80.9L31.6 60.4Q30.8 58 29.8 55.1Q28.7 52.1 27.9 49.3Q27 46.4 26.6 44.5L26.6 44.5L26.2 44.5Q25.3 48 23.9 52Q22.4 56 20.7 59.9L20.7 59.9L8.5 88" fill="#16130F"/></svg>
+      <span class="n"><b>11.</b> lambda</span><span class="s">says l</span></div>
+    <div class="cell"><svg viewBox="-4 6 98.7 112" width="26" height="30" role="img" aria-label="Μ"><path d="M48.6 88L41.2 88L17.7 25.4L17.3 25.4Q17.6 28.5 17.8 33.8Q18 39 18 44.7L18 44.7L18 88L9.7 88L9.7 16.6L23 16.6L45 75.1L45.4 75.1L67.8 16.6L81 16.6L81 88L72.1 88L72.1 44.1Q72.1 38.9 72.4 33.8Q72.6 28.7 72.8 25.5L72.8 25.5L72.4 25.5L48.6 88" fill="#16130F"/></svg><svg viewBox="-4 6 70.3 112" width="19" height="30" role="img" aria-label="μ"><path d="M45 34.4L53.8 34.4L53.8 88L46.7 88L45.3 80.8L44.8 80.8Q42.3 84.8 38.3 86.9Q34.3 89 28.7 89L28.7 89Q24.8 89 22 87.8Q19.2 86.5 17.2 84.5L17.2 84.5L16.8 84.5Q17 86.3 17.2 89.3Q17.3 92.3 17.3 96.4L17.3 96.4L17.3 112L8.5 112L8.5 34.4L17.3 34.4L17.3 69Q17.3 81.7 29.3 81.7L29.3 81.7Q38.2 81.7 41.6 76.7Q45 71.7 45 62.3L45 62.3L45 34.4" fill="#16130F"/></svg>
+      <span class="n"><b>12.</b> mu</span><span class="s">says m</span></div>
+    <div class="cell"><svg viewBox="-4 6 84 112" width="23" height="30" role="img" aria-label="Ν"><path d="M66.3 16.6L66.3 88L55.8 88L17.6 28.7L17.2 28.7Q17.4 32.2 17.7 37.4Q18 42.6 18 48.1L18 48.1L18 88L9.7 88L9.7 16.6L20.1 16.6L58.2 75.7L58.6 75.7Q58.5 74.1 58.4 70.9Q58.2 67.7 58.1 63.9Q57.9 60.1 57.9 56.9L57.9 56.9L57.9 16.6L66.3 16.6" fill="#16130F"/></svg><svg viewBox="-4 6 62.7 112" width="17" height="30" role="img" aria-label="ν"><path d="M20 88L0 34.4L9.1 34.4L19.8 63.3Q20.7 65.7 21.9 69Q23 72.3 24.1 75.5Q25.1 78.6 25.6 80.6L25.6 80.6L26 80.6Q32.2 74.3 35.7 67.4Q39.1 60.4 40.5 52.3Q41.9 44.1 41.9 34.4L41.9 34.4L50.6 34.4Q50.6 44.9 48.8 54Q46.9 63 42.4 71.4Q37.8 79.7 29.5 88L29.5 88L20 88" fill="#16130F"/></svg>
+      <span class="n"><b>13.</b> nu</span><span class="s">says n</span></div>
+    <div class="cell"><svg viewBox="-4 6 63.5 112" width="17" height="30" role="img" aria-label="Ξ"><path d="M49.9 24.5L5.5 24.5L5.5 16.6L49.9 16.6L49.9 24.5M45.9 54.6L9.5 54.6L9.5 46.8L45.9 46.8L45.9 54.6M51.9 88L3.5 88L3.5 80.1L51.9 80.1L51.9 88" fill="#16130F"/></svg><svg viewBox="-4 6 55.7 112" width="15" height="30" role="img" aria-label="ξ"><path d="M5.4 67.4L5.4 67.4Q5.4 62.4 7.4 58.6Q9.3 54.7 12.5 52.2Q15.7 49.6 19.4 48.5L19.4 48.5L19.4 47.9Q14.5 46.5 11.7 43.3Q8.8 40 8.8 34.3L8.8 34.3Q8.8 29.6 10.9 26.6Q12.9 23.5 16.3 21.6Q19.6 19.8 23.6 18.7L23.6 18.7Q21.7 18.9 18.3 19.1Q14.9 19.3 11.5 19.3L11.5 19.3L8.5 19.3L8.5 12L43.1 12L43.1 18.8L40.5 18.8Q34.8 18.8 29.5 20.5Q24.1 22.2 20.7 25.6Q17.3 29 17.3 34.1L17.3 34.1Q17.3 39.2 21 41.9Q24.7 44.7 33.6 44.7L33.6 44.7L41.9 44.7L41.9 51.4L33.3 51.4Q24.2 51.4 19.4 55.8Q14.6 60.2 14.6 66.7L14.6 66.7Q14.6 71.8 16.7 74.4Q18.8 77 22.8 78.3Q26.7 79.6 32 80.7L32 80.7Q39.7 82.3 42.7 85.1Q45.7 87.9 45.7 92L45.7 92Q45.7 96.4 43.8 100.4Q41.9 104.3 39.7 107.5L39.7 107.5L31.4 107.5Q33.7 104.3 35.5 100.7Q37.3 97 37.3 94.2L37.3 94.2Q37.3 92.8 36.5 91.7Q35.7 90.5 33.1 89.5Q30.5 88.4 25.1 87.5L25.1 87.5Q15.4 85.8 10.4 80.9Q5.4 76 5.4 67.4" fill="#16130F"/></svg>
+      <span class="n"><b>14.</b> xi</span><span class="s">says x</span></div>
+    <div class="cell"><svg viewBox="-4 6 86.1 112" width="23" height="30" role="img" aria-label="Ο"><path d="M72 52.2L72 52.2Q72 63.3 68.3 71.6Q64.5 79.8 57.2 84.4Q49.9 89 39.1 89L39.1 89Q28 89 20.7 84.4Q13.3 79.8 9.7 71.5Q6.1 63.2 6.1 52.1L6.1 52.1Q6.1 41.1 9.7 32.9Q13.3 24.7 20.7 20.1Q28 15.5 39.2 15.5L39.2 15.5Q49.9 15.5 57.2 20Q64.5 24.6 68.3 32.8Q72 41.1 72 52.2M15.6 52.2L15.6 52.2Q15.6 65.7 21.3 73.5Q27 81.2 39.1 81.2L39.1 81.2Q51.3 81.2 56.9 73.5Q62.5 65.7 62.5 52.2L62.5 52.2Q62.5 38.7 56.9 31.1Q51.3 23.4 39.2 23.4L39.2 23.4Q27.1 23.4 21.4 31.1Q15.6 38.7 15.6 52.2" fill="#16130F"/></svg><svg viewBox="-4 6 68.5 112" width="18" height="30" role="img" aria-label="ο"><path d="M55.1 61.1L55.1 61.1Q55.1 74.4 48.4 81.7Q41.6 89 30.1 89L30.1 89Q23 89 17.5 85.8Q11.9 82.5 8.7 76.3Q5.5 70 5.5 61.1L5.5 61.1Q5.5 47.8 12.2 40.6Q18.9 33.4 30.4 33.4L30.4 33.4Q37.7 33.4 43.3 36.7Q48.8 39.9 52 46.1Q55.1 52.2 55.1 61.1M14.6 61.1L14.6 61.1Q14.6 70.6 18.4 76.2Q22.1 81.7 30.3 81.7L30.3 81.7Q38.4 81.7 42.2 76.2Q46 70.6 46 61.1L46 61.1Q46 51.6 42.2 46.2Q38.4 40.8 30.2 40.8L30.2 40.8Q22 40.8 18.3 46.2Q14.6 51.6 14.6 61.1" fill="#16130F"/></svg>
+      <span class="n"><b>15.</b> omicron</span><span class="s">says o</span></div>
+    <div class="cell"><svg viewBox="-4 6 81.1 112" width="22" height="30" role="img" aria-label="Π"><path d="M18.7 88L9.7 88L9.7 16.6L63.3 16.6L63.3 88L54.4 88L54.4 24.5L18.7 24.5L18.7 88" fill="#16130F"/></svg><svg viewBox="-4 6 73.9 112" width="20" height="30" role="img" aria-label="π"><path d="M56.8 81.8L56.8 81.8Q58.2 81.8 59.4 81.5Q60.5 81.2 61.2 80.8L61.2 80.8L61.2 87.7Q60.4 88.1 58.7 88.6Q56.9 89 54.6 89L54.6 89Q43.5 89 43.5 76.2L43.5 76.2L43.5 41.7L20.8 41.7L20.8 88L12.1 88L12.1 41.7L1.2 41.7L1.2 37.9L8.4 34.4L62.7 34.4L62.7 41.7L52.2 41.7L52.2 75.6Q52.2 79.1 53.5 80.5Q54.8 81.8 56.8 81.8" fill="#16130F"/></svg>
+      <span class="n"><b>16.</b> pi</span><span class="s">says p</span></div>
+    <div class="cell"><svg viewBox="-4 6 68.5 112" width="18" height="30" role="img" aria-label="Ρ"><path d="M9.7 16.6L28.6 16.6Q42.6 16.6 49 22.1Q55.4 27.6 55.4 37.6L55.4 37.6Q55.4 43.5 52.8 48.7Q50.1 53.8 43.9 57Q37.6 60.2 26.9 60.2L26.9 60.2L18.7 60.2L18.7 88L9.7 88L9.7 16.6M27.8 24.3L27.8 24.3L18.7 24.3L18.7 52.5L25.9 52.5Q36.1 52.5 41.1 49.2Q46.1 45.9 46.1 38L46.1 38Q46.1 31.1 41.7 27.7Q37.3 24.3 27.8 24.3" fill="#16130F"/></svg><svg viewBox="-4 6 68.5 112" width="18" height="30" role="img" aria-label="ρ"><path d="M55 61.2L55 61.2Q55 74.8 48.7 81.9Q42.3 89 31.3 89L31.3 89Q27.3 89 23.5 87.9Q19.7 86.7 16.8 84.5L16.8 84.5L16.3 84.5Q16.5 86.1 16.7 89.7Q16.8 93.3 16.8 97.8L16.8 97.8L16.8 112L7.9 112L7.9 60.5Q7.9 46.8 14.4 40.1Q20.9 33.4 31.8 33.4L31.8 33.4Q38.6 33.4 43.9 36.6Q49.1 39.8 52.1 46Q55 52.2 55 61.2M31.4 40.8L31.4 40.8Q16.8 40.8 16.8 60.6L16.8 60.6L16.8 76.8Q19.7 79.3 23.5 80.5Q27.2 81.7 31.2 81.7L31.2 81.7Q39.1 81.7 42.6 76.5Q46 71.3 46 61.2L46 61.2Q46 50.9 42.6 45.8Q39.1 40.8 31.4 40.8" fill="#16130F"/></svg>
+      <span class="n"><b>17.</b> rho</span><span class="s">says r</span></div>
+    <div class="cell"><svg viewBox="-4 6 65 112" width="17" height="30" role="img" aria-label="Σ"><path d="M54.6 88L3.6 88L3.6 80.6L27 50.7L4.2 24.1L4.2 16.6L51.7 16.6L51.7 24.6L26.2 24.6Q24.8 24.6 22.4 24.6Q20 24.6 17.8 24.5Q15.6 24.5 14.5 24.5L14.5 24.5L37 50.6L13.5 80.2Q17.3 80.2 21.1 80.2Q24.8 80.1 28.8 80.1L28.8 80.1L54.6 80.1L54.6 88" fill="#16130F"/></svg><svg viewBox="-4 6 69.7 112" width="19" height="30" role="img" aria-label="σ"><path d="M55 63.4L55 63.4Q55 70.6 52.2 76.4Q49.4 82.2 43.9 85.6Q38.3 89 30.1 89L30.1 89Q19 89 12.3 82.2Q5.5 75.4 5.5 62.4L5.5 62.4Q5.5 52.3 9.1 46.2Q12.6 40 19.2 37.2Q25.7 34.4 34.6 34.4L34.6 34.4L59.3 34.4L59.3 41.7L46.3 41.7Q50.2 45.4 52.6 50.8Q55 56.2 55 63.4M14.6 62.4L14.6 62.4Q14.6 70.9 18.3 76.3Q22 81.7 30.3 81.7L30.3 81.7Q38.6 81.7 42.3 76.6Q46 71.5 46 63.6L46 63.6Q46 57.1 43.9 51.6Q41.7 46 37.7 41.7L37.7 41.7L34.6 41.7Q24.6 41.7 19.6 46.4Q14.6 51.1 14.6 62.4" fill="#16130F"/></svg>
+      <span class="n"><b>18.</b> sigma</span><span class="s">says s</span></div>
+    <div class="cell"><svg viewBox="-4 6 63.6 112" width="17" height="30" role="img" aria-label="Τ"><path d="M32.3 24.5L32.3 88L23.3 88L23.3 24.5L1 24.5L1 16.6L54.5 16.6L54.5 24.5L32.3 24.5" fill="#16130F"/></svg><svg viewBox="-4 6 55.9 112" width="15" height="30" role="img" aria-label="τ"><path d="M8.3 34.4L45.2 34.4L45.2 41.8L24.3 41.8L24.3 71.6Q24.3 77.4 27 79.7Q29.6 82 33.9 82L33.9 82Q36.1 82 38.5 81.7Q40.8 81.3 42.4 80.9L42.4 80.9L42.4 87.5Q41 88.1 38.3 88.6Q35.5 89.1 32.6 89.1L32.6 89.1Q28 89.1 24.1 87.8Q20.2 86.4 17.8 82.8Q15.4 79.2 15.4 72.5L15.4 72.5L15.4 41.8L1 41.8L1 37.9L8.3 34.4" fill="#16130F"/></svg>
+      <span class="n"><b>19.</b> tau</span><span class="s">says t</span></div>
+    <div class="cell"><svg viewBox="-4 6 64.6 112" width="17" height="30" role="img" aria-label="Υ"><path d="M9.8 16.6L28.3 51.7L46.9 16.6L56.6 16.6L32.8 60.3L32.8 88L23.8 88L23.8 60.7L0 16.6L9.8 16.6" fill="#16130F"/></svg><svg viewBox="-4 6 69.3 112" width="19" height="30" role="img" aria-label="υ"><path d="M30.7 89L30.7 89Q21.8 89 16.9 85.7Q11.9 82.3 9.9 76.6Q7.9 70.8 7.9 63.7L7.9 63.7L7.9 34.4L16.7 34.4L16.7 63.4Q16.7 71.9 20.2 76.9Q23.7 81.8 31.4 81.8L31.4 81.8Q39.4 81.8 43.2 76.1Q47 70.4 47 58.4L47 58.4Q47 51.4 46.2 45.9Q45.4 40.4 43.9 34.4L43.9 34.4L52.7 34.4Q54.3 40.3 55.1 45.8Q55.9 51.4 55.9 58.8L55.9 58.8Q55.9 74.3 49.6 81.7Q43.2 89 30.7 89" fill="#16130F"/></svg>
+      <span class="n"><b>20.</b> upsilon</span><span class="s">says y</span></div>
+    <div class="cell"><svg viewBox="-4 6 88.4 112" width="24" height="30" role="img" aria-label="Φ"><path d="M44.6 15.6L44.6 24.4Q56.2 24.6 62.9 28.2Q69.6 31.8 72.4 37.8Q75.2 43.7 75.2 51L75.2 51Q75.2 55.8 73.8 60.6Q72.3 65.3 68.8 69.2Q65.3 73 59.4 75.4Q53.5 77.8 44.6 78L44.6 78L44.6 89L35.7 89L35.7 78Q26.6 77.8 20.7 75.4Q14.7 72.9 11.3 69Q7.9 65 6.5 60.3Q5.1 55.6 5.1 51L5.1 51Q5.1 43.9 8 37.9Q10.8 32 17.5 28.3Q24.2 24.6 35.7 24.4L35.7 24.4L35.7 15.6L44.6 15.6M35.7 70.6L35.7 32Q27.7 32.2 23 34.6Q18.2 37 16.2 41.2Q14.2 45.3 14.2 50.9L14.2 50.9Q14.2 59.7 19.4 65Q24.5 70.2 35.7 70.6L35.7 70.6M44.6 32L44.6 70.6Q56.2 70.2 61.2 64.9Q66.1 59.5 66.1 50.9L66.1 50.9Q66.1 45.2 64.1 41.1Q62.1 36.9 57.4 34.6Q52.7 32.2 44.6 32L44.6 32" fill="#16130F"/></svg><svg viewBox="-4 6 80.5 112" width="22" height="30" role="img" aria-label="φ"><path d="M15.7 33.9L22.5 38.6Q18.8 43.5 16.6 48.8Q14.3 54.2 14.3 61.2L14.3 61.2Q14.3 68.5 16.7 72.9Q19 77.2 22.9 79.2Q26.8 81.2 31.4 81.7L31.4 81.7L31.4 51.9Q31.4 42.8 35.7 38.1Q39.9 33.4 47.2 33.4L47.2 33.4Q53.4 33.4 57.8 36.8Q62.2 40.1 64.6 46.1Q67 52 67 59.9L67 59.9Q67 69.6 63.3 75.9Q59.5 82.1 53.4 85.3Q47.2 88.5 40 88.9L40 88.9L40 112L31.4 112L31.4 88.9Q24 88.5 18.2 85.6Q12.3 82.7 8.9 76.7Q5.5 70.7 5.5 60.9L5.5 60.9Q5.5 52.8 8.4 46.1Q11.3 39.3 15.7 33.9L15.7 33.9M47.3 40.7L47.3 40.7Q44.4 40.7 42.2 43.1Q40 45.5 40 51.8L40 51.8L40 81.7Q45.1 81.2 49.2 78.8Q53.3 76.3 55.7 71.7Q58.1 67 58.1 60L58.1 60Q58.1 50.6 55.1 45.7Q52 40.7 47.3 40.7" fill="#16130F"/></svg>
+      <span class="n"><b>21.</b> phi</span><span class="s">says ph</span></div>
+    <div class="cell"><svg viewBox="-4 6 66.6 112" width="18" height="30" role="img" aria-label="Χ"><path d="M34.4 50.6L58.2 88L48 88L29.1 57L9.9 88L0.4 88L24.1 50.8L1.9 16.6L11.9 16.6L29.4 44.6L47 16.6L56.5 16.6L34.4 50.6" fill="#16130F"/></svg><svg viewBox="-4 6 63.1 112" width="17" height="30" role="img" aria-label="χ"><path d="M9 34.1L9 34.1Q14 34.1 16.4 37.3Q18.7 40.4 21 46.3L21 46.3L27.8 63.5L43.1 34.4L52.5 34.4L31.5 72L40.8 95.6Q42.6 100.2 44.5 102.5Q46.3 104.8 50 104.8L50 104.8Q51.3 104.8 52.5 104.7Q53.6 104.5 54.5 104.4L54.5 104.4L54.5 111.2Q53.4 111.5 51.9 111.8Q50.4 112 48.3 112L48.3 112Q43.8 112 41 110.4Q38.1 108.7 36.3 105.7Q34.4 102.6 32.8 98.4L32.8 98.4L25.7 79.8L8.3 112L-1.1 112L21.7 71L13.5 49.7Q12 45.7 10.4 43.4Q8.7 41.2 6.1 41.2L6.1 41.2Q4.2 41.2 2.8 41.8L2.8 41.8L2.8 34.9Q3.9 34.6 5.4 34.3Q6.9 34.1 9 34.1" fill="#16130F"/></svg>
+      <span class="n"><b>22.</b> chi</span><span class="s">says ch</span></div>
+    <div class="cell"><svg viewBox="-4 6 88.4 112" width="24" height="30" role="img" aria-label="Ψ"><path d="M75.1 16.6L75.1 40.1Q75.1 45.2 73.7 49.9Q72.2 54.6 68.8 58.3Q65.4 62 59.5 64.2Q53.5 66.3 44.5 66.3L44.5 66.3L44.5 88L35.7 88L35.7 66.3Q26.7 66.3 20.8 64.1Q14.8 61.9 11.5 58.2Q8.1 54.5 6.7 49.8Q5.3 45.1 5.3 40.2L5.3 40.2L5.3 16.6L14.3 16.6L14.3 40Q14.3 49.3 19.4 54Q24.5 58.6 35.7 58.6L35.7 58.6L35.7 16.6L44.5 16.6L44.5 58.6Q55.9 58.6 60.9 54Q65.9 49.3 65.9 40.2L65.9 40.2L65.9 16.6L75.1 16.6" fill="#16130F"/></svg><svg viewBox="-4 6 84.1 112" width="23" height="30" role="img" aria-label="ψ"><path d="M42.6 12.1L42.6 81.5Q51.1 80.7 56.3 75.7Q61.4 70.6 61.4 60L61.4 60Q61.4 53.1 60.6 47.3Q59.8 41.4 58.2 34.4L58.2 34.4L66.9 34.4Q68.5 41.1 69.3 47.1Q70 53.1 70 59.7L70 59.7Q70 70 66.3 76.3Q62.6 82.5 56.4 85.5Q50.2 88.4 42.6 88.9L42.6 88.9L42.6 112L34 112L34 88.9Q26.4 88.6 20.5 85.8Q14.6 83 11.3 77Q7.9 70.9 7.9 61L7.9 61L7.9 34.4L16.6 34.4L16.6 61.3Q16.6 68.8 19 73.1Q21.4 77.4 25.4 79.3Q29.4 81.2 34 81.6L34 81.6L34 12.1L42.6 12.1" fill="#16130F"/></svg>
+      <span class="n"><b>23.</b> psi</span><span class="s">says ps</span></div>
+    <div class="cell"><svg viewBox="-4 6 86.2 112" width="23" height="30" role="img" aria-label="Ω"><path d="M39.1 23.4L39.1 23.4Q27.1 23.4 21.5 29.9Q15.9 36.5 15.9 47.9L15.9 47.9Q15.9 57.9 19.6 66Q23.3 74.1 32.6 80.8L32.6 80.8L32.6 88L3.8 88L3.8 80.1L21.6 80.1Q15.2 75.2 10.8 67Q6.4 58.8 6.4 47.6L6.4 47.6Q6.4 37.8 10.2 30.6Q14 23.4 21.4 19.5Q28.7 15.5 39.1 15.5L39.1 15.5Q49.7 15.5 57 19.4Q64.3 23.3 68.1 30.5Q71.9 37.7 71.9 47.5L71.9 47.5Q71.9 58.7 67.6 67Q63.2 75.2 56.8 80.1L56.8 80.1L74.5 80.1L74.5 88L45.7 88L45.7 80.8Q55 74.2 58.8 66Q62.5 57.8 62.5 47.9L62.5 47.9Q62.5 36.5 56.9 29.9Q51.2 23.4 39.1 23.4" fill="#16130F"/></svg><svg viewBox="-4 6 86.2 112" width="23" height="30" role="img" aria-label="ω"><path d="M57.7 34.4L66.7 34.4Q69.8 41.4 71.2 47.8Q72.6 54.2 72.6 62L72.6 62Q72.6 70 70.4 76.1Q68.2 82.2 64 85.6Q59.7 89 53.5 89L53.5 89Q42.7 89 39.3 80L39.3 80L38.8 80Q35.6 89 24.7 89L24.7 89Q18.5 89 14.3 85.6Q10 82.2 7.8 76.1Q5.6 70 5.6 62L5.6 62Q5.6 54.2 7 47.8Q8.4 41.4 11.5 34.4L11.5 34.4L20.5 34.4Q17.4 41.4 15.9 47.8Q14.4 54.1 14.4 62.1L14.4 62.1Q14.4 71.8 17.4 76.8Q20.4 81.7 25.3 81.7L25.3 81.7Q30.3 81.7 32.6 78Q34.9 74.3 34.9 68.7L34.9 68.7L34.9 53.6L43.3 53.6L43.3 68.7Q43.3 74.9 45.8 78.3Q48.3 81.7 52.8 81.7L52.8 81.7Q57.8 81.7 60.8 76.8Q63.8 71.8 63.8 62.1L63.8 62.1Q63.8 54.1 62.4 47.8Q60.9 41.4 57.7 34.4L57.7 34.4" fill="#16130F"/></svg>
+      <span class="n"><b>24.</b> omega</span><span class="s">says o</span></div>
+  </div>
+
+  <div class="note"><b>One rule:</b> small sigma is <span style="display:inline-block;vertical-align:-0.16em"><svg viewBox="-4 6 69.7 112" width="11" height="17" role="img" aria-label="σ"><path d="M55 63.4L55 63.4Q55 70.6 52.2 76.4Q49.4 82.2 43.9 85.6Q38.3 89 30.1 89L30.1 89Q19 89 12.3 82.2Q5.5 75.4 5.5 62.4L5.5 62.4Q5.5 52.3 9.1 46.2Q12.6 40 19.2 37.2Q25.7 34.4 34.6 34.4L34.6 34.4L59.3 34.4L59.3 41.7L46.3 41.7Q50.2 45.4 52.6 50.8Q55 56.2 55 63.4M14.6 62.4L14.6 62.4Q14.6 70.9 18.3 76.3Q22 81.7 30.3 81.7L30.3 81.7Q38.6 81.7 42.3 76.6Q46 71.5 46 63.6L46 63.6Q46 57.1 43.9 51.6Q41.7 46 37.7 41.7L37.7 41.7L34.6 41.7Q24.6 41.7 19.6 46.4Q14.6 51.1 14.6 62.4" fill="#16130F"/></svg></span> inside a word and <span style="display:inline-block;vertical-align:-0.16em"><svg viewBox="-4 6 56.4 112" width="9" height="17" role="img" aria-label="ς"><path d="M31.3 33.4L31.3 33.4Q35.3 33.4 39.2 34.3Q43 35.1 45.8 36.3L45.8 36.3L43 43.6Q40.4 42.6 37.3 41.8Q34.2 41.1 30.9 41.1L30.9 41.1Q22.2 41.1 18.4 46.6Q14.6 52.1 14.6 62.6L14.6 62.6Q14.6 68.5 16 71.9Q17.4 75.3 21.2 77.2Q24.9 79.1 31.9 80.6L31.9 80.6Q39.6 82.2 42.7 85.1Q45.7 87.9 45.7 92L45.7 92Q45.7 96.4 43.8 100.5Q41.9 104.5 39.7 107.5L39.7 107.5L31.4 107.5Q33.7 104.3 35.6 100.7Q37.4 97 37.4 94.2L37.4 94.2Q37.4 92.8 36.6 91.7Q35.8 90.5 33.2 89.5Q30.6 88.4 25.2 87.4L25.2 87.4Q19.7 86.3 15.3 83.7Q10.8 81.1 8.2 76.1Q5.5 71 5.5 62.7L5.5 62.7Q5.5 52.6 8.8 46.1Q12.1 39.6 17.9 36.5Q23.7 33.4 31.3 33.4" fill="#16130F"/></svg></span> at the end.</div>
+
+  <div class="note">These spellings are <b>rough</b>: Greek sounds have changed over 2,500 years.</div>
+
+  <ol class="qs" start="1"><li><span class="qt">Which letter is fifth? Which is twenty-fourth? Write the names.</span><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Four more over the leaf &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Alpha to omega</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>Using the Order</h1>
+    <p class="sub">Greek &middot; Page 2 of 3</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Answer from the chart on page 1.
+  </div>
+
+<ol class="qs" start="2"><li><span class="qt">Write the name of the letter that comes straight after <span style="display:inline-block;vertical-align:-0.16em"><svg viewBox="-4 6 68.8 112" width="10" height="17" role="img" aria-label="Λ"><path d="M25.6 16.6L35 16.6L60.7 88L51.2 88L35.4 43Q33.8 38.3 32.5 34.2Q31.1 30 30.2 26.4L30.2 26.4Q29.5 30 28.2 34.2Q26.8 38.4 25.2 42.9L25.2 42.9L9.5 88L0 88L25.6 16.6" fill="#16130F"/></svg></span>, and the one straight before <span style="display:inline-block;vertical-align:-0.16em"><svg viewBox="-4 6 68.5 112" width="10" height="17" role="img" aria-label="Ρ"><path d="M9.7 16.6L28.6 16.6Q42.6 16.6 49 22.1Q55.4 27.6 55.4 37.6L55.4 37.6Q55.4 43.5 52.8 48.7Q50.1 53.8 43.9 57Q37.6 60.2 26.9 60.2L26.9 60.2L18.7 60.2L18.7 88L9.7 88L9.7 16.6M27.8 24.3L27.8 24.3L18.7 24.3L18.7 52.5L25.9 52.5Q36.1 52.5 41.1 49.2Q46.1 45.9 46.1 38L46.1 38Q46.1 31.1 41.7 27.7Q37.3 24.3 27.8 24.3" fill="#16130F"/></svg></span>.</span><div class="write"></div></li><li><span class="qt">Four letters in the chart have names that describe them rather than just naming them: <i>epsilon</i>, <i>omicron</i>, <i>upsilon</i> and <i>omega</i>. Two of those four are a pair. Which two, and what does the pair mean?</span><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Count how many of the twenty-four capitals you could mistake for a letter of your own alphabet. Write the number, then write two of them that would trick you.</span><div class="write"></div><div class="write"></div></li><li><span class="qt">Somebody writes a Greek word ending in sigma and uses the inside form. Would a Greek reader still know the word? Say what the rule is really for.</span><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Score: ______ / 5</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Alpha to omega</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>Write Them</h1>
+    <p class="sub">Greek &middot; Page 3 of 3</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Copy each capital twice, over the pale ones.
+  </div>
+
+
+  <div class="chart" style="grid-template-columns:repeat(3,1fr)">
+    <div class="cell" style="text-align:left;padding:6px 8px">
+      <svg viewBox="-4 6 71.9 112" width="26" height="40" role="img" aria-label="Α"><path d="M63.8 88L54.5 88L45.9 65.9L17.6 65.9L9.1 88L0 88L27.9 16.3L36 16.3L63.8 88M43.2 57.9L35.2 36.3Q34.9 35.5 34.2 33.4Q33.5 31.3 32.9 29.1Q32.2 26.8 31.8 25.6L31.8 25.6Q31.1 28.7 30.2 31.7Q29.3 34.6 28.7 36.3L28.7 36.3L20.6 57.9L43.2 57.9" fill="#16130F"/></svg><svg viewBox="-4 6 71.9 112" width="26" height="40" role="img" aria-label="Α"><path d="M63.8 88L54.5 88L45.9 65.9L17.6 65.9L9.1 88L0 88L27.9 16.3L36 16.3L63.8 88M43.2 57.9L35.2 36.3Q34.9 35.5 34.2 33.4Q33.5 31.3 32.9 29.1Q32.2 26.8 31.8 25.6L31.8 25.6Q31.1 28.7 30.2 31.7Q29.3 34.6 28.7 36.3L28.7 36.3L20.6 57.9L43.2 57.9" fill="#CFC3B2"/></svg><svg viewBox="-4 6 71.9 112" width="26" height="40" role="img" aria-label="Α"><path d="M63.8 88L54.5 88L45.9 65.9L17.6 65.9L9.1 88L0 88L27.9 16.3L36 16.3L63.8 88M43.2 57.9L35.2 36.3Q34.9 35.5 34.2 33.4Q33.5 31.3 32.9 29.1Q32.2 26.8 31.8 25.6L31.8 25.6Q31.1 28.7 30.2 31.7Q29.3 34.6 28.7 36.3L28.7 36.3L20.6 57.9L43.2 57.9" fill="#CFC3B2"/></svg>
+      <span class="s">alpha</span></div>
+    <div class="cell" style="text-align:left;padding:6px 8px">
+      <svg viewBox="-4 6 73 112" width="26" height="40" role="img" aria-label="Β"><path d="M9.7 16.6L30.1 16.6Q43.5 16.6 50.4 20.5Q57.2 24.5 57.2 34.3L57.2 34.3Q57.2 40.6 53.7 44.8Q50.2 48.9 43.6 50.1L43.6 50.1L43.6 50.6Q48.1 51.3 51.8 53.2Q55.4 55.1 57.5 58.6Q59.6 62.1 59.6 67.7L59.6 67.7Q59.6 77.4 53 82.7Q46.3 88 34.8 88L34.8 88L9.7 88L9.7 16.6M18.7 47L31.9 47Q41.1 47 44.5 44.1Q47.9 41.1 47.9 35.3L47.9 35.3Q47.9 29.4 43.8 26.8Q39.6 24.3 30.5 24.3L30.5 24.3L18.7 24.3L18.7 47M32.4 54.5L18.7 54.5L18.7 80.4L33.1 80.4Q42.6 80.4 46.3 76.7Q50 73 50 67L50 67Q50 61.4 46.2 58Q42.3 54.5 32.4 54.5L32.4 54.5" fill="#16130F"/></svg><svg viewBox="-4 6 73 112" width="26" height="40" role="img" aria-label="Β"><path d="M9.7 16.6L30.1 16.6Q43.5 16.6 50.4 20.5Q57.2 24.5 57.2 34.3L57.2 34.3Q57.2 40.6 53.7 44.8Q50.2 48.9 43.6 50.1L43.6 50.1L43.6 50.6Q48.1 51.3 51.8 53.2Q55.4 55.1 57.5 58.6Q59.6 62.1 59.6 67.7L59.6 67.7Q59.6 77.4 53 82.7Q46.3 88 34.8 88L34.8 88L9.7 88L9.7 16.6M18.7 47L31.9 47Q41.1 47 44.5 44.1Q47.9 41.1 47.9 35.3L47.9 35.3Q47.9 29.4 43.8 26.8Q39.6 24.3 30.5 24.3L30.5 24.3L18.7 24.3L18.7 47M32.4 54.5L18.7 54.5L18.7 80.4L33.1 80.4Q42.6 80.4 46.3 76.7Q50 73 50 67L50 67Q50 61.4 46.2 58Q42.3 54.5 32.4 54.5L32.4 54.5" fill="#CFC3B2"/></svg><svg viewBox="-4 6 73 112" width="26" height="40" role="img" aria-label="Β"><path d="M9.7 16.6L30.1 16.6Q43.5 16.6 50.4 20.5Q57.2 24.5 57.2 34.3L57.2 34.3Q57.2 40.6 53.7 44.8Q50.2 48.9 43.6 50.1L43.6 50.1L43.6 50.6Q48.1 51.3 51.8 53.2Q55.4 55.1 57.5 58.6Q59.6 62.1 59.6 67.7L59.6 67.7Q59.6 77.4 53 82.7Q46.3 88 34.8 88L34.8 88L9.7 88L9.7 16.6M18.7 47L31.9 47Q41.1 47 44.5 44.1Q47.9 41.1 47.9 35.3L47.9 35.3Q47.9 29.4 43.8 26.8Q39.6 24.3 30.5 24.3L30.5 24.3L18.7 24.3L18.7 47M32.4 54.5L18.7 54.5L18.7 80.4L33.1 80.4Q42.6 80.4 46.3 76.7Q50 73 50 67L50 67Q50 61.4 46.2 58Q42.3 54.5 32.4 54.5L32.4 54.5" fill="#CFC3B2"/></svg>
+      <span class="s">beta</span></div>
+    <div class="cell" style="text-align:left;padding:6px 8px">
+      <svg viewBox="-4 6 60.4 112" width="22" height="40" role="img" aria-label="Γ"><path d="M9.7 16.6L50 16.6L50 24.6L18.7 24.6L18.7 88L9.7 88L9.7 16.6" fill="#16130F"/></svg><svg viewBox="-4 6 60.4 112" width="22" height="40" role="img" aria-label="Γ"><path d="M9.7 16.6L50 16.6L50 24.6L18.7 24.6L18.7 88L9.7 88L9.7 16.6" fill="#CFC3B2"/></svg><svg viewBox="-4 6 60.4 112" width="22" height="40" role="img" aria-label="Γ"><path d="M9.7 16.6L50 16.6L50 24.6L18.7 24.6L18.7 88L9.7 88L9.7 16.6" fill="#CFC3B2"/></svg>
+      <span class="s">gamma</span></div>
+    <div class="cell" style="text-align:left;padding:6px 8px">
+      <svg viewBox="-4 6 66.1 112" width="24" height="40" role="img" aria-label="Δ"><path d="M24.5 16.6L33.5 16.6L56.1 82.6L56.1 88L2 88L2 82.5L24.5 16.6M46.2 80.1L33.7 42.9Q32.2 38.4 31 34.2Q29.7 30 28.9 26.4L28.9 26.4Q28 30 26.9 34.2Q25.7 38.3 24.3 42.5L24.3 42.5L11.6 80.1L46.2 80.1" fill="#16130F"/></svg><svg viewBox="-4 6 66.1 112" width="24" height="40" role="img" aria-label="Δ"><path d="M24.5 16.6L33.5 16.6L56.1 82.6L56.1 88L2 88L2 82.5L24.5 16.6M46.2 80.1L33.7 42.9Q32.2 38.4 31 34.2Q29.7 30 28.9 26.4L28.9 26.4Q28 30 26.9 34.2Q25.7 38.3 24.3 42.5L24.3 42.5L11.6 80.1L46.2 80.1" fill="#CFC3B2"/></svg><svg viewBox="-4 6 66.1 112" width="24" height="40" role="img" aria-label="Δ"><path d="M24.5 16.6L33.5 16.6L56.1 82.6L56.1 88L2 88L2 82.5L24.5 16.6M46.2 80.1L33.7 42.9Q32.2 38.4 31 34.2Q29.7 30 28.9 26.4L28.9 26.4Q28 30 26.9 34.2Q25.7 38.3 24.3 42.5L24.3 42.5L11.6 80.1L46.2 80.1" fill="#CFC3B2"/></svg>
+      <span class="s">delta</span></div>
+    <div class="cell" style="text-align:left;padding:6px 8px">
+      <svg viewBox="-4 6 63.6 112" width="23" height="40" role="img" aria-label="Ε"><path d="M49.6 80.1L49.6 88L9.7 88L9.7 16.6L49.6 16.6L49.6 24.5L18.7 24.5L18.7 46.8L47.8 46.8L47.8 54.6L18.7 54.6L18.7 80.1L49.6 80.1" fill="#16130F"/></svg><svg viewBox="-4 6 63.6 112" width="23" height="40" role="img" aria-label="Ε"><path d="M49.6 80.1L49.6 88L9.7 88L9.7 16.6L49.6 16.6L49.6 24.5L18.7 24.5L18.7 46.8L47.8 46.8L47.8 54.6L18.7 54.6L18.7 80.1L49.6 80.1" fill="#CFC3B2"/></svg><svg viewBox="-4 6 63.6 112" width="23" height="40" role="img" aria-label="Ε"><path d="M49.6 80.1L49.6 88L9.7 88L9.7 16.6L49.6 16.6L49.6 24.5L18.7 24.5L18.7 46.8L47.8 46.8L47.8 54.6L18.7 54.6L18.7 80.1L49.6 80.1" fill="#CFC3B2"/></svg>
+      <span class="s">epsilon</span></div>
+    <div class="cell" style="text-align:left;padding:6px 8px">
+      <svg viewBox="-4 6 65.2 112" width="23" height="40" role="img" aria-label="Ζ"><path d="M53.3 80L53.3 88L3.8 88L3.8 81.2L41.4 24.6L5 24.6L5 16.6L52.3 16.6L52.3 23.4L14.7 80L53.3 80" fill="#16130F"/></svg><svg viewBox="-4 6 65.2 112" width="23" height="40" role="img" aria-label="Ζ"><path d="M53.3 80L53.3 88L3.8 88L3.8 81.2L41.4 24.6L5 24.6L5 16.6L52.3 16.6L52.3 23.4L14.7 80L53.3 80" fill="#CFC3B2"/></svg><svg viewBox="-4 6 65.2 112" width="23" height="40" role="img" aria-label="Ζ"><path d="M53.3 80L53.3 88L3.8 88L3.8 81.2L41.4 24.6L5 24.6L5 16.6L52.3 16.6L52.3 23.4L14.7 80L53.3 80" fill="#CFC3B2"/></svg>
+      <span class="s">zeta</span></div>
+    <div class="cell" style="text-align:left;padding:6px 8px">
+      <svg viewBox="-4 6 82.1 112" width="29" height="40" role="img" aria-label="Η"><path d="M64.3 16.6L64.3 88L55.3 88L55.3 54.7L18.7 54.7L18.7 88L9.7 88L9.7 16.6L18.7 16.6L18.7 46.8L55.3 46.8L55.3 16.6L64.3 16.6" fill="#16130F"/></svg><svg viewBox="-4 6 82.1 112" width="29" height="40" role="img" aria-label="Η"><path d="M64.3 16.6L64.3 88L55.3 88L55.3 54.7L18.7 54.7L18.7 88L9.7 88L9.7 16.6L18.7 16.6L18.7 46.8L55.3 46.8L55.3 16.6L64.3 16.6" fill="#CFC3B2"/></svg><svg viewBox="-4 6 82.1 112" width="29" height="40" role="img" aria-label="Η"><path d="M64.3 16.6L64.3 88L55.3 88L55.3 54.7L18.7 54.7L18.7 88L9.7 88L9.7 16.6L18.7 16.6L18.7 46.8L55.3 46.8L55.3 16.6L64.3 16.6" fill="#CFC3B2"/></svg>
+      <span class="s">eta</span></div>
+    <div class="cell" style="text-align:left;padding:6px 8px">
+      <svg viewBox="-4 6 86.1 112" width="31" height="40" role="img" aria-label="Θ"><path d="M72 52.2L72 52.2Q72 63.3 68.3 71.6Q64.5 79.8 57.2 84.4Q49.9 89 39.1 89L39.1 89Q28 89 20.7 84.4Q13.3 79.8 9.7 71.5Q6.1 63.2 6.1 52.1L6.1 52.1Q6.1 41.1 9.7 32.9Q13.3 24.7 20.7 20.1Q28 15.5 39.2 15.5L39.2 15.5Q49.9 15.5 57.2 20Q64.5 24.6 68.3 32.8Q72 41.1 72 52.2M15.6 52.2L15.6 52.2Q15.6 65.7 21.3 73.5Q27 81.2 39.1 81.2L39.1 81.2Q51.3 81.2 56.9 73.5Q62.5 65.7 62.5 52.2L62.5 52.2Q62.5 38.7 56.9 31.1Q51.3 23.4 39.2 23.4L39.2 23.4Q27.1 23.4 21.4 31.1Q15.6 38.7 15.6 52.2M23.9 47.8L54.1 47.8L54.1 55.6L23.9 55.6L23.9 47.8" fill="#16130F"/></svg><svg viewBox="-4 6 86.1 112" width="31" height="40" role="img" aria-label="Θ"><path d="M72 52.2L72 52.2Q72 63.3 68.3 71.6Q64.5 79.8 57.2 84.4Q49.9 89 39.1 89L39.1 89Q28 89 20.7 84.4Q13.3 79.8 9.7 71.5Q6.1 63.2 6.1 52.1L6.1 52.1Q6.1 41.1 9.7 32.9Q13.3 24.7 20.7 20.1Q28 15.5 39.2 15.5L39.2 15.5Q49.9 15.5 57.2 20Q64.5 24.6 68.3 32.8Q72 41.1 72 52.2M15.6 52.2L15.6 52.2Q15.6 65.7 21.3 73.5Q27 81.2 39.1 81.2L39.1 81.2Q51.3 81.2 56.9 73.5Q62.5 65.7 62.5 52.2L62.5 52.2Q62.5 38.7 56.9 31.1Q51.3 23.4 39.2 23.4L39.2 23.4Q27.1 23.4 21.4 31.1Q15.6 38.7 15.6 52.2M23.9 47.8L54.1 47.8L54.1 55.6L23.9 55.6L23.9 47.8" fill="#CFC3B2"/></svg><svg viewBox="-4 6 86.1 112" width="31" height="40" role="img" aria-label="Θ"><path d="M72 52.2L72 52.2Q72 63.3 68.3 71.6Q64.5 79.8 57.2 84.4Q49.9 89 39.1 89L39.1 89Q28 89 20.7 84.4Q13.3 79.8 9.7 71.5Q6.1 63.2 6.1 52.1L6.1 52.1Q6.1 41.1 9.7 32.9Q13.3 24.7 20.7 20.1Q28 15.5 39.2 15.5L39.2 15.5Q49.9 15.5 57.2 20Q64.5 24.6 68.3 32.8Q72 41.1 72 52.2M15.6 52.2L15.6 52.2Q15.6 65.7 21.3 73.5Q27 81.2 39.1 81.2L39.1 81.2Q51.3 81.2 56.9 73.5Q62.5 65.7 62.5 52.2L62.5 52.2Q62.5 38.7 56.9 31.1Q51.3 23.4 39.2 23.4L39.2 23.4Q27.1 23.4 21.4 31.1Q15.6 38.7 15.6 52.2M23.9 47.8L54.1 47.8L54.1 55.6L23.9 55.6L23.9 47.8" fill="#CFC3B2"/></svg>
+      <span class="s">theta</span></div>
+    <div class="cell" style="text-align:left;padding:6px 8px">
+      <svg viewBox="-4 6 41.9 112" width="15" height="40" role="img" aria-label="Ι"><path d="M29.8 82.8L29.8 88L4 88L4 82.8L12.4 80.9L12.4 23.8L4 21.8L4 16.6L29.8 16.6L29.8 21.8L21.4 23.8L21.4 80.9L29.8 82.8" fill="#16130F"/></svg><svg viewBox="-4 6 41.9 112" width="15" height="40" role="img" aria-label="Ι"><path d="M29.8 82.8L29.8 88L4 88L4 82.8L12.4 80.9L12.4 23.8L4 21.8L4 16.6L29.8 16.6L29.8 21.8L21.4 23.8L21.4 80.9L29.8 82.8" fill="#CFC3B2"/></svg><svg viewBox="-4 6 41.9 112" width="15" height="40" role="img" aria-label="Ι"><path d="M29.8 82.8L29.8 88L4 88L4 82.8L12.4 80.9L12.4 23.8L4 21.8L4 16.6L29.8 16.6L29.8 21.8L21.4 23.8L21.4 80.9L29.8 82.8" fill="#CFC3B2"/></svg>
+      <span class="s">iota</span></div>
+    <div class="cell" style="text-align:left;padding:6px 8px">
+      <svg viewBox="-4 6 69.9 112" width="25" height="40" role="img" aria-label="Κ"><path d="M32.5 47.7L61.9 88L51.3 88L26 53.9L18.7 60.3L18.7 88L9.7 88L9.7 16.6L18.7 16.6L18.7 51.8Q21.7 48.4 24.8 45Q27.9 41.6 31 38.2L31 38.2L50.3 16.6L60.8 16.6L32.5 47.7" fill="#16130F"/></svg><svg viewBox="-4 6 69.9 112" width="25" height="40" role="img" aria-label="Κ"><path d="M32.5 47.7L61.9 88L51.3 88L26 53.9L18.7 60.3L18.7 88L9.7 88L9.7 16.6L18.7 16.6L18.7 51.8Q21.7 48.4 24.8 45Q27.9 41.6 31 38.2L31 38.2L50.3 16.6L60.8 16.6L32.5 47.7" fill="#CFC3B2"/></svg><svg viewBox="-4 6 69.9 112" width="25" height="40" role="img" aria-label="Κ"><path d="M32.5 47.7L61.9 88L51.3 88L26 53.9L18.7 60.3L18.7 88L9.7 88L9.7 16.6L18.7 16.6L18.7 51.8Q21.7 48.4 24.8 45Q27.9 41.6 31 38.2L31 38.2L50.3 16.6L60.8 16.6L32.5 47.7" fill="#CFC3B2"/></svg>
+      <span class="s">kappa</span></div>
+    <div class="cell" style="text-align:left;padding:6px 8px">
+      <svg viewBox="-4 6 68.8 112" width="25" height="40" role="img" aria-label="Λ"><path d="M25.6 16.6L35 16.6L60.7 88L51.2 88L35.4 43Q33.8 38.3 32.5 34.2Q31.1 30 30.2 26.4L30.2 26.4Q29.5 30 28.2 34.2Q26.8 38.4 25.2 42.9L25.2 42.9L9.5 88L0 88L25.6 16.6" fill="#16130F"/></svg><svg viewBox="-4 6 68.8 112" width="25" height="40" role="img" aria-label="Λ"><path d="M25.6 16.6L35 16.6L60.7 88L51.2 88L35.4 43Q33.8 38.3 32.5 34.2Q31.1 30 30.2 26.4L30.2 26.4Q29.5 30 28.2 34.2Q26.8 38.4 25.2 42.9L25.2 42.9L9.5 88L0 88L25.6 16.6" fill="#CFC3B2"/></svg><svg viewBox="-4 6 68.8 112" width="25" height="40" role="img" aria-label="Λ"><path d="M25.6 16.6L35 16.6L60.7 88L51.2 88L35.4 43Q33.8 38.3 32.5 34.2Q31.1 30 30.2 26.4L30.2 26.4Q29.5 30 28.2 34.2Q26.8 38.4 25.2 42.9L25.2 42.9L9.5 88L0 88L25.6 16.6" fill="#CFC3B2"/></svg>
+      <span class="s">lambda</span></div>
+    <div class="cell" style="text-align:left;padding:6px 8px">
+      <svg viewBox="-4 6 98.7 112" width="35" height="40" role="img" aria-label="Μ"><path d="M48.6 88L41.2 88L17.7 25.4L17.3 25.4Q17.6 28.5 17.8 33.8Q18 39 18 44.7L18 44.7L18 88L9.7 88L9.7 16.6L23 16.6L45 75.1L45.4 75.1L67.8 16.6L81 16.6L81 88L72.1 88L72.1 44.1Q72.1 38.9 72.4 33.8Q72.6 28.7 72.8 25.5L72.8 25.5L72.4 25.5L48.6 88" fill="#16130F"/></svg><svg viewBox="-4 6 98.7 112" width="35" height="40" role="img" aria-label="Μ"><path d="M48.6 88L41.2 88L17.7 25.4L17.3 25.4Q17.6 28.5 17.8 33.8Q18 39 18 44.7L18 44.7L18 88L9.7 88L9.7 16.6L23 16.6L45 75.1L45.4 75.1L67.8 16.6L81 16.6L81 88L72.1 88L72.1 44.1Q72.1 38.9 72.4 33.8Q72.6 28.7 72.8 25.5L72.8 25.5L72.4 25.5L48.6 88" fill="#CFC3B2"/></svg><svg viewBox="-4 6 98.7 112" width="35" height="40" role="img" aria-label="Μ"><path d="M48.6 88L41.2 88L17.7 25.4L17.3 25.4Q17.6 28.5 17.8 33.8Q18 39 18 44.7L18 44.7L18 88L9.7 88L9.7 16.6L23 16.6L45 75.1L45.4 75.1L67.8 16.6L81 16.6L81 88L72.1 88L72.1 44.1Q72.1 38.9 72.4 33.8Q72.6 28.7 72.8 25.5L72.8 25.5L72.4 25.5L48.6 88" fill="#CFC3B2"/></svg>
+      <span class="s">mu</span></div>
+    <div class="cell" style="text-align:left;padding:6px 8px">
+      <svg viewBox="-4 6 84 112" width="30" height="40" role="img" aria-label="Ν"><path d="M66.3 16.6L66.3 88L55.8 88L17.6 28.7L17.2 28.7Q17.4 32.2 17.7 37.4Q18 42.6 18 48.1L18 48.1L18 88L9.7 88L9.7 16.6L20.1 16.6L58.2 75.7L58.6 75.7Q58.5 74.1 58.4 70.9Q58.2 67.7 58.1 63.9Q57.9 60.1 57.9 56.9L57.9 56.9L57.9 16.6L66.3 16.6" fill="#16130F"/></svg><svg viewBox="-4 6 84 112" width="30" height="40" role="img" aria-label="Ν"><path d="M66.3 16.6L66.3 88L55.8 88L17.6 28.7L17.2 28.7Q17.4 32.2 17.7 37.4Q18 42.6 18 48.1L18 48.1L18 88L9.7 88L9.7 16.6L20.1 16.6L58.2 75.7L58.6 75.7Q58.5 74.1 58.4 70.9Q58.2 67.7 58.1 63.9Q57.9 60.1 57.9 56.9L57.9 56.9L57.9 16.6L66.3 16.6" fill="#CFC3B2"/></svg><svg viewBox="-4 6 84 112" width="30" height="40" role="img" aria-label="Ν"><path d="M66.3 16.6L66.3 88L55.8 88L17.6 28.7L17.2 28.7Q17.4 32.2 17.7 37.4Q18 42.6 18 48.1L18 48.1L18 88L9.7 88L9.7 16.6L20.1 16.6L58.2 75.7L58.6 75.7Q58.5 74.1 58.4 70.9Q58.2 67.7 58.1 63.9Q57.9 60.1 57.9 56.9L57.9 56.9L57.9 16.6L66.3 16.6" fill="#CFC3B2"/></svg>
+      <span class="s">nu</span></div>
+    <div class="cell" style="text-align:left;padding:6px 8px">
+      <svg viewBox="-4 6 63.5 112" width="23" height="40" role="img" aria-label="Ξ"><path d="M49.9 24.5L5.5 24.5L5.5 16.6L49.9 16.6L49.9 24.5M45.9 54.6L9.5 54.6L9.5 46.8L45.9 46.8L45.9 54.6M51.9 88L3.5 88L3.5 80.1L51.9 80.1L51.9 88" fill="#16130F"/></svg><svg viewBox="-4 6 63.5 112" width="23" height="40" role="img" aria-label="Ξ"><path d="M49.9 24.5L5.5 24.5L5.5 16.6L49.9 16.6L49.9 24.5M45.9 54.6L9.5 54.6L9.5 46.8L45.9 46.8L45.9 54.6M51.9 88L3.5 88L3.5 80.1L51.9 80.1L51.9 88" fill="#CFC3B2"/></svg><svg viewBox="-4 6 63.5 112" width="23" height="40" role="img" aria-label="Ξ"><path d="M49.9 24.5L5.5 24.5L5.5 16.6L49.9 16.6L49.9 24.5M45.9 54.6L9.5 54.6L9.5 46.8L45.9 46.8L45.9 54.6M51.9 88L3.5 88L3.5 80.1L51.9 80.1L51.9 88" fill="#CFC3B2"/></svg>
+      <span class="s">xi</span></div>
+    <div class="cell" style="text-align:left;padding:6px 8px">
+      <svg viewBox="-4 6 86.1 112" width="31" height="40" role="img" aria-label="Ο"><path d="M72 52.2L72 52.2Q72 63.3 68.3 71.6Q64.5 79.8 57.2 84.4Q49.9 89 39.1 89L39.1 89Q28 89 20.7 84.4Q13.3 79.8 9.7 71.5Q6.1 63.2 6.1 52.1L6.1 52.1Q6.1 41.1 9.7 32.9Q13.3 24.7 20.7 20.1Q28 15.5 39.2 15.5L39.2 15.5Q49.9 15.5 57.2 20Q64.5 24.6 68.3 32.8Q72 41.1 72 52.2M15.6 52.2L15.6 52.2Q15.6 65.7 21.3 73.5Q27 81.2 39.1 81.2L39.1 81.2Q51.3 81.2 56.9 73.5Q62.5 65.7 62.5 52.2L62.5 52.2Q62.5 38.7 56.9 31.1Q51.3 23.4 39.2 23.4L39.2 23.4Q27.1 23.4 21.4 31.1Q15.6 38.7 15.6 52.2" fill="#16130F"/></svg><svg viewBox="-4 6 86.1 112" width="31" height="40" role="img" aria-label="Ο"><path d="M72 52.2L72 52.2Q72 63.3 68.3 71.6Q64.5 79.8 57.2 84.4Q49.9 89 39.1 89L39.1 89Q28 89 20.7 84.4Q13.3 79.8 9.7 71.5Q6.1 63.2 6.1 52.1L6.1 52.1Q6.1 41.1 9.7 32.9Q13.3 24.7 20.7 20.1Q28 15.5 39.2 15.5L39.2 15.5Q49.9 15.5 57.2 20Q64.5 24.6 68.3 32.8Q72 41.1 72 52.2M15.6 52.2L15.6 52.2Q15.6 65.7 21.3 73.5Q27 81.2 39.1 81.2L39.1 81.2Q51.3 81.2 56.9 73.5Q62.5 65.7 62.5 52.2L62.5 52.2Q62.5 38.7 56.9 31.1Q51.3 23.4 39.2 23.4L39.2 23.4Q27.1 23.4 21.4 31.1Q15.6 38.7 15.6 52.2" fill="#CFC3B2"/></svg><svg viewBox="-4 6 86.1 112" width="31" height="40" role="img" aria-label="Ο"><path d="M72 52.2L72 52.2Q72 63.3 68.3 71.6Q64.5 79.8 57.2 84.4Q49.9 89 39.1 89L39.1 89Q28 89 20.7 84.4Q13.3 79.8 9.7 71.5Q6.1 63.2 6.1 52.1L6.1 52.1Q6.1 41.1 9.7 32.9Q13.3 24.7 20.7 20.1Q28 15.5 39.2 15.5L39.2 15.5Q49.9 15.5 57.2 20Q64.5 24.6 68.3 32.8Q72 41.1 72 52.2M15.6 52.2L15.6 52.2Q15.6 65.7 21.3 73.5Q27 81.2 39.1 81.2L39.1 81.2Q51.3 81.2 56.9 73.5Q62.5 65.7 62.5 52.2L62.5 52.2Q62.5 38.7 56.9 31.1Q51.3 23.4 39.2 23.4L39.2 23.4Q27.1 23.4 21.4 31.1Q15.6 38.7 15.6 52.2" fill="#CFC3B2"/></svg>
+      <span class="s">omicron</span></div>
+    <div class="cell" style="text-align:left;padding:6px 8px">
+      <svg viewBox="-4 6 81.1 112" width="29" height="40" role="img" aria-label="Π"><path d="M18.7 88L9.7 88L9.7 16.6L63.3 16.6L63.3 88L54.4 88L54.4 24.5L18.7 24.5L18.7 88" fill="#16130F"/></svg><svg viewBox="-4 6 81.1 112" width="29" height="40" role="img" aria-label="Π"><path d="M18.7 88L9.7 88L9.7 16.6L63.3 16.6L63.3 88L54.4 88L54.4 24.5L18.7 24.5L18.7 88" fill="#CFC3B2"/></svg><svg viewBox="-4 6 81.1 112" width="29" height="40" role="img" aria-label="Π"><path d="M18.7 88L9.7 88L9.7 16.6L63.3 16.6L63.3 88L54.4 88L54.4 24.5L18.7 24.5L18.7 88" fill="#CFC3B2"/></svg>
+      <span class="s">pi</span></div>
+    <div class="cell" style="text-align:left;padding:6px 8px">
+      <svg viewBox="-4 6 68.5 112" width="24" height="40" role="img" aria-label="Ρ"><path d="M9.7 16.6L28.6 16.6Q42.6 16.6 49 22.1Q55.4 27.6 55.4 37.6L55.4 37.6Q55.4 43.5 52.8 48.7Q50.1 53.8 43.9 57Q37.6 60.2 26.9 60.2L26.9 60.2L18.7 60.2L18.7 88L9.7 88L9.7 16.6M27.8 24.3L27.8 24.3L18.7 24.3L18.7 52.5L25.9 52.5Q36.1 52.5 41.1 49.2Q46.1 45.9 46.1 38L46.1 38Q46.1 31.1 41.7 27.7Q37.3 24.3 27.8 24.3" fill="#16130F"/></svg><svg viewBox="-4 6 68.5 112" width="24" height="40" role="img" aria-label="Ρ"><path d="M9.7 16.6L28.6 16.6Q42.6 16.6 49 22.1Q55.4 27.6 55.4 37.6L55.4 37.6Q55.4 43.5 52.8 48.7Q50.1 53.8 43.9 57Q37.6 60.2 26.9 60.2L26.9 60.2L18.7 60.2L18.7 88L9.7 88L9.7 16.6M27.8 24.3L27.8 24.3L18.7 24.3L18.7 52.5L25.9 52.5Q36.1 52.5 41.1 49.2Q46.1 45.9 46.1 38L46.1 38Q46.1 31.1 41.7 27.7Q37.3 24.3 27.8 24.3" fill="#CFC3B2"/></svg><svg viewBox="-4 6 68.5 112" width="24" height="40" role="img" aria-label="Ρ"><path d="M9.7 16.6L28.6 16.6Q42.6 16.6 49 22.1Q55.4 27.6 55.4 37.6L55.4 37.6Q55.4 43.5 52.8 48.7Q50.1 53.8 43.9 57Q37.6 60.2 26.9 60.2L26.9 60.2L18.7 60.2L18.7 88L9.7 88L9.7 16.6M27.8 24.3L27.8 24.3L18.7 24.3L18.7 52.5L25.9 52.5Q36.1 52.5 41.1 49.2Q46.1 45.9 46.1 38L46.1 38Q46.1 31.1 41.7 27.7Q37.3 24.3 27.8 24.3" fill="#CFC3B2"/></svg>
+      <span class="s">rho</span></div>
+    <div class="cell" style="text-align:left;padding:6px 8px">
+      <svg viewBox="-4 6 65 112" width="23" height="40" role="img" aria-label="Σ"><path d="M54.6 88L3.6 88L3.6 80.6L27 50.7L4.2 24.1L4.2 16.6L51.7 16.6L51.7 24.6L26.2 24.6Q24.8 24.6 22.4 24.6Q20 24.6 17.8 24.5Q15.6 24.5 14.5 24.5L14.5 24.5L37 50.6L13.5 80.2Q17.3 80.2 21.1 80.2Q24.8 80.1 28.8 80.1L28.8 80.1L54.6 80.1L54.6 88" fill="#16130F"/></svg><svg viewBox="-4 6 65 112" width="23" height="40" role="img" aria-label="Σ"><path d="M54.6 88L3.6 88L3.6 80.6L27 50.7L4.2 24.1L4.2 16.6L51.7 16.6L51.7 24.6L26.2 24.6Q24.8 24.6 22.4 24.6Q20 24.6 17.8 24.5Q15.6 24.5 14.5 24.5L14.5 24.5L37 50.6L13.5 80.2Q17.3 80.2 21.1 80.2Q24.8 80.1 28.8 80.1L28.8 80.1L54.6 80.1L54.6 88" fill="#CFC3B2"/></svg><svg viewBox="-4 6 65 112" width="23" height="40" role="img" aria-label="Σ"><path d="M54.6 88L3.6 88L3.6 80.6L27 50.7L4.2 24.1L4.2 16.6L51.7 16.6L51.7 24.6L26.2 24.6Q24.8 24.6 22.4 24.6Q20 24.6 17.8 24.5Q15.6 24.5 14.5 24.5L14.5 24.5L37 50.6L13.5 80.2Q17.3 80.2 21.1 80.2Q24.8 80.1 28.8 80.1L28.8 80.1L54.6 80.1L54.6 88" fill="#CFC3B2"/></svg>
+      <span class="s">sigma</span></div>
+    <div class="cell" style="text-align:left;padding:6px 8px">
+      <svg viewBox="-4 6 63.6 112" width="23" height="40" role="img" aria-label="Τ"><path d="M32.3 24.5L32.3 88L23.3 88L23.3 24.5L1 24.5L1 16.6L54.5 16.6L54.5 24.5L32.3 24.5" fill="#16130F"/></svg><svg viewBox="-4 6 63.6 112" width="23" height="40" role="img" aria-label="Τ"><path d="M32.3 24.5L32.3 88L23.3 88L23.3 24.5L1 24.5L1 16.6L54.5 16.6L54.5 24.5L32.3 24.5" fill="#CFC3B2"/></svg><svg viewBox="-4 6 63.6 112" width="23" height="40" role="img" aria-label="Τ"><path d="M32.3 24.5L32.3 88L23.3 88L23.3 24.5L1 24.5L1 16.6L54.5 16.6L54.5 24.5L32.3 24.5" fill="#CFC3B2"/></svg>
+      <span class="s">tau</span></div>
+    <div class="cell" style="text-align:left;padding:6px 8px">
+      <svg viewBox="-4 6 64.6 112" width="23" height="40" role="img" aria-label="Υ"><path d="M9.8 16.6L28.3 51.7L46.9 16.6L56.6 16.6L32.8 60.3L32.8 88L23.8 88L23.8 60.7L0 16.6L9.8 16.6" fill="#16130F"/></svg><svg viewBox="-4 6 64.6 112" width="23" height="40" role="img" aria-label="Υ"><path d="M9.8 16.6L28.3 51.7L46.9 16.6L56.6 16.6L32.8 60.3L32.8 88L23.8 88L23.8 60.7L0 16.6L9.8 16.6" fill="#CFC3B2"/></svg><svg viewBox="-4 6 64.6 112" width="23" height="40" role="img" aria-label="Υ"><path d="M9.8 16.6L28.3 51.7L46.9 16.6L56.6 16.6L32.8 60.3L32.8 88L23.8 88L23.8 60.7L0 16.6L9.8 16.6" fill="#CFC3B2"/></svg>
+      <span class="s">upsilon</span></div>
+    <div class="cell" style="text-align:left;padding:6px 8px">
+      <svg viewBox="-4 6 88.4 112" width="32" height="40" role="img" aria-label="Φ"><path d="M44.6 15.6L44.6 24.4Q56.2 24.6 62.9 28.2Q69.6 31.8 72.4 37.8Q75.2 43.7 75.2 51L75.2 51Q75.2 55.8 73.8 60.6Q72.3 65.3 68.8 69.2Q65.3 73 59.4 75.4Q53.5 77.8 44.6 78L44.6 78L44.6 89L35.7 89L35.7 78Q26.6 77.8 20.7 75.4Q14.7 72.9 11.3 69Q7.9 65 6.5 60.3Q5.1 55.6 5.1 51L5.1 51Q5.1 43.9 8 37.9Q10.8 32 17.5 28.3Q24.2 24.6 35.7 24.4L35.7 24.4L35.7 15.6L44.6 15.6M35.7 70.6L35.7 32Q27.7 32.2 23 34.6Q18.2 37 16.2 41.2Q14.2 45.3 14.2 50.9L14.2 50.9Q14.2 59.7 19.4 65Q24.5 70.2 35.7 70.6L35.7 70.6M44.6 32L44.6 70.6Q56.2 70.2 61.2 64.9Q66.1 59.5 66.1 50.9L66.1 50.9Q66.1 45.2 64.1 41.1Q62.1 36.9 57.4 34.6Q52.7 32.2 44.6 32L44.6 32" fill="#16130F"/></svg><svg viewBox="-4 6 88.4 112" width="32" height="40" role="img" aria-label="Φ"><path d="M44.6 15.6L44.6 24.4Q56.2 24.6 62.9 28.2Q69.6 31.8 72.4 37.8Q75.2 43.7 75.2 51L75.2 51Q75.2 55.8 73.8 60.6Q72.3 65.3 68.8 69.2Q65.3 73 59.4 75.4Q53.5 77.8 44.6 78L44.6 78L44.6 89L35.7 89L35.7 78Q26.6 77.8 20.7 75.4Q14.7 72.9 11.3 69Q7.9 65 6.5 60.3Q5.1 55.6 5.1 51L5.1 51Q5.1 43.9 8 37.9Q10.8 32 17.5 28.3Q24.2 24.6 35.7 24.4L35.7 24.4L35.7 15.6L44.6 15.6M35.7 70.6L35.7 32Q27.7 32.2 23 34.6Q18.2 37 16.2 41.2Q14.2 45.3 14.2 50.9L14.2 50.9Q14.2 59.7 19.4 65Q24.5 70.2 35.7 70.6L35.7 70.6M44.6 32L44.6 70.6Q56.2 70.2 61.2 64.9Q66.1 59.5 66.1 50.9L66.1 50.9Q66.1 45.2 64.1 41.1Q62.1 36.9 57.4 34.6Q52.7 32.2 44.6 32L44.6 32" fill="#CFC3B2"/></svg><svg viewBox="-4 6 88.4 112" width="32" height="40" role="img" aria-label="Φ"><path d="M44.6 15.6L44.6 24.4Q56.2 24.6 62.9 28.2Q69.6 31.8 72.4 37.8Q75.2 43.7 75.2 51L75.2 51Q75.2 55.8 73.8 60.6Q72.3 65.3 68.8 69.2Q65.3 73 59.4 75.4Q53.5 77.8 44.6 78L44.6 78L44.6 89L35.7 89L35.7 78Q26.6 77.8 20.7 75.4Q14.7 72.9 11.3 69Q7.9 65 6.5 60.3Q5.1 55.6 5.1 51L5.1 51Q5.1 43.9 8 37.9Q10.8 32 17.5 28.3Q24.2 24.6 35.7 24.4L35.7 24.4L35.7 15.6L44.6 15.6M35.7 70.6L35.7 32Q27.7 32.2 23 34.6Q18.2 37 16.2 41.2Q14.2 45.3 14.2 50.9L14.2 50.9Q14.2 59.7 19.4 65Q24.5 70.2 35.7 70.6L35.7 70.6M44.6 32L44.6 70.6Q56.2 70.2 61.2 64.9Q66.1 59.5 66.1 50.9L66.1 50.9Q66.1 45.2 64.1 41.1Q62.1 36.9 57.4 34.6Q52.7 32.2 44.6 32L44.6 32" fill="#CFC3B2"/></svg>
+      <span class="s">phi</span></div>
+    <div class="cell" style="text-align:left;padding:6px 8px">
+      <svg viewBox="-4 6 66.6 112" width="24" height="40" role="img" aria-label="Χ"><path d="M34.4 50.6L58.2 88L48 88L29.1 57L9.9 88L0.4 88L24.1 50.8L1.9 16.6L11.9 16.6L29.4 44.6L47 16.6L56.5 16.6L34.4 50.6" fill="#16130F"/></svg><svg viewBox="-4 6 66.6 112" width="24" height="40" role="img" aria-label="Χ"><path d="M34.4 50.6L58.2 88L48 88L29.1 57L9.9 88L0.4 88L24.1 50.8L1.9 16.6L11.9 16.6L29.4 44.6L47 16.6L56.5 16.6L34.4 50.6" fill="#CFC3B2"/></svg><svg viewBox="-4 6 66.6 112" width="24" height="40" role="img" aria-label="Χ"><path d="M34.4 50.6L58.2 88L48 88L29.1 57L9.9 88L0.4 88L24.1 50.8L1.9 16.6L11.9 16.6L29.4 44.6L47 16.6L56.5 16.6L34.4 50.6" fill="#CFC3B2"/></svg>
+      <span class="s">chi</span></div>
+    <div class="cell" style="text-align:left;padding:6px 8px">
+      <svg viewBox="-4 6 88.4 112" width="32" height="40" role="img" aria-label="Ψ"><path d="M75.1 16.6L75.1 40.1Q75.1 45.2 73.7 49.9Q72.2 54.6 68.8 58.3Q65.4 62 59.5 64.2Q53.5 66.3 44.5 66.3L44.5 66.3L44.5 88L35.7 88L35.7 66.3Q26.7 66.3 20.8 64.1Q14.8 61.9 11.5 58.2Q8.1 54.5 6.7 49.8Q5.3 45.1 5.3 40.2L5.3 40.2L5.3 16.6L14.3 16.6L14.3 40Q14.3 49.3 19.4 54Q24.5 58.6 35.7 58.6L35.7 58.6L35.7 16.6L44.5 16.6L44.5 58.6Q55.9 58.6 60.9 54Q65.9 49.3 65.9 40.2L65.9 40.2L65.9 16.6L75.1 16.6" fill="#16130F"/></svg><svg viewBox="-4 6 88.4 112" width="32" height="40" role="img" aria-label="Ψ"><path d="M75.1 16.6L75.1 40.1Q75.1 45.2 73.7 49.9Q72.2 54.6 68.8 58.3Q65.4 62 59.5 64.2Q53.5 66.3 44.5 66.3L44.5 66.3L44.5 88L35.7 88L35.7 66.3Q26.7 66.3 20.8 64.1Q14.8 61.9 11.5 58.2Q8.1 54.5 6.7 49.8Q5.3 45.1 5.3 40.2L5.3 40.2L5.3 16.6L14.3 16.6L14.3 40Q14.3 49.3 19.4 54Q24.5 58.6 35.7 58.6L35.7 58.6L35.7 16.6L44.5 16.6L44.5 58.6Q55.9 58.6 60.9 54Q65.9 49.3 65.9 40.2L65.9 40.2L65.9 16.6L75.1 16.6" fill="#CFC3B2"/></svg><svg viewBox="-4 6 88.4 112" width="32" height="40" role="img" aria-label="Ψ"><path d="M75.1 16.6L75.1 40.1Q75.1 45.2 73.7 49.9Q72.2 54.6 68.8 58.3Q65.4 62 59.5 64.2Q53.5 66.3 44.5 66.3L44.5 66.3L44.5 88L35.7 88L35.7 66.3Q26.7 66.3 20.8 64.1Q14.8 61.9 11.5 58.2Q8.1 54.5 6.7 49.8Q5.3 45.1 5.3 40.2L5.3 40.2L5.3 16.6L14.3 16.6L14.3 40Q14.3 49.3 19.4 54Q24.5 58.6 35.7 58.6L35.7 58.6L35.7 16.6L44.5 16.6L44.5 58.6Q55.9 58.6 60.9 54Q65.9 49.3 65.9 40.2L65.9 40.2L65.9 16.6L75.1 16.6" fill="#CFC3B2"/></svg>
+      <span class="s">psi</span></div>
+    <div class="cell" style="text-align:left;padding:6px 8px">
+      <svg viewBox="-4 6 86.2 112" width="31" height="40" role="img" aria-label="Ω"><path d="M39.1 23.4L39.1 23.4Q27.1 23.4 21.5 29.9Q15.9 36.5 15.9 47.9L15.9 47.9Q15.9 57.9 19.6 66Q23.3 74.1 32.6 80.8L32.6 80.8L32.6 88L3.8 88L3.8 80.1L21.6 80.1Q15.2 75.2 10.8 67Q6.4 58.8 6.4 47.6L6.4 47.6Q6.4 37.8 10.2 30.6Q14 23.4 21.4 19.5Q28.7 15.5 39.1 15.5L39.1 15.5Q49.7 15.5 57 19.4Q64.3 23.3 68.1 30.5Q71.9 37.7 71.9 47.5L71.9 47.5Q71.9 58.7 67.6 67Q63.2 75.2 56.8 80.1L56.8 80.1L74.5 80.1L74.5 88L45.7 88L45.7 80.8Q55 74.2 58.8 66Q62.5 57.8 62.5 47.9L62.5 47.9Q62.5 36.5 56.9 29.9Q51.2 23.4 39.1 23.4" fill="#16130F"/></svg><svg viewBox="-4 6 86.2 112" width="31" height="40" role="img" aria-label="Ω"><path d="M39.1 23.4L39.1 23.4Q27.1 23.4 21.5 29.9Q15.9 36.5 15.9 47.9L15.9 47.9Q15.9 57.9 19.6 66Q23.3 74.1 32.6 80.8L32.6 80.8L32.6 88L3.8 88L3.8 80.1L21.6 80.1Q15.2 75.2 10.8 67Q6.4 58.8 6.4 47.6L6.4 47.6Q6.4 37.8 10.2 30.6Q14 23.4 21.4 19.5Q28.7 15.5 39.1 15.5L39.1 15.5Q49.7 15.5 57 19.4Q64.3 23.3 68.1 30.5Q71.9 37.7 71.9 47.5L71.9 47.5Q71.9 58.7 67.6 67Q63.2 75.2 56.8 80.1L56.8 80.1L74.5 80.1L74.5 88L45.7 88L45.7 80.8Q55 74.2 58.8 66Q62.5 57.8 62.5 47.9L62.5 47.9Q62.5 36.5 56.9 29.9Q51.2 23.4 39.1 23.4" fill="#CFC3B2"/></svg><svg viewBox="-4 6 86.2 112" width="31" height="40" role="img" aria-label="Ω"><path d="M39.1 23.4L39.1 23.4Q27.1 23.4 21.5 29.9Q15.9 36.5 15.9 47.9L15.9 47.9Q15.9 57.9 19.6 66Q23.3 74.1 32.6 80.8L32.6 80.8L32.6 88L3.8 88L3.8 80.1L21.6 80.1Q15.2 75.2 10.8 67Q6.4 58.8 6.4 47.6L6.4 47.6Q6.4 37.8 10.2 30.6Q14 23.4 21.4 19.5Q28.7 15.5 39.1 15.5L39.1 15.5Q49.7 15.5 57 19.4Q64.3 23.3 68.1 30.5Q71.9 37.7 71.9 47.5L71.9 47.5Q71.9 58.7 67.6 67Q63.2 75.2 56.8 80.1L56.8 80.1L74.5 80.1L74.5 88L45.7 88L45.7 80.8Q55 74.2 58.8 66Q62.5 57.8 62.5 47.9L62.5 47.9Q62.5 36.5 56.9 29.9Q51.2 23.4 39.1 23.4" fill="#CFC3B2"/></svg>
+      <span class="s">omega</span></div>
+  </div>
+
+  <footer>
+    <span>twenty-four, twice each</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Alpha to omega</span>
+  </footer>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="sheet-kind" content="form">
+<title>Two Meanings Joined — Chinese</title>
+<style>
+  :root { --font: Georgia, "Times New Roman", serif; }
+
+  /* Page margins live HERE only — body padding stays 0 for print so the two
+     don't stack and eat the sheet. */
+  @page { size: letter portrait; margin: 0.45in 0.5in; }
+
+  /*
+   * THE PALETTE. The same one the shop wears (kitchen-table/BRAND.md): warm
+   * near-black ink, one accent, pine kept back for the answer key.
+   *
+   * WHY A SHEET HAS COLOR AT ALL. Every sheet was pure grayscale — #000 rules,
+   * #333 subtitles, #f0f0f0 boxes — which is what you get by never deciding.
+   * The paper is the product and it looked like a fax. A printer set to
+   * grayscale, or one that has no color to give, renders all of this as the
+   * greys it already had, so nothing below costs a parent anything they were
+   * not already spending.
+   *
+   * WHAT STAYS BLACK, ON PURPOSE:
+   *   - anything drawn to be written on (rules, name lines, answer boxes)
+   *   - anything drawn to be traced or colored in (line art, letter guides)
+   *   - the confidence rings, which have to survive a mono laser
+   * Color marks the sheet's own furniture — its rule, its numbering, its
+   * boxes — and never the part a child puts a pencil through.
+   */
+  :root {
+    --ink:    #16130F;
+    --muted:  #6B635A;
+    --rule:   #CFC3B2;
+    --guide:  #BCAE9C;
+    --accent: #C0511D;
+    --tint:   #F7EDE4;
+    --slate:  #2E5A78;
+    --tintslate: #E9EFF4;
+    --deep:   #2C4A45;
+    --tintdeep: #ECF1EF;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font);
+    color: #000; background: #fff;
+    font-size: 12pt; line-height: 1.3;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+
+  /* ORDER MATTERS. This generic rule must come BEFORE the @media screen block:
+     same specificity, so whichever is declared last wins. With it after, the
+     on-screen preview stretches to the viewport instead of 8.5in — print is
+     unaffected, but the proof you check before printing is wrong. */
+  .page { width: 100%; }
+  .page + .page { page-break-before: always; }
+
+  @media screen {
+    body { padding: 0.5in; background: #ddd; }
+    .page {
+      background: #fff; padding: 0.45in 0.5in;
+      width: 8.5in; min-height: 11in;
+      margin: 0 auto 24px; box-shadow: 0 2px 10px rgba(0,0,0,.3);
+    }
+  }
+
+  /* ------------------------------------------------------------- header */
+  header { border-bottom: 3px double var(--accent); padding-bottom: 6px; }
+  header.cont { border-bottom: 1px solid var(--rule); }
+  h1 { font-size: 16pt; margin: 0 0 1px; letter-spacing: .01em; }
+  .sub { font-size: 10pt; font-style: italic; color: var(--muted); margin: 0; }
+
+  .nameline { display: flex; gap: 26px; font-size: 10.5pt; margin: 11px 0 12px; }
+  .nameline span { flex: 1; border-bottom: 1px solid var(--ink); padding-bottom: 1px; }
+  .nameline span.short { flex: 0 0 1.9in; }
+
+  .directions {
+    font-size: 10.5pt; line-height: 1.35;
+    background: var(--tint); border-left: 4px solid var(--accent);
+    padding: 7px 10px; margin: 12px 0 14px;
+  }
+  .directions b { letter-spacing: .03em; }
+  .tip { font-style: italic; margin-top: 3px; }
+
+  /* ------------------------------------------------- problems and grids */
+  .grid { display: grid; gap: 13px 16px; margin-top: 4px; }
+  .prob { page-break-inside: avoid; display: flex; gap: 5px; align-items: flex-start; }
+  .pn { font-weight: bold; font-size: 11pt; min-width: .28in; flex: 0 0 auto; color: var(--accent); }
+  .pbody { flex: 1; min-width: 0; }
+
+  /* Digits need lining figures and even widths whatever the body font is. */
+  .num, .vert, .horiz { font-family: "Trebuchet MS", "Segoe UI", Tahoma, Verdana, sans-serif; font-variant-numeric: lining-nums tabular-nums; }
+
+  /* A stacked column algorithm.
+     Two grid columns — operator, then digits — because a floated or absolutely
+     positioned operator overlaps the digits as soon as the numbers get wide,
+     and "324" with a + sitting on the 3 is unreadable. The grid also lets the
+     rule under the last operand span BOTH columns, which is how it is written
+     by hand. The rule is heavy: it is the line you write the answer beneath. */
+  .vert {
+    display: inline-grid; grid-template-columns: auto auto;
+    font-size: 15pt; line-height: 1.3; text-align: right;
+  }
+  .vert > span { padding: 0 0 1px 0; }
+  .vert .op { text-align: left; padding-right: .16in; }
+  .vert .last { border-bottom: 2.5px solid var(--ink); padding-bottom: 3px; }
+  .vert .ans { height: .4in; }
+  /* Partial-products working, for 2-digit x 1-digit before the short method. */
+  .vert .part { font-size: 11pt; color: var(--muted); }
+  /* A row of worked examples that fade — see lib/formats.js faded(). The
+     caption is what makes the fade legible: without it the third one looks like
+     a question somebody forgot to number. */
+  .egrow { display: flex; gap: .34in; align-items: flex-start; margin: 0 0 4px; }
+  .eg { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; }
+  .eglab { font-size: 8.5pt; color: var(--slate); letter-spacing: .02em; }
+
+  /* The carried digits. Small and grey so the sum still reads as the sum, and
+     tight to the row below it so a carry sits ON the column it goes into. */
+  .vert .carry { font-size: 9pt; color: var(--slate); line-height: 1; padding: 0 0 1px 0; }
+
+  .horiz { font-size: 14pt; white-space: nowrap; }
+
+  /* Row numbers in a word list. Gray and small: they are there so a list can be
+     dictated ("number seven") and marked without counting down the page, and
+     they must not compete with the word itself. */
+  .wn { color: var(--muted); font-size: 9pt; }
+
+  /* The box an answer goes in. inline-block so it can sit mid-sentence. */
+  .abox {
+    display: inline-block; border: 1.6px solid var(--slate); border-radius: 3px;
+    vertical-align: middle; margin: 0 3px; position: relative; background: #fff;
+  }
+  /* Scoped to the box: as a bare ".alab" it pinned any generator's own .alab
+     to the bottom of the page (life-07-signs-and-forms 40, 2026-09-24). */
+  .abox > .alab {
+    position: absolute; bottom: 1px; left: 0; right: 0;
+    text-align: center; font-size: 7pt; color: var(--muted); font-style: italic;
+  }
+
+  /* Confidence marks. The rings are drawn with a border and a gradient rather
+     than an SVG so they stay inline with the question text at any font size,
+     and print black on a mono laser without relying on a background image. */
+  .conf { float: right; margin: 2px 0 0 8px; white-space: nowrap; }
+  .cring {
+    display: inline-block; width: 11px; height: 11px; margin-left: 4px;
+    border: 1.4px solid var(--slate); border-radius: 50%; vertical-align: middle;
+  }
+  .cring-full { background: var(--accent); }
+  .cring-half { background: linear-gradient(90deg, var(--accent) 50%, #fff 50%); }
+  .cring-none { background: #fff; }
+  ol.qs.hasconf li { overflow: hidden; }
+
+  .conflegend {
+    border: 1.2px solid var(--rule); border-radius: 4px;
+    padding: 3px 8px; margin: 0 0 7px;
+    font-size: 8.5pt; color: var(--muted); display: flex; gap: 14px; align-items: center;
+  }
+  .conftitle { font-weight: 700; color: var(--ink); }
+  .confitem { white-space: nowrap; }
+
+  .work {
+    border: 1.4px dashed var(--rule); border-radius: 4px;
+    margin: 6px 0 2px; position: relative;
+  }
+  /* The label S.work() puts in the box: a DIRECT child only. As ".work span"
+     it also caught every span inside any generator's own .work content and
+     stacked them all at the top-left corner (math-11-grade6 47, 2026-09-23). */
+  .work > span {
+    position: absolute; top: 3px; left: 6px;
+    font-size: 8pt; color: var(--muted); font-style: italic;
+  }
+
+  /* ------------------------------------------------------ writing lines */
+  /* Primary rule: solid top, dashed midline, heavy baseline. Capitals reach
+     the top line, lowercase bodies sit under the dashed one. */
+  .write {
+    position: relative; height: 0.375in;
+    margin: 6px 0 0 .3in;
+    border-top: 1px solid var(--rule); border-bottom: 2px solid var(--ink);
+  }
+  .write.flush { margin-left: 0; }
+  .write + .write { margin-top: .17in; }
+  .write::after {
+    content: ""; position: absolute; left: 0; right: 0; top: 50%;
+    border-top: 1px dashed var(--guide);
+  }
+
+  /* ------------------------------------------------------- question list */
+  ol.qs { margin: 0; padding: 0 0 0 .34in; }
+  ol.qs li { margin-bottom: 13px; page-break-inside: avoid; }
+  ol.qs li::marker { font-weight: bold; font-size: 11pt; color: var(--accent); }
+  .qt { display: block; }
+
+  .mcq { display: grid; gap: 3px 14px; margin: 5px 0 2px .12in; font-size: 11pt; }
+  .opt { white-space: nowrap; }
+
+  /* -------------------------------------------------------------- tables */
+  .tbl { border-collapse: collapse; margin: 8px 0; font-size: 11pt; width: 100%; }
+  .tbl th, .tbl td { border: 1.4px solid var(--ink); padding: 5px 8px; text-align: left; }
+  .tbl th { color: var(--slate); }
+  .tbl th { background: var(--tint); font-size: 10pt; letter-spacing: .02em; }
+  .tbl td.blank { height: .34in; }
+  .tbl.narrow { width: auto; }
+  .tbl.center td, .tbl.center th { text-align: center; }
+
+  /* ------------------------------------------------------------ passages */
+  .passage {
+    border: 1.5px solid var(--slate); border-radius: 4px;
+    padding: 11px 14px; margin-bottom: 12px;
+    font-size: 11.5pt; line-height: 1.55;
+  }
+  .passage h2 { font-size: 13pt; margin: 0 0 6px; color: var(--deep); }
+  .passage p { margin: 0 0 8px; }
+  .passage p:last-child { margin-bottom: 0; }
+  .passage .byline { font-size: 9.5pt; font-style: italic; color: var(--muted); margin-bottom: 8px; }
+  /* Numbered paragraphs, so a question can say "in paragraph 2". */
+  .passage p.np { position: relative; padding-left: .3in; }
+  .passage p.np::before {
+    content: attr(data-p); position: absolute; left: 0; top: 0;
+    font-size: 9pt; color: var(--accent); font-weight: bold;
+  }
+
+  .wordbank {
+    border: 1.5px dashed var(--slate); border-radius: 4px;
+    padding: 8px 12px; margin: 10px 0 12px;
+    font-size: 11.5pt; text-align: center;
+  }
+  .wordbank b { display: block; font-size: 9.5pt; letter-spacing: .06em;
+    text-transform: uppercase; margin-bottom: 4px; color: var(--accent); }
+  .wordbank span { display: inline-block; margin: 2px 11px; }
+
+  .note {
+    border-left: 4px solid var(--deep); background: var(--tintdeep);
+    padding: 7px 11px; margin: 10px 0; font-size: 10.5pt;
+  }
+  .note b { letter-spacing: .02em; }
+
+  /* -------------------------------------------------------------- footer */
+  /* THE WORDMARK SITS IN THE FOOTER THAT WAS ALREADY THERE, so it costs no
+     height at all — a sheet that fitted before fits now. Upright where the rest
+     of the line is italic, and a size down: it is a signature, not a message,
+     and it must never compete with "Score: ___ / 10". */
+  .brand { font-style: normal; font-size: 7.5pt; letter-spacing: .04em;
+    color: var(--accent); align-self: center; }
+
+  footer {
+    margin-top: 14px; padding-top: 6px; border-top: 1px solid var(--rule);
+    font-size: 9pt; font-style: italic; color: var(--muted);
+    display: flex; justify-content: space-between;
+  }
+
+  /* ---------------------------------------------------------- answer key */
+  .keybadge {
+    display: inline-block; border: 2px solid var(--deep); color: var(--deep); padding: 2px 9px;
+    font-size: 9.5pt; font-weight: bold; letter-spacing: .08em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .key .why {
+    display: block; font-size: 9pt; font-style: italic; color: var(--muted); margin-top: 1px;
+  }
+  /* Highlight rather than underline: <u> in a key marks WHAT CHANGED, and an
+     underline under a comma is invisible. */
+  .key u { text-decoration: none; background: var(--tint); padding: 0 2px; font-weight: bold; }
+  .keygrid .pbody { font-family: "Trebuchet MS", "Segoe UI", Tahoma, Verdana, sans-serif; font-size: 12pt; }
+  /* A key's pictures scale to their column: at 1fr a wide drawing pushed a
+     three-column key 92px off the paper (art-04-drawing 10, 2026-09-24). */
+  .keygrid svg { max-width: 100%; height: auto; }
+  .keylist .qt { font-weight: normal; }
+
+  /*
+   * The guide page. Four lines per question, and the ASK line is the one that
+   * gets used at the table, so it is the one with a rule beside it — a parent
+   * scanning this page in ten seconds should land on the follow-up question
+   * and nothing else.
+   */
+  .guide { padding-left: .3in; }
+  .guide li { margin-bottom: 11px; page-break-inside: avoid; }
+  .guide .gq { font-weight: bold; font-size: 11pt; margin-bottom: 3px; }
+  /* 9pt, matching the key's own why line, because the guide page is the
+     binding constraint on every open sheet: four lines per question against a
+     key's one, and at 10pt a sheet with seven questions ran onto a second
+     side. Found by measuring, not chosen. (No backticks in here — this CSS
+     lives inside a template literal and one would close it.) */
+  .guide .glook, .guide .gthin, .guide .gstrong {
+    font-size: 9pt; line-height: 1.3; margin-top: 1px;
+  }
+  .guide .gthin { color: var(--muted); }
+  .guide .gstrong { color: var(--muted); font-style: italic; }
+  .guide .gask {
+    font-size: 9.5pt; line-height: 1.3; margin-top: 3px;
+    border-left: 3px solid var(--slate); padding-left: 7px;
+  }
+  .key .qs li { margin-bottom: 9px; }
+
+  /*
+   * INLINE-BLOCK, NOT BLOCK, AND THIS WAS WRONG FOR A LONG TIME. A block-level
+   * svg ignores text-align: center on its parent and sits flush left — so 117
+   * sheets across 35 packs said "centre this diagram" and got a left-aligned
+   * one. Twenty-five of them were origami and paper-plane fold sequences, where
+   * the whole page is diagrams.
+   *
+   * Nobody spotted it because a left-flush diagram looks deliberate; it only
+   * reads as wrong next to a centered one, and no sheet has both.
+   *
+   * inline-block makes text-align do what every one of those authors meant,
+   * and leaves a diagram in a left-aligned container exactly where it was.
+   * vertical-align: top kills the baseline gap that inline elements otherwise
+   * leave underneath them, which would have pushed long pages over.
+   */
+  svg { display: inline-block; vertical-align: top; }
+  svg.inline { vertical-align: middle; }
+
+  .row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin: 9px 0; }
+  .cell { border: 2.2px solid var(--ink); border-radius: 9px; padding: 10px 4px 8px;
+    text-align: center; }
+  .cell .py { font-size: 11pt; color: var(--muted); margin-top: 3px; }
+  .cell .mn { font-size: 12.5pt; font-weight: 700; }
+  .cell .box { border: 1.8px dashed var(--rule); border-radius: 6px; height: 1.5in;
+    margin: 6px 4px 0; }
+  .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 10px 0; }
+  .join { display: flex; align-items: center; justify-content: center; gap: 8px;
+    border: 2.4px solid var(--ink); border-radius: 9px; padding: 10px; }
+  .join .op { font-size: 20pt; font-weight: 700; color: var(--muted); }
+  .join .ans { border: 1.8px dashed var(--rule); border-radius: 6px; width: 1.9in;
+    height: .95in; }
+  .guess { border-collapse: collapse; width: 100%; margin: 8px 0; }
+  .guess th { border: 1.8px solid var(--ink); background: var(--tint); padding: 5px 8px;
+    font-size: 10pt; text-align: left; }
+  .guess td { border: 1.4px solid var(--rule); padding: 8px 9px; vertical-align: middle; font-size: 12pt; }
+  .guess td.g { text-align: center; width: .95in; }
+  .guess td.b { height: .52in; }
+  .guess.tall td { height: .72in; }
+  .rad { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center;
+    border: 2.4px solid var(--ink); border-radius: 9px; padding: 12px; margin: 9px 0; }
+  .rad > div { text-align: center; }
+  .rad .nm { font-size: 11pt; font-weight: 700; margin-top: 2px; }
+  .sorder { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin: 8px 0; }
+  .sorder > span { border: 1.8px solid var(--rule); border-radius: 6px; padding: 2px; }
+  .sorder .n { font-size: 10pt; color: var(--muted); width: .9in; flex: none; }
+  .note b.big { font-size: 15pt; }
+  .big { text-align: center; margin: 8px 0; }
+  .pickrow { display: flex; gap: .4in; justify-content: center; margin: 8px 0; }
+
+</style>
+</head>
+<body>
+
+<div class="page ">
+  <header>
+    
+    <h1>Two Meanings Joined</h1>
+    <p class="sub">Chinese &middot; Page 1 of 2</p>
+  </header>
+  <div class="nameline">
+    <span>Name</span>
+    <span class="short">Date</span>
+  </div>
+  <div class="directions">
+    <b>DIRECTIONS:</b> Two parts make a new character. <b>Write what you think it means</b>, then turn over.
+    <div class="tip">Say the parts out loud in English.</div>
+  </div>
+
+
+  <div class="join">
+    <svg viewBox="0 0 100 100" width="54" height="54" role="img" aria-label="木"><path d="M85.8 21.1L80.5 27.6L53.1 27.6L53.1 8C55.7 7.6 56.5 6.7 56.7 5.3L46.5 4.1L46.5 27.6L5.2 27.6L6 30.5L41.6 30.5C34.4 50.3 20.7 71 3.7 84.7L5 86C23.5 74.1 37.7 57.1 46.5 38.2L46.5 95.8L47.8 95.8C50.3 95.8 53.1 94.1 53.1 93.1L53.1 31.1C60.8 54.3 74.3 72.9 89.5 83.5C90.7 80.3 93.3 78.2 96.2 78L96.5 77C80.6 68.7 64 50.6 55 30.5L92.6 30.5C94 30.5 95 30 95.3 28.9C91.7 25.6 85.8 21.1 85.8 21.1" fill="#000"/></svg><span class="op">+</span><svg viewBox="0 0 100 100" width="54" height="54" role="img" aria-label="木"><path d="M85.8 21.1L80.5 27.6L53.1 27.6L53.1 8C55.7 7.6 56.5 6.7 56.7 5.3L46.5 4.1L46.5 27.6L5.2 27.6L6 30.5L41.6 30.5C34.4 50.3 20.7 71 3.7 84.7L5 86C23.5 74.1 37.7 57.1 46.5 38.2L46.5 95.8L47.8 95.8C50.3 95.8 53.1 94.1 53.1 93.1L53.1 31.1C60.8 54.3 74.3 72.9 89.5 83.5C90.7 80.3 93.3 78.2 96.2 78L96.5 77C80.6 68.7 64 50.6 55 30.5L92.6 30.5C94 30.5 95 30 95.3 28.9C91.7 25.6 85.8 21.1 85.8 21.1" fill="#000"/></svg>
+    <span class="op">=</span><svg viewBox="0 0 100 100" width="54" height="54" role="img" aria-label="林"><path d="M65.8 4.4L65.8 27.3L46.6 27.3L47.4 30.2L62.9 30.2C58 48.5 48.8 66.4 35.4 79.1L36.7 80.5C50 70.4 59.6 57.5 65.8 42.6L65.8 95.6L67.1 95.6C69.4 95.6 72.2 94 72.2 93L72.2 32.8C75.8 51 82.9 69.1 93 79.7C93.6 76.4 95.2 73.8 98.3 72.3L98.5 71.3C87.4 62.8 78.1 46.6 74.1 30.2L94.2 30.2C95.6 30.2 96.5 29.7 96.7 28.6C93.6 25.5 88.3 21.3 88.3 21.3L83.6 27.3L72.2 27.3L72.2 8.3C74.8 7.9 75.6 6.8 75.9 5.4M22.7 4.3L22.7 27.4L4.3 27.4L5.1 30.3L21.7 30.3C18.4 46.9 12.2 63.7 3.1 76.3L4.5 77.6C12.3 69.3 18.3 59.7 22.7 49L22.7 95.6L24.1 95.6C26.5 95.6 29.2 94.1 29.2 93.2L29.2 40.4C33.2 44.8 37.7 51.2 39 56.2C45.9 61.3 51.4 47.2 29.2 38.3L29.2 30.3L44.2 30.3C45.6 30.3 46.6 29.8 46.8 28.7C43.7 25.7 38.7 21.6 38.7 21.6L34.2 27.4L29.2 27.4L29.2 8.1C31.7 7.7 32.5 6.8 32.8 5.3" fill="#000"/></svg><span class="op">&rarr;</span>
+    <span class="ans"></span>
+  </div>
+  <div class="join">
+    <svg viewBox="0 0 100 100" width="54" height="54" role="img" aria-label="木"><path d="M85.8 21.1L80.5 27.6L53.1 27.6L53.1 8C55.7 7.6 56.5 6.7 56.7 5.3L46.5 4.1L46.5 27.6L5.2 27.6L6 30.5L41.6 30.5C34.4 50.3 20.7 71 3.7 84.7L5 86C23.5 74.1 37.7 57.1 46.5 38.2L46.5 95.8L47.8 95.8C50.3 95.8 53.1 94.1 53.1 93.1L53.1 31.1C60.8 54.3 74.3 72.9 89.5 83.5C90.7 80.3 93.3 78.2 96.2 78L96.5 77C80.6 68.7 64 50.6 55 30.5L92.6 30.5C94 30.5 95 30 95.3 28.9C91.7 25.6 85.8 21.1 85.8 21.1" fill="#000"/></svg><span class="op">+</span><svg viewBox="0 0 100 100" width="54" height="54" role="img" aria-label="木"><path d="M85.8 21.1L80.5 27.6L53.1 27.6L53.1 8C55.7 7.6 56.5 6.7 56.7 5.3L46.5 4.1L46.5 27.6L5.2 27.6L6 30.5L41.6 30.5C34.4 50.3 20.7 71 3.7 84.7L5 86C23.5 74.1 37.7 57.1 46.5 38.2L46.5 95.8L47.8 95.8C50.3 95.8 53.1 94.1 53.1 93.1L53.1 31.1C60.8 54.3 74.3 72.9 89.5 83.5C90.7 80.3 93.3 78.2 96.2 78L96.5 77C80.6 68.7 64 50.6 55 30.5L92.6 30.5C94 30.5 95 30 95.3 28.9C91.7 25.6 85.8 21.1 85.8 21.1" fill="#000"/></svg><span class="op">+</span><svg viewBox="0 0 100 100" width="54" height="54" role="img" aria-label="木"><path d="M85.8 21.1L80.5 27.6L53.1 27.6L53.1 8C55.7 7.6 56.5 6.7 56.7 5.3L46.5 4.1L46.5 27.6L5.2 27.6L6 30.5L41.6 30.5C34.4 50.3 20.7 71 3.7 84.7L5 86C23.5 74.1 37.7 57.1 46.5 38.2L46.5 95.8L47.8 95.8C50.3 95.8 53.1 94.1 53.1 93.1L53.1 31.1C60.8 54.3 74.3 72.9 89.5 83.5C90.7 80.3 93.3 78.2 96.2 78L96.5 77C80.6 68.7 64 50.6 55 30.5L92.6 30.5C94 30.5 95 30 95.3 28.9C91.7 25.6 85.8 21.1 85.8 21.1" fill="#000"/></svg>
+    <span class="op">=</span><svg viewBox="0 0 100 100" width="54" height="54" role="img" aria-label="森"><path d="M23.6 43.4L23.6 57.4L4.7 57.4L5.5 60.2L21.3 60.2C17.5 70.5 11.4 80.3 3.1 87.7L4.3 89.3C12.4 83.8 18.9 77.1 23.6 69.1L23.6 95.7L24.8 95.7C27.1 95.7 29.8 94.2 29.8 93.4L29.8 65.6C33.7 68.7 38.2 73.3 39.7 77.2C46.1 81 50.3 68.5 29.8 63.8L29.8 60.2L45.8 60.2C47.1 60.2 48 59.7 48.3 58.6C45.5 55.9 40.8 52.1 40.8 52.1L36.8 57.4L29.8 57.4L29.8 47C32.2 46.6 33.1 45.7 33.3 44.4M66.3 43.6L66.3 57.4L48.2 57.4L49 60.2L62.9 60.2C57.6 71.5 48.8 81.7 37.4 89L38.5 90.7C50.4 84.7 59.8 76.5 66.3 66.5L66.3 95.7L67.6 95.7C69.9 95.7 72.6 94.5 72.6 93.7L72.6 60.9C76.8 73.3 83.7 83.2 91.9 89.2C92.7 86.2 94.7 84.4 97.1 84L97.3 83C88.7 78.9 79.7 70.3 74.6 60.2L92.9 60.2C94.3 60.2 95.3 59.7 95.5 58.6C92.4 55.7 87.4 51.6 87.4 51.6L82.9 57.4L72.6 57.4L72.6 47.2C75.1 46.9 75.9 45.9 76.2 44.7M46.1 4.2L46.1 16.4L9.6 16.4L10.4 19.3L40.2 19.3C32.5 29.3 20.5 38.4 6.6 44.4L7.6 46.1C23.4 40.8 37 32.7 46.1 22.1L46.1 48.1L47.4 48.1C49.9 48.1 52.7 46.9 52.7 46.2L52.7 19.3L53.3 19.3C61.3 30.9 75.4 40.3 88.4 45.3C89 42.4 91.2 40.7 93.7 40.3L93.8 39.3C81 35.9 65.3 28.3 56.3 19.3L88.3 19.3C89.6 19.3 90.7 18.8 90.9 17.8C87.7 14.7 82.5 10.6 82.5 10.6L78 16.4L52.7 16.4L52.7 8C55.2 7.7 56.1 6.7 56.4 5.3" fill="#000"/></svg><span class="op">&rarr;</span>
+    <span class="ans"></span>
+  </div>
+  <div class="join">
+    <svg viewBox="0 0 100 100" width="54" height="54" role="img" aria-label="日"><path d="M73.5 51L73.5 83.2L26.8 83.2L26.8 51M73.5 48L26.8 48L26.8 17L73.5 17M20.2 14.1L20.2 95L21.4 95C24.4 95 26.8 93.3 26.8 92.3L26.8 86.1L73.5 86.1L73.5 94.5L74.5 94.5C76.9 94.5 80.2 92.7 80.3 92L80.3 18.3C82.3 17.9 83.9 17.1 84.6 16.3L76.3 9.7L72.5 14.1L27.5 14.1L20.2 10.7" fill="#000"/></svg><span class="op">+</span><svg viewBox="0 0 100 100" width="54" height="54" role="img" aria-label="月"><path d="M70.8 14.9L70.8 34.4L31.6 34.4L31.6 14.9M25.1 11.9L25.1 43.3C25.1 63.5 22 81 4.7 94.6L6.1 95.8C22 86.6 28.2 73.8 30.4 60.3L70.8 60.3L70.8 85C70.8 86.7 70.2 87.4 68.1 87.4C65.7 87.4 53.5 86.5 53.5 86.5L53.5 88.1C58.7 88.8 61.7 89.6 63.4 90.8C64.9 91.9 65.6 93.6 66 95.8C76.3 94.8 77.4 91.2 77.4 85.8L77.4 16.2C79.5 15.9 81.1 15 81.8 14.2L73.3 7.7L69.8 11.9L32.9 11.9L25.1 8.6M70.8 37.3L70.8 57.4L30.8 57.4C31.4 52.7 31.6 47.9 31.6 43.2L31.6 37.3" fill="#000"/></svg>
+    <span class="op">=</span><svg viewBox="0 0 100 100" width="54" height="54" role="img" aria-label="明"><path d="M83.7 13.5L83.7 33.5L58 33.5L58 13.5M51.6 10.6L51.6 42.6C51.6 63.5 48.2 81 30.1 94.8L31.5 96C48 86.7 54.4 73.7 56.7 59.9L83.7 59.9L83.7 85.2C83.7 87 83.1 87.6 81 87.6C78.5 87.6 66.1 86.7 66.1 86.7L66.1 88.3C71.4 89 74.4 89.8 76.1 90.9C77.7 92 78.4 93.7 78.8 95.8C89 94.7 90.1 91.2 90.1 86L90.1 14.8C92.1 14.4 93.8 13.6 94.5 12.7L86 6.4L82.7 10.6L59.1 10.6L51.6 7.3M83.7 36.4L83.7 57L57.2 57C57.8 52.2 58 47.3 58 42.5L58 36.4M14.3 15.2L33.1 15.2L33.1 37.6L14.3 37.6M8 12.2L8 78.7L9 78.7C12.2 78.7 14.3 76.9 14.3 76.4L14.3 66.7L33.1 66.7L33.1 74.7L34 74.7C36.3 74.7 39.3 73 39.4 72.3L39.4 16.5C41.4 16 43.1 15.2 43.7 14.4L35.7 8.2L32.1 12.2L15.5 12.2L8 9.1M14.3 40.5L33.1 40.5L33.1 63.7L14.3 63.7" fill="#000"/></svg><span class="op">&rarr;</span>
+    <span class="ans"></span>
+  </div>
+  <div class="join">
+    <svg viewBox="0 0 100 100" width="54" height="54" role="img" aria-label="人"><path d="M50.8 10.2C53.3 9.9 54.1 8.9 54.3 7.4L43.7 6.3C43.6 36.9 43.9 69.3 4.1 94L5.5 95.7C41.1 77.2 48.3 51.9 50.1 27.7C53.2 57.5 62.2 80.8 89.1 95.7C90.2 91.9 92.7 90.5 96.3 90.1L96.5 89C61.9 73 53 47 50.8 10.2" fill="#000"/></svg><span class="op">+</span><svg viewBox="0 0 100 100" width="54" height="54" role="img" aria-label="木"><path d="M85.8 21.1L80.5 27.6L53.1 27.6L53.1 8C55.7 7.6 56.5 6.7 56.7 5.3L46.5 4.1L46.5 27.6L5.2 27.6L6 30.5L41.6 30.5C34.4 50.3 20.7 71 3.7 84.7L5 86C23.5 74.1 37.7 57.1 46.5 38.2L46.5 95.8L47.8 95.8C50.3 95.8 53.1 94.1 53.1 93.1L53.1 31.1C60.8 54.3 74.3 72.9 89.5 83.5C90.7 80.3 93.3 78.2 96.2 78L96.5 77C80.6 68.7 64 50.6 55 30.5L92.6 30.5C94 30.5 95 30 95.3 28.9C91.7 25.6 85.8 21.1 85.8 21.1" fill="#000"/></svg>
+    <span class="op">=</span><svg viewBox="0 0 100 100" width="54" height="54" role="img" aria-label="休"><path d="M58 5.6L58 29.5L30.5 29.5L31.3 32.4L53.8 32.4C48.9 50.2 39.7 67.8 26.7 80.3L28.1 81.6C41.7 71.3 51.7 57.7 58 42L58 95.4L59.3 95.4C61.8 95.4 64.5 93.8 64.5 92.8L64.5 33.8C69.3 52.5 79.2 69.9 91.9 80.1C92.5 77.2 94.5 75 97.3 74L97.6 72.9C84.4 64.6 71.8 49.5 66.5 32.4L92.8 32.4C94.2 32.4 95.1 31.9 95.4 30.9C92 27.7 86.6 23.5 86.6 23.5L81.8 29.5L64.5 29.5L64.5 9.5C67.1 9.1 67.9 8.1 68.1 6.7M26.2 4.2C21.1 23.6 11.9 42.9 3 55.1L4.4 56.1C9.4 51.3 14.2 45.4 18.5 38.6L18.5 95.6L19.7 95.6C22.3 95.6 24.9 94 25.1 93.5L25.1 35.7C26.8 35.4 27.8 34.8 28.2 33.9L22.6 31.8C26.5 24.9 29.9 17.4 32.8 9.5C35 9.6 36.3 8.7 36.7 7.5" fill="#000"/></svg><span class="op">&rarr;</span>
+    <span class="ans"></span>
+  </div>
+  <div class="join">
+    <svg viewBox="0 0 100 100" width="54" height="54" role="img" aria-label="女"><path d="M43.1 4C41.2 10.2 37.5 20.1 33.2 30.5L3.8 30.5L4.6 33.4L32 33.4C26.4 46.6 20.1 60.2 15.6 68C18.4 69.2 21.4 69.4 23.1 68.6L25.9 62.9C34.6 65.7 42.7 68.9 49.9 72.3C39.9 82.6 25.4 89.5 4 94.1L4.6 95.9C29.1 92.2 44.9 85.7 55.7 75.2C68.7 82 78.4 89.2 83.7 95C91.8 98.7 95 84.6 59.7 70.7C67.5 61.2 72.1 49 75.5 33.4L93.4 33.4C94.8 33.4 95.8 32.9 96.1 31.8C92.4 28.5 86.5 23.9 86.5 23.9L81.2 30.5L40.3 30.5C44.1 21.6 47.4 13.5 49.3 8.2C51.8 8.2 52.8 7.2 53.2 5.8M39.1 33.4L67.9 33.4C65 47.9 60.6 59.4 53.4 68.4C46 65.8 37.2 63.3 26.8 61C30.7 52.8 35.1 42.8 39.1 33.4" fill="#000"/></svg><span class="op">+</span><svg viewBox="0 0 100 100" width="54" height="54" role="img" aria-label="子"><path d="M14.7 12.7L15.6 15.6L72.5 15.6C67.4 20.7 59.7 27.4 52.6 32L47.1 31.4L47.1 47.9L4.5 47.9L5.4 50.9L47.1 50.9L47.1 85.1C47.1 87 46.4 87.7 44 87.7C41.2 87.7 26.3 86.6 26.3 86.6L26.3 88.2C32.5 88.9 36 89.8 38 90.9C39.9 92 40.7 93.6 41.1 95.8C52.4 94.7 53.8 91.1 53.8 85.7L53.8 50.9L93.1 50.9C94.5 50.9 95.6 50.4 95.8 49.3C92 45.9 86 41.3 86 41.3L80.7 47.9L53.8 47.9L53.8 35.1C56.1 34.8 57.1 33.9 57.3 32.5L55.4 32.3C65.2 28.1 75.5 21.5 82.4 16.6C84.6 16.4 85.9 16.2 86.8 15.5L78.8 8.2L74 12.7" fill="#000"/></svg>
+    <span class="op">=</span><svg viewBox="0 0 100 100" width="54" height="54" role="img" aria-label="好"><path d="M64.4 29.9L64.4 47.5L40.9 47.5L41.7 50.4L64.4 50.4L64.4 85.3C64.4 86.9 63.8 87.5 61.9 87.5C59.7 87.5 48.3 86.6 48.3 86.6L48.3 88.2C53.1 88.8 55.9 89.6 57.5 90.8C59 91.9 59.6 93.6 59.9 95.7C69.9 94.7 70.9 91.3 70.9 85.8L70.9 50.4L94.6 50.4C96 50.4 96.9 49.9 97.2 48.8C94 45.7 88.9 41.6 88.9 41.6L84.3 47.5L70.9 47.5L70.9 33.6C73.3 33.3 74.2 32.4 74.5 31L72.1 30.7C78.5 26.2 85.7 19.8 90.3 15.9C92.5 15.8 93.7 15.7 94.5 15L87 7.9L82.5 12.1L42.7 12.1L43.6 15.1L81.6 15.1C78.4 19.6 73.7 25.9 69.5 30.5M21.7 4.6C20.8 10.4 18.9 19.1 16.7 28.4L3.7 28.4L4.6 31.3L16 31.3C12.5 45.2 8.3 59.9 5.2 68.3C8 69.1 10.6 69 11.9 68.1L14 61.3C17.4 63.7 21.1 66.6 24.4 69.7C19.7 79 12.9 87.1 2.7 93.3L3.7 94.7C15.1 89.2 22.8 82 28.2 73.6C32.2 78.1 35.4 83 36.7 87.5C43.4 91.5 46.5 79.6 31.3 68.2C36.6 57.4 38.9 45.1 40.3 32.2C42.5 32 43.4 31.7 44.2 30.9L36.8 24.3L33 28.4L22.9 28.4C24.8 20.7 26.4 13.7 27.4 8.9C29.9 8.9 30.9 8 31.2 6.7M22.1 31.3L33.8 31.3C32.7 43.4 30.7 54.9 26.5 65C23.2 63 19.2 61.1 14.6 59.4C17.1 50.8 19.8 40.6 22.1 31.3" fill="#000"/></svg><span class="op">&rarr;</span>
+    <span class="ans"></span>
+  </div>
+  <div class="join">
+    <svg viewBox="0 0 100 100" width="54" height="54" role="img" aria-label="田"><path d="M46.6 18L46.6 48L19.5 48L19.5 18M53.1 18L81.2 18L81.2 48L53.1 48M46.6 50.9L46.6 82.5L19.5 82.5L19.5 50.9M53.1 50.9L81.2 50.9L81.2 82.5L53.1 82.5M13.1 15.1L13.1 93.9L14.2 93.9C17.2 93.9 19.5 92.3 19.5 91.3L19.5 85.4L81.2 85.4L81.2 93.3L82.1 93.3C84.5 93.3 87.6 91.5 87.8 90.9L87.8 19.3C89.8 18.9 91.4 18.1 92.1 17.3L83.9 10.8L80.2 15.1L20.2 15.1L13.1 11.7" fill="#000"/></svg><span class="op">+</span><svg viewBox="0 0 100 100" width="54" height="54" role="img" aria-label="力"><path d="M42.8 4.4C42.8 13.2 42.8 21.6 42.4 29.7L9.7 29.7L10.5 32.6L42.2 32.6C40.5 56.9 33.6 77.8 4.7 94L5.9 95.8C40 80 47.4 57.9 49.4 32.6L79.1 32.6C78.2 59.7 76.3 81.5 72.5 85C71.3 86 70.5 86.3 68.4 86.3C65.8 86.3 56.9 85.5 51.5 85L51.4 86.8C56.1 87.5 61.4 88.8 63.2 89.9C64.9 91.1 65.4 93 65.4 95.1C70.6 95.1 74.8 93.7 77.7 90.5C82.7 85 84.9 62.9 85.8 33.6C88.1 33.2 89.3 32.7 90.1 31.9L82.2 25.2L78.1 29.7L49.6 29.7C50 22.8 50.1 15.6 50.2 8.3C52.6 8 53.4 6.9 53.7 5.5" fill="#000"/></svg>
+    <span class="op">=</span><svg viewBox="0 0 100 100" width="54" height="54" role="img" aria-label="男"><path d="M44.8 47.2C44.7 52 44.4 56.5 43.4 60.8L6.8 60.8L7.7 63.7L42.7 63.7C38.9 77.3 28.7 87.9 4.4 94.4L5.1 95.8C34.4 90.1 45.7 78.8 50 63.7L80.4 63.7C79 75 76.4 84.6 73.6 86.7C72.5 87.6 71.4 87.8 69.4 87.8C67 87.8 57.5 86.9 52.3 86.5L52.2 88.2C56.9 88.8 62.2 89.9 63.9 91C65.6 92.1 66 93.9 66 95.8C70.7 95.8 74.8 94.7 77.5 92.6C82.2 89.2 85.5 77.8 87.1 64.6C89.2 64.4 90.3 63.8 91 63.1L83.5 56.9L79.7 60.8L50.7 60.8C51.4 57.7 51.8 54.5 52.1 51.2C54.1 51 55.5 50.2 55.7 48.5M46.4 29.9L46.4 43.9L23.1 43.9L23.1 29.9M46.4 27L23.1 27L23.1 13.8L46.4 13.8M52.8 29.9L76.7 29.9L76.7 43.9L52.8 43.9M52.8 27L52.8 13.8L76.7 13.8L76.7 27M16.6 10.9L16.6 52.6L17.7 52.6C20.4 52.6 23.1 51.1 23.1 50.4L23.1 46.8L76.7 46.8L76.7 51.6L77.7 51.6C79.8 51.6 83.2 50.2 83.3 49.6L83.3 15C85.2 14.6 86.8 13.8 87.5 13L79.4 6.8L75.7 10.9L23.8 10.9L16.6 7.6" fill="#000"/></svg><span class="op">&rarr;</span>
+    <span class="ans"></span>
+  </div>
+
+  <footer>
+    <span>Write the meaning in each box</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Two joined</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>Two Meanings Joined — The Answers</h1>
+    <p class="sub">Chinese &middot; Page 2 of 2</p>
+  </header>
+
+
+
+
+  <table class="guess">
+    <tr><th style="width:14%">Made of</th><th style="width:12%">Is</th><th style="width:32%">Which is</th><th>And means</th></tr>
+    <tr>
+      <td class="g"><svg viewBox="0 0 100 100" width="38" height="38" role="img" aria-label="木"><path d="M85.8 21.1L80.5 27.6L53.1 27.6L53.1 8C55.7 7.6 56.5 6.7 56.7 5.3L46.5 4.1L46.5 27.6L5.2 27.6L6 30.5L41.6 30.5C34.4 50.3 20.7 71 3.7 84.7L5 86C23.5 74.1 37.7 57.1 46.5 38.2L46.5 95.8L47.8 95.8C50.3 95.8 53.1 94.1 53.1 93.1L53.1 31.1C60.8 54.3 74.3 72.9 89.5 83.5C90.7 80.3 93.3 78.2 96.2 78L96.5 77C80.6 68.7 64 50.6 55 30.5L92.6 30.5C94 30.5 95 30 95.3 28.9C91.7 25.6 85.8 21.1 85.8 21.1" fill="#000"/></svg><svg viewBox="0 0 100 100" width="38" height="38" role="img" aria-label="木"><path d="M85.8 21.1L80.5 27.6L53.1 27.6L53.1 8C55.7 7.6 56.5 6.7 56.7 5.3L46.5 4.1L46.5 27.6L5.2 27.6L6 30.5L41.6 30.5C34.4 50.3 20.7 71 3.7 84.7L5 86C23.5 74.1 37.7 57.1 46.5 38.2L46.5 95.8L47.8 95.8C50.3 95.8 53.1 94.1 53.1 93.1L53.1 31.1C60.8 54.3 74.3 72.9 89.5 83.5C90.7 80.3 93.3 78.2 96.2 78L96.5 77C80.6 68.7 64 50.6 55 30.5L92.6 30.5C94 30.5 95 30 95.3 28.9C91.7 25.6 85.8 21.1 85.8 21.1" fill="#000"/></svg></td>
+      <td class="g"><svg viewBox="0 0 100 100" width="54" height="54" role="img" aria-label="林"><path d="M65.8 4.4L65.8 27.3L46.6 27.3L47.4 30.2L62.9 30.2C58 48.5 48.8 66.4 35.4 79.1L36.7 80.5C50 70.4 59.6 57.5 65.8 42.6L65.8 95.6L67.1 95.6C69.4 95.6 72.2 94 72.2 93L72.2 32.8C75.8 51 82.9 69.1 93 79.7C93.6 76.4 95.2 73.8 98.3 72.3L98.5 71.3C87.4 62.8 78.1 46.6 74.1 30.2L94.2 30.2C95.6 30.2 96.5 29.7 96.7 28.6C93.6 25.5 88.3 21.3 88.3 21.3L83.6 27.3L72.2 27.3L72.2 8.3C74.8 7.9 75.6 6.8 75.9 5.4M22.7 4.3L22.7 27.4L4.3 27.4L5.1 30.3L21.7 30.3C18.4 46.9 12.2 63.7 3.1 76.3L4.5 77.6C12.3 69.3 18.3 59.7 22.7 49L22.7 95.6L24.1 95.6C26.5 95.6 29.2 94.1 29.2 93.2L29.2 40.4C33.2 44.8 37.7 51.2 39 56.2C45.9 61.3 51.4 47.2 29.2 38.3L29.2 30.3L44.2 30.3C45.6 30.3 46.6 29.8 46.8 28.7C43.7 25.7 38.7 21.6 38.7 21.6L34.2 27.4L29.2 27.4L29.2 8.1C31.7 7.7 32.5 6.8 32.8 5.3" fill="#000"/></svg></td>
+      <td>two trees</td>
+      <td><b>woods</b> &nbsp;<span style="color:var(--muted)">lín</span></td></tr><tr>
+      <td class="g"><svg viewBox="0 0 100 100" width="38" height="38" role="img" aria-label="木"><path d="M85.8 21.1L80.5 27.6L53.1 27.6L53.1 8C55.7 7.6 56.5 6.7 56.7 5.3L46.5 4.1L46.5 27.6L5.2 27.6L6 30.5L41.6 30.5C34.4 50.3 20.7 71 3.7 84.7L5 86C23.5 74.1 37.7 57.1 46.5 38.2L46.5 95.8L47.8 95.8C50.3 95.8 53.1 94.1 53.1 93.1L53.1 31.1C60.8 54.3 74.3 72.9 89.5 83.5C90.7 80.3 93.3 78.2 96.2 78L96.5 77C80.6 68.7 64 50.6 55 30.5L92.6 30.5C94 30.5 95 30 95.3 28.9C91.7 25.6 85.8 21.1 85.8 21.1" fill="#000"/></svg><svg viewBox="0 0 100 100" width="38" height="38" role="img" aria-label="木"><path d="M85.8 21.1L80.5 27.6L53.1 27.6L53.1 8C55.7 7.6 56.5 6.7 56.7 5.3L46.5 4.1L46.5 27.6L5.2 27.6L6 30.5L41.6 30.5C34.4 50.3 20.7 71 3.7 84.7L5 86C23.5 74.1 37.7 57.1 46.5 38.2L46.5 95.8L47.8 95.8C50.3 95.8 53.1 94.1 53.1 93.1L53.1 31.1C60.8 54.3 74.3 72.9 89.5 83.5C90.7 80.3 93.3 78.2 96.2 78L96.5 77C80.6 68.7 64 50.6 55 30.5L92.6 30.5C94 30.5 95 30 95.3 28.9C91.7 25.6 85.8 21.1 85.8 21.1" fill="#000"/></svg><svg viewBox="0 0 100 100" width="38" height="38" role="img" aria-label="木"><path d="M85.8 21.1L80.5 27.6L53.1 27.6L53.1 8C55.7 7.6 56.5 6.7 56.7 5.3L46.5 4.1L46.5 27.6L5.2 27.6L6 30.5L41.6 30.5C34.4 50.3 20.7 71 3.7 84.7L5 86C23.5 74.1 37.7 57.1 46.5 38.2L46.5 95.8L47.8 95.8C50.3 95.8 53.1 94.1 53.1 93.1L53.1 31.1C60.8 54.3 74.3 72.9 89.5 83.5C90.7 80.3 93.3 78.2 96.2 78L96.5 77C80.6 68.7 64 50.6 55 30.5L92.6 30.5C94 30.5 95 30 95.3 28.9C91.7 25.6 85.8 21.1 85.8 21.1" fill="#000"/></svg></td>
+      <td class="g"><svg viewBox="0 0 100 100" width="54" height="54" role="img" aria-label="森"><path d="M23.6 43.4L23.6 57.4L4.7 57.4L5.5 60.2L21.3 60.2C17.5 70.5 11.4 80.3 3.1 87.7L4.3 89.3C12.4 83.8 18.9 77.1 23.6 69.1L23.6 95.7L24.8 95.7C27.1 95.7 29.8 94.2 29.8 93.4L29.8 65.6C33.7 68.7 38.2 73.3 39.7 77.2C46.1 81 50.3 68.5 29.8 63.8L29.8 60.2L45.8 60.2C47.1 60.2 48 59.7 48.3 58.6C45.5 55.9 40.8 52.1 40.8 52.1L36.8 57.4L29.8 57.4L29.8 47C32.2 46.6 33.1 45.7 33.3 44.4M66.3 43.6L66.3 57.4L48.2 57.4L49 60.2L62.9 60.2C57.6 71.5 48.8 81.7 37.4 89L38.5 90.7C50.4 84.7 59.8 76.5 66.3 66.5L66.3 95.7L67.6 95.7C69.9 95.7 72.6 94.5 72.6 93.7L72.6 60.9C76.8 73.3 83.7 83.2 91.9 89.2C92.7 86.2 94.7 84.4 97.1 84L97.3 83C88.7 78.9 79.7 70.3 74.6 60.2L92.9 60.2C94.3 60.2 95.3 59.7 95.5 58.6C92.4 55.7 87.4 51.6 87.4 51.6L82.9 57.4L72.6 57.4L72.6 47.2C75.1 46.9 75.9 45.9 76.2 44.7M46.1 4.2L46.1 16.4L9.6 16.4L10.4 19.3L40.2 19.3C32.5 29.3 20.5 38.4 6.6 44.4L7.6 46.1C23.4 40.8 37 32.7 46.1 22.1L46.1 48.1L47.4 48.1C49.9 48.1 52.7 46.9 52.7 46.2L52.7 19.3L53.3 19.3C61.3 30.9 75.4 40.3 88.4 45.3C89 42.4 91.2 40.7 93.7 40.3L93.8 39.3C81 35.9 65.3 28.3 56.3 19.3L88.3 19.3C89.6 19.3 90.7 18.8 90.9 17.8C87.7 14.7 82.5 10.6 82.5 10.6L78 16.4L52.7 16.4L52.7 8C55.2 7.7 56.1 6.7 56.4 5.3" fill="#000"/></svg></td>
+      <td>three trees</td>
+      <td><b>forest</b> &nbsp;<span style="color:var(--muted)">sēn</span></td></tr><tr>
+      <td class="g"><svg viewBox="0 0 100 100" width="38" height="38" role="img" aria-label="日"><path d="M73.5 51L73.5 83.2L26.8 83.2L26.8 51M73.5 48L26.8 48L26.8 17L73.5 17M20.2 14.1L20.2 95L21.4 95C24.4 95 26.8 93.3 26.8 92.3L26.8 86.1L73.5 86.1L73.5 94.5L74.5 94.5C76.9 94.5 80.2 92.7 80.3 92L80.3 18.3C82.3 17.9 83.9 17.1 84.6 16.3L76.3 9.7L72.5 14.1L27.5 14.1L20.2 10.7" fill="#000"/></svg><svg viewBox="0 0 100 100" width="38" height="38" role="img" aria-label="月"><path d="M70.8 14.9L70.8 34.4L31.6 34.4L31.6 14.9M25.1 11.9L25.1 43.3C25.1 63.5 22 81 4.7 94.6L6.1 95.8C22 86.6 28.2 73.8 30.4 60.3L70.8 60.3L70.8 85C70.8 86.7 70.2 87.4 68.1 87.4C65.7 87.4 53.5 86.5 53.5 86.5L53.5 88.1C58.7 88.8 61.7 89.6 63.4 90.8C64.9 91.9 65.6 93.6 66 95.8C76.3 94.8 77.4 91.2 77.4 85.8L77.4 16.2C79.5 15.9 81.1 15 81.8 14.2L73.3 7.7L69.8 11.9L32.9 11.9L25.1 8.6M70.8 37.3L70.8 57.4L30.8 57.4C31.4 52.7 31.6 47.9 31.6 43.2L31.6 37.3" fill="#000"/></svg></td>
+      <td class="g"><svg viewBox="0 0 100 100" width="54" height="54" role="img" aria-label="明"><path d="M83.7 13.5L83.7 33.5L58 33.5L58 13.5M51.6 10.6L51.6 42.6C51.6 63.5 48.2 81 30.1 94.8L31.5 96C48 86.7 54.4 73.7 56.7 59.9L83.7 59.9L83.7 85.2C83.7 87 83.1 87.6 81 87.6C78.5 87.6 66.1 86.7 66.1 86.7L66.1 88.3C71.4 89 74.4 89.8 76.1 90.9C77.7 92 78.4 93.7 78.8 95.8C89 94.7 90.1 91.2 90.1 86L90.1 14.8C92.1 14.4 93.8 13.6 94.5 12.7L86 6.4L82.7 10.6L59.1 10.6L51.6 7.3M83.7 36.4L83.7 57L57.2 57C57.8 52.2 58 47.3 58 42.5L58 36.4M14.3 15.2L33.1 15.2L33.1 37.6L14.3 37.6M8 12.2L8 78.7L9 78.7C12.2 78.7 14.3 76.9 14.3 76.4L14.3 66.7L33.1 66.7L33.1 74.7L34 74.7C36.3 74.7 39.3 73 39.4 72.3L39.4 16.5C41.4 16 43.1 15.2 43.7 14.4L35.7 8.2L32.1 12.2L15.5 12.2L8 9.1M14.3 40.5L33.1 40.5L33.1 63.7L14.3 63.7" fill="#000"/></svg></td>
+      <td>the sun and the moon</td>
+      <td><b>bright</b> &nbsp;<span style="color:var(--muted)">míng</span></td></tr><tr>
+      <td class="g"><svg viewBox="0 0 100 100" width="38" height="38" role="img" aria-label="人"><path d="M50.8 10.2C53.3 9.9 54.1 8.9 54.3 7.4L43.7 6.3C43.6 36.9 43.9 69.3 4.1 94L5.5 95.7C41.1 77.2 48.3 51.9 50.1 27.7C53.2 57.5 62.2 80.8 89.1 95.7C90.2 91.9 92.7 90.5 96.3 90.1L96.5 89C61.9 73 53 47 50.8 10.2" fill="#000"/></svg><svg viewBox="0 0 100 100" width="38" height="38" role="img" aria-label="木"><path d="M85.8 21.1L80.5 27.6L53.1 27.6L53.1 8C55.7 7.6 56.5 6.7 56.7 5.3L46.5 4.1L46.5 27.6L5.2 27.6L6 30.5L41.6 30.5C34.4 50.3 20.7 71 3.7 84.7L5 86C23.5 74.1 37.7 57.1 46.5 38.2L46.5 95.8L47.8 95.8C50.3 95.8 53.1 94.1 53.1 93.1L53.1 31.1C60.8 54.3 74.3 72.9 89.5 83.5C90.7 80.3 93.3 78.2 96.2 78L96.5 77C80.6 68.7 64 50.6 55 30.5L92.6 30.5C94 30.5 95 30 95.3 28.9C91.7 25.6 85.8 21.1 85.8 21.1" fill="#000"/></svg></td>
+      <td class="g"><svg viewBox="0 0 100 100" width="54" height="54" role="img" aria-label="休"><path d="M58 5.6L58 29.5L30.5 29.5L31.3 32.4L53.8 32.4C48.9 50.2 39.7 67.8 26.7 80.3L28.1 81.6C41.7 71.3 51.7 57.7 58 42L58 95.4L59.3 95.4C61.8 95.4 64.5 93.8 64.5 92.8L64.5 33.8C69.3 52.5 79.2 69.9 91.9 80.1C92.5 77.2 94.5 75 97.3 74L97.6 72.9C84.4 64.6 71.8 49.5 66.5 32.4L92.8 32.4C94.2 32.4 95.1 31.9 95.4 30.9C92 27.7 86.6 23.5 86.6 23.5L81.8 29.5L64.5 29.5L64.5 9.5C67.1 9.1 67.9 8.1 68.1 6.7M26.2 4.2C21.1 23.6 11.9 42.9 3 55.1L4.4 56.1C9.4 51.3 14.2 45.4 18.5 38.6L18.5 95.6L19.7 95.6C22.3 95.6 24.9 94 25.1 93.5L25.1 35.7C26.8 35.4 27.8 34.8 28.2 33.9L22.6 31.8C26.5 24.9 29.9 17.4 32.8 9.5C35 9.6 36.3 8.7 36.7 7.5" fill="#000"/></svg></td>
+      <td>a person beside a tree</td>
+      <td><b>rest</b> &nbsp;<span style="color:var(--muted)">xiū</span></td></tr><tr>
+      <td class="g"><svg viewBox="0 0 100 100" width="38" height="38" role="img" aria-label="女"><path d="M43.1 4C41.2 10.2 37.5 20.1 33.2 30.5L3.8 30.5L4.6 33.4L32 33.4C26.4 46.6 20.1 60.2 15.6 68C18.4 69.2 21.4 69.4 23.1 68.6L25.9 62.9C34.6 65.7 42.7 68.9 49.9 72.3C39.9 82.6 25.4 89.5 4 94.1L4.6 95.9C29.1 92.2 44.9 85.7 55.7 75.2C68.7 82 78.4 89.2 83.7 95C91.8 98.7 95 84.6 59.7 70.7C67.5 61.2 72.1 49 75.5 33.4L93.4 33.4C94.8 33.4 95.8 32.9 96.1 31.8C92.4 28.5 86.5 23.9 86.5 23.9L81.2 30.5L40.3 30.5C44.1 21.6 47.4 13.5 49.3 8.2C51.8 8.2 52.8 7.2 53.2 5.8M39.1 33.4L67.9 33.4C65 47.9 60.6 59.4 53.4 68.4C46 65.8 37.2 63.3 26.8 61C30.7 52.8 35.1 42.8 39.1 33.4" fill="#000"/></svg><svg viewBox="0 0 100 100" width="38" height="38" role="img" aria-label="子"><path d="M14.7 12.7L15.6 15.6L72.5 15.6C67.4 20.7 59.7 27.4 52.6 32L47.1 31.4L47.1 47.9L4.5 47.9L5.4 50.9L47.1 50.9L47.1 85.1C47.1 87 46.4 87.7 44 87.7C41.2 87.7 26.3 86.6 26.3 86.6L26.3 88.2C32.5 88.9 36 89.8 38 90.9C39.9 92 40.7 93.6 41.1 95.8C52.4 94.7 53.8 91.1 53.8 85.7L53.8 50.9L93.1 50.9C94.5 50.9 95.6 50.4 95.8 49.3C92 45.9 86 41.3 86 41.3L80.7 47.9L53.8 47.9L53.8 35.1C56.1 34.8 57.1 33.9 57.3 32.5L55.4 32.3C65.2 28.1 75.5 21.5 82.4 16.6C84.6 16.4 85.9 16.2 86.8 15.5L78.8 8.2L74 12.7" fill="#000"/></svg></td>
+      <td class="g"><svg viewBox="0 0 100 100" width="54" height="54" role="img" aria-label="好"><path d="M64.4 29.9L64.4 47.5L40.9 47.5L41.7 50.4L64.4 50.4L64.4 85.3C64.4 86.9 63.8 87.5 61.9 87.5C59.7 87.5 48.3 86.6 48.3 86.6L48.3 88.2C53.1 88.8 55.9 89.6 57.5 90.8C59 91.9 59.6 93.6 59.9 95.7C69.9 94.7 70.9 91.3 70.9 85.8L70.9 50.4L94.6 50.4C96 50.4 96.9 49.9 97.2 48.8C94 45.7 88.9 41.6 88.9 41.6L84.3 47.5L70.9 47.5L70.9 33.6C73.3 33.3 74.2 32.4 74.5 31L72.1 30.7C78.5 26.2 85.7 19.8 90.3 15.9C92.5 15.8 93.7 15.7 94.5 15L87 7.9L82.5 12.1L42.7 12.1L43.6 15.1L81.6 15.1C78.4 19.6 73.7 25.9 69.5 30.5M21.7 4.6C20.8 10.4 18.9 19.1 16.7 28.4L3.7 28.4L4.6 31.3L16 31.3C12.5 45.2 8.3 59.9 5.2 68.3C8 69.1 10.6 69 11.9 68.1L14 61.3C17.4 63.7 21.1 66.6 24.4 69.7C19.7 79 12.9 87.1 2.7 93.3L3.7 94.7C15.1 89.2 22.8 82 28.2 73.6C32.2 78.1 35.4 83 36.7 87.5C43.4 91.5 46.5 79.6 31.3 68.2C36.6 57.4 38.9 45.1 40.3 32.2C42.5 32 43.4 31.7 44.2 30.9L36.8 24.3L33 28.4L22.9 28.4C24.8 20.7 26.4 13.7 27.4 8.9C29.9 8.9 30.9 8 31.2 6.7M22.1 31.3L33.8 31.3C32.7 43.4 30.7 54.9 26.5 65C23.2 63 19.2 61.1 14.6 59.4C17.1 50.8 19.8 40.6 22.1 31.3" fill="#000"/></svg></td>
+      <td>a woman and a child</td>
+      <td><b>good</b> &nbsp;<span style="color:var(--muted)">hǎo</span></td></tr><tr>
+      <td class="g"><svg viewBox="0 0 100 100" width="38" height="38" role="img" aria-label="田"><path d="M46.6 18L46.6 48L19.5 48L19.5 18M53.1 18L81.2 18L81.2 48L53.1 48M46.6 50.9L46.6 82.5L19.5 82.5L19.5 50.9M53.1 50.9L81.2 50.9L81.2 82.5L53.1 82.5M13.1 15.1L13.1 93.9L14.2 93.9C17.2 93.9 19.5 92.3 19.5 91.3L19.5 85.4L81.2 85.4L81.2 93.3L82.1 93.3C84.5 93.3 87.6 91.5 87.8 90.9L87.8 19.3C89.8 18.9 91.4 18.1 92.1 17.3L83.9 10.8L80.2 15.1L20.2 15.1L13.1 11.7" fill="#000"/></svg><svg viewBox="0 0 100 100" width="38" height="38" role="img" aria-label="力"><path d="M42.8 4.4C42.8 13.2 42.8 21.6 42.4 29.7L9.7 29.7L10.5 32.6L42.2 32.6C40.5 56.9 33.6 77.8 4.7 94L5.9 95.8C40 80 47.4 57.9 49.4 32.6L79.1 32.6C78.2 59.7 76.3 81.5 72.5 85C71.3 86 70.5 86.3 68.4 86.3C65.8 86.3 56.9 85.5 51.5 85L51.4 86.8C56.1 87.5 61.4 88.8 63.2 89.9C64.9 91.1 65.4 93 65.4 95.1C70.6 95.1 74.8 93.7 77.7 90.5C82.7 85 84.9 62.9 85.8 33.6C88.1 33.2 89.3 32.7 90.1 31.9L82.2 25.2L78.1 29.7L49.6 29.7C50 22.8 50.1 15.6 50.2 8.3C52.6 8 53.4 6.9 53.7 5.5" fill="#000"/></svg></td>
+      <td class="g"><svg viewBox="0 0 100 100" width="54" height="54" role="img" aria-label="男"><path d="M44.8 47.2C44.7 52 44.4 56.5 43.4 60.8L6.8 60.8L7.7 63.7L42.7 63.7C38.9 77.3 28.7 87.9 4.4 94.4L5.1 95.8C34.4 90.1 45.7 78.8 50 63.7L80.4 63.7C79 75 76.4 84.6 73.6 86.7C72.5 87.6 71.4 87.8 69.4 87.8C67 87.8 57.5 86.9 52.3 86.5L52.2 88.2C56.9 88.8 62.2 89.9 63.9 91C65.6 92.1 66 93.9 66 95.8C70.7 95.8 74.8 94.7 77.5 92.6C82.2 89.2 85.5 77.8 87.1 64.6C89.2 64.4 90.3 63.8 91 63.1L83.5 56.9L79.7 60.8L50.7 60.8C51.4 57.7 51.8 54.5 52.1 51.2C54.1 51 55.5 50.2 55.7 48.5M46.4 29.9L46.4 43.9L23.1 43.9L23.1 29.9M46.4 27L23.1 27L23.1 13.8L46.4 13.8M52.8 29.9L76.7 29.9L76.7 43.9L52.8 43.9M52.8 27L52.8 13.8L76.7 13.8L76.7 27M16.6 10.9L16.6 52.6L17.7 52.6C20.4 52.6 23.1 51.1 23.1 50.4L23.1 46.8L76.7 46.8L76.7 51.6L77.7 51.6C79.8 51.6 83.2 50.2 83.3 49.6L83.3 15C85.2 14.6 86.8 13.8 87.5 13L79.4 6.8L75.7 10.9L23.8 10.9L16.6 7.6" fill="#000"/></svg></td>
+      <td>a field and strength</td>
+      <td><b>man</b> &nbsp;<span style="color:var(--muted)">nán</span></td></tr>
+  </table>
+  <div class="note"><b>How many did you get?</b> &nbsp; ____________ out of 6</div>
+  <div class="note" style="margin-top:12px"><b>There are not many of these.</b> Nearly all characters are built another way. That is the next sheet.</div>
+
+  <footer>
+    <span>There are not many of these</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Two joined</span>
+  </footer>
+</div>
+
+</body>
+</html>

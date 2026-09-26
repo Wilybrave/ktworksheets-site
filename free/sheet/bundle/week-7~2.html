@@ -1,0 +1,795 @@
+<!DOCTYPE html><html><head>
+<meta charset="utf-8">
+<meta name="sheet-kind" content="worksheet">
+<title>Solid, Liquid, Gas</title>
+<style>
+  @page { size: letter portrait; margin: 0.4in 0.45in; }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  :root {
+    --ink:    #16130F;
+    --muted:  #6B635A;
+    --rule:   #CFC3B2;
+    --guide:  #BCAE9C;
+    --accent: #C0511D;
+    --tint:   #F7EDE4;
+    --slate:  #2E5A78;
+    --tintslate: #E9EFF4;
+    --deep:   #2C4A45;
+    --tintdeep: #ECF1EF;
+  }
+
+  body {
+    font-family: Quicksand, 'URW Gothic', 'Century Gothic', sans-serif;
+    color: #000; background: #fff;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+
+  /* ORDER MATTERS. This generic rule must come BEFORE the @media screen block:
+   * both selectors have the same specificity, so whichever is declared last
+   * wins. With it after, it overrode the screen width and the preview stretched
+   * to the viewport — rows scaled up and pages measured 16in tall. Print was
+   * always fine (@media screen doesn't apply), but the on-screen proof lied. */
+  .page { width: 100%; }
+  .page + .page { page-break-before: always; }
+
+  @media screen {
+    body { padding: 0.4in; background: #ddd; }
+    .page {
+      background: #fff; padding: 0.4in 0.45in;
+      width: 8.5in; min-height: 11in;
+      margin: 0 auto 22px; box-shadow: 0 2px 10px rgba(0,0,0,.3);
+    }
+  }
+
+  header {
+    display: flex; align-items: center; gap: 16px;
+    border-bottom: 3px solid var(--slate); padding-bottom: 7px; margin-bottom: 2px;
+  }
+  .bigletter { font-size: 38pt; font-weight: 700; line-height: 1; letter-spacing: .02em; }
+  .htext { flex: 1; }
+  h1 { font-size: 14pt; font-weight: 700; margin: 0 0 2px; }
+  .sub { font-size: 10pt; color: var(--muted); margin: 0; }
+  .nameline {
+    font-size: 9.5pt; color: var(--muted);
+    border-bottom: 1px solid var(--ink); width: 2in;
+    padding-bottom: 1px; align-self: flex-end;
+  }
+
+  .label { font-size: 11.5pt; font-weight: 700; margin: 9px 0 1px; }
+  .label span { font-weight: 400; font-size: 10pt; color: var(--muted); }
+
+  .row { display: block; width: 100%; height: auto; margin-bottom: .06in; }
+  /* Rows that follow the header directly would otherwise jam against its rule. */
+  header + .row { margin-top: .12in; }
+
+  .words {
+    margin-top: 10px; padding-top: 7px; border-top: 1px solid var(--rule);
+    font-size: 12.5pt;
+    display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap;
+  }
+  .words b { font-size: 14pt; }
+  .words em { font-style: normal; color: var(--muted); }
+
+  /* The wordmark rides in the footer line that was already there — see the note
+     in lib/sheet.js. No height, upright, a size down, and never louder than the
+     two slots it sits between. */
+  .brand { font-style: normal; font-size: 7pt; letter-spacing: .04em;
+    color: var(--accent); align-self: center; }
+
+  footer {
+    margin-top: 7px; font-size: 8.5pt; color: var(--muted);
+    display: flex; justify-content: space-between;
+  }
+
+  .chart { display: grid; grid-template-columns: repeat(6, 1fr); gap: 7px; margin-top: 14px; }
+  .cell {
+    border: 2px solid var(--slate); border-radius: 8px; height: 1.35in;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .page.key { background: #fcfcfa; }
+  .page.key header { border-bottom-style: double; border-bottom-width: 3px; }
+  .keylist { font-size: 11pt; line-height: 1.7; }
+  .keylist p { margin: .02in 0; }
+  .keynote { border: 1.5px solid var(--deep); border-radius: 8px; padding: .07in .12in;
+    margin: .1in 0 0; font-size: 10pt; line-height: 1.5; }
+
+  .note { border: 1.5px solid var(--deep); border-radius: 8px; padding: .07in .12in;
+    margin: .06in 0 .1in; font-size: 10pt; color: var(--ink); }
+  .tasknote { border: 1.5px solid var(--deep); border-radius: 8px; padding: .07in .12in;
+    margin-top: .1in; font-size: 10.5pt; }
+  svg { display: block; }
+  svg.inline { display: inline-block; vertical-align: middle; }
+
+  .wqs { margin-top: .06in; }
+  .wq { margin-bottom: .03in; }
+  .wqt { font-size: 10.5pt; font-weight: 700; margin-bottom: .01in; }
+  .wordbank { border: 1.5px solid var(--accent); border-radius: 8px; padding: .06in .12in;
+    margin-top: .08in; font-size: 10.5pt; }
+
+  .pick { display: flex; align-items: center; gap: .05in; font-size: 10pt;
+    white-space: nowrap; }
+  .pick i { width: .22in; height: .22in; border: 2px solid var(--slate); border-radius: 4px;
+    display: inline-block; flex: 0 0 auto; }
+
+  .dobox { border: 2.4px solid var(--slate); border-radius: 9px; padding: .08in .12in;
+    margin: .1in 0 .08in; }
+  .dotitle { font-size: 11.5pt; font-weight: 700; margin-bottom: .03in; }
+  .dosteps { margin: 0; padding-left: .22in; }
+  .dosteps li { font-size: 10.5pt; margin-bottom: .02in; }
+
+  .strow { display: flex; align-items: center; gap: .22in;
+    border-bottom: 1px solid var(--rule); padding: .06in 0; }
+  .spic { flex: 0 0 1.75in; }
+  .sname { font-size: 14pt; font-weight: 700; }
+  .sfact { font-size: 10.5pt; }
+  .segs { font-size: 10pt; color: var(--muted); font-style: italic; margin-top: .02in; }
+
+  .sortlist { display: grid; grid-template-columns: 1fr 1fr; gap: 0 .3in; }
+  .sortrow { display: flex; align-items: center; gap: .08in;
+    border-bottom: 1px solid var(--rule); padding: .05in 0; }
+  .sortname { flex: 1; font-size: 10.5pt; }
+
+  .oddbox { border: 2.4px solid var(--slate); border-radius: 9px; padding: .08in .12in;
+    margin-top: .1in; }
+  .otitle { font-size: 11.5pt; font-weight: 700; }
+  .otext { font-size: 10.5pt; margin-bottom: .04in; }
+
+  .changelist { border: 2px solid var(--slate); border-radius: 9px; overflow: hidden; }
+  .chead { display: grid; grid-template-columns: 1fr .9in .9in 1.2in; font-size: 9.5pt;
+    font-weight: 700; border-bottom: 1.6px solid var(--slate); }
+  .chead span { padding: .05in .07in; }
+  .chrow { display: grid; grid-template-columns: 1fr .9in .9in 1.2in;
+    border-bottom: 1px solid var(--rule); min-height: .48in; align-items: stretch; }
+  .chrow:last-child { border-bottom: 0; }
+  .cwhat { font-size: 10.5pt; padding: .1in .07in; }
+  .ccell { border-left: 1px solid var(--ink); }
+
+  .matlist { border: 2px solid var(--slate); border-radius: 9px; overflow: hidden; }
+  .mhead { display: grid; grid-template-columns: 1.4in .9in 1fr; font-size: 9.5pt;
+    font-weight: 700; border-bottom: 1.6px solid var(--slate); }
+  .mhead span { padding: .05in .07in; }
+  .mrow { display: grid; grid-template-columns: 1.4in .9in 1fr;
+    border-bottom: 1px solid var(--rule); min-height: 1.2in; align-items: stretch; }
+  .mrow:last-child { border-bottom: 0; }
+  .mthing { font-size: 13pt; padding: .13in .07in; }
+  .mmade { font-size: 13pt; padding: .13in .07in; border-left: 1px solid var(--slate);
+    border-right: 1px solid var(--rule); }
+
+  .wrow { border-bottom: 1px solid var(--ink); padding: .16in 0 .1in; }
+  .wthing { font-size: 13pt; font-weight: 700; }
+  .wprompt { font-size: 11.5pt; color: var(--muted); }
+</style>
+</head><body>
+
+<div class="page">
+  <header>
+    <div class="bigletter">&#9633;</div>
+    <div class="htext">
+      <h1>Solid, Liquid, Gas</h1>
+      <p class="sub">The test is not how it feels. It is what happens when you put it in a jar.</p>
+    </div>
+    <div class="nameline">Name</div>
+  </header>
+
+  <div class="note"><b>Do not go by touch</b> (sand is hard, a towel is wet). Ask: <b>poured into a new container, does it keep its shape or take the container's?</b></div>
+
+  <div class="strow">
+    <div class="spic"><svg class="" viewBox="0 0 158 172" width="158" height="172" role="img" aria-label="a jar holding a solid brick" xmlns="http://www.w3.org/2000/svg"><rect x="38" y="100" width="82" height="54" rx="0" fill="#F0DCC9" stroke="#16130F" stroke-width="2"/><line x1="14" y1="14" x2="14" y2="156" stroke="#16130F" stroke-width="2.4" stroke-linecap="round"/><line x1="144" y1="14" x2="144" y2="156" stroke="#16130F" stroke-width="2.4" stroke-linecap="round"/><line x1="14" y1="156" x2="144" y2="156" stroke="#16130F" stroke-width="2.4" stroke-linecap="round"/></svg></div>
+    <div class="sinfo">
+      <div class="sname">Solid</div>
+      <div class="sfact"><b>Shape:</b> keeps its own shape</div>
+      <div class="sfact"><b>Space:</b> takes up the same space wherever you put it</div>
+      <div class="segs">for example: a brick, a spoon, an ice cube, you</div>
+    </div>
+  </div>
+  <div class="strow">
+    <div class="spic"><svg class="" viewBox="0 0 158 172" width="158" height="172" role="img" aria-label="a jar holding a liquid" xmlns="http://www.w3.org/2000/svg"><rect x="14" y="80.1" width="130" height="75.9" rx="0" fill="#F0DCC9" stroke="#16130F" stroke-width="0"/><line x1="14" y1="80.1" x2="144" y2="80.1" stroke="#16130F" stroke-width="2" stroke-linecap="round"/><line x1="14" y1="14" x2="14" y2="156" stroke="#16130F" stroke-width="2.4" stroke-linecap="round"/><line x1="144" y1="14" x2="144" y2="156" stroke="#16130F" stroke-width="2.4" stroke-linecap="round"/><line x1="14" y1="156" x2="144" y2="156" stroke="#16130F" stroke-width="2.4" stroke-linecap="round"/></svg></div>
+    <div class="sinfo">
+      <div class="sname">Liquid</div>
+      <div class="sfact"><b>Shape:</b> takes the shape of whatever you pour it into</div>
+      <div class="sfact"><b>Space:</b> always takes up the same amount of space</div>
+      <div class="segs">for example: water, milk, honey, petrol</div>
+    </div>
+  </div>
+  <div class="strow">
+    <div class="spic"><svg class="" viewBox="0 0 158 172" width="158" height="172" role="img" aria-label="a jar holding a gas" xmlns="http://www.w3.org/2000/svg"><rect x="14" y="18" width="130" height="138" rx="0" fill="#F0DCC9" stroke="#16130F" stroke-width="0"/><circle cx="24" cy="30" r="3.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><circle cx="61" cy="83" r="3.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><circle cx="98" cy="136" r="3.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><circle cx="25" cy="75" r="3.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><circle cx="62" cy="128" r="3.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><circle cx="99" cy="67" r="3.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><circle cx="26" cy="120" r="3.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><circle cx="63" cy="59" r="3.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><circle cx="100" cy="112" r="3.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><line x1="14" y1="14" x2="14" y2="156" stroke="#16130F" stroke-width="2.4" stroke-linecap="round"/><line x1="144" y1="14" x2="144" y2="156" stroke="#16130F" stroke-width="2.4" stroke-linecap="round"/><line x1="14" y1="156" x2="144" y2="156" stroke="#16130F" stroke-width="2.4" stroke-linecap="round"/></svg></div>
+    <div class="sinfo">
+      <div class="sname">Gas</div>
+      <div class="sfact"><b>Shape:</b> spreads out and fills the whole container</div>
+      <div class="sfact"><b>Space:</b> takes up as much space as it is given</div>
+      <div class="segs">for example: air, steam, the bubbles in a fizzy drink</div>
+    </div>
+  </div>
+  <div class="note"><b>Tick one for each.</b> <b>Honey is the one that argues back.</b> It pours so slowly that it looks like it is keeping its shape &mdash; but leave it long enough and it will spread out flat and take the shape of the plate. Slow is not the same as solid.</div>
+  <div class="sortlist">
+    <div class="sortrow">
+      <div class="sortname">a rock</div>
+      <label class="pick"><i></i>solid</label>
+      <label class="pick"><i></i>liquid</label>
+      <label class="pick"><i></i>gas</label>
+    </div>
+    <div class="sortrow">
+      <div class="sortname">milk</div>
+      <label class="pick"><i></i>solid</label>
+      <label class="pick"><i></i>liquid</label>
+      <label class="pick"><i></i>gas</label>
+    </div>
+    <div class="sortrow">
+      <div class="sortname">an ice cube</div>
+      <label class="pick"><i></i>solid</label>
+      <label class="pick"><i></i>liquid</label>
+      <label class="pick"><i></i>gas</label>
+    </div>
+    <div class="sortrow">
+      <div class="sortname">a wooden spoon</div>
+      <label class="pick"><i></i>solid</label>
+      <label class="pick"><i></i>liquid</label>
+      <label class="pick"><i></i>gas</label>
+    </div>
+    <div class="sortrow">
+      <div class="sortname">steam from a kettle</div>
+      <label class="pick"><i></i>solid</label>
+      <label class="pick"><i></i>liquid</label>
+      <label class="pick"><i></i>gas</label>
+    </div>
+    <div class="sortrow">
+      <div class="sortname">the bubbles in lemonade</div>
+      <label class="pick"><i></i>solid</label>
+      <label class="pick"><i></i>liquid</label>
+      <label class="pick"><i></i>gas</label>
+    </div>
+    <div class="sortrow">
+      <div class="sortname">orange juice</div>
+      <label class="pick"><i></i>solid</label>
+      <label class="pick"><i></i>liquid</label>
+      <label class="pick"><i></i>gas</label>
+    </div>
+    <div class="sortrow">
+      <div class="sortname">the air in a balloon</div>
+      <label class="pick"><i></i>solid</label>
+      <label class="pick"><i></i>liquid</label>
+      <label class="pick"><i></i>gas</label>
+    </div>
+    <div class="sortrow">
+      <div class="sortname">honey</div>
+      <label class="pick"><i></i>solid</label>
+      <label class="pick"><i></i>liquid</label>
+      <label class="pick"><i></i>gas</label>
+    </div>
+    <div class="sortrow">
+      <div class="sortname">a sweater</div>
+      <label class="pick"><i></i>solid</label>
+      <label class="pick"><i></i>liquid</label>
+      <label class="pick"><i></i>gas</label>
+    </div>
+  </div>
+
+  <footer>
+    <span>3 states · 10 to sort · sand overleaf</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Matter</span>
+  </footer>
+</div>
+
+<div class="page">
+  <header>
+    <div class="bigletter">&#9635;</div>
+    <div class="htext">
+      <h1>Which Is It? Sand</h1>
+      <p class="sub">The one the jar test gets wrong.</p>
+    </div>
+    <div class="nameline">Name</div>
+  </header>
+
+  <div class="oddbox">
+    <div class="otitle">And now the difficult one: <b>sand</b></div>
+    <div class="otext">Sand pours. It takes the shape of the bucket you tip it into, just like water does.
+    So is it a liquid? Look at ONE grain of sand very closely and answer these.</div>
+    <div class="wq"><div class="wqt">Does one single grain of sand keep its own shape?</div>      <svg class="row" viewBox="0 0 729.6 62.32" width="100%" role="img" aria-label="write here">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="25.16" x2="729.6" y2="25.16" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="45.32" x2="729.6" y2="45.32" stroke="#16130F" stroke-width="2.6"/>
+      </svg>      <svg class="row" viewBox="0 0 729.6 62.32" width="100%" role="img" aria-label="write here">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="25.16" x2="729.6" y2="25.16" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="45.32" x2="729.6" y2="45.32" stroke="#16130F" stroke-width="2.6"/>
+      </svg>      <svg class="row" viewBox="0 0 729.6 62.32" width="100%" role="img" aria-label="write here">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="25.16" x2="729.6" y2="25.16" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="45.32" x2="729.6" y2="45.32" stroke="#16130F" stroke-width="2.6"/>
+      </svg>      <svg class="row" viewBox="0 0 729.6 62.32" width="100%" role="img" aria-label="write here">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="25.16" x2="729.6" y2="25.16" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="45.32" x2="729.6" y2="45.32" stroke="#16130F" stroke-width="2.6"/>
+      </svg></div>
+    <div class="wq"><div class="wqt">So is sand a solid or a liquid? Say why.</div>      <svg class="row" viewBox="0 0 729.6 62.32" width="100%" role="img" aria-label="write here">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="25.16" x2="729.6" y2="25.16" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="45.32" x2="729.6" y2="45.32" stroke="#16130F" stroke-width="2.6"/>
+      </svg>      <svg class="row" viewBox="0 0 729.6 62.32" width="100%" role="img" aria-label="write here">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="25.16" x2="729.6" y2="25.16" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="45.32" x2="729.6" y2="45.32" stroke="#16130F" stroke-width="2.6"/>
+      </svg>      <svg class="row" viewBox="0 0 729.6 62.32" width="100%" role="img" aria-label="write here">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="25.16" x2="729.6" y2="25.16" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="45.32" x2="729.6" y2="45.32" stroke="#16130F" stroke-width="2.6"/>
+      </svg>      <svg class="row" viewBox="0 0 729.6 62.32" width="100%" role="img" aria-label="write here">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="25.16" x2="729.6" y2="25.16" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="45.32" x2="729.6" y2="45.32" stroke="#16130F" stroke-width="2.6"/>
+      </svg>      <svg class="row" viewBox="0 0 729.6 62.32" width="100%" role="img" aria-label="write here">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="25.16" x2="729.6" y2="25.16" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="45.32" x2="729.6" y2="45.32" stroke="#16130F" stroke-width="2.6"/>
+      </svg></div>
+  </div>
+
+  <footer>
+    <span>2 to write</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Matter</span>
+  </footer>
+</div>
+
+
+<div style="page-break-before:always"></div>
+
+
+<div class="page">
+  <header>
+    <div class="bigletter">&#9878;</div>
+    <div class="htext">
+      <h1>Who Actually Does It?</h1>
+      <p class="sub">Tick local or national for each job.</p>
+    </div>
+    <div class="nameline">Name</div>
+  </header>
+
+  <div class="twobox">
+    <div class="tb">
+      <div class="tbt">Local &mdash; your town or city</div>
+      <div class="tbd">A small group of people, usually voted for by the people who live there. They look
+      after the things you can see from your own street.</div>
+    </div>
+    <div class="tb">
+      <div class="tbt">National &mdash; the whole country</div>
+      <div class="tbd">A much bigger group, in the capital city. They make the laws that everybody in the
+      country has to follow, wherever they live.</div>
+    </div>
+  </div>
+
+  <div class="sortlist roomy">
+    <div class="sortrow">
+      <div class="sortname">fixing a pothole in your street</div>
+      <label class="pick"><i></i>local</label>
+      <label class="pick"><i></i>national</label>
+    </div>
+    <div class="sortrow">
+      <div class="sortname">printing the money</div>
+      <label class="pick"><i></i>local</label>
+      <label class="pick"><i></i>national</label>
+    </div>
+    <div class="sortrow">
+      <div class="sortname">deciding how much money the whole country spends on hospitals</div>
+      <label class="pick"><i></i>local</label>
+      <label class="pick"><i></i>national</label>
+    </div>
+    <div class="sortrow">
+      <div class="sortname">emptying the bins</div>
+      <label class="pick"><i></i>local</label>
+      <label class="pick"><i></i>national</label>
+    </div>
+    <div class="sortrow">
+      <div class="sortname">deciding the speed limit for the whole country</div>
+      <label class="pick"><i></i>local</label>
+      <label class="pick"><i></i>national</label>
+    </div>
+    <div class="sortrow">
+      <div class="sortname">putting up street lights</div>
+      <label class="pick"><i></i>local</label>
+      <label class="pick"><i></i>national</label>
+    </div>
+    <div class="sortrow">
+      <div class="sortname">making a new law about seatbelts</div>
+      <label class="pick"><i></i>local</label>
+      <label class="pick"><i></i>national</label>
+    </div>
+    <div class="sortrow">
+      <div class="sortname">running the libraries and the parks</div>
+      <label class="pick"><i></i>local</label>
+      <label class="pick"><i></i>national</label>
+    </div>
+  </div>
+
+  <footer>
+    <span>8 to sort</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Government</span>
+  </footer>
+</div>
+
+<div class="page">
+  <header>
+    <div class="bigletter">&#9993;</div>
+    <div class="htext">
+      <h1>Who Would You Tell?</h1>
+      <p class="sub">Tick who could fix it. Write what you would ask.</p>
+    </div>
+    <div class="nameline">Name</div>
+  </header>
+
+  <div class="problist">
+    <div class="prow">
+      <div class="pwhat">The swing in your local park is broken.</div>
+      <div class="ppick">
+        <label class="pick"><i></i>local</label>
+        <label class="pick"><i></i>national</label>
+      </div>
+            <svg class="row" viewBox="0 0 729.6 97.39" width="100%" role="img" aria-label="what exactly would you ask them to do?">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="38.7" x2="729.6" y2="38.7" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="72.39" x2="729.6" y2="72.39" stroke="#16130F" stroke-width="2.6"/>
+      </svg>
+    </div>
+    <div class="prow">
+      <div class="pwhat">You think the speed limit outside your school should be lower for everyone in the country.</div>
+      <div class="ppick">
+        <label class="pick"><i></i>local</label>
+        <label class="pick"><i></i>national</label>
+      </div>
+            <svg class="row" viewBox="0 0 729.6 97.39" width="100%" role="img" aria-label="what exactly would you ask them to do?">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="38.7" x2="729.6" y2="38.7" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="72.39" x2="729.6" y2="72.39" stroke="#16130F" stroke-width="2.6"/>
+      </svg>
+    </div>
+    <div class="prow">
+      <div class="pwhat">The bins have not been emptied for three weeks.</div>
+      <div class="ppick">
+        <label class="pick"><i></i>local</label>
+        <label class="pick"><i></i>national</label>
+      </div>
+            <svg class="row" viewBox="0 0 729.6 97.39" width="100%" role="img" aria-label="what exactly would you ask them to do?">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="38.7" x2="729.6" y2="38.7" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="72.39" x2="729.6" y2="72.39" stroke="#16130F" stroke-width="2.6"/>
+      </svg>
+    </div>
+    <div class="prow">
+      <div class="pwhat">You think the library should open on Sundays.</div>
+      <div class="ppick">
+        <label class="pick"><i></i>local</label>
+        <label class="pick"><i></i>national</label>
+      </div>
+            <svg class="row" viewBox="0 0 729.6 97.39" width="100%" role="img" aria-label="what exactly would you ask them to do?">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="38.7" x2="729.6" y2="38.7" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="72.39" x2="729.6" y2="72.39" stroke="#16130F" stroke-width="2.6"/>
+      </svg>
+    </div>
+  </div>
+
+  <footer>
+    <span>4 problems</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Government</span>
+  </footer>
+</div>
+
+
+<div style="page-break-before:always"></div>
+
+
+<div class="page ">
+  <header>
+    
+    <h1>Only Two at a Time</h1>
+    <p class="sub">Computing &middot; Page 1 of 2</p>
+  </header>
+  <div class="nameline">
+    <span>Name</span>
+    <span class="short">Date</span>
+  </div>
+  <div class="directions">
+    <b>DIRECTIONS:</b> Look at two cards at a time. Write the one that comes first.
+  </div>
+
+
+  <div class="pair"><div class="c">7</div><div>and</div><div class="c">3</div><div>&nbsp; &rarr; &nbsp; which comes first?</div><div class="c"></div></div>
+  <div class="pair"><div class="c">4</div><div>and</div><div class="c">9</div><div>&nbsp; &rarr; &nbsp; which comes first?</div><div class="c"></div></div>
+  <div class="pair"><div class="c">6</div><div>and</div><div class="c">6</div><div>&nbsp; &rarr; &nbsp; which comes first?</div><div class="c"></div></div>
+  <div class="box"><b>The same?</b> Either one can go first.</div>
+  <div class="note"><b>Now six cards.</b> Put them in order, smallest first. Still only two at a time.</div>
+  <div class="cards"><div>5</div><div>2</div><div>8</div><div>1</div><div>9</div><div>3</div></div>
+  <div class="cards"><div class="blank"></div><div class="blank"></div><div class="blank"></div><div class="blank"></div><div class="blank"></div><div class="blank"></div></div>
+  <div class="box"><b>How did you do it?</b> Write it so someone else could follow it.
+  <div class="write flush"></div><div class="write flush"></div><div class="write flush"></div></div>
+
+  <footer>
+    <span>Keep going on page 2 &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Two at a time</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>Everybody Does It Differently</h1>
+    <p class="sub">Computing &middot; Page 2 of 2</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Watch two other people put the same six in order.
+  </div>
+
+
+  <div class="box"><b>Person 1: what did they do?</b>
+  <div class="write flush"></div><div class="write flush"></div><div class="write flush"></div><div class="write flush"></div><div class="write flush"></div><div class="write flush"></div>
+  <b>Same as yours?</b> &nbsp; ____________</div>
+<div class="box"><b>Person 2: what did they do?</b>
+  <div class="write flush"></div><div class="write flush"></div><div class="write flush"></div><div class="write flush"></div><div class="write flush"></div><div class="write flush"></div>
+  <b>Same as yours?</b> &nbsp; ____________</div>
+  <div class="note">Everyone got it right, different ways. A machine can't "do what seems sensible". It needs exact steps: the next sheet.</div>
+
+  <footer>
+    <span>One question, over and over</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Two at a time</span>
+  </footer>
+</div>
+
+
+<div style="page-break-before:always"></div>
+
+
+<div class="page ">
+  <header>
+    
+    <h1>Mark This One</h1>
+    <p class="sub">Grades 2&ndash;5 · Doing the Work · Page 1 of 2</p>
+  </header>
+  <div class="nameline">
+    <span>Name</span>
+    <span class="short">Date</span>
+  </div>
+  <div class="directions">
+    <b>DIRECTIONS:</b> Robin marked this sheet. <b>Mark it again, properly:</b> tick or cross. Not everything odd is wrong.
+  </div>
+
+
+  <table class="tbl marking">
+    <thead><tr><th></th><th>The question</th><th>What Robin wrote</th><th>Tick or cross</th></tr></thead>
+    <tbody><tr><td><span class="pn">1.</span></td><td>72 &minus; 66</td><td>66 &rarr; 69 is 3, 69 &rarr; 72 is 3, so 6</td><td><span class="abox" style="width:0.42in;height:0.3in"></span></td></tr><tr><td><span class="pn">2.</span></td><td>47 + 39</td><td>76</td><td><span class="abox" style="width:0.42in;height:0.3in"></span></td></tr><tr><td><span class="pn">3.</span></td><td>61 &minus; 19</td><td>61 &minus; 20 = 41, then + 1 = 42</td><td><span class="abox" style="width:0.42in;height:0.3in"></span></td></tr><tr><td><span class="pn">4.</span></td><td>Add 9 and 7, then take away 3.</td><td>16</td><td><span class="abox" style="width:0.42in;height:0.3in"></span></td></tr><tr><td><span class="pn">5.</span></td><td>32 &minus; 27</td><td>15</td><td><span class="abox" style="width:0.42in;height:0.3in"></span></td></tr><tr><td><span class="pn">6.</span></td><td>32 + 27</td><td>59</td><td><span class="abox" style="width:0.42in;height:0.3in"></span></td></tr><tr><td><span class="pn">7.</span></td><td>There were 16 stickers in a box. 5 were given away. How many are left?</td><td>21</td><td><span class="abox" style="width:0.42in;height:0.3in"></span></td></tr><tr><td><span class="pn">8.</span></td><td>48 &minus; 22</td><td>26</td><td><span class="abox" style="width:0.42in;height:0.3in"></span></td></tr><tr><td><span class="pn">9.</span></td><td>42 + 20</td><td>24 + 20 = 44</td><td><span class="abox" style="width:0.42in;height:0.3in"></span></td></tr></tbody>
+  </table>
+
+  <div class="note"><b>At the bottom of Robin&rsquo;s sheet, in Robin&rsquo;s writing:</b>
+  &ldquo;I marked it myself. <b>8 out of 9.</b>&rdquo;</div>
+
+  <ol class="qs" start="10">
+    <li><span class="qt" style="font-size:12pt">What is Robin&rsquo;s real score, out of 9? &nbsp;<span class="abox" style="width:0.8in;height:0.32in"></span></span></li>
+  </ol>
+  
+
+  <footer>
+    <span>Score: ______ / 10 (the 9 marks, and the real total)</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Mark this one</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>Mark This One &mdash; What Robin Did</h1>
+    <p class="sub">Grades 2&ndash;5 · Doing the Work · Page 2 of 2</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Say what Robin <b>did</b>, not just that it is wrong.
+  </div>
+
+
+  <b>B. For each one you crossed, write its number and what Robin did.</b>
+  <div style="display:flex;align-items:center;gap:.12in;margin:.04in 0">
+       <span class="abox" style="width:0.34in;height:0.28in"></span>
+       <span style="flex:1;border-bottom:1px solid var(--rule);height:.22in"></span></div><div style="display:flex;align-items:center;gap:.12in;margin:.04in 0">
+       <span class="abox" style="width:0.34in;height:0.28in"></span>
+       <span style="flex:1;border-bottom:1px solid var(--rule);height:.22in"></span></div><div style="display:flex;align-items:center;gap:.12in;margin:.04in 0">
+       <span class="abox" style="width:0.34in;height:0.28in"></span>
+       <span style="flex:1;border-bottom:1px solid var(--rule);height:.22in"></span></div><div style="display:flex;align-items:center;gap:.12in;margin:.04in 0">
+       <span class="abox" style="width:0.34in;height:0.28in"></span>
+       <span style="flex:1;border-bottom:1px solid var(--rule);height:.22in"></span></div><div style="display:flex;align-items:center;gap:.12in;margin:.04in 0">
+       <span class="abox" style="width:0.34in;height:0.28in"></span>
+       <span style="flex:1;border-bottom:1px solid var(--rule);height:.22in"></span></div><div style="display:flex;align-items:center;gap:.12in;margin:.04in 0">
+       <span class="abox" style="width:0.34in;height:0.28in"></span>
+       <span style="flex:1;border-bottom:1px solid var(--rule);height:.22in"></span></div>
+
+  <ol class="qs" start="11">
+    <li><span class="qt">Two of Robin&rsquo;s right answers were worked out in a way you would not use.
+    Find one. Write its number, and say whether it is still right.</span><div class="write"></div><div class="write"></div><div class="write"></div></li>
+    <li><span class="qt">Robin gave themselves 8 out of 9. You gave them  fewer.
+    Robin was not cheating &mdash; so what makes your own work the hardest kind to mark?</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li>
+  </ol>
+
+  <b>C. Three of your own.</b> Do them, then mark them yourself against the key.
+
+  <ol class="qs" start="13"><li><span class="qt" style="font-size:12pt">Add 11 and 8, then take away 5. &nbsp;<span class="abox" style="width:0.9in;height:0.32in"></span></span></li><li><span class="qt" style="font-size:12pt">There were 14 stickers in a box. 7 were given away. How many are left? &nbsp;<span class="abox" style="width:0.9in;height:0.32in"></span></span></li><li><span class="qt" style="font-size:12pt">38 + 48 &nbsp;<span class="abox" style="width:0.9in;height:0.32in"></span></span></li></ol>
+  
+
+  <footer>
+    <span>Score: ______ / 2 (part B is marked with them, not counted)</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Mark this one</span>
+  </footer>
+</div>
+
+
+<div style="page-break-before:always"></div>
+
+
+<div class="page ">
+  <header>
+    
+    <h1>A Bar Adds Up to One</h1>
+    <p class="sub">Music &middot; Page 1 of 6</p>
+  </header>
+  <div class="nameline">
+    <span>Name</span>
+    <span class="short">Date</span>
+  </div>
+  <div class="directions">
+    <b>DIRECTIONS:</b> Clap the four bars while somebody counts 1&ndash;2&ndash;3&ndash;4.
+  </div>
+
+
+  <div class="plan" style="display:flex;align-items:stretch;gap:.08in;margin:.02in 0 .1in"><div style="flex:1;display:flex;align-items:center;gap:.07in;border:1.8px solid var(--ink);border-radius:5px;padding:.05in .08in"><span style="flex:0 0 auto;display:inline-block;width:.26in;height:.26in;line-height:.26in;border-radius:50%;background:var(--ink);color:#fff;text-align:center;font-weight:700;font-size:11pt">1</span><span style="font-size:10.5pt;font-weight:700;line-height:1.2">Read the table</span></div><div style="align-self:center;font-size:16pt;font-weight:700;color:var(--ink)">&rarr;</div><div style="flex:1;display:flex;align-items:center;gap:.07in;border:1.8px solid var(--ink);border-radius:5px;padding:.05in .08in"><span style="flex:0 0 auto;display:inline-block;width:.26in;height:.26in;line-height:.26in;border-radius:50%;background:var(--ink);color:#fff;text-align:center;font-weight:700;font-size:11pt">2</span><span style="font-size:10.5pt;font-weight:700;line-height:1.2">Clap the four bars</span></div><div style="align-self:center;font-size:16pt;font-weight:700;color:var(--ink)">&rarr;</div><div style="flex:1;display:flex;align-items:center;gap:.07in;border:1.8px solid var(--ink);border-radius:5px;padding:.05in .08in"><span style="flex:0 0 auto;display:inline-block;width:.26in;height:.26in;line-height:.26in;border-radius:50%;background:var(--ink);color:#fff;text-align:center;font-weight:700;font-size:11pt">3</span><span style="font-size:10.5pt;font-weight:700;line-height:1.2">Turn over: add them up</span></div></div>
+  <div class="note" style="margin-top:2px"><b>A bar adds up to exactly one.</b></div>
+
+  <table class="tbl ">
+    <thead><tr><th>The note</th><th>What it is called</th><th>How much of a bar it is</th><th>Beats in 4/4</th></tr></thead>
+    <tbody><tr><td><svg class="" viewBox="0 0 88 100" width="101" height="115" role="img" aria-label="1 bar of rhythm" xmlns="http://www.w3.org/2000/svg"><line x1="10" y1="54" x2="60" y2="54" stroke="#CFC3B2" stroke-width="1.2" stroke-linecap="round"/><ellipse cx="16" cy="54" rx="7.5" ry="5.4" fill="none" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 16 54)"/></svg></td><td>whole note</td><td><b>1</b></td><td>4</td></tr><tr><td><svg class="" viewBox="0 0 88 100" width="101" height="115" role="img" aria-label="1 bar of rhythm" xmlns="http://www.w3.org/2000/svg"><line x1="10" y1="54" x2="60" y2="54" stroke="#CFC3B2" stroke-width="1.2" stroke-linecap="round"/><ellipse cx="16" cy="54" rx="7.5" ry="5.4" fill="none" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 16 54)"/><line x1="23" y1="53" x2="23" y2="20" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/></svg></td><td>half note</td><td><b>&frac12;</b></td><td>2</td></tr><tr><td><svg class="" viewBox="0 0 88 100" width="101" height="115" role="img" aria-label="1 bar of rhythm" xmlns="http://www.w3.org/2000/svg"><line x1="10" y1="54" x2="60" y2="54" stroke="#CFC3B2" stroke-width="1.2" stroke-linecap="round"/><ellipse cx="16" cy="54" rx="7.5" ry="5.4" fill="#111" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 16 54)"/><line x1="23" y1="53" x2="23" y2="20" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/></svg></td><td>quarter note</td><td><b>&frac14;</b></td><td>1</td></tr><tr><td><svg class="" viewBox="0 0 88 100" width="101" height="115" role="img" aria-label="1 bar of rhythm" xmlns="http://www.w3.org/2000/svg"><line x1="10" y1="54" x2="60" y2="54" stroke="#CFC3B2" stroke-width="1.2" stroke-linecap="round"/><ellipse cx="16" cy="54" rx="7.5" ry="5.4" fill="#111" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 16 54)"/><line x1="23" y1="53" x2="23" y2="20" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/><path d="M 23 20 q 11 6 9 17 q -1 -9 -9 -12 z" fill="#16130F" stroke="#C0511D" stroke-width="1"/></svg></td><td>eighth note</td><td><b>&#8539;</b></td><td>0.5</td></tr></tbody>
+  </table>
+
+  <div class="rules">&frac14; + &frac14; + &frac14; + &frac14; = 1 &nbsp;&middot;&nbsp; &frac12; + &frac12; = 1</div>
+
+  <div style="text-align:center;margin:10px 0"><svg class="" viewBox="0 0 646 100" width="690" height="107" role="img" aria-label="4 bars of rhythm" xmlns="http://www.w3.org/2000/svg"><line x1="10" y1="54" x2="630" y2="54" stroke="#CFC3B2" stroke-width="1.2" stroke-linecap="round"/><text x="26" y="48" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="19" font-weight="700" text-anchor="middle" fill="#16130F">4</text><text x="26" y="70" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="19" font-weight="700" text-anchor="middle" fill="#16130F">4</text><ellipse cx="52" cy="54" rx="7.5" ry="5.4" fill="#111" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 52 54)"/><line x1="59" y1="53" x2="59" y2="20" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/><text x="54" y="84" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="11" font-weight="normal" text-anchor="middle" fill="#16130F">&frac14;</text><ellipse cx="90" cy="54" rx="7.5" ry="5.4" fill="#111" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 90 54)"/><line x1="97" y1="53" x2="97" y2="20" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/><text x="92" y="84" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="11" font-weight="normal" text-anchor="middle" fill="#16130F">&frac14;</text><ellipse cx="128" cy="54" rx="7.5" ry="5.4" fill="#111" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 128 54)"/><line x1="135" y1="53" x2="135" y2="20" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/><text x="130" y="84" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="11" font-weight="normal" text-anchor="middle" fill="#16130F">&frac14;</text><ellipse cx="166" cy="54" rx="7.5" ry="5.4" fill="#111" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 166 54)"/><line x1="173" y1="53" x2="173" y2="20" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/><text x="168" y="84" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="11" font-weight="normal" text-anchor="middle" fill="#16130F">&frac14;</text><line x1="210" y1="32" x2="210" y2="66" stroke="#16130F" stroke-width="1.6" stroke-linecap="round"/><ellipse cx="226" cy="54" rx="7.5" ry="5.4" fill="none" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 226 54)"/><line x1="233" y1="53" x2="233" y2="20" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/><text x="228" y="84" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="11" font-weight="normal" text-anchor="middle" fill="#16130F">&frac12;</text><ellipse cx="264" cy="54" rx="7.5" ry="5.4" fill="#111" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 264 54)"/><line x1="271" y1="53" x2="271" y2="20" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/><text x="266" y="84" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="11" font-weight="normal" text-anchor="middle" fill="#16130F">&frac14;</text><ellipse cx="302" cy="54" rx="7.5" ry="5.4" fill="#111" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 302 54)"/><line x1="309" y1="53" x2="309" y2="20" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/><text x="304" y="84" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="11" font-weight="normal" text-anchor="middle" fill="#16130F">&frac14;</text><line x1="346" y1="32" x2="346" y2="66" stroke="#16130F" stroke-width="1.6" stroke-linecap="round"/><ellipse cx="362" cy="54" rx="7.5" ry="5.4" fill="none" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 362 54)"/><line x1="369" y1="53" x2="369" y2="20" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/><text x="364" y="84" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="11" font-weight="normal" text-anchor="middle" fill="#16130F">&frac12;</text><ellipse cx="400" cy="54" rx="7.5" ry="5.4" fill="none" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 400 54)"/><line x1="407" y1="53" x2="407" y2="20" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/><text x="402" y="84" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="11" font-weight="normal" text-anchor="middle" fill="#16130F">&frac12;</text><line x1="444" y1="32" x2="444" y2="66" stroke="#16130F" stroke-width="1.6" stroke-linecap="round"/><ellipse cx="460" cy="54" rx="7.5" ry="5.4" fill="#111" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 460 54)"/><line x1="467" y1="53" x2="467" y2="20" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/><text x="462" y="84" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="11" font-weight="normal" text-anchor="middle" fill="#16130F">&frac14;</text><ellipse cx="498" cy="54" rx="7.5" ry="5.4" fill="#111" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 498 54)"/><line x1="505" y1="53" x2="505" y2="20" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/><path d="M 505 20 q 11 6 9 17 q -1 -9 -9 -12 z" fill="#16130F" stroke="#C0511D" stroke-width="1"/><text x="500" y="84" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="11" font-weight="normal" text-anchor="middle" fill="#16130F">&#8539;</text><ellipse cx="536" cy="54" rx="7.5" ry="5.4" fill="#111" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 536 54)"/><line x1="543" y1="53" x2="543" y2="20" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/><path d="M 543 20 q 11 6 9 17 q -1 -9 -9 -12 z" fill="#16130F" stroke="#C0511D" stroke-width="1"/><text x="538" y="84" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="11" font-weight="normal" text-anchor="middle" fill="#16130F">&#8539;</text><ellipse cx="574" cy="54" rx="7.5" ry="5.4" fill="none" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 574 54)"/><line x1="581" y1="53" x2="581" y2="20" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/><text x="576" y="84" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="11" font-weight="normal" text-anchor="middle" fill="#16130F">&frac12;</text></svg></div>
+
+
+
+  <footer>
+    <span>Keep going on page 2 &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>A bar adds up to one</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>Add Them Up</h1>
+    <p class="sub">Music &middot; Page 2 of 6</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Write each note&rsquo;s fraction, then add. Each comes to <b>1</b>.
+  </div>
+
+
+  <ol class="qs" start="1"><li><span class="qt"><svg class="" viewBox="0 0 340 100" width="646" height="190" role="img" aria-label="1 bar of rhythm" xmlns="http://www.w3.org/2000/svg"><line x1="10" y1="54" x2="330" y2="54" stroke="#CFC3B2" stroke-width="1.2" stroke-linecap="round"/><ellipse cx="16" cy="54" rx="7.5" ry="5.4" fill="#111" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 16 54)"/><line x1="23" y1="53" x2="23" y2="20" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/><ellipse cx="54" cy="54" rx="7.5" ry="5.4" fill="#111" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 54 54)"/><line x1="61" y1="53" x2="61" y2="20" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/><ellipse cx="92" cy="54" rx="7.5" ry="5.4" fill="#111" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 92 54)"/><line x1="99" y1="53" x2="99" y2="20" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/><ellipse cx="130" cy="54" rx="7.5" ry="5.4" fill="#111" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 130 54)"/><line x1="137" y1="53" x2="137" y2="20" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/></svg><div style="margin-top:2px;font-size:13pt">&nbsp;&nbsp;______ + ______ + ______ + ______ &nbsp;=&nbsp; ______</div></span></li><li><span class="qt"><svg class="" viewBox="0 0 340 100" width="646" height="190" role="img" aria-label="1 bar of rhythm" xmlns="http://www.w3.org/2000/svg"><line x1="10" y1="54" x2="330" y2="54" stroke="#CFC3B2" stroke-width="1.2" stroke-linecap="round"/><ellipse cx="16" cy="54" rx="7.5" ry="5.4" fill="none" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 16 54)"/><line x1="23" y1="53" x2="23" y2="20" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/><ellipse cx="54" cy="54" rx="7.5" ry="5.4" fill="#111" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 54 54)"/><line x1="61" y1="53" x2="61" y2="20" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/><ellipse cx="92" cy="54" rx="7.5" ry="5.4" fill="#111" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 92 54)"/><line x1="99" y1="53" x2="99" y2="20" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/></svg><div style="margin-top:2px;font-size:13pt">&nbsp;&nbsp;______ + ______ + ______ + ______ &nbsp;=&nbsp; ______</div></span></li><li><span class="qt"><svg class="" viewBox="0 0 340 100" width="646" height="190" role="img" aria-label="1 bar of rhythm" xmlns="http://www.w3.org/2000/svg"><line x1="10" y1="54" x2="330" y2="54" stroke="#CFC3B2" stroke-width="1.2" stroke-linecap="round"/><ellipse cx="16" cy="54" rx="7.5" ry="5.4" fill="none" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 16 54)"/><line x1="23" y1="53" x2="23" y2="20" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/><ellipse cx="54" cy="54" rx="7.5" ry="5.4" fill="none" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 54 54)"/><line x1="61" y1="53" x2="61" y2="20" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/></svg><div style="margin-top:2px;font-size:13pt">&nbsp;&nbsp;______ + ______ + ______ + ______ &nbsp;=&nbsp; ______</div></span></li></ol>
+
+  <footer>
+    <span>Keep going on page 3 &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Add them up</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>Add Them Up</h1>
+    <p class="sub">Music &middot; Page 3 of 6</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Three more.
+  </div>
+
+
+  <ol class="qs" start="4"><li><span class="qt"><svg class="" viewBox="0 0 340 100" width="646" height="190" role="img" aria-label="1 bar of rhythm" xmlns="http://www.w3.org/2000/svg"><line x1="10" y1="54" x2="330" y2="54" stroke="#CFC3B2" stroke-width="1.2" stroke-linecap="round"/><ellipse cx="16" cy="54" rx="7.5" ry="5.4" fill="#111" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 16 54)"/><line x1="23" y1="53" x2="23" y2="20" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/><ellipse cx="54" cy="54" rx="7.5" ry="5.4" fill="#111" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 54 54)"/><line x1="61" y1="53" x2="61" y2="20" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/><path d="M 61 20 q 11 6 9 17 q -1 -9 -9 -12 z" fill="#16130F" stroke="#C0511D" stroke-width="1"/><ellipse cx="92" cy="54" rx="7.5" ry="5.4" fill="#111" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 92 54)"/><line x1="99" y1="53" x2="99" y2="20" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/><path d="M 99 20 q 11 6 9 17 q -1 -9 -9 -12 z" fill="#16130F" stroke="#C0511D" stroke-width="1"/><ellipse cx="130" cy="54" rx="7.5" ry="5.4" fill="none" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 130 54)"/><line x1="137" y1="53" x2="137" y2="20" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/></svg><div style="margin-top:2px;font-size:13pt">&nbsp;&nbsp;______ + ______ + ______ + ______ &nbsp;=&nbsp; ______</div></span></li><li><span class="qt"><svg class="" viewBox="0 0 340 100" width="646" height="190" role="img" aria-label="1 bar of rhythm" xmlns="http://www.w3.org/2000/svg"><line x1="10" y1="54" x2="330" y2="54" stroke="#CFC3B2" stroke-width="1.2" stroke-linecap="round"/><ellipse cx="16" cy="54" rx="7.5" ry="5.4" fill="#111" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 16 54)"/><line x1="23" y1="53" x2="23" y2="20" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/><path d="M 23 20 q 11 6 9 17 q -1 -9 -9 -12 z" fill="#16130F" stroke="#C0511D" stroke-width="1"/><ellipse cx="54" cy="54" rx="7.5" ry="5.4" fill="#111" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 54 54)"/><line x1="61" y1="53" x2="61" y2="20" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/><path d="M 61 20 q 11 6 9 17 q -1 -9 -9 -12 z" fill="#16130F" stroke="#C0511D" stroke-width="1"/><ellipse cx="92" cy="54" rx="7.5" ry="5.4" fill="#111" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 92 54)"/><line x1="99" y1="53" x2="99" y2="20" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/><path d="M 99 20 q 11 6 9 17 q -1 -9 -9 -12 z" fill="#16130F" stroke="#C0511D" stroke-width="1"/><ellipse cx="130" cy="54" rx="7.5" ry="5.4" fill="#111" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 130 54)"/><line x1="137" y1="53" x2="137" y2="20" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/><path d="M 137 20 q 11 6 9 17 q -1 -9 -9 -12 z" fill="#16130F" stroke="#C0511D" stroke-width="1"/><ellipse cx="168" cy="54" rx="7.5" ry="5.4" fill="none" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 168 54)"/><line x1="175" y1="53" x2="175" y2="20" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/></svg><div style="margin-top:2px;font-size:13pt">&nbsp;&nbsp;______ + ______ + ______ + ______ &nbsp;=&nbsp; ______</div></span></li><li><span class="qt"><svg class="" viewBox="0 0 340 100" width="646" height="190" role="img" aria-label="1 bar of rhythm" xmlns="http://www.w3.org/2000/svg"><line x1="10" y1="54" x2="330" y2="54" stroke="#CFC3B2" stroke-width="1.2" stroke-linecap="round"/><ellipse cx="16" cy="54" rx="7.5" ry="5.4" fill="none" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 16 54)"/></svg><div style="margin-top:2px;font-size:13pt">&nbsp;&nbsp;______ + ______ + ______ + ______ &nbsp;=&nbsp; ______</div></span></li></ol>
+
+  <div class="note" style="margin-top:12px"><b>Then clap all six.</b></div>
+
+  <footer>
+    <span>Keep going on page 4 &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Add them up</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>These Are Wrong</h1>
+    <p class="sub">Music &middot; Page 4 of 6</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Every bar is wrong. Add it up: how much too long or too short?
+  </div>
+
+
+  <ol class="qs" start="7"><li><span class="qt"><svg class="" viewBox="0 0 320 100" width="480" height="150" role="img" aria-label="1 bar of rhythm" xmlns="http://www.w3.org/2000/svg"><line x1="10" y1="54" x2="310" y2="54" stroke="#CFC3B2" stroke-width="1.2" stroke-linecap="round"/><ellipse cx="16" cy="54" rx="7.5" ry="5.4" fill="#111" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 16 54)"/><line x1="23" y1="53" x2="23" y2="20" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/><ellipse cx="54" cy="54" rx="7.5" ry="5.4" fill="#111" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 54 54)"/><line x1="61" y1="53" x2="61" y2="20" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/><ellipse cx="92" cy="54" rx="7.5" ry="5.4" fill="#111" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 92 54)"/><line x1="99" y1="53" x2="99" y2="20" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/></svg><div style="margin-top:2px">adds up to ______ &nbsp;&middot;&nbsp; that is ______ too ______</div></span></li><li><span class="qt"><svg class="" viewBox="0 0 320 100" width="480" height="150" role="img" aria-label="1 bar of rhythm" xmlns="http://www.w3.org/2000/svg"><line x1="10" y1="54" x2="310" y2="54" stroke="#CFC3B2" stroke-width="1.2" stroke-linecap="round"/><ellipse cx="16" cy="54" rx="7.5" ry="5.4" fill="none" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 16 54)"/><line x1="23" y1="53" x2="23" y2="20" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/><ellipse cx="54" cy="54" rx="7.5" ry="5.4" fill="none" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 54 54)"/><line x1="61" y1="53" x2="61" y2="20" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/><ellipse cx="92" cy="54" rx="7.5" ry="5.4" fill="#111" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 92 54)"/><line x1="99" y1="53" x2="99" y2="20" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/></svg><div style="margin-top:2px">adds up to ______ &nbsp;&middot;&nbsp; that is ______ too ______</div></span></li><li><span class="qt"><svg class="" viewBox="0 0 320 100" width="480" height="150" role="img" aria-label="1 bar of rhythm" xmlns="http://www.w3.org/2000/svg"><line x1="10" y1="54" x2="310" y2="54" stroke="#CFC3B2" stroke-width="1.2" stroke-linecap="round"/><ellipse cx="16" cy="54" rx="7.5" ry="5.4" fill="#111" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 16 54)"/><line x1="23" y1="53" x2="23" y2="20" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/><path d="M 23 20 q 11 6 9 17 q -1 -9 -9 -12 z" fill="#16130F" stroke="#C0511D" stroke-width="1"/><ellipse cx="54" cy="54" rx="7.5" ry="5.4" fill="#111" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 54 54)"/><line x1="61" y1="53" x2="61" y2="20" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/><path d="M 61 20 q 11 6 9 17 q -1 -9 -9 -12 z" fill="#16130F" stroke="#C0511D" stroke-width="1"/><ellipse cx="92" cy="54" rx="7.5" ry="5.4" fill="#111" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 92 54)"/><line x1="99" y1="53" x2="99" y2="20" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/><ellipse cx="130" cy="54" rx="7.5" ry="5.4" fill="#111" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 130 54)"/><line x1="137" y1="53" x2="137" y2="20" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/></svg><div style="margin-top:2px">adds up to ______ &nbsp;&middot;&nbsp; that is ______ too ______</div></span></li><li><span class="qt"><svg class="" viewBox="0 0 320 100" width="480" height="150" role="img" aria-label="1 bar of rhythm" xmlns="http://www.w3.org/2000/svg"><line x1="10" y1="54" x2="310" y2="54" stroke="#CFC3B2" stroke-width="1.2" stroke-linecap="round"/><ellipse cx="16" cy="54" rx="7.5" ry="5.4" fill="none" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 16 54)"/><ellipse cx="54" cy="54" rx="7.5" ry="5.4" fill="#111" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 54 54)"/><line x1="61" y1="53" x2="61" y2="20" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/><path d="M 61 20 q 11 6 9 17 q -1 -9 -9 -12 z" fill="#16130F" stroke="#C0511D" stroke-width="1"/></svg><div style="margin-top:2px">adds up to ______ &nbsp;&middot;&nbsp; that is ______ too ______</div></span></li></ol>
+
+  <div class="rules" style="margin-top:12px">A short bar leaves a hole. A long one runs into the next bar. Clap one and hear it.</div>
+
+  <footer>
+    <span>Keep going on page 5 &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>These are wrong</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>What Is Missing</h1>
+    <p class="sub">Music &middot; Page 5 of 6</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Each bar is missing one note. Draw it in the gap.
+    <div class="tip">Add up what is there, then take it from one.</div>
+  </div>
+
+
+  <ol class="qs" start="11"><li><span class="qt"><svg class="" viewBox="0 0 300 100" width="360" height="120" role="img" aria-label="1 bar of rhythm" xmlns="http://www.w3.org/2000/svg"><line x1="10" y1="54" x2="290" y2="54" stroke="#CFC3B2" stroke-width="1.2" stroke-linecap="round"/><ellipse cx="16" cy="54" rx="7.5" ry="5.4" fill="#111" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 16 54)"/><line x1="23" y1="53" x2="23" y2="20" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/><ellipse cx="54" cy="54" rx="7.5" ry="5.4" fill="#111" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 54 54)"/><line x1="61" y1="53" x2="61" y2="20" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/></svg><div style="margin-top:2px">what is there: ______ &nbsp;&middot;&nbsp; so the missing note is ______</div></span></li><li><span class="qt"><svg class="" viewBox="0 0 300 100" width="360" height="120" role="img" aria-label="1 bar of rhythm" xmlns="http://www.w3.org/2000/svg"><line x1="10" y1="54" x2="290" y2="54" stroke="#CFC3B2" stroke-width="1.2" stroke-linecap="round"/><ellipse cx="16" cy="54" rx="7.5" ry="5.4" fill="none" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 16 54)"/><line x1="23" y1="53" x2="23" y2="20" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/><ellipse cx="54" cy="54" rx="7.5" ry="5.4" fill="#111" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 54 54)"/><line x1="61" y1="53" x2="61" y2="20" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/><path d="M 61 20 q 11 6 9 17 q -1 -9 -9 -12 z" fill="#16130F" stroke="#C0511D" stroke-width="1"/><ellipse cx="92" cy="54" rx="7.5" ry="5.4" fill="#111" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 92 54)"/><line x1="99" y1="53" x2="99" y2="20" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/><path d="M 99 20 q 11 6 9 17 q -1 -9 -9 -12 z" fill="#16130F" stroke="#C0511D" stroke-width="1"/></svg><div style="margin-top:2px">what is there: ______ &nbsp;&middot;&nbsp; so the missing note is ______</div></span></li><li><span class="qt"><svg class="" viewBox="0 0 300 100" width="360" height="120" role="img" aria-label="1 bar of rhythm" xmlns="http://www.w3.org/2000/svg"><line x1="10" y1="54" x2="290" y2="54" stroke="#CFC3B2" stroke-width="1.2" stroke-linecap="round"/><ellipse cx="16" cy="54" rx="7.5" ry="5.4" fill="#111" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 16 54)"/><line x1="23" y1="53" x2="23" y2="20" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/><path d="M 23 20 q 11 6 9 17 q -1 -9 -9 -12 z" fill="#16130F" stroke="#C0511D" stroke-width="1"/><ellipse cx="54" cy="54" rx="7.5" ry="5.4" fill="#111" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 54 54)"/><line x1="61" y1="53" x2="61" y2="20" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/><path d="M 61 20 q 11 6 9 17 q -1 -9 -9 -12 z" fill="#16130F" stroke="#C0511D" stroke-width="1"/><ellipse cx="92" cy="54" rx="7.5" ry="5.4" fill="#111" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 92 54)"/><line x1="99" y1="53" x2="99" y2="20" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/><path d="M 99 20 q 11 6 9 17 q -1 -9 -9 -12 z" fill="#16130F" stroke="#C0511D" stroke-width="1"/><ellipse cx="130" cy="54" rx="7.5" ry="5.4" fill="#111" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 130 54)"/><line x1="137" y1="53" x2="137" y2="20" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/><path d="M 137 20 q 11 6 9 17 q -1 -9 -9 -12 z" fill="#16130F" stroke="#C0511D" stroke-width="1"/></svg><div style="margin-top:2px">what is there: ______ &nbsp;&middot;&nbsp; so the missing note is ______</div></span></li><li><span class="qt"><svg class="" viewBox="0 0 300 100" width="360" height="120" role="img" aria-label="1 bar of rhythm" xmlns="http://www.w3.org/2000/svg"><line x1="10" y1="54" x2="290" y2="54" stroke="#CFC3B2" stroke-width="1.2" stroke-linecap="round"/><ellipse cx="16" cy="54" rx="7.5" ry="5.4" fill="none" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 16 54)"/><line x1="23" y1="53" x2="23" y2="20" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/><ellipse cx="54" cy="54" rx="7.5" ry="5.4" fill="#111" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 54 54)"/><line x1="61" y1="53" x2="61" y2="20" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/></svg><div style="margin-top:2px">what is there: ______ &nbsp;&middot;&nbsp; so the missing note is ______</div></span></li><li><span class="qt"><svg class="" viewBox="0 0 300 100" width="360" height="120" role="img" aria-label="1 bar of rhythm" xmlns="http://www.w3.org/2000/svg"><line x1="10" y1="54" x2="290" y2="54" stroke="#CFC3B2" stroke-width="1.2" stroke-linecap="round"/><ellipse cx="16" cy="54" rx="7.5" ry="5.4" fill="#111" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 16 54)"/><line x1="23" y1="53" x2="23" y2="20" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/><ellipse cx="54" cy="54" rx="7.5" ry="5.4" fill="#111" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 54 54)"/><line x1="61" y1="53" x2="61" y2="20" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/><path d="M 61 20 q 11 6 9 17 q -1 -9 -9 -12 z" fill="#16130F" stroke="#C0511D" stroke-width="1"/><ellipse cx="92" cy="54" rx="7.5" ry="5.4" fill="#111" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 92 54)"/><line x1="99" y1="53" x2="99" y2="20" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/><path d="M 99 20 q 11 6 9 17 q -1 -9 -9 -12 z" fill="#16130F" stroke="#C0511D" stroke-width="1"/><ellipse cx="130" cy="54" rx="7.5" ry="5.4" fill="#111" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 130 54)"/><line x1="137" y1="53" x2="137" y2="20" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/></svg><div style="margin-top:2px">what is there: ______ &nbsp;&middot;&nbsp; so the missing note is ______</div></span></li></ol>
+
+
+
+  <footer>
+    <span>Keep going on page 6 &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>What is missing</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>Write Your Own</h1>
+    <p class="sub">Music &middot; Page 6 of 6</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Write four different bars that each add up to one. Fractions first, then notes.
+  </div>
+
+
+
+  <table class="tbl tall">
+    <thead><tr><th>Bar</th><th>The fractions</th><th>Does it come to 1?</th><th>Draw it</th></tr></thead>
+    <tbody><tr><td>1</td><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr><tr><td>2</td><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr><tr><td>3</td><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr><tr><td>4</td><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr></tbody>
+  </table>
+
+  <div style="text-align:center;margin:12px 0"><svg class="" viewBox="0 0 620 100" width="690" height="111" role="img" aria-label="4 bars of rhythm" xmlns="http://www.w3.org/2000/svg"><line x1="10" y1="54" x2="610" y2="54" stroke="#CFC3B2" stroke-width="1.2" stroke-linecap="round"/><text x="26" y="48" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="19" font-weight="700" text-anchor="middle" fill="#16130F">4</text><text x="26" y="70" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="19" font-weight="700" text-anchor="middle" fill="#16130F">4</text><line x1="58" y1="32" x2="58" y2="66" stroke="#16130F" stroke-width="1.6" stroke-linecap="round"/><line x1="80" y1="32" x2="80" y2="66" stroke="#16130F" stroke-width="1.6" stroke-linecap="round"/><line x1="102" y1="32" x2="102" y2="66" stroke="#16130F" stroke-width="1.6" stroke-linecap="round"/></svg></div>
+
+  <div class="note"><b>Clap all four without stopping.</b> Had to pause or rush? One doesn&rsquo;t add up.</div>
+
+  <div class="note"><b>Extra:</b> a bar of only eighth notes. How many, and why?</div>
+  <div class="write"></div><div class="write"></div><div class="write"></div>
+
+  <footer>
+    <span>Answers on the last page</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Write your own</span>
+  </footer>
+</div>
+
+</body></html>

@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="sheet-kind" content="form">
+<title>Five Letters, Five Sounds — Spanish</title>
+<style>
+  :root { --font: Georgia, "Times New Roman", serif; }
+
+  /* Page margins live HERE only — body padding stays 0 for print so the two
+     don't stack and eat the sheet. */
+  @page { size: letter portrait; margin: 0.45in 0.5in; }
+
+  /*
+   * THE PALETTE. The same one the shop wears (kitchen-table/BRAND.md): warm
+   * near-black ink, one accent, pine kept back for the answer key.
+   *
+   * WHY A SHEET HAS COLOR AT ALL. Every sheet was pure grayscale — #000 rules,
+   * #333 subtitles, #f0f0f0 boxes — which is what you get by never deciding.
+   * The paper is the product and it looked like a fax. A printer set to
+   * grayscale, or one that has no color to give, renders all of this as the
+   * greys it already had, so nothing below costs a parent anything they were
+   * not already spending.
+   *
+   * WHAT STAYS BLACK, ON PURPOSE:
+   *   - anything drawn to be written on (rules, name lines, answer boxes)
+   *   - anything drawn to be traced or colored in (line art, letter guides)
+   *   - the confidence rings, which have to survive a mono laser
+   * Color marks the sheet's own furniture — its rule, its numbering, its
+   * boxes — and never the part a child puts a pencil through.
+   */
+  :root {
+    --ink:    #16130F;
+    --muted:  #6B635A;
+    --rule:   #CFC3B2;
+    --guide:  #BCAE9C;
+    --accent: #C0511D;
+    --tint:   #F7EDE4;
+    --slate:  #2E5A78;
+    --tintslate: #E9EFF4;
+    --deep:   #2C4A45;
+    --tintdeep: #ECF1EF;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font);
+    color: #000; background: #fff;
+    font-size: 12pt; line-height: 1.3;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+
+  /* ORDER MATTERS. This generic rule must come BEFORE the @media screen block:
+     same specificity, so whichever is declared last wins. With it after, the
+     on-screen preview stretches to the viewport instead of 8.5in — print is
+     unaffected, but the proof you check before printing is wrong. */
+  .page { width: 100%; }
+  .page + .page { page-break-before: always; }
+
+  @media screen {
+    body { padding: 0.5in; background: #ddd; }
+    .page {
+      background: #fff; padding: 0.45in 0.5in;
+      width: 8.5in; min-height: 11in;
+      margin: 0 auto 24px; box-shadow: 0 2px 10px rgba(0,0,0,.3);
+    }
+  }
+
+  /* ------------------------------------------------------------- header */
+  header { border-bottom: 3px double var(--accent); padding-bottom: 6px; }
+  header.cont { border-bottom: 1px solid var(--rule); }
+  h1 { font-size: 16pt; margin: 0 0 1px; letter-spacing: .01em; }
+  .sub { font-size: 10pt; font-style: italic; color: var(--muted); margin: 0; }
+
+  .nameline { display: flex; gap: 26px; font-size: 10.5pt; margin: 11px 0 12px; }
+  .nameline span { flex: 1; border-bottom: 1px solid var(--ink); padding-bottom: 1px; }
+  .nameline span.short { flex: 0 0 1.9in; }
+
+  .directions {
+    font-size: 10.5pt; line-height: 1.35;
+    background: var(--tint); border-left: 4px solid var(--accent);
+    padding: 7px 10px; margin: 12px 0 14px;
+  }
+  .directions b { letter-spacing: .03em; }
+  .tip { font-style: italic; margin-top: 3px; }
+
+  /* ------------------------------------------------- problems and grids */
+  .grid { display: grid; gap: 13px 16px; margin-top: 4px; }
+  .prob { page-break-inside: avoid; display: flex; gap: 5px; align-items: flex-start; }
+  .pn { font-weight: bold; font-size: 11pt; min-width: .28in; flex: 0 0 auto; color: var(--accent); }
+  .pbody { flex: 1; min-width: 0; }
+
+  /* Digits need lining figures and even widths whatever the body font is. */
+  .num, .vert, .horiz { font-family: "Trebuchet MS", "Segoe UI", Tahoma, Verdana, sans-serif; font-variant-numeric: lining-nums tabular-nums; }
+
+  /* A stacked column algorithm.
+     Two grid columns — operator, then digits — because a floated or absolutely
+     positioned operator overlaps the digits as soon as the numbers get wide,
+     and "324" with a + sitting on the 3 is unreadable. The grid also lets the
+     rule under the last operand span BOTH columns, which is how it is written
+     by hand. The rule is heavy: it is the line you write the answer beneath. */
+  .vert {
+    display: inline-grid; grid-template-columns: auto auto;
+    font-size: 15pt; line-height: 1.3; text-align: right;
+  }
+  .vert > span { padding: 0 0 1px 0; }
+  .vert .op { text-align: left; padding-right: .16in; }
+  .vert .last { border-bottom: 2.5px solid var(--ink); padding-bottom: 3px; }
+  .vert .ans { height: .4in; }
+  /* Partial-products working, for 2-digit x 1-digit before the short method. */
+  .vert .part { font-size: 11pt; color: var(--muted); }
+  /* A row of worked examples that fade — see lib/formats.js faded(). The
+     caption is what makes the fade legible: without it the third one looks like
+     a question somebody forgot to number. */
+  .egrow { display: flex; gap: .34in; align-items: flex-start; margin: 0 0 4px; }
+  .eg { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; }
+  .eglab { font-size: 8.5pt; color: var(--slate); letter-spacing: .02em; }
+
+  /* The carried digits. Small and grey so the sum still reads as the sum, and
+     tight to the row below it so a carry sits ON the column it goes into. */
+  .vert .carry { font-size: 9pt; color: var(--slate); line-height: 1; padding: 0 0 1px 0; }
+
+  .horiz { font-size: 14pt; white-space: nowrap; }
+
+  /* Row numbers in a word list. Gray and small: they are there so a list can be
+     dictated ("number seven") and marked without counting down the page, and
+     they must not compete with the word itself. */
+  .wn { color: var(--muted); font-size: 9pt; }
+
+  /* The box an answer goes in. inline-block so it can sit mid-sentence. */
+  .abox {
+    display: inline-block; border: 1.6px solid var(--slate); border-radius: 3px;
+    vertical-align: middle; margin: 0 3px; position: relative; background: #fff;
+  }
+  /* Scoped to the box: as a bare ".alab" it pinned any generator's own .alab
+     to the bottom of the page (life-07-signs-and-forms 40, 2026-09-24). */
+  .abox > .alab {
+    position: absolute; bottom: 1px; left: 0; right: 0;
+    text-align: center; font-size: 7pt; color: var(--muted); font-style: italic;
+  }
+
+  /* Confidence marks. The rings are drawn with a border and a gradient rather
+     than an SVG so they stay inline with the question text at any font size,
+     and print black on a mono laser without relying on a background image. */
+  .conf { float: right; margin: 2px 0 0 8px; white-space: nowrap; }
+  .cring {
+    display: inline-block; width: 11px; height: 11px; margin-left: 4px;
+    border: 1.4px solid var(--slate); border-radius: 50%; vertical-align: middle;
+  }
+  .cring-full { background: var(--accent); }
+  .cring-half { background: linear-gradient(90deg, var(--accent) 50%, #fff 50%); }
+  .cring-none { background: #fff; }
+  ol.qs.hasconf li { overflow: hidden; }
+
+  .conflegend {
+    border: 1.2px solid var(--rule); border-radius: 4px;
+    padding: 3px 8px; margin: 0 0 7px;
+    font-size: 8.5pt; color: var(--muted); display: flex; gap: 14px; align-items: center;
+  }
+  .conftitle { font-weight: 700; color: var(--ink); }
+  .confitem { white-space: nowrap; }
+
+  .work {
+    border: 1.4px dashed var(--rule); border-radius: 4px;
+    margin: 6px 0 2px; position: relative;
+  }
+  /* The label S.work() puts in the box: a DIRECT child only. As ".work span"
+     it also caught every span inside any generator's own .work content and
+     stacked them all at the top-left corner (math-11-grade6 47, 2026-09-23). */
+  .work > span {
+    position: absolute; top: 3px; left: 6px;
+    font-size: 8pt; color: var(--muted); font-style: italic;
+  }
+
+  /* ------------------------------------------------------ writing lines */
+  /* Primary rule: solid top, dashed midline, heavy baseline. Capitals reach
+     the top line, lowercase bodies sit under the dashed one. */
+  .write {
+    position: relative; height: 0.375in;
+    margin: 6px 0 0 .3in;
+    border-top: 1px solid var(--rule); border-bottom: 2px solid var(--ink);
+  }
+  .write.flush { margin-left: 0; }
+  .write + .write { margin-top: .17in; }
+  .write::after {
+    content: ""; position: absolute; left: 0; right: 0; top: 50%;
+    border-top: 1px dashed var(--guide);
+  }
+
+  /* ------------------------------------------------------- question list */
+  ol.qs { margin: 0; padding: 0 0 0 .34in; }
+  ol.qs li { margin-bottom: 13px; page-break-inside: avoid; }
+  ol.qs li::marker { font-weight: bold; font-size: 11pt; color: var(--accent); }
+  .qt { display: block; }
+
+  .mcq { display: grid; gap: 3px 14px; margin: 5px 0 2px .12in; font-size: 11pt; }
+  .opt { white-space: nowrap; }
+
+  /* -------------------------------------------------------------- tables */
+  .tbl { border-collapse: collapse; margin: 8px 0; font-size: 11pt; width: 100%; }
+  .tbl th, .tbl td { border: 1.4px solid var(--ink); padding: 5px 8px; text-align: left; }
+  .tbl th { color: var(--slate); }
+  .tbl th { background: var(--tint); font-size: 10pt; letter-spacing: .02em; }
+  .tbl td.blank { height: .34in; }
+  .tbl.narrow { width: auto; }
+  .tbl.center td, .tbl.center th { text-align: center; }
+
+  /* ------------------------------------------------------------ passages */
+  .passage {
+    border: 1.5px solid var(--slate); border-radius: 4px;
+    padding: 11px 14px; margin-bottom: 12px;
+    font-size: 11.5pt; line-height: 1.55;
+  }
+  .passage h2 { font-size: 13pt; margin: 0 0 6px; color: var(--deep); }
+  .passage p { margin: 0 0 8px; }
+  .passage p:last-child { margin-bottom: 0; }
+  .passage .byline { font-size: 9.5pt; font-style: italic; color: var(--muted); margin-bottom: 8px; }
+  /* Numbered paragraphs, so a question can say "in paragraph 2". */
+  .passage p.np { position: relative; padding-left: .3in; }
+  .passage p.np::before {
+    content: attr(data-p); position: absolute; left: 0; top: 0;
+    font-size: 9pt; color: var(--accent); font-weight: bold;
+  }
+
+  .wordbank {
+    border: 1.5px dashed var(--slate); border-radius: 4px;
+    padding: 8px 12px; margin: 10px 0 12px;
+    font-size: 11.5pt; text-align: center;
+  }
+  .wordbank b { display: block; font-size: 9.5pt; letter-spacing: .06em;
+    text-transform: uppercase; margin-bottom: 4px; color: var(--accent); }
+  .wordbank span { display: inline-block; margin: 2px 11px; }
+
+  .note {
+    border-left: 4px solid var(--deep); background: var(--tintdeep);
+    padding: 7px 11px; margin: 10px 0; font-size: 10.5pt;
+  }
+  .note b { letter-spacing: .02em; }
+
+  /* -------------------------------------------------------------- footer */
+  /* THE WORDMARK SITS IN THE FOOTER THAT WAS ALREADY THERE, so it costs no
+     height at all — a sheet that fitted before fits now. Upright where the rest
+     of the line is italic, and a size down: it is a signature, not a message,
+     and it must never compete with "Score: ___ / 10". */
+  .brand { font-style: normal; font-size: 7.5pt; letter-spacing: .04em;
+    color: var(--accent); align-self: center; }
+
+  footer {
+    margin-top: 14px; padding-top: 6px; border-top: 1px solid var(--rule);
+    font-size: 9pt; font-style: italic; color: var(--muted);
+    display: flex; justify-content: space-between;
+  }
+
+  /* ---------------------------------------------------------- answer key */
+  .keybadge {
+    display: inline-block; border: 2px solid var(--deep); color: var(--deep); padding: 2px 9px;
+    font-size: 9.5pt; font-weight: bold; letter-spacing: .08em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .key .why {
+    display: block; font-size: 9pt; font-style: italic; color: var(--muted); margin-top: 1px;
+  }
+  /* Highlight rather than underline: <u> in a key marks WHAT CHANGED, and an
+     underline under a comma is invisible. */
+  .key u { text-decoration: none; background: var(--tint); padding: 0 2px; font-weight: bold; }
+  .keygrid .pbody { font-family: "Trebuchet MS", "Segoe UI", Tahoma, Verdana, sans-serif; font-size: 12pt; }
+  /* A key's pictures scale to their column: at 1fr a wide drawing pushed a
+     three-column key 92px off the paper (art-04-drawing 10, 2026-09-24). */
+  .keygrid svg { max-width: 100%; height: auto; }
+  .keylist .qt { font-weight: normal; }
+
+  /*
+   * The guide page. Four lines per question, and the ASK line is the one that
+   * gets used at the table, so it is the one with a rule beside it — a parent
+   * scanning this page in ten seconds should land on the follow-up question
+   * and nothing else.
+   */
+  .guide { padding-left: .3in; }
+  .guide li { margin-bottom: 11px; page-break-inside: avoid; }
+  .guide .gq { font-weight: bold; font-size: 11pt; margin-bottom: 3px; }
+  /* 9pt, matching the key's own why line, because the guide page is the
+     binding constraint on every open sheet: four lines per question against a
+     key's one, and at 10pt a sheet with seven questions ran onto a second
+     side. Found by measuring, not chosen. (No backticks in here — this CSS
+     lives inside a template literal and one would close it.) */
+  .guide .glook, .guide .gthin, .guide .gstrong {
+    font-size: 9pt; line-height: 1.3; margin-top: 1px;
+  }
+  .guide .gthin { color: var(--muted); }
+  .guide .gstrong { color: var(--muted); font-style: italic; }
+  .guide .gask {
+    font-size: 9.5pt; line-height: 1.3; margin-top: 3px;
+    border-left: 3px solid var(--slate); padding-left: 7px;
+  }
+  .key .qs li { margin-bottom: 9px; }
+
+  /*
+   * INLINE-BLOCK, NOT BLOCK, AND THIS WAS WRONG FOR A LONG TIME. A block-level
+   * svg ignores text-align: center on its parent and sits flush left — so 117
+   * sheets across 35 packs said "centre this diagram" and got a left-aligned
+   * one. Twenty-five of them were origami and paper-plane fold sequences, where
+   * the whole page is diagrams.
+   *
+   * Nobody spotted it because a left-flush diagram looks deliberate; it only
+   * reads as wrong next to a centered one, and no sheet has both.
+   *
+   * inline-block makes text-align do what every one of those authors meant,
+   * and leaves a diagram in a left-aligned container exactly where it was.
+   * vertical-align: top kills the baseline gap that inline elements otherwise
+   * leave underneath them, which would have pushed long pages over.
+   */
+  svg { display: inline-block; vertical-align: top; }
+  svg.inline { vertical-align: middle; }
+
+  .pickrow { display: grid; grid-template-columns: 1.9in 1fr; gap: 14px; align-items: center;
+    border: 2.2px solid var(--ink); border-radius: 9px; padding: 16px 14px; margin: 12px 0; }
+  .pickrow .es { font-size: 28pt; font-weight: 700; font-style: italic; }
+  .pickrow .opts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .pickrow .opts span { border: 1.8px solid var(--rule); border-radius: 7px; padding: 14px 4px;
+    text-align: center; font-size: 16pt; }
+
+  .maps { display: flex; gap: 26px; justify-content: center; align-items: flex-end;
+    margin: 8px 0 4px; }
+  /*
+   * THE SOUND KEY, added after a reader said the obvious thing: the sheet
+   * claimed each vowel says one thing and then only ever said WHICH for the
+   * letter a. Four fifths of the lesson was missing and the words underneath
+   * could not be attempted. The picture shows that Spanish is regular; this
+   * table is what makes it usable, and it has to be on the same page.
+   */
+  .vkey { display: grid; grid-template-columns: repeat(5, 1fr); gap: 7px;
+    margin: 8px 0 6px; }
+  .vkey > div { border: 2.2px solid var(--ink); border-radius: 7px; padding: 7px 4px 6px;
+    text-align: center; }
+  .vkey .l { font-size: 25pt; font-weight: 700; font-style: italic; line-height: 1.05; }
+  .vkey .as { font-size: 9.5pt; color: var(--muted); margin-top: 1px; }
+  .vkey .ex { font-size: 13pt; font-weight: 700; margin-top: 2px; }
+  .vkey .ex u { text-decoration: underline; text-underline-offset: 2px; }
+  .maps .cap { text-align: center; font-size: 10pt; color: var(--muted); margin-top: 2px; }
+  .say { border-collapse: collapse; width: 100%; margin: 4px 0 8px; }
+  .say th { border: 1.8px solid var(--ink); background: var(--tint); padding: 4px 7px;
+    font-size: 9.5pt; text-align: left; }
+  .say td { border: 1.4px solid var(--rule); padding: 8px 10px; }
+  .say .w { font-size: 20pt; font-weight: 700; font-style: italic; }
+  .say td.b { height: .62in; }
+  .say.big td.b { height: .85in; }
+  .pairs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 26px; margin: 8px 0; }
+  .pairs div { border: 1.6px solid var(--rule); border-radius: 5px; padding: 14px 10px;
+    font-size: 16pt; }
+  .pairs.big div { padding: 22px 10px; font-size: 18pt; }
+  .es { font-style: italic; font-weight: 700; }
+
+</style>
+</head>
+<body>
+
+<div class="page ">
+  <header>
+    
+    <h1>Five Letters, Five Sounds</h1>
+    <p class="sub">Spanish · Page 1 of 2</p>
+  </header>
+  <div class="nameline">
+    <span>Name</span>
+    <span class="short">Date</span>
+  </div>
+  <div class="directions">
+    <b>DIRECTIONS:</b> Each Spanish vowel says <b>one</b> sound, every time. Say each word, then write what it sounded like.
+  </div>
+
+
+  <div class="maps">
+    <div><svg class="" viewBox="0 0 280 77" width="280" height="77" role="img" aria-label="Spanish: a dot for every sound each letter can make" xmlns="http://www.w3.org/2000/svg"><text x="28" y="70" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="15" font-weight="bold" text-anchor="middle" fill="#16130F">a</text><line x1="10.08" y1="55" x2="45.92" y2="55" stroke="#16130F" stroke-width="1.6" stroke-linecap="round"/><circle cx="28" cy="43" r="5.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><text x="84" y="70" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="15" font-weight="bold" text-anchor="middle" fill="#16130F">e</text><line x1="66.08" y1="55" x2="101.92" y2="55" stroke="#16130F" stroke-width="1.6" stroke-linecap="round"/><circle cx="84" cy="43" r="5.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><text x="140" y="70" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="15" font-weight="bold" text-anchor="middle" fill="#16130F">i</text><line x1="122.08" y1="55" x2="157.92" y2="55" stroke="#16130F" stroke-width="1.6" stroke-linecap="round"/><circle cx="140" cy="43" r="5.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><text x="196" y="70" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="15" font-weight="bold" text-anchor="middle" fill="#16130F">o</text><line x1="178.08" y1="55" x2="213.92" y2="55" stroke="#16130F" stroke-width="1.6" stroke-linecap="round"/><circle cx="196" cy="43" r="5.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><text x="252" y="70" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="15" font-weight="bold" text-anchor="middle" fill="#16130F">u</text><line x1="234.08" y1="55" x2="269.92" y2="55" stroke="#16130F" stroke-width="1.6" stroke-linecap="round"/><circle cx="252" cy="43" r="5.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><text x="140" y="14" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="11" font-weight="normal" text-anchor="middle" fill="#6B635A">Spanish</text></svg>
+      <div class="cap">five letters &middot; five sounds</div></div>
+    <div><svg class="" viewBox="0 0 280 145" width="280" height="145" role="img" aria-label="English: a dot for every sound each letter can make" xmlns="http://www.w3.org/2000/svg"><text x="28" y="138" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="15" font-weight="bold" text-anchor="middle" fill="#16130F">a</text><line x1="10.08" y1="123" x2="45.92" y2="123" stroke="#16130F" stroke-width="1.6" stroke-linecap="round"/><circle cx="28" cy="111" r="5.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><circle cx="28" cy="94" r="5.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><circle cx="28" cy="77" r="5.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><circle cx="28" cy="60" r="5.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><circle cx="28" cy="43" r="5.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><text x="84" y="138" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="15" font-weight="bold" text-anchor="middle" fill="#16130F">e</text><line x1="66.08" y1="123" x2="101.92" y2="123" stroke="#16130F" stroke-width="1.6" stroke-linecap="round"/><circle cx="84" cy="111" r="5.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><circle cx="84" cy="94" r="5.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><circle cx="84" cy="77" r="5.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><circle cx="84" cy="60" r="5.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><text x="140" y="138" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="15" font-weight="bold" text-anchor="middle" fill="#16130F">i</text><line x1="122.08" y1="123" x2="157.92" y2="123" stroke="#16130F" stroke-width="1.6" stroke-linecap="round"/><circle cx="140" cy="111" r="5.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><circle cx="140" cy="94" r="5.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><circle cx="140" cy="77" r="5.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><circle cx="140" cy="60" r="5.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><text x="196" y="138" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="15" font-weight="bold" text-anchor="middle" fill="#16130F">o</text><line x1="178.08" y1="123" x2="213.92" y2="123" stroke="#16130F" stroke-width="1.6" stroke-linecap="round"/><circle cx="196" cy="111" r="5.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><circle cx="196" cy="94" r="5.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><circle cx="196" cy="77" r="5.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><circle cx="196" cy="60" r="5.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><circle cx="196" cy="43" r="5.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><text x="252" y="138" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="15" font-weight="bold" text-anchor="middle" fill="#16130F">u</text><line x1="234.08" y1="123" x2="269.92" y2="123" stroke="#16130F" stroke-width="1.6" stroke-linecap="round"/><circle cx="252" cy="111" r="5.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><circle cx="252" cy="94" r="5.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><circle cx="252" cy="77" r="5.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><circle cx="252" cy="60" r="5.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><text x="140" y="14" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="11" font-weight="normal" text-anchor="middle" fill="#6B635A">English</text></svg>
+      <div class="cap">five letters &middot; twenty-two sounds</div></div>
+  </div>
+  <div class="note" style="margin-top:6px"><b>The five sounds:</b> the underlined bit is the Spanish letter.</div>
+  <div class="vkey">
+    <div><div class="l">a</div><div class="as">like the a in</div><div class="ex">f<u>a</u>ther</div></div>
+    <div><div class="l">e</div><div class="as">like the e in</div><div class="ex">b<u>e</u>d</div></div>
+    <div><div class="l">i</div><div class="as">like the ee in</div><div class="ex">s<u>ee</u></div></div>
+    <div><div class="l">o</div><div class="as">like the o in</div><div class="ex">m<u>o</u>re</div></div>
+    <div><div class="l">u</div><div class="as">like the oo in</div><div class="ex">m<u>oo</u>n</div></div>
+  </div>
+  <table class="say">
+    <tr><th style="width:26%">Say it out loud</th><th style="width:30%">Its vowels are</th><th>What did it sound like?</th></tr>
+    <tr><td class="w">casa</td><td><b>a &nbsp; a</b></td><td class="b"></td></tr>
+    <tr><td class="w">mesa</td><td><b>e &nbsp; a</b></td><td class="b"></td></tr>
+    <tr><td class="w">libro</td><td><b>i &nbsp; o</b></td><td class="b"></td></tr>
+    <tr><td class="w">gato</td><td><b>a &nbsp; o</b></td><td class="b"></td></tr>
+    <tr><td class="w">luna</td><td><b>u &nbsp; a</b></td><td class="b"></td></tr>
+  </table>
+
+  <footer>
+    <span>Keep going on page 2 →</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Five sounds</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>Five Letters, Five Sounds — A Long One</h1>
+    <p class="sub">Spanish · Page 2 of 2</p>
+  </header>
+
+
+
+
+  <div class="note" style="margin-top:0"><b>A word you have never seen.</b> You can still say it.</div>
+  <div style="text-align:center; font-size:48pt; font-weight:700; font-style:italic; margin:18px 0 6px">murciélago</div>
+  <div style="text-align:center; font-size:11pt; color:var(--muted); margin-bottom:12px">(it means bat &mdash; the animal)</div>
+  <div class="note"><b>Slowly:</b> &nbsp; mur &middot; ci &middot; é &middot; la &middot; go &nbsp; (vowels <b>u &middot; i &middot; e &middot; a &middot; o</b>: moon, see, bed, father, more). Then faster.</div>
+  <table class="say big" style="margin-top:10px">
+    <tr><th>Try these too. Say each one, then tick if it felt easy.</th><th style="width:18%">Easy?</th></tr>
+    <tr><td class="w">elefante</td><td class="b"></td></tr>
+    <tr><td class="w">chocolate</td><td class="b"></td></tr>
+    <tr><td class="w">tomate</td><td class="b"></td></tr>
+  </table>
+  <div class="note"><b>Notice anything about the last three?</b> The next sheet explains.</div>
+
+  <footer>
+    <span>Say it, do not read it</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Five sounds</span>
+  </footer>
+</div>
+
+</body>
+</html>

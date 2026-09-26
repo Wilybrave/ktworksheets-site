@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="sheet-kind" content="worksheet">
+<title>The 7 times table</title>
+<style>
+  @page { size: letter portrait; margin: 0.4in 0.45in; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  :root {
+    --ink: #16130F; --muted: #6B635A; --rule: #CFC3B2; --guide: #BCAE9C;
+    --accent: #C0511D; --tint: #F7EDE4; --slate: #2E5A78;
+  }
+  body {
+    font-family: Quicksand, 'URW Gothic', 'Century Gothic', sans-serif;
+    color: #000; background: #fff;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  .page { width: 100%; }
+  .page + .page { page-break-before: always; }
+  /* A screen ignores @page margins, so the preview drew every made sheet edge
+     to edge while the paper has 0.4in / 0.45in of white round it. The shelf's
+     sheets carry the same screen padding; print is untouched. */
+  @media screen { .page { padding: 0.4in 0.45in; } }
+  header {
+    display: flex; align-items: center; gap: 16px;
+    border-bottom: 3px solid var(--slate); padding-bottom: 7px; margin-bottom: 2px;
+  }
+  .bigletter { font-size: 38pt; font-weight: 700; line-height: 1; letter-spacing: .02em; }
+  .htext { flex: 1; }
+  h1 { font-size: 14pt; font-weight: 700; margin: 0 0 2px; }
+  .sub { font-size: 10pt; color: var(--muted); margin: 0; }
+  .nameline {
+    font-size: 9.5pt; color: var(--muted);
+    border-bottom: 1px solid var(--ink); width: 2in;
+    padding-bottom: 1px; align-self: flex-end;
+  }
+  .dir { font-size: 11pt; margin: 12px 0 10px; }
+  footer {
+    margin-top: 10px; padding-top: 6px; border-top: 1px solid var(--rule);
+    font-size: 8.5pt; color: var(--muted);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .brand { font-size: 7pt; letter-spacing: .04em; color: var(--accent); }
+  table { border-collapse: collapse; }
+  /* The parent-copy badge, lifted from the shelf's key pages so the two match
+     on paper. Tinted rather than outlined, because it has to be recognisable
+     at a glance from across a table with the page upside down. */
+  .badgeline {
+    display: inline-block; font-size: 8.5pt; font-weight: 700;
+    letter-spacing: .06em; text-transform: uppercase;
+    color: var(--accent); background: var(--tint);
+    border: 1.5px solid var(--accent); padding: 2px 8px; margin-bottom: 8px;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <div class="bigletter">7</div>
+    <div class="htext">
+      <h1>The 7 times table</h1>
+      <p class="sub">To fill in</p>
+    </div>
+    <div class="nameline">Name</div>
+  </header>
+  <p class="dir">Fill in every answer, then check.</p>
+  <style>
+        .tt { display: grid; grid-template-rows: repeat(12, 1fr); height: 8.1in; width: 4.6in; margin: 4px auto 0; }
+        .f { display: flex; align-items: center; justify-content: center; gap: 0.18in;
+             font-size: 24pt; font-weight: 600; font-variant-numeric: tabular-nums; border-bottom: 1px solid var(--rule); }
+        .q { width: 2.6in; text-align: right; white-space: nowrap; }
+        .a { width: 1.2in; height: 0.46in; border: 1.5px solid var(--ink); border-radius: 4px;
+             display: flex; align-items: center; justify-content: center; }
+      </style><div class="tt"><div class="f"><span class="q">1 × 7 =</span><span class="a"></span></div><div class="f"><span class="q">2 × 7 =</span><span class="a"></span></div><div class="f"><span class="q">3 × 7 =</span><span class="a"></span></div><div class="f"><span class="q">4 × 7 =</span><span class="a"></span></div><div class="f"><span class="q">5 × 7 =</span><span class="a"></span></div><div class="f"><span class="q">6 × 7 =</span><span class="a"></span></div><div class="f"><span class="q">7 × 7 =</span><span class="a"></span></div><div class="f"><span class="q">8 × 7 =</span><span class="a"></span></div><div class="f"><span class="q">9 × 7 =</span><span class="a"></span></div><div class="f"><span class="q">10 × 7 =</span><span class="a"></span></div><div class="f"><span class="q">11 × 7 =</span><span class="a"></span></div><div class="f"><span class="q">12 × 7 =</span><span class="a"></span></div></div>
+  <footer>
+    <span>12 facts</span>
+    <span class="brand">KITCHEN TABLE</span>
+    <span></span>
+  </footer>
+</div>
+
+</body>
+</html>

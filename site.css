@@ -1,0 +1,351 @@
+
+  @font-face { font-family:Quicksand; font-weight:400; font-display:swap;
+    src:url(/fonts/Quicksand_400Regular.ttf) format('truetype'); }
+  @font-face { font-family:Quicksand; font-weight:700; font-display:swap;
+    src:url(/fonts/Quicksand_700Bold.ttf) format('truetype'); }
+  :root {
+    --ink:#000000; --paper:#FFFFFF; --ground:#EDEDEA; --mark:#C2C2B8;
+    --accent:#C0511D; --muted:#6B635A;
+  }
+  * { box-sizing:border-box; }
+  html,body { margin:0; padding:0; }
+  /* The gradient comes from the tint class — see tintsCSS in ground-tiles.js.
+     Only the fallback colour lives here, for the instant before it applies. */
+  body { background:var(--ground); color:var(--ink);
+    font:16px/1.55 Quicksand, 'URW Gothic', 'Century Gothic', sans-serif; }
+  main { max-width:44rem; margin:0 auto; padding:1.2rem 1.2rem 4rem; }
+
+  /* The app's Panel: white paper, a hard contour, square corners, no shadow.
+     src/ui.tsx draws exactly this and the contour does all the work. */
+  .panel { background:var(--paper); border:2.5px solid var(--ink);
+    padding:1.4rem 1.5rem; margin:1.2rem 0; }
+  .panel.raised { box-shadow:6px 6px 0 var(--ink); }
+  .tab { display:inline-block; font-size:.72rem; font-weight:700; letter-spacing:.12em;
+    text-transform:uppercase; border:2px solid var(--ink); padding:.15rem .5rem;
+    margin-bottom:.9rem; }
+
+  h1 { font-size:1.9rem; line-height:1.1; margin:0 0 .5rem; font-weight:700; }
+  h2 { font-size:1.15rem; margin:1.8rem 0 .5rem; font-weight:700; }
+  .lede { font-size:1.15rem; line-height:1.5; margin:.2rem 0 0; }
+  p { margin:.7rem 0; }
+  ul { padding-left:1.15rem; }
+  li { margin:.4rem 0; }
+  a { color:var(--ink); }
+  .muted { color:var(--muted); font-size:.9rem; }
+
+  /* Counts, in ruled boxes — the app states its numbers this way rather than
+     in a sentence, because a number is the one thing worth being able to
+     glance at. */
+  /* Text left, the pencil right, stacked on a phone — the drawing is the
+     argument the heading makes, so it sits beside it rather than under. */
+  .hero { display:flex; gap:1.4rem; align-items:center; flex-wrap:wrap; }
+  .hero > div:first-child { flex:1 1 18rem; }
+  .hero .anim { flex:0 1 15rem; max-width:15rem; }
+
+  .stats { display:flex; flex-wrap:wrap; gap:.6rem; margin-top:1.1rem; }
+  .stat { border:2px solid var(--ink); padding:.4rem .7rem; font-weight:700; font-size:.92rem; }
+  .stat span { display:block; font-weight:400; font-size:.72rem; letter-spacing:.08em;
+    text-transform:uppercase; color:var(--muted); }
+
+  .btn { display:inline-block; border:2.5px solid var(--ink); background:var(--paper);
+    color:var(--ink); text-decoration:none; font-weight:700; font-size:.85rem;
+    letter-spacing:.09em; text-transform:uppercase; padding:.8rem 1.3rem; }
+  .btn.primary { background:var(--accent); border-color:var(--accent); color:#fff; }
+
+  /* The 22 subject icons, in a ruled row — the app's own drawings, extracted
+     rather than redrawn. See scripts/site-icons.js. */
+  .subjects { display:grid; grid-template-columns:repeat(auto-fill, minmax(4.6rem,1fr));
+    gap:0; margin-top:1.1rem; border:2px solid var(--ink); }
+  .subj { display:flex; flex-direction:column; align-items:center; gap:.3rem;
+    padding:.75rem .3rem; border-right:1px solid var(--ink); border-bottom:1px solid var(--ink); }
+  .subj span { font-size:.66rem; letter-spacing:.05em; text-transform:uppercase;
+    color:var(--muted); text-align:center; }
+
+  /*
+   * A SHEET, SCALED TO FIT, WITH ITS OWN MARGIN AROUND IT.
+   *
+   * The sheets bring their own screen styling: lib/sheet.js gives every one a
+   * body padding of 0.4in on a #ddd background and a page fixed at 8.5in wide,
+   * so a sheet in a browser is a real 816px page floating on grey. A
+   * fixed-width page in a narrower frame does not reflow, it overflows — and
+   * the body padding offsets it again. So the frame is the width of the BODY,
+   * 8.5in plus both paddings, and the whole thing scales together.
+   *
+   * It is also one page tall and SCROLLS, because 225 of the 292 free sheets
+   * run to three pages or more and one runs to twelve.
+   *
+   * The factor cannot be pure CSS — container width over 892.8px, and CSS
+   * cannot divide a length by a length. Script sets it, a ResizeObserver keeps
+   * it, and the default is sized for a typical column so that with no
+   * JavaScript the preview is the wrong size rather than cropped.
+   */
+  .paper { position:relative; width:100%; aspect-ratio:892.8/1132.8;
+    border:2px solid var(--ink); background:#ddd; overflow:hidden; }
+  .paper iframe { position:absolute; top:0; left:0; width:892.8px; height:1132.8px; border:0;
+    transform-origin:top left; transform:scale(var(--k, .38)); }
+
+  /*
+   * The app's Row: a number or an icon, a title, a subtitle, and an arrow that
+   * is telling the truth about going somewhere. src/ui.tsx draws this, and the
+   * whole free section is built out of it.
+   */
+  .rows { display:block; }
+  .row { display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:.2rem .8rem;
+    padding:.85rem .2rem; border-top:1px solid var(--ink); text-decoration:none; color:var(--ink); }
+  .row:first-child { border-top:0; }
+  .row b { grid-column:2; }
+  .row .muted { grid-column:2; font-size:.86rem; }
+  .row .rowicon, .row .rownum { grid-row:1 / span 2; grid-column:1; }
+  .row .rownum { font-weight:700; font-size:.9rem; min-width:1.6rem; }
+  .row .arrow { grid-row:1 / span 2; grid-column:3; font-weight:700; }
+  .row:hover { background:var(--ground); }
+
+  /* Visually hidden, still read aloud — for the "opens in a new tab" that a
+     sighted reader gets from the arrow. */
+  .vh { position:absolute; width:1px; height:1px; overflow:hidden;
+    clip:rect(0 0 0 0); clip-path:inset(50%); white-space:nowrap; }
+
+  /* The amount is the label, the ages are the buttons — see ageTable. Chips
+     are square and bordered like every other control here; a number is a
+     bigger target and a shorter read than two words of link text. */
+  .pick { display:flex; align-items:center; gap:.7rem; flex-wrap:wrap; margin-top:.9rem; }
+  .pick > span { font-weight:700; font-size:.92rem; min-width:7.2rem; }
+  .chips { display:flex; gap:.35rem; flex-wrap:wrap; }
+  .age { display:inline-block; min-width:2.1rem; text-align:center; padding:.35rem .4rem;
+    border:2px solid var(--ink); background:var(--paper); color:var(--ink);
+    text-decoration:none; font-weight:700; font-size:.95rem; }
+  .age:hover { background:var(--ink); color:var(--paper); }
+
+  /*
+   * NOTHING UNTIL SOMEBODY ASKS. The homepage opened on a week for a
+   * nine-year-old, which was a page of real worksheets and also an answer to a
+   * question nobody had put — and 125KB of iframe fetched on every visit for
+   * it. Hidden until an age is chosen, and the frame's src is about:blank
+   * until then, so the bundle is only fetched when it is wanted.
+   *
+   * IT ARRIVES RATHER THAN APPEARING. A block of that size snapping into
+   * existence shoves the page down under the reader's hands; a short rise and
+   * fade says where it came from. The hidden attribute comes off first and the
+   * animation runs on the next frame — a display change and a transition in
+   * the same tick would simply not animate.
+   */
+  .picked { margin-top:1.2rem; padding-top:1.1rem; border-top:2px solid var(--ink); }
+  .picked[hidden] { display:none; }
+  .picked .paper { margin-top:.9rem; }
+  .picked p { margin:.4rem 0; }
+  .picked [hidden] { display:none; }
+  .picked.coming { animation:pickIn .55s cubic-bezier(.22,.61,.36,1) both; }
+  @keyframes pickIn {
+    from { opacity:0; transform:translateY(-10px); }
+    to   { opacity:1; transform:none; }
+  }
+  @media (prefers-reduced-motion: reduce) { .picked.coming { animation:none; } }
+
+  /* A grid of pages, each showing the real file rather than describing it —
+     the same argument the sheet pages make, and here it is not even a
+     screenshot. Lazy and click-through-proof so eight frames cost nothing. */
+  .cards { display:grid; grid-template-columns:repeat(auto-fill,minmax(13rem,1fr)); gap:1rem;
+    margin:1.2rem 0; }
+  .card { display:block; background:var(--paper); border:2.5px solid var(--ink); padding:.9rem;
+    text-decoration:none; color:var(--ink); }
+  .card b { display:block; margin:.7rem 0 .2rem; }
+  .card .thumb { display:block; position:relative; width:100%; aspect-ratio:8.5/11;
+    border:1px solid var(--ink); overflow:hidden; background:#fff; }
+  .card .thumb iframe { width:100%; height:100%; border:0; display:block; pointer-events:none; }
+
+  /* The only form on the site — see make-namer.js. Inputs get the same hard
+     contour as every button, because a rounded field would be the one control
+     here from a different design. */
+  .form { display:flex; gap:1rem; flex-wrap:wrap; align-items:center; margin-top:1rem; }
+  .form label { display:flex; gap:.45rem; align-items:center; font-weight:700; font-size:.92rem; }
+  .form input[type=text], .form input[type=number] {
+    font:inherit; font-weight:400; padding:.45rem .5rem; border:2px solid var(--ink);
+    background:var(--paper); color:var(--ink); border-radius:0; }
+  .form input[type=text] { width:16rem; }
+  .form input[type=number] { width:4.2rem; }
+  .radios { display:flex; gap:.9rem; }
+  .radios label { font-weight:400; }
+  /* Script decides which of the two panels is real. */
+  .js-only { display:none; }
+  .js .js-only { display:block; }
+  .js .no-js { display:none; }
+
+  .more { display:flex; gap:1.1rem; flex-wrap:wrap; font-size:.92rem; margin-top:.8rem; }
+
+  /*
+   * THE HEADER STANDS ON PAPER, because it is the only thing on any page that
+   * does not. Every other element is a panel; the wordmark was bare text over
+   * a ruled or dotted pattern, and no ink colour fixes that — the pattern is
+   * behind the letters, not around them.
+   *
+   * This was tried once, reverted because it changed more than the header, and
+   * asked for again. So this time it is only the header: no hover invert, no
+   * boxed footer, nothing else moved.
+   */
+  /*
+   * THE BUCKET IS A SIBLING OF THE PLATE, NOT INSIDE IT — Wil's ask.
+   *
+   * It reads better as its own thing and it is more honest: the plate is the
+   * imprint, and a control that repaints the desk is not part of a wordmark.
+   * They share a row because the header is the only furniture on every page,
+   * and each keeps its own paper so both stay readable over a pattern.
+   */
+  .top { display:flex; align-items:center; gap:.5rem; margin:1rem 0 .2rem; }
+  .plate { background:var(--paper); border:2.5px solid var(--ink);
+    padding:.4rem .5rem; min-width:0; }
+  .mark { display:flex; align-items:center; gap:.55rem; text-decoration:none;
+    color:var(--ink); font-weight:700; font-size:1.05rem; }
+
+  /*
+   * THE PAINT BUCKET — Wil's ask: change the desk on click, not only per visit.
+   *
+   * It sits in the plate beside the wordmark because that is the one piece of
+   * furniture on every page, and because a control for the background belongs
+   * on the thing the background is behind. One tap rolls a new pattern and a
+   * new colour, the same pair the app's "a different desk each time" rolls.
+   *
+   * It is a <button> and it is hidden when there is no script, because a
+   * control that does nothing is worse than one that is not there.
+   */
+  .bucket { border:2.5px solid var(--ink); background:var(--paper); color:var(--ink);
+    cursor:pointer; padding:.4rem .45rem; display:none; line-height:0; }
+  .bucket:hover { background:var(--ink); color:var(--paper); }
+  .js .bucket { display:flex; align-items:center; }
+  nav.foot { margin-top:2.2rem; padding-top:1.1rem; border-top:2px solid var(--ink);
+    font-size:.9rem; display:flex; gap:1.3rem; flex-wrap:wrap; }
+  .upd { margin-top:2rem; font-size:.82rem; color:var(--muted); }
+  @media (max-width:34rem) { .panel { padding:1.1rem 1.1rem; } h1 { font-size:1.6rem; } }
+
+
+  .desk { position:fixed; inset:0; z-index:0; pointer-events:none;
+    background:var(--mark);
+    -webkit-mask-repeat:repeat; mask-repeat:repeat; }
+  main { position:relative; z-index:1; }
+  .desk.g-dots {
+    -webkit-mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2248%22%20height%3D%2248%22%20viewBox%3D%220%200%2048%2048%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%222.6%22%20fill%3D%22black%22%2F%3E%3Ccircle%20cx%3D%2236%22%20cy%3D%2212%22%20r%3D%222.6%22%20fill%3D%22black%22%2F%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2236%22%20r%3D%222.6%22%20fill%3D%22black%22%2F%3E%3Ccircle%20cx%3D%2236%22%20cy%3D%2236%22%20r%3D%222.6%22%20fill%3D%22black%22%2F%3E%3C%2Fsvg%3E"); mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2248%22%20height%3D%2248%22%20viewBox%3D%220%200%2048%2048%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%222.6%22%20fill%3D%22black%22%2F%3E%3Ccircle%20cx%3D%2236%22%20cy%3D%2212%22%20r%3D%222.6%22%20fill%3D%22black%22%2F%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2236%22%20r%3D%222.6%22%20fill%3D%22black%22%2F%3E%3Ccircle%20cx%3D%2236%22%20cy%3D%2236%22%20r%3D%222.6%22%20fill%3D%22black%22%2F%3E%3C%2Fsvg%3E");
+    -webkit-mask-size:48px 48px; mask-size:48px 48px; }
+  .desk.g-grid {
+    -webkit-mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2248%22%20height%3D%2248%22%20viewBox%3D%220%200%2048%2048%22%3E%3Cpath%20d%3D%22M0%200%20H48%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M0%200%20V48%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E"); mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2248%22%20height%3D%2248%22%20viewBox%3D%220%200%2048%2048%22%3E%3Cpath%20d%3D%22M0%200%20H48%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M0%200%20V48%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E");
+    -webkit-mask-size:48px 48px; mask-size:48px 48px; }
+  .desk.g-lines {
+    -webkit-mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2248%22%20height%3D%2248%22%20viewBox%3D%220%200%2048%2048%22%3E%3Cpath%20d%3D%22M0%2012%20H48%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M0%2036%20H48%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E"); mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2248%22%20height%3D%2248%22%20viewBox%3D%220%200%2048%2048%22%3E%3Cpath%20d%3D%22M0%2012%20H48%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M0%2036%20H48%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E");
+    -webkit-mask-size:48px 48px; mask-size:48px 48px; }
+  .desk.g-hatch {
+    -webkit-mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2248%22%20height%3D%2248%22%20viewBox%3D%220%200%2048%2048%22%3E%3Cpath%20d%3D%22M0%2048%20L48%200%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M-24%2024%20L24%20-24%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M24%2072%20L72%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E"); mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2248%22%20height%3D%2248%22%20viewBox%3D%220%200%2048%2048%22%3E%3Cpath%20d%3D%22M0%2048%20L48%200%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M-24%2024%20L24%20-24%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M24%2072%20L72%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E");
+    -webkit-mask-size:48px 48px; mask-size:48px 48px; }
+  .desk.g-scallops {
+    -webkit-mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2248%22%20height%3D%2248%22%20viewBox%3D%220%200%2048%2048%22%3E%3Cpath%20d%3D%22M0%2024%20A%2012%2012%200%200%201%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M24%2024%20A%2012%2012%200%200%201%2048%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M-12%2048%20A%2012%2012%200%200%201%2012%2048%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M12%2048%20A%2012%2012%200%200%201%2036%2048%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M36%2048%20A%2012%2012%200%200%201%2060%2048%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E"); mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2248%22%20height%3D%2248%22%20viewBox%3D%220%200%2048%2048%22%3E%3Cpath%20d%3D%22M0%2024%20A%2012%2012%200%200%201%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M24%2024%20A%2012%2012%200%200%201%2048%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M-12%2048%20A%2012%2012%200%200%201%2012%2048%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M12%2048%20A%2012%2012%200%200%201%2036%2048%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M36%2048%20A%2012%2012%200%200%201%2060%2048%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E");
+    -webkit-mask-size:48px 48px; mask-size:48px 48px; }
+  .desk.g-shapes {
+    -webkit-mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22144%22%20height%3D%2248%22%20viewBox%3D%220%200%20144%2048%22%3E%3Ccircle%20cx%3D%2224%22%20cy%3D%2224%22%20r%3D%227%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.9%22%2F%3E%3Crect%20x%3D%2265%22%20y%3D%2217%22%20width%3D%2214%22%20height%3D%2214%22%20rx%3D%222%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.9%22%2F%3E%3Cpath%20d%3D%22M120%2016%20L128%2031%20L112%2031%20Z%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.9%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E"); mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22144%22%20height%3D%2248%22%20viewBox%3D%220%200%20144%2048%22%3E%3Ccircle%20cx%3D%2224%22%20cy%3D%2224%22%20r%3D%227%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.9%22%2F%3E%3Crect%20x%3D%2265%22%20y%3D%2217%22%20width%3D%2214%22%20height%3D%2214%22%20rx%3D%222%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.9%22%2F%3E%3Cpath%20d%3D%22M120%2016%20L128%2031%20L112%2031%20Z%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.9%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E");
+    -webkit-mask-size:144px 48px; mask-size:144px 48px; }
+  .desk.g-stars {
+    -webkit-mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2248%22%20height%3D%2248%22%20viewBox%3D%220%200%2048%2048%22%3E%3Cpath%20d%3D%22M24.0%2016.0%20L26.0%2021.2%20L31.6%2021.5%20L27.2%2025.1%20L28.7%2030.5%20L24.0%2027.4%20L19.3%2030.5%20L20.8%2025.1%20L16.4%2021.5%20L22.0%2021.2%20Z%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E"); mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2248%22%20height%3D%2248%22%20viewBox%3D%220%200%2048%2048%22%3E%3Cpath%20d%3D%22M24.0%2016.0%20L26.0%2021.2%20L31.6%2021.5%20L27.2%2025.1%20L28.7%2030.5%20L24.0%2027.4%20L19.3%2030.5%20L20.8%2025.1%20L16.4%2021.5%20L22.0%2021.2%20Z%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E");
+    -webkit-mask-size:48px 48px; mask-size:48px 48px; }
+  .desk.g-crosses {
+    -webkit-mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2248%22%20height%3D%2248%22%20viewBox%3D%220%200%2048%2048%22%3E%3Cpath%20d%3D%22M18%2024%20H30%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.9%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M24%2018%20V30%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.9%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E"); mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2248%22%20height%3D%2248%22%20viewBox%3D%220%200%2048%2048%22%3E%3Cpath%20d%3D%22M18%2024%20H30%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.9%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M24%2018%20V30%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.9%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E");
+    -webkit-mask-size:48px 48px; mask-size:48px 48px; }
+  .desk.g-chevron {
+    -webkit-mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2248%22%20height%3D%2248%22%20viewBox%3D%220%200%2048%2048%22%3E%3Cpath%20d%3D%22M0%2031.68%20L12%2016.32%20L24%2031.68%20L36%2016.32%20L48%2031.68%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E"); mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2248%22%20height%3D%2248%22%20viewBox%3D%220%200%2048%2048%22%3E%3Cpath%20d%3D%22M0%2031.68%20L12%2016.32%20L24%2031.68%20L36%2016.32%20L48%2031.68%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E");
+    -webkit-mask-size:48px 48px; mask-size:48px 48px; }
+  .desk.g-graph {
+    -webkit-mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2248%22%20height%3D%2248%22%20viewBox%3D%220%200%2048%2048%22%3E%3Cpath%20d%3D%22M0%2016%20H48%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.2%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M0%2032%20H48%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.2%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M16%200%20V48%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.2%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M32%200%20V48%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.2%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M0%200%20H48%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M0%200%20V48%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E"); mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2248%22%20height%3D%2248%22%20viewBox%3D%220%200%2048%2048%22%3E%3Cpath%20d%3D%22M0%2016%20H48%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.2%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M0%2032%20H48%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.2%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M16%200%20V48%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.2%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M32%200%20V48%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.2%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M0%200%20H48%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M0%200%20V48%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E");
+    -webkit-mask-size:48px 48px; mask-size:48px 48px; }
+  .desk.g-lattice {
+    -webkit-mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2248%22%20height%3D%2248%22%20viewBox%3D%220%200%2048%2048%22%3E%3Cpath%20d%3D%22M0%2048%20L48%200%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M-24%2024%20L24%20-24%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M24%2072%20L72%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M0%200%20L48%2048%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M24%20-24%20L72%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M-24%2024%20L24%2072%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E"); mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2248%22%20height%3D%2248%22%20viewBox%3D%220%200%2048%2048%22%3E%3Cpath%20d%3D%22M0%2048%20L48%200%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M-24%2024%20L24%20-24%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M24%2072%20L72%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M0%200%20L48%2048%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M24%20-24%20L72%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M-24%2024%20L24%2072%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E");
+    -webkit-mask-size:48px 48px; mask-size:48px 48px; }
+  .desk.g-brick {
+    -webkit-mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2248%22%20height%3D%2248%22%20viewBox%3D%220%200%2048%2048%22%3E%3Cpath%20d%3D%22M0%200%20H48%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M0%2024%20H48%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M24%200%20V24%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M0%2024%20V48%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E"); mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2248%22%20height%3D%2248%22%20viewBox%3D%220%200%2048%2048%22%3E%3Cpath%20d%3D%22M0%200%20H48%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M0%2024%20H48%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M24%200%20V24%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M0%2024%20V48%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E");
+    -webkit-mask-size:48px 48px; mask-size:48px 48px; }
+  .desk.g-weave {
+    -webkit-mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2248%22%20height%3D%2248%22%20viewBox%3D%220%200%2048%2048%22%3E%3Cpath%20d%3D%22M2%206%20H22%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M2%2012%20H22%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M2%2018%20H22%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M26%2030%20H46%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M26%2036%20H46%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M26%2042%20H46%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M30%202%20V22%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M36%202%20V22%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M42%202%20V22%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M6%2026%20V46%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M12%2026%20V46%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M18%2026%20V46%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E"); mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2248%22%20height%3D%2248%22%20viewBox%3D%220%200%2048%2048%22%3E%3Cpath%20d%3D%22M2%206%20H22%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M2%2012%20H22%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M2%2018%20H22%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M26%2030%20H46%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M26%2036%20H46%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M26%2042%20H46%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M30%202%20V22%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M36%202%20V22%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M42%202%20V22%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M6%2026%20V46%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M12%2026%20V46%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M18%2026%20V46%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E");
+    -webkit-mask-size:48px 48px; mask-size:48px 48px; }
+  .desk.g-rings {
+    -webkit-mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2248%22%20height%3D%2248%22%20viewBox%3D%220%200%2048%2048%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%226.5%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%2F%3E%3Ccircle%20cx%3D%2236%22%20cy%3D%2236%22%20r%3D%226.5%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%2F%3E%3C%2Fsvg%3E"); mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2248%22%20height%3D%2248%22%20viewBox%3D%220%200%2048%2048%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%226.5%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%2F%3E%3Ccircle%20cx%3D%2236%22%20cy%3D%2236%22%20r%3D%226.5%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%2F%3E%3C%2Fsvg%3E");
+    -webkit-mask-size:48px 48px; mask-size:48px 48px; }
+  .desk.g-marks {
+    -webkit-mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2248%22%20height%3D%2248%22%20viewBox%3D%220%200%2048%2048%22%3E%3Cpath%20d%3D%22M8%2015%20V8%20H15%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M40%2015%20V8%20H33%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M8%2033%20V40%20H15%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M40%2033%20V40%20H33%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E"); mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2248%22%20height%3D%2248%22%20viewBox%3D%220%200%2048%2048%22%3E%3Cpath%20d%3D%22M8%2015%20V8%20H15%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M40%2015%20V8%20H33%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M8%2033%20V40%20H15%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M40%2033%20V40%20H33%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E");
+    -webkit-mask-size:48px 48px; mask-size:48px 48px; }
+  body.t-plain { background:linear-gradient(135deg, #EDEDEA, #EDEDEA, #EDEDEA); --mark:#C2C2B8; }
+  body.t-clay { background:linear-gradient(135deg, #F1E6E6, #F1E9E6, #F1EDE6); --mark:#CFB6AB; }
+  body.t-amber { background:linear-gradient(135deg, #F1EBE6, #F1EEE6, #F0F1E6); --mark:#CFC6AB; }
+  body.t-moss { background:linear-gradient(135deg, #EEF1E6, #EBF1E6, #E7F1E6); --mark:#BACFAB; }
+  body.t-fern { background:linear-gradient(135deg, #E7F1E6, #E6F1E9, #E6F1EC); --mark:#ABCFB4; }
+  body.t-teal { background:linear-gradient(135deg, #E6F1ED, #E6F1F1, #E6EEF1); --mark:#ABCFCE; }
+  body.t-sky { background:linear-gradient(135deg, #E6EFF1, #E6ECF1, #E6E8F1); --mark:#ABBECF; }
+  body.t-plum { background:linear-gradient(135deg, #EFE6F1, #F1E6EF, #F1E6EC); --mark:#CFABC9; }
+  body.t-rose { background:linear-gradient(135deg, #F1E6EC, #F1E6E8, #F1E8E6); --mark:#CFABB2; }
+
+  .anim { width:100%; max-width:15rem; height:auto; color:var(--ink); display:block; }
+
+  /* Everything is drawn FINISHED. The keyframes below only run once .in is
+     added, so no-JS and no-observer both leave a complete picture. */
+  /*
+   * Finished by default — the sheet sits lifted, so no-JS shows the drawing
+   * made rather than an empty stack. The keyframes run it from flat.
+   *
+   * The origin is the sheet's own centre because the app rotates a View, whose
+   * transform origin is its centre; rotating about the SVG's origin instead
+   * would swing the page in from off-canvas.
+   */
+  .anim-paper .pa-sheet {
+    transform-origin:120px 88px;
+    transform:translate(28px,-46px) rotate(-5deg);
+  }
+  .anim-paper.in .pa-sheet { animation:liftoff 1.7s cubic-bezier(.4,0,.2,1) .3s both; }
+  @keyframes liftoff {
+    from { transform:none; }
+    to   { transform:translate(28px,-46px) rotate(-5deg); }
+  }
+
+  /* The loops genuinely draw, which the app cannot do — see the header. The
+     dash length is set generously and the offset animated to zero. */
+  .anim-loops .l-loops { stroke-dasharray:1200; stroke-dashoffset:0; }
+  .anim-loops.in .l-loops { animation:draw 2.8s ease-in-out both; }
+  @keyframes draw { from { stroke-dashoffset:1200; } to { stroke-dashoffset:0; } }
+
+  .anim-printer.in .pr-sheet { animation:emerge 1.6s cubic-bezier(.34,1.2,.64,1) .2s both; }
+  .anim-printer.in .pr-led { animation:blink 1.6s steps(1,end) 3; }
+  @keyframes emerge { from { transform:translateY(-46px); } to { transform:none; } }
+  @keyframes blink { 0%,49% { opacity:1; } 50%,100% { opacity:.15; } }
+
+  /* A page arguing that a screen is the wrong place for a child is not the
+     page to override somebody's stated preference about screens. */
+  @media (prefers-reduced-motion: reduce) {
+    .anim *, .anim.in * { animation:none !important; }
+    /* The paper keeps its finished transform; only the motion stops. */
+  }
+
+  .anim-table .tb-chair, .anim-table .tb-sheet, .anim-table .tb-pencil { opacity:1; }
+  .anim-table.in .tb-l     { animation:tbChair .56s cubic-bezier(.34,1.36,.64,1) .14s both; }
+  .anim-table.in .tb-r     { animation:tbChair .56s cubic-bezier(.34,1.36,.64,1) .37s both; }
+  .anim-table.in .tb-sheet { animation:tbDrop .43s cubic-bezier(.22,.61,.36,1) 1.04s both; }
+  .anim-table.in .tb-pencil{ animation:tbDrop .42s cubic-bezier(.25,.46,.45,.94) 1.47s both; }
+  @keyframes tbChair { from { opacity:0; transform:translateY(-48px); } 12% { opacity:1; } to { opacity:1; transform:none; } }
+  @keyframes tbDrop  { from { opacity:0; transform:translateY(-34px); } 20% { opacity:1; } to { opacity:1; transform:none; } }
+
+
+  .adpanel { text-align:center; }
+  .adpanel .tab { display:table; margin-left:auto; margin-right:auto; }
+  .ad { position:relative; width:100%; max-width:24rem; margin:0 auto; }
+  .ad video { display:block; width:100%; aspect-ratio:9/16; object-fit:cover; background:var(--ground);
+    border:2.5px solid var(--ink); border-radius:1.8rem; }
+  /* In the empty lower part of the poster, under "No ads · No sign-up" —
+     centred, it sat on top of the app's name. */
+  .adplay { position:absolute; left:0; right:0; bottom:8%; margin:0 auto; width:5.5rem; height:5.5rem; border-radius:50%;
+    border:3px solid var(--ink); background:var(--paper); cursor:pointer; box-shadow:5px 5px 0 var(--ink);
+    display:flex; align-items:center; justify-content:center; padding:0; }
+  /* a triangle drawn with borders, nudged right so it looks centred */
+  .adplay span { width:0; height:0; border-style:solid; border-width:1.05rem 0 1.05rem 1.8rem;
+    border-color:transparent transparent transparent var(--ink); margin-left:.4rem; }
+  .adplay:hover, .adplay:focus-visible { background:var(--ink); }
+  .adplay:hover span, .adplay:focus-visible span { border-left-color:var(--paper); }
+  .ad.playing .adplay { display:none; }
+
+
+  .getapp { display:flex; align-items:center; gap:1rem; max-width:24rem; margin:1.2rem auto 0; text-align:left; }
+  .getapp .qr { flex:none; width:6.2rem; height:6.2rem; padding:.35rem; background:var(--paper);
+    border:2.5px solid var(--ink); color:var(--ink); font-family:inherit; }
+  .getapp .qr svg { display:block; }
+  .getapp-text b { display:block; font-size:1rem; line-height:1.3; }
+  .getapp-text span { display:block; margin-top:.3rem; font-size:.85rem; color:var(--muted); }

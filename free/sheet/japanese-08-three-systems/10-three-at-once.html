@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="sheet-kind" content="worksheet">
+<title>Three at Once — Japanese</title>
+<style>
+  :root { --font: Georgia, "Times New Roman", serif; }
+
+  /* Page margins live HERE only — body padding stays 0 for print so the two
+     don't stack and eat the sheet. */
+  @page { size: letter portrait; margin: 0.45in 0.5in; }
+
+  /*
+   * THE PALETTE. The same one the shop wears (kitchen-table/BRAND.md): warm
+   * near-black ink, one accent, pine kept back for the answer key.
+   *
+   * WHY A SHEET HAS COLOR AT ALL. Every sheet was pure grayscale — #000 rules,
+   * #333 subtitles, #f0f0f0 boxes — which is what you get by never deciding.
+   * The paper is the product and it looked like a fax. A printer set to
+   * grayscale, or one that has no color to give, renders all of this as the
+   * greys it already had, so nothing below costs a parent anything they were
+   * not already spending.
+   *
+   * WHAT STAYS BLACK, ON PURPOSE:
+   *   - anything drawn to be written on (rules, name lines, answer boxes)
+   *   - anything drawn to be traced or colored in (line art, letter guides)
+   *   - the confidence rings, which have to survive a mono laser
+   * Color marks the sheet's own furniture — its rule, its numbering, its
+   * boxes — and never the part a child puts a pencil through.
+   */
+  :root {
+    --ink:    #16130F;
+    --muted:  #6B635A;
+    --rule:   #CFC3B2;
+    --guide:  #BCAE9C;
+    --accent: #C0511D;
+    --tint:   #F7EDE4;
+    --slate:  #2E5A78;
+    --tintslate: #E9EFF4;
+    --deep:   #2C4A45;
+    --tintdeep: #ECF1EF;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font);
+    color: #000; background: #fff;
+    font-size: 12pt; line-height: 1.3;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+
+  /* ORDER MATTERS. This generic rule must come BEFORE the @media screen block:
+     same specificity, so whichever is declared last wins. With it after, the
+     on-screen preview stretches to the viewport instead of 8.5in — print is
+     unaffected, but the proof you check before printing is wrong. */
+  .page { width: 100%; }
+  .page + .page { page-break-before: always; }
+
+  @media screen {
+    body { padding: 0.5in; background: #ddd; }
+    .page {
+      background: #fff; padding: 0.45in 0.5in;
+      width: 8.5in; min-height: 11in;
+      margin: 0 auto 24px; box-shadow: 0 2px 10px rgba(0,0,0,.3);
+    }
+  }
+
+  /* ------------------------------------------------------------- header */
+  header { border-bottom: 3px double var(--accent); padding-bottom: 6px; }
+  header.cont { border-bottom: 1px solid var(--rule); }
+  h1 { font-size: 16pt; margin: 0 0 1px; letter-spacing: .01em; }
+  .sub { font-size: 10pt; font-style: italic; color: var(--muted); margin: 0; }
+
+  .nameline { display: flex; gap: 26px; font-size: 10.5pt; margin: 11px 0 12px; }
+  .nameline span { flex: 1; border-bottom: 1px solid var(--ink); padding-bottom: 1px; }
+  .nameline span.short { flex: 0 0 1.9in; }
+
+  .directions {
+    font-size: 10.5pt; line-height: 1.35;
+    background: var(--tint); border-left: 4px solid var(--accent);
+    padding: 7px 10px; margin: 12px 0 14px;
+  }
+  .directions b { letter-spacing: .03em; }
+  .tip { font-style: italic; margin-top: 3px; }
+
+  /* ------------------------------------------------- problems and grids */
+  .grid { display: grid; gap: 13px 16px; margin-top: 4px; }
+  .prob { page-break-inside: avoid; display: flex; gap: 5px; align-items: flex-start; }
+  .pn { font-weight: bold; font-size: 11pt; min-width: .28in; flex: 0 0 auto; color: var(--accent); }
+  .pbody { flex: 1; min-width: 0; }
+
+  /* Digits need lining figures and even widths whatever the body font is. */
+  .num, .vert, .horiz { font-family: "Trebuchet MS", "Segoe UI", Tahoma, Verdana, sans-serif; font-variant-numeric: lining-nums tabular-nums; }
+
+  /* A stacked column algorithm.
+     Two grid columns — operator, then digits — because a floated or absolutely
+     positioned operator overlaps the digits as soon as the numbers get wide,
+     and "324" with a + sitting on the 3 is unreadable. The grid also lets the
+     rule under the last operand span BOTH columns, which is how it is written
+     by hand. The rule is heavy: it is the line you write the answer beneath. */
+  .vert {
+    display: inline-grid; grid-template-columns: auto auto;
+    font-size: 15pt; line-height: 1.3; text-align: right;
+  }
+  .vert > span { padding: 0 0 1px 0; }
+  .vert .op { text-align: left; padding-right: .16in; }
+  .vert .last { border-bottom: 2.5px solid var(--ink); padding-bottom: 3px; }
+  .vert .ans { height: .4in; }
+  /* Partial-products working, for 2-digit x 1-digit before the short method. */
+  .vert .part { font-size: 11pt; color: var(--muted); }
+  /* A row of worked examples that fade — see lib/formats.js faded(). The
+     caption is what makes the fade legible: without it the third one looks like
+     a question somebody forgot to number. */
+  .egrow { display: flex; gap: .34in; align-items: flex-start; margin: 0 0 4px; }
+  .eg { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; }
+  .eglab { font-size: 8.5pt; color: var(--slate); letter-spacing: .02em; }
+
+  /* The carried digits. Small and grey so the sum still reads as the sum, and
+     tight to the row below it so a carry sits ON the column it goes into. */
+  .vert .carry { font-size: 9pt; color: var(--slate); line-height: 1; padding: 0 0 1px 0; }
+
+  .horiz { font-size: 14pt; white-space: nowrap; }
+
+  /* Row numbers in a word list. Gray and small: they are there so a list can be
+     dictated ("number seven") and marked without counting down the page, and
+     they must not compete with the word itself. */
+  .wn { color: var(--muted); font-size: 9pt; }
+
+  /* The box an answer goes in. inline-block so it can sit mid-sentence. */
+  .abox {
+    display: inline-block; border: 1.6px solid var(--slate); border-radius: 3px;
+    vertical-align: middle; margin: 0 3px; position: relative; background: #fff;
+  }
+  /* Scoped to the box: as a bare ".alab" it pinned any generator's own .alab
+     to the bottom of the page (life-07-signs-and-forms 40, 2026-09-24). */
+  .abox > .alab {
+    position: absolute; bottom: 1px; left: 0; right: 0;
+    text-align: center; font-size: 7pt; color: var(--muted); font-style: italic;
+  }
+
+  /* Confidence marks. The rings are drawn with a border and a gradient rather
+     than an SVG so they stay inline with the question text at any font size,
+     and print black on a mono laser without relying on a background image. */
+  .conf { float: right; margin: 2px 0 0 8px; white-space: nowrap; }
+  .cring {
+    display: inline-block; width: 11px; height: 11px; margin-left: 4px;
+    border: 1.4px solid var(--slate); border-radius: 50%; vertical-align: middle;
+  }
+  .cring-full { background: var(--accent); }
+  .cring-half { background: linear-gradient(90deg, var(--accent) 50%, #fff 50%); }
+  .cring-none { background: #fff; }
+  ol.qs.hasconf li { overflow: hidden; }
+
+  .conflegend {
+    border: 1.2px solid var(--rule); border-radius: 4px;
+    padding: 3px 8px; margin: 0 0 7px;
+    font-size: 8.5pt; color: var(--muted); display: flex; gap: 14px; align-items: center;
+  }
+  .conftitle { font-weight: 700; color: var(--ink); }
+  .confitem { white-space: nowrap; }
+
+  .work {
+    border: 1.4px dashed var(--rule); border-radius: 4px;
+    margin: 6px 0 2px; position: relative;
+  }
+  /* The label S.work() puts in the box: a DIRECT child only. As ".work span"
+     it also caught every span inside any generator's own .work content and
+     stacked them all at the top-left corner (math-11-grade6 47, 2026-09-23). */
+  .work > span {
+    position: absolute; top: 3px; left: 6px;
+    font-size: 8pt; color: var(--muted); font-style: italic;
+  }
+
+  /* ------------------------------------------------------ writing lines */
+  /* Primary rule: solid top, dashed midline, heavy baseline. Capitals reach
+     the top line, lowercase bodies sit under the dashed one. */
+  .write {
+    position: relative; height: 0.375in;
+    margin: 6px 0 0 .3in;
+    border-top: 1px solid var(--rule); border-bottom: 2px solid var(--ink);
+  }
+  .write.flush { margin-left: 0; }
+  .write + .write { margin-top: .17in; }
+  .write::after {
+    content: ""; position: absolute; left: 0; right: 0; top: 50%;
+    border-top: 1px dashed var(--guide);
+  }
+
+  /* ------------------------------------------------------- question list */
+  ol.qs { margin: 0; padding: 0 0 0 .34in; }
+  ol.qs li { margin-bottom: 13px; page-break-inside: avoid; }
+  ol.qs li::marker { font-weight: bold; font-size: 11pt; color: var(--accent); }
+  .qt { display: block; }
+
+  .mcq { display: grid; gap: 3px 14px; margin: 5px 0 2px .12in; font-size: 11pt; }
+  .opt { white-space: nowrap; }
+
+  /* -------------------------------------------------------------- tables */
+  .tbl { border-collapse: collapse; margin: 8px 0; font-size: 11pt; width: 100%; }
+  .tbl th, .tbl td { border: 1.4px solid var(--ink); padding: 5px 8px; text-align: left; }
+  .tbl th { color: var(--slate); }
+  .tbl th { background: var(--tint); font-size: 10pt; letter-spacing: .02em; }
+  .tbl td.blank { height: .34in; }
+  .tbl.narrow { width: auto; }
+  .tbl.center td, .tbl.center th { text-align: center; }
+
+  /* ------------------------------------------------------------ passages */
+  .passage {
+    border: 1.5px solid var(--slate); border-radius: 4px;
+    padding: 11px 14px; margin-bottom: 12px;
+    font-size: 11.5pt; line-height: 1.55;
+  }
+  .passage h2 { font-size: 13pt; margin: 0 0 6px; color: var(--deep); }
+  .passage p { margin: 0 0 8px; }
+  .passage p:last-child { margin-bottom: 0; }
+  .passage .byline { font-size: 9.5pt; font-style: italic; color: var(--muted); margin-bottom: 8px; }
+  /* Numbered paragraphs, so a question can say "in paragraph 2". */
+  .passage p.np { position: relative; padding-left: .3in; }
+  .passage p.np::before {
+    content: attr(data-p); position: absolute; left: 0; top: 0;
+    font-size: 9pt; color: var(--accent); font-weight: bold;
+  }
+
+  .wordbank {
+    border: 1.5px dashed var(--slate); border-radius: 4px;
+    padding: 8px 12px; margin: 10px 0 12px;
+    font-size: 11.5pt; text-align: center;
+  }
+  .wordbank b { display: block; font-size: 9.5pt; letter-spacing: .06em;
+    text-transform: uppercase; margin-bottom: 4px; color: var(--accent); }
+  .wordbank span { display: inline-block; margin: 2px 11px; }
+
+  .note {
+    border-left: 4px solid var(--deep); background: var(--tintdeep);
+    padding: 7px 11px; margin: 10px 0; font-size: 10.5pt;
+  }
+  .note b { letter-spacing: .02em; }
+
+  /* -------------------------------------------------------------- footer */
+  /* THE WORDMARK SITS IN THE FOOTER THAT WAS ALREADY THERE, so it costs no
+     height at all — a sheet that fitted before fits now. Upright where the rest
+     of the line is italic, and a size down: it is a signature, not a message,
+     and it must never compete with "Score: ___ / 10". */
+  .brand { font-style: normal; font-size: 7.5pt; letter-spacing: .04em;
+    color: var(--accent); align-self: center; }
+
+  footer {
+    margin-top: 14px; padding-top: 6px; border-top: 1px solid var(--rule);
+    font-size: 9pt; font-style: italic; color: var(--muted);
+    display: flex; justify-content: space-between;
+  }
+
+  /* ---------------------------------------------------------- answer key */
+  .keybadge {
+    display: inline-block; border: 2px solid var(--deep); color: var(--deep); padding: 2px 9px;
+    font-size: 9.5pt; font-weight: bold; letter-spacing: .08em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .key .why {
+    display: block; font-size: 9pt; font-style: italic; color: var(--muted); margin-top: 1px;
+  }
+  /* Highlight rather than underline: <u> in a key marks WHAT CHANGED, and an
+     underline under a comma is invisible. */
+  .key u { text-decoration: none; background: var(--tint); padding: 0 2px; font-weight: bold; }
+  .keygrid .pbody { font-family: "Trebuchet MS", "Segoe UI", Tahoma, Verdana, sans-serif; font-size: 12pt; }
+  /* A key's pictures scale to their column: at 1fr a wide drawing pushed a
+     three-column key 92px off the paper (art-04-drawing 10, 2026-09-24). */
+  .keygrid svg { max-width: 100%; height: auto; }
+  .keylist .qt { font-weight: normal; }
+
+  /*
+   * The guide page. Four lines per question, and the ASK line is the one that
+   * gets used at the table, so it is the one with a rule beside it — a parent
+   * scanning this page in ten seconds should land on the follow-up question
+   * and nothing else.
+   */
+  .guide { padding-left: .3in; }
+  .guide li { margin-bottom: 11px; page-break-inside: avoid; }
+  .guide .gq { font-weight: bold; font-size: 11pt; margin-bottom: 3px; }
+  /* 9pt, matching the key's own why line, because the guide page is the
+     binding constraint on every open sheet: four lines per question against a
+     key's one, and at 10pt a sheet with seven questions ran onto a second
+     side. Found by measuring, not chosen. (No backticks in here — this CSS
+     lives inside a template literal and one would close it.) */
+  .guide .glook, .guide .gthin, .guide .gstrong {
+    font-size: 9pt; line-height: 1.3; margin-top: 1px;
+  }
+  .guide .gthin { color: var(--muted); }
+  .guide .gstrong { color: var(--muted); font-style: italic; }
+  .guide .gask {
+    font-size: 9.5pt; line-height: 1.3; margin-top: 3px;
+    border-left: 3px solid var(--slate); padding-left: 7px;
+  }
+  .key .qs li { margin-bottom: 9px; }
+
+  /*
+   * INLINE-BLOCK, NOT BLOCK, AND THIS WAS WRONG FOR A LONG TIME. A block-level
+   * svg ignores text-align: center on its parent and sits flush left — so 117
+   * sheets across 35 packs said "centre this diagram" and got a left-aligned
+   * one. Twenty-five of them were origami and paper-plane fold sequences, where
+   * the whole page is diagrams.
+   *
+   * Nobody spotted it because a left-flush diagram looks deliberate; it only
+   * reads as wrong next to a centered one, and no sheet has both.
+   *
+   * inline-block makes text-align do what every one of those authors meant,
+   * and leaves a diagram in a left-aligned container exactly where it was.
+   * vertical-align: top kills the baseline gap that inline elements otherwise
+   * leave underneath them, which would have pushed long pages over.
+   */
+  svg { display: inline-block; vertical-align: top; }
+  svg.inline { vertical-align: middle; }
+
+  .tasknum { font-size: 11pt; margin: 14px 0 2px; }
+  .tasknum b { font-size: 12.5pt; }
+  .strip { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin: 12px 0 8px; }
+  .strip .ch { border: 2px solid var(--ink); border-radius: 7px; padding: 5px 2px 3px;
+    width: .82in; text-align: center; }
+  .strip .ch .n { display: block; font-size: 11pt; color: var(--muted); margin-top: 1px; }
+  .sortcols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 10px 0; }
+  .sortcols .col { border: 2.2px solid var(--ink); border-radius: 9px; padding: 8px 9px; }
+  .sortcols .col h4 { margin: 0 0 3px; font-size: 12pt; }
+  .sortcols .col .hint { font-size: 10pt; color: var(--muted); display: block; margin-bottom: 6px; }
+  .sortcols .col .slot { border-bottom: 1.6px solid var(--rule); height: .42in; margin-top: 7px; }
+  .jobs { display: grid; grid-template-columns: .8in 1fr; gap: 10px 13px; align-items: center;
+    border: 2.2px solid var(--ink); border-radius: 9px; padding: 10px 13px; margin: 9px 0; }
+  .jobs .s { text-align: center; }
+  /* the dakuten rows read ACROSS — a narrow column wraps them into a stack and
+   * the whole point (this sign, plus dots, becomes that sign) disappears */
+  .jobs.dots { grid-template-columns: 2.5in 1fr; }
+  .jobs.dots .s { white-space: nowrap; }
+  .jobs .t { font-size: 12pt; }
+  .deriv { display: grid; grid-template-columns: .95in 22px 1fr 1fr; gap: 8px; align-items: center;
+    border: 2.2px solid var(--ink); border-radius: 9px; padding: 9px 12px; margin: 9px 0; }
+  .deriv .arrow { font-size: 15pt; color: var(--muted); text-align: center; }
+  .deriv .kid { text-align: center; }
+  .deriv .kid .how { display: block; font-size: 10pt; color: var(--muted); margin-top: 2px; line-height: 1.25; }
+  .deriv .blank { border: 2.2px dashed var(--rule); border-radius: 8px; height: .9in; }
+  .ktable { border-collapse: collapse; width: 100%; margin: 6px 0; }
+  .ktable td, .ktable th { border: 1.4px solid var(--rule); text-align: center; padding: 3px 1px; }
+  .ktable th { font-size: 9pt; color: var(--muted); font-weight: normal; }
+  .ktable td .r { display: block; font-size: 8pt; color: var(--muted); margin-top: -2px; }
+  .ktable td.hole { background: repeating-linear-gradient(45deg, transparent, transparent 4px, var(--rule) 4px, var(--rule) 5px); }
+  .beats { display: grid; grid-template-columns: 1.5in 1fr .7in; gap: 12px; align-items: center;
+    border: 2.2px solid var(--ink); border-radius: 9px; padding: 9px 12px; margin: 8px 0; }
+  .beats .box { border: 2.2px solid var(--ink); border-radius: 7px; height: .38in; }
+  .decode { border: 2.2px solid var(--ink); border-radius: 9px; padding: 10px 12px; margin: 10px 0; }
+  .decode .signs { display: flex; gap: 6px; align-items: flex-end; }
+  .decode .sign { text-align: center; }
+  .decode .sign .slot { border-bottom: 1.6px solid var(--ink); height: .34in; width: .7in; margin-top: 4px; }
+  .decode .guess { margin-top: 9px; font-size: 10.5pt; }
+  .decode .guess .lines { border-bottom: 1.6px solid var(--ink); height: .34in; margin-top: 5px; }
+  .label { border: 3px solid var(--ink); border-radius: 11px; padding: 14px 18px; margin: 12px auto;
+    max-width: 4.4in; }
+  .label .top { text-align: center; border-bottom: 2.2px solid var(--ink); padding-bottom: 8px; margin-bottom: 9px; }
+  .label .row { display: flex; align-items: flex-end; justify-content: space-between; gap: 10px;
+    padding: 6px 0; border-bottom: 1.4px dotted var(--rule); }
+  .label .row .price { font-size: 12pt; white-space: nowrap; }
+  .telegram { border: 2.6px solid var(--ink); border-radius: 9px; padding: 12px 14px; margin: 11px 0;
+    text-align: center; }
+  .telegram .gapmark { display: inline-block; width: .5in; border-bottom: 2.2px dashed var(--rule);
+    margin: 0 3px 6px; vertical-align: bottom; }
+
+</style>
+</head>
+<body>
+
+<div class="page ">
+  <header>
+    
+    <h1>Three at Once</h1>
+    <p class="sub">Japanese &middot; Page 1 of 3</p>
+  </header>
+  <div class="nameline">
+    <span>Name</span>
+    <span class="short">Date</span>
+  </div>
+  <div class="directions">
+    <b>DIRECTIONS:</b> Don&rsquo;t read it: look at the <b>shapes</b>. Write each character&rsquo;s number in the column its shape belongs to.
+  </div>
+
+<div class="tasknum"><b>1.</b> Sort this sentence.</div>
+    <div class="strip">
+    <div class="ch"><svg viewBox="0 0 100 100" width="50" height="50" role="img" aria-label="私"><path d="M42.6 4.7C34.1 8.6 18.3 12 4.9 14.2C5.8 15.8 6.8 18.3 7.1 19.9C12.7 19.1 18.7 18.2 24.5 17L24.5 33.2L5 33.2L5 40.4L23.1 40.4C18.4 52.2 10.2 65.7 2.8 73.1C4.2 74.9 6.1 78.1 6.9 80.2C13 73.5 19.5 62.5 24.5 51.5L24.5 95.7L31.8 95.7L31.8 54.1C36.3 58.7 42 64.9 44.5 68.2L49.1 62.4C46.5 59.8 35.4 49.5 31.8 46.5L31.8 40.4L49.5 40.4L49.5 33.2L31.8 33.2L31.8 15.3C37.9 13.9 43.6 12.1 48.2 10.2M73.3 55.1C77.2 62.5 80.9 71.1 83.8 79.2L56 82.1C62 61.1 68.4 31.1 72.4 7.5L63.9 6C60.6 29.9 54 61.9 48.1 82.9L38.8 83.8L40.5 91.7C52.7 90.3 69.7 88.1 86.1 85.9C87.2 89.6 88.1 93.1 88.6 96L96.4 93.4C94.2 82.7 87.4 65.9 80.4 52.9" fill="#16130F"/></svg><span class="n">1</span></div>
+    <div class="ch"><svg viewBox="0 0 100 100" width="50" height="50" role="img" aria-label="は"><path d="M25.5 11.6L16.7 10.9C16.7 13 16.4 15.7 16.1 18C14.8 26.3 11.5 45.4 11.5 60.1C11.5 73.6 13.3 84.6 15.3 91.7L22.3 91.2C22.2 90.1 22.1 88.7 22.1 87.7C22 86.5 22.2 84.6 22.5 83.2C23.5 78.3 27.2 68.1 29.6 61.1L25.5 57.9C23.8 62 21.4 68.1 19.8 72.6C19.1 67.7 18.8 63.5 18.8 58.7C18.8 47.5 21.8 27.7 23.8 18.4C24.1 16.6 24.9 13.3 25.5 11.6M67.6 69.5L67.7 73C67.7 79.6 65.2 83.9 56.8 83.9C49.6 83.9 44.6 81.1 44.6 76C44.6 71.1 49.9 67.9 57.4 67.9C61 67.9 64.4 68.5 67.6 69.5M74.9 11L65.9 11C66.1 12.7 66.3 15.4 66.3 17.1L66.3 29.5L56.9 29.7C50.9 29.7 45.6 29.4 39.9 28.9L39.9 36.4C45.8 36.8 51 37.1 56.7 37.1L66.3 36.9C66.4 45.1 67 54.9 67.3 62.6C64.4 62 61.3 61.7 58 61.7C44.9 61.7 37.4 68.4 37.4 76.8C37.4 85.8 44.8 91.1 58.2 91.1C71.7 91.1 75.5 83.2 75.5 75L75.5 72.9C80.6 75.8 85.6 79.8 90.6 84.5L95 77.8C89.8 73.1 83.3 68.1 75.2 64.9C74.8 56.5 74.1 46.5 74 36.4C80 36 85.8 35.4 91.3 34.5L91.3 26.8C86 27.8 80.1 28.6 74 29.1C74.1 24.4 74.2 19.7 74.3 17C74.4 15 74.6 13 74.9 11" fill="#16130F"/></svg><span class="n">2</span></div>
+    <div class="ch"><svg viewBox="0 0 100 100" width="50" height="50" role="img" aria-label="コ"><path d="M15.9 74.6L15.9 83.7C18.6 83.5 23.1 83.3 27.2 83.3L76.1 83.3L75.9 88.9L84.9 88.9C84.8 87.3 84.5 82.8 84.5 79.2L84.5 27.6C84.5 25.2 84.7 22.1 84.8 19.8C82.8 19.9 79.8 20 77.4 20L28.1 20C24.9 20 20.5 19.8 17.2 19.4L17.2 28.3C19.5 28.2 24.5 28 28.2 28L76.1 28L76.1 75.2L27 75.2C22.8 75.2 18.5 74.9 15.9 74.6" fill="#16130F"/></svg><span class="n">3</span></div>
+    <div class="ch"><svg viewBox="0 0 100 100" width="50" height="50" role="img" aria-label="ー"><path d="M10.2 44.7L10.2 54.5C13.3 54.2 18.6 54 24.1 54C31.6 54 71.5 54 79 54C83.5 54 87.7 54.4 89.7 54.5L89.7 44.7C87.5 44.9 83.9 45.2 78.9 45.2C71.5 45.2 31.5 45.2 24.1 45.2C18.5 45.2 13.2 44.9 10.2 44.7" fill="#16130F"/></svg><span class="n">4</span></div>
+    <div class="ch"><svg viewBox="0 0 100 100" width="50" height="50" role="img" aria-label="ヒ"><path d="M31.9 11.1L22.6 11.1C23 13.1 23.2 16.5 23.2 19.2C23.2 24.5 23.2 64.6 23.2 74.2C23.2 82.3 27.5 85.8 35.1 87.2C39.3 87.9 45.2 88.2 51.2 88.2C62.1 88.2 77.1 87.4 85.8 86.1L85.8 77C77.5 79.2 62.1 80.2 51.6 80.2C46.6 80.2 41.5 79.9 38.3 79.4C33.5 78.4 31.3 77.1 31.3 72L31.3 50C43.8 46.8 62 41.1 73.3 36.6C76.3 35.5 79.9 33.9 82.8 32.7L79.3 24.6C76.4 26.4 73.5 27.9 70.5 29.2C60.1 33.7 43.3 38.9 31.3 41.8L31.3 19.2C31.3 16.4 31.6 13.4 31.9 11.1" fill="#16130F"/></svg><span class="n">5</span></div>
+    <div class="ch"><svg viewBox="0 0 100 100" width="50" height="50" role="img" aria-label="ー"><path d="M10.2 44.7L10.2 54.5C13.3 54.2 18.6 54 24.1 54C31.6 54 71.5 54 79 54C83.5 54 87.7 54.4 89.7 54.5L89.7 44.7C87.5 44.9 83.9 45.2 78.9 45.2C71.5 45.2 31.5 45.2 24.1 45.2C18.5 45.2 13.2 44.9 10.2 44.7" fill="#16130F"/></svg><span class="n">6</span></div>
+    <div class="ch"><svg viewBox="0 0 100 100" width="50" height="50" role="img" aria-label="を"><path d="M88.2 43.9L84.9 36.4C82.1 37.9 79.7 39 76.7 40.3C71.5 42.7 65.4 45.1 58.5 48.4C57 42.6 51.7 39.4 45.2 39.4C40.9 39.4 35.1 40.7 31.3 43.1C34.7 38.6 38 32.9 40.3 27.6C51.2 27.2 63.6 26.4 73.5 24.8L73.6 17.4C64.2 19.1 53.3 20 43.1 20.5C44.6 15.8 45.4 11.9 46 8.9L37.8 8.2C37.6 11.9 36.7 16.4 35.3 20.7L28.7 20.8C24.1 20.8 17.1 20.4 11.8 19.7L11.8 27.2C17.3 27.6 23.9 27.8 28.2 27.8L32.6 27.8C28.8 35.9 22.1 46.2 9.5 58.4L16.3 63.4C19.7 59.4 22.5 55.7 25.4 53C29.9 48.8 36.3 45.7 42.6 45.7C47.1 45.7 50.7 47.6 51.7 51.9C40 58 28.1 65.4 28.1 77.2C28.1 89.4 39.6 92.5 53.9 92.5C62.6 92.5 73.7 91.7 81.3 90.7L81.5 82.7C72.7 84.2 62 85.1 54.2 85.1C43.9 85.1 36.1 83.9 36.1 76.1C36.1 69.5 42.6 64.2 51.9 59.3C51.9 64.5 51.8 71 51.6 74.9L59.3 74.9L59 55.7C66.6 52.1 73.7 49.2 79.3 47.1C82 46 85.6 44.6 88.2 43.9" fill="#16130F"/></svg><span class="n">7</span></div>
+    <div class="ch"><svg viewBox="0 0 100 100" width="50" height="50" role="img" aria-label="飲"><path d="M29.3 67.3C30.9 70.1 32.6 73.3 34 76.4L18 81.1L18 62.7L43.5 62.7L43.5 44.6C45.4 45.6 48.1 47.3 49.3 48.3C53.1 43.1 56.3 36.5 58.9 29L66.4 29L66.4 42.1C66.4 50.4 63.4 76.7 41.9 90C43.3 91.5 45.5 94.5 46.4 96.1C63.3 85.3 69.1 65.9 70.2 57.8C71.1 65.9 76.4 85.8 92 96.1C93.2 94.3 95.4 91.3 96.8 89.6C76.9 76.7 73.9 50 73.9 42.1L73.9 29L86.7 29C85.3 35.5 83.3 42.4 81.4 46.9L87.4 49.1C90.4 42.6 93.4 32.2 95.3 23.2L90.3 21.8L89.1 22.1L61.1 22.1C62.7 16.7 64 10.9 65.1 5L57.6 3.9C55.3 19.2 50.7 33.8 43.5 43.3L43.5 30.2L31 30.2L31 21L24.2 21L24.2 30.2L11.2 30.2L11.2 83.1L3.9 85L6.6 92C15.1 89.3 25.9 85.7 36.4 82.2C37.3 84.3 37.9 86.2 38.4 87.9L44.9 85C43.3 79.8 39.2 71.4 35.5 65.1M18 49L36.8 49L36.8 57.2L18 57.2M18 43.5L18 35.8L36.8 35.8L36.8 43.5M22.7 4C18.9 12 11.8 21.9 1.8 29.2C3.3 30.3 5.3 32.7 6.3 34.2C16.1 26.6 23 17.6 27.4 10.2C32.8 15.3 39 22.5 42.1 26.9L47.5 22C43.7 17 36.2 9.4 30.1 4" fill="#16130F"/></svg><span class="n">8</span></div>
+    <div class="ch"><svg viewBox="0 0 100 100" width="50" height="50" role="img" aria-label="み"><path d="M84.8 36.6L76.7 35.7C76.9 38.5 76.8 41.9 76.7 44.9C76.5 47.3 76.3 49.8 75.8 52.4C67.8 48.6 58.5 45.4 48.4 44.3C52.6 35 57 24.8 59.8 20.3C60.6 19.1 61.5 18.1 62.4 17L57.4 12.9C56.1 13.4 54.3 13.8 52.4 14C48.2 14.3 35.1 15 29.8 15C27.8 15 24.9 14.9 22.3 14.7L22.7 22.8C25.1 22.6 27.9 22.3 30.1 22.2C34.7 21.9 46.9 21.4 50.9 21.2C47.8 27.4 44 36.1 40.5 44C20.8 44.5 7.2 55.8 7.2 70.5C7.2 78.9 12.8 84.2 20.2 84.2C25.4 84.2 29.2 82.4 32.8 77.3C36.6 71.7 41.5 59.9 45.4 51.1C55.8 52 65.6 55.6 74 60.3C70.8 71.1 63.6 81.8 47.8 88.5L54.4 94C68.9 86.8 76.6 77.3 80.7 64.3C84.6 66.9 88.1 69.6 91.1 72.2L94.8 63.6C91.6 61.3 87.5 58.6 82.7 55.9C83.8 50.1 84.4 43.7 84.8 36.6M37.4 51C33.9 58.8 30.1 68.1 26.5 72.8C24.4 75.4 22.8 76.3 20.5 76.3C17.3 76.3 14.5 73.9 14.5 69.5C14.5 60.9 22.8 52.1 37.4 51" fill="#16130F"/></svg><span class="n">9</span></div>
+    <div class="ch"><svg viewBox="0 0 100 100" width="50" height="50" role="img" aria-label="ま"><path d="M50 70.2L50.1 76.9C50.1 83.8 45.2 85.6 39.5 85.6C29.6 85.6 25.6 82.1 25.6 77.5C25.6 72.9 30.8 69.2 40.3 69.2C43.6 69.2 46.9 69.5 50 70.2M18.5 40.7L18.6 48.2C25.8 49 36.8 49.6 43.6 49.6L49.3 49.6L49.7 63.2C47 62.8 44.2 62.6 41.3 62.6C26.9 62.6 18.2 68.8 18.2 77.9C18.2 87.5 26 92.6 40.4 92.6C53.4 92.6 58 85.6 58 78.6L57.8 72.4C67.8 76 76.1 82.1 82 87.5L86.6 80.4C80.9 75.7 70.7 68.4 57.4 64.8L56.7 49.4C66.2 49.1 75 48.3 84.4 47.1L84.5 39.6C75.4 41 66.3 41.9 56.6 42.3L56.6 41.1L56.6 28.3C66.2 27.8 75.7 26.9 83.6 26L83.7 18.7C74.7 20.1 65.6 21 56.6 21.4L56.7 15.3C56.8 12.4 57 10.4 57.3 8.6L48.8 8.6C49 10 49.2 12.9 49.2 14.6L49.2 21.7L44.6 21.7C37.9 21.7 25.5 20.7 19 19.5L19.1 26.9C25.4 27.6 37.7 28.6 44.7 28.6L49.1 28.6L49.1 41.1L49.1 42.6L43.7 42.6C37.1 42.6 25.7 41.9 18.5 40.7" fill="#16130F"/></svg><span class="n">10</span></div>
+    <div class="ch"><svg viewBox="0 0 100 100" width="50" height="50" role="img" aria-label="す"><path d="M56.8 50.8C57.7 60.2 53.8 64.9 48 64.9C42.4 64.9 37.8 61.2 37.8 55C37.8 48.5 42.7 44.4 47.9 44.4C51.9 44.4 55.2 46.3 56.8 50.8M9.6 22.7L9.8 30.4C22.3 29.5 39.3 28.8 54.5 28.7L54.6 38.8C52.6 38.1 50.4 37.7 47.9 37.7C38.4 37.7 30.3 45.2 30.3 55.1C30.3 66 38.3 71.8 46.7 71.8C50.1 71.8 53 70.9 55.4 69.1C51.4 78.2 42.2 83.8 28.9 86.8L35.6 93.4C58.9 86.4 65.5 71.4 65.5 57.9C65.5 52.9 64.4 48.5 62.3 45.1L62.1 28.6L63.5 28.6C78.1 28.6 87.2 28.8 92.8 29.1L92.9 21.7C88.1 21.7 75.8 21.6 63.6 21.6L62.1 21.6L62.2 15.1C62.3 13.8 62.5 9.9 62.7 8.8L53.6 8.8C53.7 9.6 54.1 12.5 54.2 15.1L54.4 21.7C39.5 21.9 20.7 22.5 9.6 22.7" fill="#16130F"/></svg><span class="n">11</span></div>
+    <div class="ch"><svg viewBox="0 0 100 100" width="50" height="50" role="img" aria-label="。"><path d="M19.4 63.6C11.1 63.6 4.2 70.4 4.2 78.8C4.2 87.3 11.1 94.1 19.4 94.1C27.9 94.1 34.7 87.3 34.7 78.8C34.7 70.4 27.9 63.6 19.4 63.6M19.4 89C13.9 89 9.3 84.5 9.3 78.8C9.3 73.3 13.9 68.7 19.4 68.7C25.1 68.7 29.6 73.3 29.6 78.8C29.6 84.5 25.1 89 19.4 89" fill="#16130F"/></svg><span class="n">12</span></div>
+  </div>
+    <div class="sortcols">
+    <div class="col"><h4>Dense and blocky</h4><span class="hint">lots of strokes packed into a square</span>
+      <div class="slot"></div><div class="slot"></div><div class="slot"></div><div class="slot"></div><div class="slot"></div></div>
+    <div class="col"><h4>Loopy and round</h4><span class="hint">curly, made of few strokes, no corners</span>
+      <div class="slot"></div><div class="slot"></div><div class="slot"></div><div class="slot"></div><div class="slot"></div></div>
+    <div class="col"><h4>Sharp and angular</h4><span class="hint">straight lines and hard corners, very plain</span>
+      <div class="slot"></div><div class="slot"></div><div class="slot"></div><div class="slot"></div><div class="slot"></div></div>
+  </div>
+
+
+
+  <footer>
+    <span>One more sentence on page 2 &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Three at once</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>And Again, Cold</h1>
+    <p class="sub">Japanese &middot; Page 2 of 3</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Same job, new sentence. No looking back.
+  </div>
+
+<div class="tasknum"><b>2.</b> Sort this one the same way.</div>
+    <div class="strip">
+    <div class="ch"><svg viewBox="0 0 100 100" width="50" height="50" role="img" aria-label="テ"><path d="M21.5 14L21.5 22.3C24 22.1 27.3 22 30.6 22C36.3 22 65.5 22 71 22C73.9 22 77.4 22.1 80.3 22.3L80.3 14C77.4 14.4 73.8 14.6 71 14.6C65.5 14.6 36.3 14.6 30.5 14.6C27.3 14.6 24.3 14.3 21.5 14M9.5 39.1L9.5 47.4C12.3 47.2 15.2 47.2 18.2 47.2L48.2 47.2C47.9 56.6 46.8 65 42.4 72C38.5 78.3 31.3 84.1 23.5 87.3L30.9 92.8C39.4 88.4 47 81.2 50.6 74.5C54.6 67.1 56.2 58 56.5 47.2L83.7 47.2C86.1 47.2 89.3 47.3 91.5 47.4L91.5 39.1C89.1 39.5 85.8 39.6 83.7 39.6C78.4 39.6 24 39.6 18.2 39.6C15.1 39.6 12.3 39.4 9.5 39.1" fill="#16130F"/></svg><span class="n">1</span></div>
+    <div class="ch"><svg viewBox="0 0 100 100" width="50" height="50" role="img" aria-label="レ"><path d="M22.2 84.8L28 89.8C29.6 88.8 31.1 88.3 32.2 88C57.1 80.8 77.7 68.4 90.7 52.3L86.2 45.3C73.8 61.4 50.6 74.6 31.5 79.4C31.5 74.3 31.5 32.2 31.5 22.7C31.5 19.8 31.8 16.1 32.2 13.6L22.3 13.6C22.7 15.6 23.2 20.1 23.2 22.7C23.2 32.2 23.2 73.7 23.2 79.9C23.2 81.9 22.9 83.2 22.2 84.8" fill="#16130F"/></svg><span class="n">2</span></div>
+    <div class="ch"><svg viewBox="0 0 100 100" width="50" height="50" role="img" aria-label="ビ"><path d="M72.8 9.6L67.5 11.9C70.2 15.7 73.6 21.7 75.6 25.8L81 23.3C78.9 19.3 75.3 13.2 72.8 9.6M83.8 5.6L78.5 7.9C81.3 11.7 84.6 17.3 86.8 21.7L92.2 19.2C90.3 15.5 86.4 9.3 83.8 5.6M27.9 13L18.6 13C19 15.3 19.2 18.7 19.2 21.1C19.2 26.4 19.2 66.4 19.2 76.1C19.2 84.2 23.5 87.7 31.2 89.1C35.3 89.8 41.3 90.1 47.2 90.1C58.1 90.1 73.1 89.3 81.8 88L81.8 78.9C73.5 81.1 58.2 82.1 47.6 82.1C42.7 82.1 37.5 81.8 34.4 81.3C29.5 80.3 27.4 79 27.4 73.9L27.4 51.9C39.8 48.7 57.1 43.4 68.3 38.9C71.3 37.8 74.9 36.2 77.7 35L74.2 27C71.4 28.7 68.4 30.2 65.4 31.5C55 36 39.2 40.8 27.4 43.7L27.4 21.1C27.4 18.3 27.6 15.3 27.9 13" fill="#16130F"/></svg><span class="n">3</span></div>
+    <div class="ch"><svg viewBox="0 0 100 100" width="50" height="50" role="img" aria-label="で"><path d="M7.9 22.2L8.8 30.9C19.6 28.6 45.1 26.2 55.8 25C46.6 30.5 37.1 43.2 37.1 58.8C37.1 81.1 58.2 91 76.7 91.7L79.6 83.4C63.3 82.8 45.1 76.6 45.1 57.1C45.1 45.2 53.8 30 68 25.4C73.1 23.9 81.9 23.8 87.6 23.8L87.6 15.8C80.9 16.1 71.5 16.7 60.6 17.6C42.2 19.1 23.3 21 16.8 21.7C14.9 21.9 11.7 22.1 7.9 22.2M73.2 36.1L68.1 38.3C71.1 42.4 74 47.6 76.3 52.4L81.4 50C79.3 45.6 75.5 39.4 73.2 36.1M84.1 31.9L79.2 34.2C82.3 38.4 85.2 43.3 87.6 48.2L92.8 45.7C90.5 41.3 86.5 35.2 84.1 31.9" fill="#16130F"/></svg><span class="n">4</span></div>
+    <div class="ch"><svg viewBox="0 0 100 100" width="50" height="50" role="img" aria-label="ニ"><path d="M17.8 22.9L17.8 31.9C20.9 31.8 24.2 31.6 27.7 31.6C32.6 31.6 65.6 31.6 70.5 31.6C73.8 31.6 77.6 31.7 80.4 31.9L80.4 22.9C77.6 23.2 74.1 23.3 70.5 23.3C65.4 23.3 34 23.3 27.7 23.3C24.4 23.3 21 23.1 17.8 22.9M9.2 72.4L9.2 82C12.6 81.8 16.1 81.5 19.7 81.5C25.5 81.5 73.8 81.5 79.6 81.5C82.3 81.5 85.7 81.7 88.7 82L88.7 72.4C85.8 72.7 82.6 72.9 79.6 72.9C73.8 72.9 25.5 72.9 19.7 72.9C16.1 72.9 12.6 72.6 9.2 72.4" fill="#16130F"/></svg><span class="n">5</span></div>
+    <div class="ch"><svg viewBox="0 0 100 100" width="50" height="50" role="img" aria-label="ュ"><path d="M14.9 78.9L14.9 87.2C17.8 87 20.1 86.9 23.2 86.9C28.1 86.9 72.3 86.9 78 86.9C80.1 86.9 83.8 87 85.6 87.1L85.6 79C83.5 79.2 79.9 79.3 77.7 79.3L67.9 79.3C69.3 70.2 72.2 50.3 73 43.5C73.1 42.7 73.4 41.4 73.7 40.4L67.6 37.5C66.7 37.9 64.2 38.2 62.6 38.2C57.1 38.2 36.1 38.2 32.2 38.2C29.7 38.2 26.7 37.9 24.3 37.6L24.3 46C26.8 45.9 29.4 45.7 32.3 45.7C35.1 45.7 57.9 45.7 64.1 45.7C63.8 51.4 60.9 70.9 59.4 79.3L23.2 79.3C20.2 79.3 17.3 79.1 14.9 78.9" fill="#16130F"/></svg><span class="n">6</span></div>
+    <div class="ch"><svg viewBox="0 0 100 100" width="50" height="50" role="img" aria-label="ー"><path d="M10.2 44.7L10.2 54.5C13.3 54.2 18.6 54 24.1 54C31.6 54 71.5 54 79 54C83.5 54 87.7 54.4 89.7 54.5L89.7 44.7C87.5 44.9 83.9 45.2 78.9 45.2C71.5 45.2 31.5 45.2 24.1 45.2C18.5 45.2 13.2 44.9 10.2 44.7" fill="#16130F"/></svg><span class="n">7</span></div>
+    <div class="ch"><svg viewBox="0 0 100 100" width="50" height="50" role="img" aria-label="ス"><path d="M80 21.1L74.9 17.2C73.3 17.7 70.7 18 67.4 18C63.7 18 32.8 18 28.8 18C25.8 18 20.1 17.6 18.7 17.4L18.7 26.5C19.8 26.4 25.3 26 28.8 26C32.3 26 64.2 26 67.8 26C65.3 34.3 58 46.1 51.2 53.8C40.9 65.3 26.1 77.2 10 83.5L16.4 90.2C31.2 83.5 44.7 72.5 55.4 61C65.6 70.1 76.2 81.8 82.9 90.7L89.9 84.7C83.4 76.8 71.2 63.8 60.7 54.8C67.8 45.8 74.1 34.1 77.5 25.5C78.1 24.1 79.4 21.9 80 21.1" fill="#16130F"/></svg><span class="n">8</span></div>
+    <div class="ch"><svg viewBox="0 0 100 100" width="50" height="50" role="img" aria-label="を"><path d="M88.2 43.9L84.9 36.4C82.1 37.9 79.7 39 76.7 40.3C71.5 42.7 65.4 45.1 58.5 48.4C57 42.6 51.7 39.4 45.2 39.4C40.9 39.4 35.1 40.7 31.3 43.1C34.7 38.6 38 32.9 40.3 27.6C51.2 27.2 63.6 26.4 73.5 24.8L73.6 17.4C64.2 19.1 53.3 20 43.1 20.5C44.6 15.8 45.4 11.9 46 8.9L37.8 8.2C37.6 11.9 36.7 16.4 35.3 20.7L28.7 20.8C24.1 20.8 17.1 20.4 11.8 19.7L11.8 27.2C17.3 27.6 23.9 27.8 28.2 27.8L32.6 27.8C28.8 35.9 22.1 46.2 9.5 58.4L16.3 63.4C19.7 59.4 22.5 55.7 25.4 53C29.9 48.8 36.3 45.7 42.6 45.7C47.1 45.7 50.7 47.6 51.7 51.9C40 58 28.1 65.4 28.1 77.2C28.1 89.4 39.6 92.5 53.9 92.5C62.6 92.5 73.7 91.7 81.3 90.7L81.5 82.7C72.7 84.2 62 85.1 54.2 85.1C43.9 85.1 36.1 83.9 36.1 76.1C36.1 69.5 42.6 64.2 51.9 59.3C51.9 64.5 51.8 71 51.6 74.9L59.3 74.9L59 55.7C66.6 52.1 73.7 49.2 79.3 47.1C82 46 85.6 44.6 88.2 43.9" fill="#16130F"/></svg><span class="n">9</span></div>
+    <div class="ch"><svg viewBox="0 0 100 100" width="50" height="50" role="img" aria-label="見"><path d="M25.8 30.8L74.2 30.8L74.2 41.1L25.8 41.1M25.8 47.5L74.2 47.5L74.2 57.9L25.8 57.9M25.8 14.2L74.2 14.2L74.2 24.5L25.8 24.5M18.5 7.5L18.5 64.6L32 64.6C30 77.5 24.6 85.3 3.9 89.5C5.5 91.1 7.6 94.2 8.2 96.1C31.1 90.8 37.6 80.7 40 64.6L56.4 64.6L56.4 84.7C56.4 92.9 58.9 95.2 68.5 95.2C70.4 95.2 82.6 95.2 84.7 95.2C93.2 95.2 95.3 91.6 96.2 77C94.1 76.5 90.9 75.2 89.3 73.9C88.8 86.3 88.2 88.1 84.1 88.1C81.3 88.1 71.3 88.1 69.2 88.1C64.9 88.1 64 87.5 64 84.7L64 64.6L81.8 64.6L81.8 7.5" fill="#16130F"/></svg><span class="n">10</span></div>
+    <div class="ch"><svg viewBox="0 0 100 100" width="50" height="50" role="img" aria-label="ま"><path d="M50 70.2L50.1 76.9C50.1 83.8 45.2 85.6 39.5 85.6C29.6 85.6 25.6 82.1 25.6 77.5C25.6 72.9 30.8 69.2 40.3 69.2C43.6 69.2 46.9 69.5 50 70.2M18.5 40.7L18.6 48.2C25.8 49 36.8 49.6 43.6 49.6L49.3 49.6L49.7 63.2C47 62.8 44.2 62.6 41.3 62.6C26.9 62.6 18.2 68.8 18.2 77.9C18.2 87.5 26 92.6 40.4 92.6C53.4 92.6 58 85.6 58 78.6L57.8 72.4C67.8 76 76.1 82.1 82 87.5L86.6 80.4C80.9 75.7 70.7 68.4 57.4 64.8L56.7 49.4C66.2 49.1 75 48.3 84.4 47.1L84.5 39.6C75.4 41 66.3 41.9 56.6 42.3L56.6 41.1L56.6 28.3C66.2 27.8 75.7 26.9 83.6 26L83.7 18.7C74.7 20.1 65.6 21 56.6 21.4L56.7 15.3C56.8 12.4 57 10.4 57.3 8.6L48.8 8.6C49 10 49.2 12.9 49.2 14.6L49.2 21.7L44.6 21.7C37.9 21.7 25.5 20.7 19 19.5L19.1 26.9C25.4 27.6 37.7 28.6 44.7 28.6L49.1 28.6L49.1 41.1L49.1 42.6L43.7 42.6C37.1 42.6 25.7 41.9 18.5 40.7" fill="#16130F"/></svg><span class="n">11</span></div>
+    <div class="ch"><svg viewBox="0 0 100 100" width="50" height="50" role="img" aria-label="す"><path d="M56.8 50.8C57.7 60.2 53.8 64.9 48 64.9C42.4 64.9 37.8 61.2 37.8 55C37.8 48.5 42.7 44.4 47.9 44.4C51.9 44.4 55.2 46.3 56.8 50.8M9.6 22.7L9.8 30.4C22.3 29.5 39.3 28.8 54.5 28.7L54.6 38.8C52.6 38.1 50.4 37.7 47.9 37.7C38.4 37.7 30.3 45.2 30.3 55.1C30.3 66 38.3 71.8 46.7 71.8C50.1 71.8 53 70.9 55.4 69.1C51.4 78.2 42.2 83.8 28.9 86.8L35.6 93.4C58.9 86.4 65.5 71.4 65.5 57.9C65.5 52.9 64.4 48.5 62.3 45.1L62.1 28.6L63.5 28.6C78.1 28.6 87.2 28.8 92.8 29.1L92.9 21.7C88.1 21.7 75.8 21.6 63.6 21.6L62.1 21.6L62.2 15.1C62.3 13.8 62.5 9.9 62.7 8.8L53.6 8.8C53.7 9.6 54.1 12.5 54.2 15.1L54.4 21.7C39.5 21.9 20.7 22.5 9.6 22.7" fill="#16130F"/></svg><span class="n">12</span></div>
+    <div class="ch"><svg viewBox="0 0 100 100" width="50" height="50" role="img" aria-label="。"><path d="M19.4 63.6C11.1 63.6 4.2 70.4 4.2 78.8C4.2 87.3 11.1 94.1 19.4 94.1C27.9 94.1 34.7 87.3 34.7 78.8C34.7 70.4 27.9 63.6 19.4 63.6M19.4 89C13.9 89 9.3 84.5 9.3 78.8C9.3 73.3 13.9 68.7 19.4 68.7C25.1 68.7 29.6 73.3 29.6 78.8C29.6 84.5 25.1 89 19.4 89" fill="#16130F"/></svg><span class="n">13</span></div>
+  </div>
+    <div class="sortcols">
+    <div class="col"><h4>Dense and blocky</h4><span class="hint">lots of strokes packed into a square</span>
+      <div class="slot"></div><div class="slot"></div><div class="slot"></div><div class="slot"></div><div class="slot"></div></div>
+    <div class="col"><h4>Loopy and round</h4><span class="hint">curly, made of few strokes, no corners</span>
+      <div class="slot"></div><div class="slot"></div><div class="slot"></div><div class="slot"></div><div class="slot"></div></div>
+    <div class="col"><h4>Sharp and angular</h4><span class="hint">straight lines and hard corners, very plain</span>
+      <div class="slot"></div><div class="slot"></div><div class="slot"></div><div class="slot"></div><div class="slot"></div></div>
+  </div>
+
+
+  <div class="note" style="margin-top:14px">Lopsided? Notice which column is fullest, then turn over.</div>
+
+  <footer>
+    <span>Turn over to find out what you just did &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Three at once</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>What You Just Sorted</h1>
+    <p class="sub">Japanese &middot; Page 3 of 3</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Japanese uses three writing systems in every sentence, each with a job. Read, then answer.
+  </div>
+
+
+
+  <div class="jobs">
+    <div class="s"><span style="display:inline-flex;align-items:flex-end;vertical-align:-0.16em" aria-label="飲"><svg viewBox="0 0 100 100" width="40" height="40" role="img" aria-label="飲"><path d="M29.3 67.3C30.9 70.1 32.6 73.3 34 76.4L18 81.1L18 62.7L43.5 62.7L43.5 44.6C45.4 45.6 48.1 47.3 49.3 48.3C53.1 43.1 56.3 36.5 58.9 29L66.4 29L66.4 42.1C66.4 50.4 63.4 76.7 41.9 90C43.3 91.5 45.5 94.5 46.4 96.1C63.3 85.3 69.1 65.9 70.2 57.8C71.1 65.9 76.4 85.8 92 96.1C93.2 94.3 95.4 91.3 96.8 89.6C76.9 76.7 73.9 50 73.9 42.1L73.9 29L86.7 29C85.3 35.5 83.3 42.4 81.4 46.9L87.4 49.1C90.4 42.6 93.4 32.2 95.3 23.2L90.3 21.8L89.1 22.1L61.1 22.1C62.7 16.7 64 10.9 65.1 5L57.6 3.9C55.3 19.2 50.7 33.8 43.5 43.3L43.5 30.2L31 30.2L31 21L24.2 21L24.2 30.2L11.2 30.2L11.2 83.1L3.9 85L6.6 92C15.1 89.3 25.9 85.7 36.4 82.2C37.3 84.3 37.9 86.2 38.4 87.9L44.9 85C43.3 79.8 39.2 71.4 35.5 65.1M18 49L36.8 49L36.8 57.2L18 57.2M18 43.5L18 35.8L36.8 35.8L36.8 43.5M22.7 4C18.9 12 11.8 21.9 1.8 29.2C3.3 30.3 5.3 32.7 6.3 34.2C16.1 26.6 23 17.6 27.4 10.2C32.8 15.3 39 22.5 42.1 26.9L47.5 22C43.7 17 36.2 9.4 30.1 4" fill="#16130F"/></svg></span></div>
+    <div class="t"><b>Kanji</b> &mdash; the dense blocky ones. Borrowed from Chinese a very long time ago, and they carry the <b>meaty words</b>: drink, watch, person, mountain.</div>
+    <div class="s"><span style="display:inline-flex;align-items:flex-end;vertical-align:-0.16em" aria-label="ます"><svg viewBox="0 0 100 100" width="30" height="30" role="img" aria-label="ま"><path d="M50 70.2L50.1 76.9C50.1 83.8 45.2 85.6 39.5 85.6C29.6 85.6 25.6 82.1 25.6 77.5C25.6 72.9 30.8 69.2 40.3 69.2C43.6 69.2 46.9 69.5 50 70.2M18.5 40.7L18.6 48.2C25.8 49 36.8 49.6 43.6 49.6L49.3 49.6L49.7 63.2C47 62.8 44.2 62.6 41.3 62.6C26.9 62.6 18.2 68.8 18.2 77.9C18.2 87.5 26 92.6 40.4 92.6C53.4 92.6 58 85.6 58 78.6L57.8 72.4C67.8 76 76.1 82.1 82 87.5L86.6 80.4C80.9 75.7 70.7 68.4 57.4 64.8L56.7 49.4C66.2 49.1 75 48.3 84.4 47.1L84.5 39.6C75.4 41 66.3 41.9 56.6 42.3L56.6 41.1L56.6 28.3C66.2 27.8 75.7 26.9 83.6 26L83.7 18.7C74.7 20.1 65.6 21 56.6 21.4L56.7 15.3C56.8 12.4 57 10.4 57.3 8.6L48.8 8.6C49 10 49.2 12.9 49.2 14.6L49.2 21.7L44.6 21.7C37.9 21.7 25.5 20.7 19 19.5L19.1 26.9C25.4 27.6 37.7 28.6 44.7 28.6L49.1 28.6L49.1 41.1L49.1 42.6L43.7 42.6C37.1 42.6 25.7 41.9 18.5 40.7" fill="#16130F"/></svg><svg viewBox="0 0 100 100" width="30" height="30" role="img" aria-label="す"><path d="M56.8 50.8C57.7 60.2 53.8 64.9 48 64.9C42.4 64.9 37.8 61.2 37.8 55C37.8 48.5 42.7 44.4 47.9 44.4C51.9 44.4 55.2 46.3 56.8 50.8M9.6 22.7L9.8 30.4C22.3 29.5 39.3 28.8 54.5 28.7L54.6 38.8C52.6 38.1 50.4 37.7 47.9 37.7C38.4 37.7 30.3 45.2 30.3 55.1C30.3 66 38.3 71.8 46.7 71.8C50.1 71.8 53 70.9 55.4 69.1C51.4 78.2 42.2 83.8 28.9 86.8L35.6 93.4C58.9 86.4 65.5 71.4 65.5 57.9C65.5 52.9 64.4 48.5 62.3 45.1L62.1 28.6L63.5 28.6C78.1 28.6 87.2 28.8 92.8 29.1L92.9 21.7C88.1 21.7 75.8 21.6 63.6 21.6L62.1 21.6L62.2 15.1C62.3 13.8 62.5 9.9 62.7 8.8L53.6 8.8C53.7 9.6 54.1 12.5 54.2 15.1L54.4 21.7C39.5 21.9 20.7 22.5 9.6 22.7" fill="#16130F"/></svg></span></div>
+    <div class="t"><b>Hiragana</b> &mdash; the loopy ones. They carry the <b>grammar</b>: the endings, and the little words that hold the meaty ones together.</div>
+    <div class="s"><span style="display:inline-flex;align-items:flex-end;vertical-align:-0.16em" aria-label="コーヒー"><svg viewBox="0 0 100 100" width="26" height="26" role="img" aria-label="コ"><path d="M15.9 74.6L15.9 83.7C18.6 83.5 23.1 83.3 27.2 83.3L76.1 83.3L75.9 88.9L84.9 88.9C84.8 87.3 84.5 82.8 84.5 79.2L84.5 27.6C84.5 25.2 84.7 22.1 84.8 19.8C82.8 19.9 79.8 20 77.4 20L28.1 20C24.9 20 20.5 19.8 17.2 19.4L17.2 28.3C19.5 28.2 24.5 28 28.2 28L76.1 28L76.1 75.2L27 75.2C22.8 75.2 18.5 74.9 15.9 74.6" fill="#16130F"/></svg><svg viewBox="0 0 100 100" width="26" height="26" role="img" aria-label="ー"><path d="M10.2 44.7L10.2 54.5C13.3 54.2 18.6 54 24.1 54C31.6 54 71.5 54 79 54C83.5 54 87.7 54.4 89.7 54.5L89.7 44.7C87.5 44.9 83.9 45.2 78.9 45.2C71.5 45.2 31.5 45.2 24.1 45.2C18.5 45.2 13.2 44.9 10.2 44.7" fill="#16130F"/></svg><svg viewBox="0 0 100 100" width="26" height="26" role="img" aria-label="ヒ"><path d="M31.9 11.1L22.6 11.1C23 13.1 23.2 16.5 23.2 19.2C23.2 24.5 23.2 64.6 23.2 74.2C23.2 82.3 27.5 85.8 35.1 87.2C39.3 87.9 45.2 88.2 51.2 88.2C62.1 88.2 77.1 87.4 85.8 86.1L85.8 77C77.5 79.2 62.1 80.2 51.6 80.2C46.6 80.2 41.5 79.9 38.3 79.4C33.5 78.4 31.3 77.1 31.3 72L31.3 50C43.8 46.8 62 41.1 73.3 36.6C76.3 35.5 79.9 33.9 82.8 32.7L79.3 24.6C76.4 26.4 73.5 27.9 70.5 29.2C60.1 33.7 43.3 38.9 31.3 41.8L31.3 19.2C31.3 16.4 31.6 13.4 31.9 11.1" fill="#16130F"/></svg><svg viewBox="0 0 100 100" width="26" height="26" role="img" aria-label="ー"><path d="M10.2 44.7L10.2 54.5C13.3 54.2 18.6 54 24.1 54C31.6 54 71.5 54 79 54C83.5 54 87.7 54.4 89.7 54.5L89.7 44.7C87.5 44.9 83.9 45.2 78.9 45.2C71.5 45.2 31.5 45.2 24.1 45.2C18.5 45.2 13.2 44.9 10.2 44.7" fill="#16130F"/></svg></span></div>
+    <div class="t"><b>Katakana</b> &mdash; the sharp angular ones. They spell anything <b>imported from somewhere else</b>. This one says coffee.</div>
+  </div>
+
+
+
+  <ol class="qs" start="3"><li><span class="qt">In the <b>second</b> sentence, which system did the most characters belong to?</span><div class="write"></div><div class="write"></div></li><li><span class="qt">You got the sorting right without knowing what any of it meant. What were you actually using to decide?</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Kanji &middot; hiragana &middot; katakana</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Three at once</span>
+  </footer>
+</div>
+
+</body>
+</html>

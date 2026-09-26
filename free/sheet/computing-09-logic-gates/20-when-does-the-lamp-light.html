@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="sheet-kind" content="worksheet">
+<title>When Does the Lamp Light? — A Switch That Flips Another Switch</title>
+<style>
+  :root { --font: Georgia, "Times New Roman", serif; }
+
+  /* Page margins live HERE only — body padding stays 0 for print so the two
+     don't stack and eat the sheet. */
+  @page { size: letter portrait; margin: 0.45in 0.5in; }
+
+  /*
+   * THE PALETTE. The same one the shop wears (kitchen-table/BRAND.md): warm
+   * near-black ink, one accent, pine kept back for the answer key.
+   *
+   * WHY A SHEET HAS COLOR AT ALL. Every sheet was pure grayscale — #000 rules,
+   * #333 subtitles, #f0f0f0 boxes — which is what you get by never deciding.
+   * The paper is the product and it looked like a fax. A printer set to
+   * grayscale, or one that has no color to give, renders all of this as the
+   * greys it already had, so nothing below costs a parent anything they were
+   * not already spending.
+   *
+   * WHAT STAYS BLACK, ON PURPOSE:
+   *   - anything drawn to be written on (rules, name lines, answer boxes)
+   *   - anything drawn to be traced or colored in (line art, letter guides)
+   *   - the confidence rings, which have to survive a mono laser
+   * Color marks the sheet's own furniture — its rule, its numbering, its
+   * boxes — and never the part a child puts a pencil through.
+   */
+  :root {
+    --ink:    #16130F;
+    --muted:  #6B635A;
+    --rule:   #CFC3B2;
+    --guide:  #BCAE9C;
+    --accent: #C0511D;
+    --tint:   #F7EDE4;
+    --slate:  #2E5A78;
+    --tintslate: #E9EFF4;
+    --deep:   #2C4A45;
+    --tintdeep: #ECF1EF;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font);
+    color: #000; background: #fff;
+    font-size: 12pt; line-height: 1.3;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+
+  /* ORDER MATTERS. This generic rule must come BEFORE the @media screen block:
+     same specificity, so whichever is declared last wins. With it after, the
+     on-screen preview stretches to the viewport instead of 8.5in — print is
+     unaffected, but the proof you check before printing is wrong. */
+  .page { width: 100%; }
+  .page + .page { page-break-before: always; }
+
+  @media screen {
+    body { padding: 0.5in; background: #ddd; }
+    .page {
+      background: #fff; padding: 0.45in 0.5in;
+      width: 8.5in; min-height: 11in;
+      margin: 0 auto 24px; box-shadow: 0 2px 10px rgba(0,0,0,.3);
+    }
+  }
+
+  /* ------------------------------------------------------------- header */
+  header { border-bottom: 3px double var(--accent); padding-bottom: 6px; }
+  header.cont { border-bottom: 1px solid var(--rule); }
+  h1 { font-size: 16pt; margin: 0 0 1px; letter-spacing: .01em; }
+  .sub { font-size: 10pt; font-style: italic; color: var(--muted); margin: 0; }
+
+  .nameline { display: flex; gap: 26px; font-size: 10.5pt; margin: 11px 0 12px; }
+  .nameline span { flex: 1; border-bottom: 1px solid var(--ink); padding-bottom: 1px; }
+  .nameline span.short { flex: 0 0 1.9in; }
+
+  .directions {
+    font-size: 10.5pt; line-height: 1.35;
+    background: var(--tint); border-left: 4px solid var(--accent);
+    padding: 7px 10px; margin: 12px 0 14px;
+  }
+  .directions b { letter-spacing: .03em; }
+  .tip { font-style: italic; margin-top: 3px; }
+
+  /* ------------------------------------------------- problems and grids */
+  .grid { display: grid; gap: 13px 16px; margin-top: 4px; }
+  .prob { page-break-inside: avoid; display: flex; gap: 5px; align-items: flex-start; }
+  .pn { font-weight: bold; font-size: 11pt; min-width: .28in; flex: 0 0 auto; color: var(--accent); }
+  .pbody { flex: 1; min-width: 0; }
+
+  /* Digits need lining figures and even widths whatever the body font is. */
+  .num, .vert, .horiz { font-family: "Trebuchet MS", "Segoe UI", Tahoma, Verdana, sans-serif; font-variant-numeric: lining-nums tabular-nums; }
+
+  /* A stacked column algorithm.
+     Two grid columns — operator, then digits — because a floated or absolutely
+     positioned operator overlaps the digits as soon as the numbers get wide,
+     and "324" with a + sitting on the 3 is unreadable. The grid also lets the
+     rule under the last operand span BOTH columns, which is how it is written
+     by hand. The rule is heavy: it is the line you write the answer beneath. */
+  .vert {
+    display: inline-grid; grid-template-columns: auto auto;
+    font-size: 15pt; line-height: 1.3; text-align: right;
+  }
+  .vert > span { padding: 0 0 1px 0; }
+  .vert .op { text-align: left; padding-right: .16in; }
+  .vert .last { border-bottom: 2.5px solid var(--ink); padding-bottom: 3px; }
+  .vert .ans { height: .4in; }
+  /* Partial-products working, for 2-digit x 1-digit before the short method. */
+  .vert .part { font-size: 11pt; color: var(--muted); }
+  /* A row of worked examples that fade — see lib/formats.js faded(). The
+     caption is what makes the fade legible: without it the third one looks like
+     a question somebody forgot to number. */
+  .egrow { display: flex; gap: .34in; align-items: flex-start; margin: 0 0 4px; }
+  .eg { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; }
+  .eglab { font-size: 8.5pt; color: var(--slate); letter-spacing: .02em; }
+
+  /* The carried digits. Small and grey so the sum still reads as the sum, and
+     tight to the row below it so a carry sits ON the column it goes into. */
+  .vert .carry { font-size: 9pt; color: var(--slate); line-height: 1; padding: 0 0 1px 0; }
+
+  .horiz { font-size: 14pt; white-space: nowrap; }
+
+  /* Row numbers in a word list. Gray and small: they are there so a list can be
+     dictated ("number seven") and marked without counting down the page, and
+     they must not compete with the word itself. */
+  .wn { color: var(--muted); font-size: 9pt; }
+
+  /* The box an answer goes in. inline-block so it can sit mid-sentence. */
+  .abox {
+    display: inline-block; border: 1.6px solid var(--slate); border-radius: 3px;
+    vertical-align: middle; margin: 0 3px; position: relative; background: #fff;
+  }
+  /* Scoped to the box: as a bare ".alab" it pinned any generator's own .alab
+     to the bottom of the page (life-07-signs-and-forms 40, 2026-09-24). */
+  .abox > .alab {
+    position: absolute; bottom: 1px; left: 0; right: 0;
+    text-align: center; font-size: 7pt; color: var(--muted); font-style: italic;
+  }
+
+  /* Confidence marks. The rings are drawn with a border and a gradient rather
+     than an SVG so they stay inline with the question text at any font size,
+     and print black on a mono laser without relying on a background image. */
+  .conf { float: right; margin: 2px 0 0 8px; white-space: nowrap; }
+  .cring {
+    display: inline-block; width: 11px; height: 11px; margin-left: 4px;
+    border: 1.4px solid var(--slate); border-radius: 50%; vertical-align: middle;
+  }
+  .cring-full { background: var(--accent); }
+  .cring-half { background: linear-gradient(90deg, var(--accent) 50%, #fff 50%); }
+  .cring-none { background: #fff; }
+  ol.qs.hasconf li { overflow: hidden; }
+
+  .conflegend {
+    border: 1.2px solid var(--rule); border-radius: 4px;
+    padding: 3px 8px; margin: 0 0 7px;
+    font-size: 8.5pt; color: var(--muted); display: flex; gap: 14px; align-items: center;
+  }
+  .conftitle { font-weight: 700; color: var(--ink); }
+  .confitem { white-space: nowrap; }
+
+  .work {
+    border: 1.4px dashed var(--rule); border-radius: 4px;
+    margin: 6px 0 2px; position: relative;
+  }
+  /* The label S.work() puts in the box: a DIRECT child only. As ".work span"
+     it also caught every span inside any generator's own .work content and
+     stacked them all at the top-left corner (math-11-grade6 47, 2026-09-23). */
+  .work > span {
+    position: absolute; top: 3px; left: 6px;
+    font-size: 8pt; color: var(--muted); font-style: italic;
+  }
+
+  /* ------------------------------------------------------ writing lines */
+  /* Primary rule: solid top, dashed midline, heavy baseline. Capitals reach
+     the top line, lowercase bodies sit under the dashed one. */
+  .write {
+    position: relative; height: 0.375in;
+    margin: 6px 0 0 .3in;
+    border-top: 1px solid var(--rule); border-bottom: 2px solid var(--ink);
+  }
+  .write.flush { margin-left: 0; }
+  .write + .write { margin-top: .17in; }
+  .write::after {
+    content: ""; position: absolute; left: 0; right: 0; top: 50%;
+    border-top: 1px dashed var(--guide);
+  }
+
+  /* ------------------------------------------------------- question list */
+  ol.qs { margin: 0; padding: 0 0 0 .34in; }
+  ol.qs li { margin-bottom: 13px; page-break-inside: avoid; }
+  ol.qs li::marker { font-weight: bold; font-size: 11pt; color: var(--accent); }
+  .qt { display: block; }
+
+  .mcq { display: grid; gap: 3px 14px; margin: 5px 0 2px .12in; font-size: 11pt; }
+  .opt { white-space: nowrap; }
+
+  /* -------------------------------------------------------------- tables */
+  .tbl { border-collapse: collapse; margin: 8px 0; font-size: 11pt; width: 100%; }
+  .tbl th, .tbl td { border: 1.4px solid var(--ink); padding: 5px 8px; text-align: left; }
+  .tbl th { color: var(--slate); }
+  .tbl th { background: var(--tint); font-size: 10pt; letter-spacing: .02em; }
+  .tbl td.blank { height: .34in; }
+  .tbl.narrow { width: auto; }
+  .tbl.center td, .tbl.center th { text-align: center; }
+
+  /* ------------------------------------------------------------ passages */
+  .passage {
+    border: 1.5px solid var(--slate); border-radius: 4px;
+    padding: 11px 14px; margin-bottom: 12px;
+    font-size: 11.5pt; line-height: 1.55;
+  }
+  .passage h2 { font-size: 13pt; margin: 0 0 6px; color: var(--deep); }
+  .passage p { margin: 0 0 8px; }
+  .passage p:last-child { margin-bottom: 0; }
+  .passage .byline { font-size: 9.5pt; font-style: italic; color: var(--muted); margin-bottom: 8px; }
+  /* Numbered paragraphs, so a question can say "in paragraph 2". */
+  .passage p.np { position: relative; padding-left: .3in; }
+  .passage p.np::before {
+    content: attr(data-p); position: absolute; left: 0; top: 0;
+    font-size: 9pt; color: var(--accent); font-weight: bold;
+  }
+
+  .wordbank {
+    border: 1.5px dashed var(--slate); border-radius: 4px;
+    padding: 8px 12px; margin: 10px 0 12px;
+    font-size: 11.5pt; text-align: center;
+  }
+  .wordbank b { display: block; font-size: 9.5pt; letter-spacing: .06em;
+    text-transform: uppercase; margin-bottom: 4px; color: var(--accent); }
+  .wordbank span { display: inline-block; margin: 2px 11px; }
+
+  .note {
+    border-left: 4px solid var(--deep); background: var(--tintdeep);
+    padding: 7px 11px; margin: 10px 0; font-size: 10.5pt;
+  }
+  .note b { letter-spacing: .02em; }
+
+  /* -------------------------------------------------------------- footer */
+  /* THE WORDMARK SITS IN THE FOOTER THAT WAS ALREADY THERE, so it costs no
+     height at all — a sheet that fitted before fits now. Upright where the rest
+     of the line is italic, and a size down: it is a signature, not a message,
+     and it must never compete with "Score: ___ / 10". */
+  .brand { font-style: normal; font-size: 7.5pt; letter-spacing: .04em;
+    color: var(--accent); align-self: center; }
+
+  footer {
+    margin-top: 14px; padding-top: 6px; border-top: 1px solid var(--rule);
+    font-size: 9pt; font-style: italic; color: var(--muted);
+    display: flex; justify-content: space-between;
+  }
+
+  /* ---------------------------------------------------------- answer key */
+  .keybadge {
+    display: inline-block; border: 2px solid var(--deep); color: var(--deep); padding: 2px 9px;
+    font-size: 9.5pt; font-weight: bold; letter-spacing: .08em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .key .why {
+    display: block; font-size: 9pt; font-style: italic; color: var(--muted); margin-top: 1px;
+  }
+  /* Highlight rather than underline: <u> in a key marks WHAT CHANGED, and an
+     underline under a comma is invisible. */
+  .key u { text-decoration: none; background: var(--tint); padding: 0 2px; font-weight: bold; }
+  .keygrid .pbody { font-family: "Trebuchet MS", "Segoe UI", Tahoma, Verdana, sans-serif; font-size: 12pt; }
+  /* A key's pictures scale to their column: at 1fr a wide drawing pushed a
+     three-column key 92px off the paper (art-04-drawing 10, 2026-09-24). */
+  .keygrid svg { max-width: 100%; height: auto; }
+  .keylist .qt { font-weight: normal; }
+
+  /*
+   * The guide page. Four lines per question, and the ASK line is the one that
+   * gets used at the table, so it is the one with a rule beside it — a parent
+   * scanning this page in ten seconds should land on the follow-up question
+   * and nothing else.
+   */
+  .guide { padding-left: .3in; }
+  .guide li { margin-bottom: 11px; page-break-inside: avoid; }
+  .guide .gq { font-weight: bold; font-size: 11pt; margin-bottom: 3px; }
+  /* 9pt, matching the key's own why line, because the guide page is the
+     binding constraint on every open sheet: four lines per question against a
+     key's one, and at 10pt a sheet with seven questions ran onto a second
+     side. Found by measuring, not chosen. (No backticks in here — this CSS
+     lives inside a template literal and one would close it.) */
+  .guide .glook, .guide .gthin, .guide .gstrong {
+    font-size: 9pt; line-height: 1.3; margin-top: 1px;
+  }
+  .guide .gthin { color: var(--muted); }
+  .guide .gstrong { color: var(--muted); font-style: italic; }
+  .guide .gask {
+    font-size: 9.5pt; line-height: 1.3; margin-top: 3px;
+    border-left: 3px solid var(--slate); padding-left: 7px;
+  }
+  .key .qs li { margin-bottom: 9px; }
+
+  /*
+   * INLINE-BLOCK, NOT BLOCK, AND THIS WAS WRONG FOR A LONG TIME. A block-level
+   * svg ignores text-align: center on its parent and sits flush left — so 117
+   * sheets across 35 packs said "centre this diagram" and got a left-aligned
+   * one. Twenty-five of them were origami and paper-plane fold sequences, where
+   * the whole page is diagrams.
+   *
+   * Nobody spotted it because a left-flush diagram looks deliberate; it only
+   * reads as wrong next to a centered one, and no sheet has both.
+   *
+   * inline-block makes text-align do what every one of those authors meant,
+   * and leaves a diagram in a left-aligned container exactly where it was.
+   * vertical-align: top kills the baseline gap that inline elements otherwise
+   * leave underneath them, which would have pushed long pages over.
+   */
+  svg { display: inline-block; vertical-align: top; }
+  svg.inline { vertical-align: middle; }
+
+  .two { display: flex; gap: .14in; align-items: flex-start; margin: .05in 0; }
+  .two figure { margin: 0; flex: 1; }
+  .two svg { width: 100%; height: auto; }
+  .two figcaption { font-size: 10.3pt; line-height: 1.32; margin-top: .02in; }
+  .two .pic { flex: 0 0 3.2in; }
+  .two .side { flex: 1; }
+  .two .side p { font-size: 10.9pt; line-height: 1.38; margin: .04in 0; }
+  h3.h { font-size: 12.5pt; margin: .11in 0 .02in; border-top: 1.5px solid #16130F; padding-top: .05in; }
+  .note { font-size: 10.9pt; line-height: 1.38; margin: .04in 0; }
+  .tabs { display: flex; gap: .16in; margin: .05in 0; }
+  .tw { flex: 1; }
+  .tw > b { font-size: 11.3pt; }
+  table.tt { width: 100%; border-collapse: collapse; margin-top: .03in; }
+  table.tt th { font-size: 10.1pt; text-align: left; border-bottom: 1.5px solid #16130F; padding: .02in .04in; }
+  table.tt td { border-bottom: 1px solid var(--rule); height: 0.62in; font-size: 10.8pt; padding: .02in .04in; }
+  table.tt td.ans { border-left: 1px solid var(--rule); }
+  .box { border: 1.5px solid var(--slate); border-radius: 4px; padding: .08in .1in; margin: .07in 0; }
+  .box b { font-size: 12.5pt; }
+  .box p { font-size: 10.8pt; line-height: 1.4; margin: .03in 0 0; }
+  ol.steps { padding-left: .26in; margin: .04in 0; }
+  ol.steps li { font-size: 11pt; line-height: 1.36; margin-bottom: .32in; }
+  .q { font-size: 11pt; line-height: 1.4; margin-top: .07in; }
+
+</style>
+</head>
+<body>
+
+<div class="page ">
+  <header>
+    
+    <h1>When Does the Lamp Light?</h1>
+    <p class="sub">A Switch That Flips Another Switch</p>
+  </header>
+  <div class="nameline">
+    <span>Name</span>
+    <span class="short">Date</span>
+  </div>
+  <div class="directions">
+    <b>DIRECTIONS:</b> Trace each ring with a finger. Can the current get all the way round? Write lit or dark.
+  </div>
+
+  <div class="two">
+    <figure><svg class="" viewBox="0 0 240 128" width="240" height="128" role="img" aria-label="two switches one after the other in a single ring" xmlns="http://www.w3.org/2000/svg"><line x1="16" y1="52" x2="16" y2="76" stroke="#16130F" stroke-width="2.4" stroke-linecap="round"/><line x1="23" y1="58" x2="23" y2="70" stroke="#16130F" stroke-width="1.2" stroke-linecap="round"/><text x="19" y="92" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="7.5" font-weight="normal" text-anchor="middle" fill="#6B635A">cell</text><circle cx="210" cy="64" r="12" fill="none" stroke="#16130F" stroke-width="1.6"/><line x1="203" y1="57" x2="217" y2="71" stroke="#16130F" stroke-width="1" stroke-linecap="round"/><line x1="217" y1="57" x2="203" y2="71" stroke="#16130F" stroke-width="1" stroke-linecap="round"/><line x1="16" y1="40" x2="16" y2="52" stroke="#16130F" stroke-width="1.4" stroke-linecap="round"/><line x1="16" y1="40" x2="60" y2="40" stroke="#16130F" stroke-width="1.4" stroke-linecap="round"/><circle cx="60" cy="40" r="2.4" fill="#16130F" stroke="#16130F" stroke-width="1"/><circle cx="86" cy="40" r="2.4" fill="none" stroke="#16130F" stroke-width="1"/><line x1="60" y1="40" x2="86" y2="40" stroke="#16130F" stroke-width="2" stroke-linecap="round"/><text x="73" y="20" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="9" font-weight="700" text-anchor="middle" fill="#16130F">A</text><line x1="86" y1="40" x2="122" y2="40" stroke="#16130F" stroke-width="1.4" stroke-linecap="round"/><circle cx="122" cy="40" r="2.4" fill="#16130F" stroke="#16130F" stroke-width="1"/><circle cx="148" cy="40" r="2.4" fill="none" stroke="#16130F" stroke-width="1"/><line x1="122" y1="40" x2="148" y2="40" stroke="#16130F" stroke-width="2" stroke-linecap="round"/><text x="135" y="20" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="9" font-weight="700" text-anchor="middle" fill="#16130F">B</text><line x1="148" y1="40" x2="210" y2="40" stroke="#16130F" stroke-width="1.4" stroke-linecap="round"/><line x1="210" y1="40" x2="210" y2="52" stroke="#16130F" stroke-width="1.4" stroke-linecap="round"/><line x1="210" y1="76" x2="210" y2="100" stroke="#16130F" stroke-width="1.4" stroke-linecap="round"/><line x1="210" y1="100" x2="16" y2="100" stroke="#16130F" stroke-width="1.4" stroke-linecap="round"/><line x1="16" y1="100" x2="16" y2="76" stroke="#16130F" stroke-width="1.4" stroke-linecap="round"/><text x="120" y="118" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="8.4" font-weight="normal" text-anchor="middle" fill="#16130F">one road, and both gates are on it</text></svg><figcaption><b>One after the other</b></figcaption></figure>
+    <figure><svg class="" viewBox="0 0 240 128" width="240" height="128" role="img" aria-label="two switches side by side on separate roads" xmlns="http://www.w3.org/2000/svg"><line x1="16" y1="52" x2="16" y2="76" stroke="#16130F" stroke-width="2.4" stroke-linecap="round"/><line x1="23" y1="58" x2="23" y2="70" stroke="#16130F" stroke-width="1.2" stroke-linecap="round"/><text x="19" y="92" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="7.5" font-weight="normal" text-anchor="middle" fill="#6B635A">cell</text><circle cx="210" cy="64" r="12" fill="none" stroke="#16130F" stroke-width="1.6"/><line x1="203" y1="57" x2="217" y2="71" stroke="#16130F" stroke-width="1" stroke-linecap="round"/><line x1="217" y1="57" x2="203" y2="71" stroke="#16130F" stroke-width="1" stroke-linecap="round"/><line x1="16" y1="40" x2="16" y2="52" stroke="#16130F" stroke-width="1.4" stroke-linecap="round"/><line x1="16" y1="40" x2="60" y2="40" stroke="#16130F" stroke-width="1.4" stroke-linecap="round"/><circle cx="60" cy="40" r="2.4" fill="#16130F" stroke="#16130F" stroke-width="1"/><circle cx="86" cy="40" r="2.4" fill="none" stroke="#16130F" stroke-width="1"/><line x1="60" y1="40" x2="86" y2="40" stroke="#16130F" stroke-width="2" stroke-linecap="round"/><text x="73" y="20" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="9" font-weight="700" text-anchor="middle" fill="#16130F">A</text><line x1="86" y1="40" x2="172" y2="40" stroke="#16130F" stroke-width="1.4" stroke-linecap="round"/><line x1="16" y1="40" x2="16" y2="22" stroke="#16130F" stroke-width="1.4" stroke-linecap="round"/><line x1="16" y1="22" x2="60" y2="22" stroke="#16130F" stroke-width="1.4" stroke-linecap="round"/><circle cx="60" cy="22" r="2.4" fill="#16130F" stroke="#16130F" stroke-width="1"/><circle cx="86" cy="22" r="2.4" fill="none" stroke="#16130F" stroke-width="1"/><line x1="60" y1="22" x2="84" y2="9" stroke="#16130F" stroke-width="2" stroke-linecap="round"/><text x="73" y="4" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="9" font-weight="700" text-anchor="middle" fill="#16130F">B</text><line x1="86" y1="22" x2="172" y2="22" stroke="#16130F" stroke-width="1.4" stroke-linecap="round"/><line x1="172" y1="22" x2="172" y2="40" stroke="#16130F" stroke-width="1.4" stroke-linecap="round"/><line x1="172" y1="40" x2="210" y2="40" stroke="#16130F" stroke-width="1.4" stroke-linecap="round"/><line x1="210" y1="40" x2="210" y2="52" stroke="#16130F" stroke-width="1.4" stroke-linecap="round"/><line x1="210" y1="76" x2="210" y2="100" stroke="#16130F" stroke-width="1.4" stroke-linecap="round"/><line x1="210" y1="100" x2="16" y2="100" stroke="#16130F" stroke-width="1.4" stroke-linecap="round"/><line x1="16" y1="100" x2="16" y2="76" stroke="#16130F" stroke-width="1.4" stroke-linecap="round"/><text x="120" y="118" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="8.4" font-weight="normal" text-anchor="middle" fill="#16130F">two roads — the current only needs one</text></svg><figcaption><b>Side by side</b></figcaption></figure>
+  </div>
+  <h3 class="h">Fill these in by tracing</h3>
+  <div class="tabs">
+    <div class="tw"><b>One after the other</b><table class="tt"><tr><th>A</th><th>B</th><th>lamp</th></tr>
+<tr><td>off</td><td>off</td><td class="ans"></td></tr>
+<tr><td>off</td><td>ON</td><td class="ans"></td></tr>
+<tr><td>ON</td><td>off</td><td class="ans"></td></tr>
+<tr><td>ON</td><td>ON</td><td class="ans"></td></tr>
+</table></div>
+    <div class="tw"><b>Side by side</b><table class="tt"><tr><th>A</th><th>B</th><th>lamp</th></tr>
+<tr><td>off</td><td>off</td><td class="ans"></td></tr>
+<tr><td>off</td><td>ON</td><td class="ans"></td></tr>
+<tr><td>ON</td><td>off</td><td class="ans"></td></tr>
+<tr><td>ON</td><td>ON</td><td class="ans"></td></tr>
+</table></div>
+    <div class="tw"><b>A single flipper</b><table class="tt"><tr><th>A</th><th>lamp</th></tr>
+<tr><td>off</td><td class="ans"></td></tr>
+<tr><td>ON</td><td class="ans"></td></tr>
+</table></div>
+  </div>
+  <div class="box"><b>The names.</b><p>You just built <b>AND</b>, <b>OR</b> and <b>NOT</b>. They are called <b>gates</b>, because each one decides whether to let something through.</p></div>
+
+  <footer>
+    <span>4 rows, no fifth</span>
+    <span class="brand">Kitchen Table</span>
+    <span>When Does the Lamp Light?</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>The One on Your Stairs</h1>
+    <p class="sub">A Switch That Flips Another Switch</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Fill in the stairs-light table, then wire up the machines below.
+  </div>
+
+  <div class="two">
+    <div class="pic"><svg class="" viewBox="0 0 300 150" width="300" height="150" role="img" aria-label="a stairway light with a switch at the bottom and a switch at the top" xmlns="http://www.w3.org/2000/svg"><line x1="30" y1="128" x2="52" y2="128" stroke="#16130F" stroke-width="1.5" stroke-linecap="round"/><line x1="52" y1="128" x2="52" y2="114" stroke="#16130F" stroke-width="1.5" stroke-linecap="round"/><line x1="52" y1="114" x2="74" y2="114" stroke="#16130F" stroke-width="1.5" stroke-linecap="round"/><line x1="74" y1="114" x2="74" y2="100" stroke="#16130F" stroke-width="1.5" stroke-linecap="round"/><line x1="74" y1="100" x2="96" y2="100" stroke="#16130F" stroke-width="1.5" stroke-linecap="round"/><line x1="96" y1="100" x2="96" y2="86" stroke="#16130F" stroke-width="1.5" stroke-linecap="round"/><line x1="96" y1="86" x2="118" y2="86" stroke="#16130F" stroke-width="1.5" stroke-linecap="round"/><line x1="118" y1="86" x2="118" y2="72" stroke="#16130F" stroke-width="1.5" stroke-linecap="round"/><line x1="118" y1="72" x2="140" y2="72" stroke="#16130F" stroke-width="1.5" stroke-linecap="round"/><line x1="140" y1="72" x2="140" y2="58" stroke="#16130F" stroke-width="1.5" stroke-linecap="round"/><line x1="30" y1="128" x2="30" y2="140" stroke="#16130F" stroke-width="1.5" stroke-linecap="round"/><rect x="16" y="92" width="13" height="20" rx="0" fill="none" stroke="#16130F" stroke-width="1.4"/><line x1="19" y1="100" x2="26" y2="100" stroke="#16130F" stroke-width="1.6" stroke-linecap="round"/><text x="22" y="88" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="9" font-weight="700" text-anchor="middle" fill="#16130F">A</text><rect x="146" y="30" width="13" height="20" rx="0" fill="none" stroke="#16130F" stroke-width="1.4"/><line x1="149" y1="42" x2="156" y2="42" stroke="#16130F" stroke-width="1.6" stroke-linecap="round"/><text x="152" y="26" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="9" font-weight="700" text-anchor="middle" fill="#16130F">B</text><line x1="214" y1="12" x2="214" y2="40" stroke="#16130F" stroke-width="1.3" stroke-linecap="round"/><circle cx="214" cy="52" r="13" fill="none" stroke="#16130F" stroke-width="1.7"/><line x1="231" y1="52" x2="237" y2="52" stroke="#16130F" stroke-width="1" stroke-linecap="round"/><line x1="224.6" y1="65.29" x2="228.34" y2="69.98" stroke="#16130F" stroke-width="1" stroke-linecap="round"/><line x1="210.22" y1="68.57" x2="208.88" y2="74.42" stroke="#16130F" stroke-width="1" stroke-linecap="round"/><line x1="198.68" y1="59.38" x2="193.28" y2="61.98" stroke="#16130F" stroke-width="1" stroke-linecap="round"/><line x1="198.68" y1="44.62" x2="193.28" y2="42.02" stroke="#16130F" stroke-width="1" stroke-linecap="round"/><line x1="210.22" y1="35.43" x2="208.88" y2="29.58" stroke="#16130F" stroke-width="1" stroke-linecap="round"/><line x1="224.6" y1="38.71" x2="228.34" y2="34.02" stroke="#16130F" stroke-width="1" stroke-linecap="round"/><text x="214" y="88" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="8.5" font-weight="normal" text-anchor="middle" fill="#16130F">one lamp</text><text x="214" y="104" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="8.5" font-weight="normal" text-anchor="middle" fill="#16130F">two switches</text><text x="214" y="124" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="9" font-weight="700" text-anchor="middle" fill="#16130F">either one always works</text></svg></div>
+    <div class="side">
+      <p>A stairs light: a switch at the bottom, one at the top. Touch either and the light changes. It is not AND and not OR.</p>
+      <table class="tt"><tr><th>A</th><th>B</th><th>lamp</th></tr>
+<tr><td>off</td><td>off</td><td class="ans"></td></tr>
+<tr><td>off</td><td>ON</td><td class="ans"></td></tr>
+<tr><td>ON</td><td>off</td><td class="ans"></td></tr>
+<tr><td>ON</td><td>ON</td><td class="ans"></td></tr>
+</table>
+    </div>
+  </div>
+  <div class="box"><b>XOR</b><p>Lit when the two switches <b>disagree</b>. Next sheet, it helps a machine add.</p></div>
+  <h3 class="h">Wire these up</h3>
+  <p class="note">Which gate, and what goes into it?</p>
+  <ol class="steps">
+    <li>A microwave that will only run when the door is shut <u>&nbsp;&nbsp;&nbsp;&nbsp;</u> you have pressed start.</li>
+    <li>A car alarm that goes off if the door is opened <u>&nbsp;&nbsp;&nbsp;&nbsp;</u> a window is broken.</li>
+    <li>A fridge light that comes on when the door is <u>&nbsp;&nbsp;&nbsp;&nbsp;</u> shut.</li>
+    <li>The light on your stairs, with a switch at the bottom and a switch at the top.</li>
+    <li>A garden light that comes on when it is dark and something is moving — but not in the daytime, however much is moving.</li>
+    <li>A door that unlocks if you have the card <i>or</i> you know the code, but not if the building is on fire.</li>
+  </ol>
+  <p class="q"><b>The big one.</b> Are four gates enough to build <i>any</i> decision? Argue it out.</p>
+
+  <footer>
+    <span>the gate on your wall</span>
+    <span class="brand">Kitchen Table</span>
+    <span>The One on Your Stairs</span>
+  </footer>
+</div>
+
+</body>
+</html>

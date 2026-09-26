@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="sheet-kind" content="worksheet">
+<title>Who Actually Does It?</title>
+<style>
+  @page { size: letter portrait; margin: 0.4in 0.45in; }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  :root {
+    --ink:    #16130F;
+    --muted:  #6B635A;
+    --rule:   #CFC3B2;
+    --guide:  #BCAE9C;
+    --accent: #C0511D;
+    --tint:   #F7EDE4;
+    --slate:  #2E5A78;
+    --tintslate: #E9EFF4;
+    --deep:   #2C4A45;
+    --tintdeep: #ECF1EF;
+  }
+
+  body {
+    font-family: Quicksand, 'URW Gothic', 'Century Gothic', sans-serif;
+    color: #000; background: #fff;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+
+  /* ORDER MATTERS. This generic rule must come BEFORE the @media screen block:
+   * both selectors have the same specificity, so whichever is declared last
+   * wins. With it after, it overrode the screen width and the preview stretched
+   * to the viewport — rows scaled up and pages measured 16in tall. Print was
+   * always fine (@media screen doesn't apply), but the on-screen proof lied. */
+  .page { width: 100%; }
+  .page + .page { page-break-before: always; }
+
+  @media screen {
+    body { padding: 0.4in; background: #ddd; }
+    .page {
+      background: #fff; padding: 0.4in 0.45in;
+      width: 8.5in; min-height: 11in;
+      margin: 0 auto 22px; box-shadow: 0 2px 10px rgba(0,0,0,.3);
+    }
+  }
+
+  header {
+    display: flex; align-items: center; gap: 16px;
+    border-bottom: 3px solid var(--slate); padding-bottom: 7px; margin-bottom: 2px;
+  }
+  .bigletter { font-size: 38pt; font-weight: 700; line-height: 1; letter-spacing: .02em; }
+  .htext { flex: 1; }
+  h1 { font-size: 14pt; font-weight: 700; margin: 0 0 2px; }
+  .sub { font-size: 10pt; color: var(--muted); margin: 0; }
+  .nameline {
+    font-size: 9.5pt; color: var(--muted);
+    border-bottom: 1px solid var(--ink); width: 2in;
+    padding-bottom: 1px; align-self: flex-end;
+  }
+
+  .label { font-size: 11.5pt; font-weight: 700; margin: 9px 0 1px; }
+  .label span { font-weight: 400; font-size: 10pt; color: var(--muted); }
+
+  .row { display: block; width: 100%; height: auto; margin-bottom: .06in; }
+  /* Rows that follow the header directly would otherwise jam against its rule. */
+  header + .row { margin-top: .12in; }
+
+  .words {
+    margin-top: 10px; padding-top: 7px; border-top: 1px solid var(--rule);
+    font-size: 12.5pt;
+    display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap;
+  }
+  .words b { font-size: 14pt; }
+  .words em { font-style: normal; color: var(--muted); }
+
+  /* The wordmark rides in the footer line that was already there — see the note
+     in lib/sheet.js. No height, upright, a size down, and never louder than the
+     two slots it sits between. */
+  .brand { font-style: normal; font-size: 7pt; letter-spacing: .04em;
+    color: var(--accent); align-self: center; }
+
+  footer {
+    margin-top: 7px; font-size: 8.5pt; color: var(--muted);
+    display: flex; justify-content: space-between;
+  }
+
+  .chart { display: grid; grid-template-columns: repeat(6, 1fr); gap: 7px; margin-top: 14px; }
+  .cell {
+    border: 2px solid var(--slate); border-radius: 8px; height: 1.35in;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .page.key { background: #fcfcfa; }
+  .page.key header { border-bottom-style: double; border-bottom-width: 3px; }
+  .keylist { font-size: 11pt; line-height: 1.7; }
+  .keylist p { margin: .02in 0; }
+  .keynote { border: 1.5px solid var(--deep); border-radius: 8px; padding: .07in .12in;
+    margin: .1in 0 0; font-size: 10pt; line-height: 1.5; }
+
+  .note { border: 1.5px solid var(--deep); border-radius: 8px; padding: .07in .12in;
+    margin: .06in 0 .1in; font-size: 10pt; color: var(--ink); }
+  .tasknote { border: 1.5px solid var(--deep); border-radius: 8px; padding: .07in .12in;
+    margin-top: .1in; font-size: 10.5pt; }
+  svg { display: block; }
+
+  .wqs { margin-top: .06in; }
+  .wq { margin-bottom: .03in; }
+  .wqt { font-size: 10.5pt; font-weight: 700; margin-bottom: .01in; }
+
+  .pick { display: flex; align-items: center; gap: .05in; font-size: 10pt;
+    white-space: nowrap; }
+  .drow2 { border-bottom: 1px solid var(--slate); padding: .07in 0 .04in; }
+  .dwhat { font-size: 11pt; font-weight: 700; margin-bottom: .03in; }
+  .dpicks { display: flex; gap: .24in; margin-bottom: .02in; }
+  .pick i { width: .22in; height: .22in; border: 2px solid var(--slate); border-radius: 4px;
+    display: inline-block; flex: 0 0 auto; }
+
+  .twobox { display: flex; gap: .2in; margin-bottom: .1in; }
+  .tb { flex: 1; border: 2.2px solid var(--slate); border-radius: 9px; padding: .07in .1in; }
+  .tbt { font-size: 11.5pt; font-weight: 700; }
+  .tbd { font-size: 10pt; }
+
+  .sortrow { display: flex; align-items: center; gap: .1in;
+    border-bottom: 1px solid var(--rule); padding: .07in 0; }
+  .sortname { flex: 1; font-size: 10.5pt; }
+
+  .prow { border-bottom: 1px solid var(--ink); padding: .05in 0; }
+  .pwhat { font-size: 11pt; }
+  .ppick { display: flex; gap: .2in; margin: .03in 0; }
+
+  .bothlist, .pclist { border: 2px solid var(--slate); border-radius: 9px; overflow: hidden; }
+  .bhead, .pchead { display: grid; grid-template-columns: 1.9in 1fr 1fr; font-size: 9.5pt;
+    font-weight: 700; border-bottom: 1.6px solid var(--slate); }
+  .bhead span, .pchead span { padding: .05in .07in; }
+  .brow, .pcrow { display: grid; grid-template-columns: 1.9in 1fr 1fr;
+    border-bottom: 1px solid var(--rule); min-height: .58in; align-items: stretch; }
+  .brow:last-child, .pcrow:last-child { border-bottom: 0; }
+  .bwhat, .pcwho { font-size: 10.5pt; padding: .12in .07in; }
+  .bcell, .pccell { border-left: 1px solid var(--ink); }
+
+  .chainbox { border: 2.2px solid var(--slate); border-radius: 9px; padding: .07in .12in;
+    margin-top: .1in; }
+  .ctitle { font-size: 11.5pt; font-weight: 700; margin-bottom: .04in; }
+  .cchain { display: flex; align-items: center; gap: .07in; flex-wrap: wrap; }
+  .cchain span { font-size: 10pt; }
+  .cchain b { font-size: 13pt; }
+  .cblank { display: inline-block; width: 1.5in; height: .38in;
+    border: 2px solid var(--slate); border-radius: 5px; }
+  .chint { font-size: 10pt; color: var(--muted); margin-top: .04in; }
+
+  .storybox { border: 2.4px solid var(--slate); border-radius: 9px; padding: .08in .13in;
+    margin-bottom: .06in; }
+  .stitle { font-size: 12.5pt; font-weight: 700; margin-bottom: .03in; }
+  .storybox p { margin: 0 0 .04in; font-size: 11pt; line-height: 1.45; }
+
+  .dobox { border: 2.4px solid var(--slate); border-radius: 9px; padding: .08in .12in;
+    margin-bottom: .1in; }
+  .dotitle { font-size: 11.5pt; font-weight: 700; margin-bottom: .03in; }
+  .dosteps { margin: 0; padding-left: .22in; }
+  .dosteps li { font-size: 10.5pt; margin-bottom: .02in; }
+
+  .swaptable { border: 2px solid var(--slate); border-radius: 9px; overflow: hidden; }
+  .swhead { display: grid; grid-template-columns: 1.9in 1fr 1fr; font-size: 10pt;
+    font-weight: 700; border-bottom: 1.6px solid var(--slate); }
+  .swhead span { padding: .05in .07in; }
+  .swrow { display: grid; grid-template-columns: 1.9in 1fr 1fr;
+    border-bottom: 1px solid var(--rule); min-height: .5in; align-items: stretch; }
+  .swrow:last-child { border-bottom: 0; }
+  .swk { font-size: 10pt; padding: .13in .07in; }
+  .swrow i { border-left: 1px solid var(--ink); display: block; }
+
+  .note, .tasknote { font-size: 12.5pt; }
+  .wqs { margin-top: .12in; }
+  .wq { margin-bottom: .16in; }
+  .wqt { font-size: 13pt; margin-bottom: .04in; }
+  .pick { font-size: 12.5pt; gap: .08in; }
+  .pick i { width: .32in; height: .32in; }
+  .tbt { font-size: 13.5pt; }
+  .tbd { font-size: 12pt; }
+  .sortrow { padding: .15in 0; }
+  .sortname { font-size: 13.5pt; }
+  .drow2 { padding: .14in 0 .1in; }
+  .dwhat { font-size: 13.5pt; }
+  .dpicks { gap: .34in; margin: .06in 0; }
+  .pwhat { font-size: 13.5pt; }
+  .prow { padding: .12in 0; }
+  .ppick { gap: .3in; margin: .07in 0; }
+  .bhead, .pchead, .swhead { font-size: 12pt; }
+  .brow, .pcrow { min-height: .9in; }
+  .brow { min-height: 1.25in; }
+  .sortlist.roomy .sortrow { padding: .27in 0; }
+  .tb { padding: .12in .14in; }
+  .bwhat, .pcwho { font-size: 13pt; }
+  .ctitle, .dotitle { font-size: 13.5pt; }
+  .cchain span { font-size: 12.5pt; }
+  .cblank { width: 1.8in; height: .5in; }
+  .chint { font-size: 12pt; }
+  .stitle { font-size: 14.5pt; }
+  .storybox p { font-size: 13pt; }
+  .dosteps li { font-size: 12.5pt; }
+  .swrow { min-height: 1in; }
+  .swk { font-size: 12.5pt; }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <header>
+    <div class="bigletter">&#9878;</div>
+    <div class="htext">
+      <h1>Who Actually Does It?</h1>
+      <p class="sub">Tick local or national for each job.</p>
+    </div>
+    <div class="nameline">Name</div>
+  </header>
+
+  <div class="twobox">
+    <div class="tb">
+      <div class="tbt">Local &mdash; your town or city</div>
+      <div class="tbd">A small group of people, usually voted for by the people who live there. They look
+      after the things you can see from your own street.</div>
+    </div>
+    <div class="tb">
+      <div class="tbt">National &mdash; the whole country</div>
+      <div class="tbd">A much bigger group, in the capital city. They make the laws that everybody in the
+      country has to follow, wherever they live.</div>
+    </div>
+  </div>
+
+  <div class="sortlist roomy">
+    <div class="sortrow">
+      <div class="sortname">deciding the speed limit for the whole country</div>
+      <label class="pick"><i></i>local</label>
+      <label class="pick"><i></i>national</label>
+    </div>
+    <div class="sortrow">
+      <div class="sortname">printing the money</div>
+      <label class="pick"><i></i>local</label>
+      <label class="pick"><i></i>national</label>
+    </div>
+    <div class="sortrow">
+      <div class="sortname">running the libraries and the parks</div>
+      <label class="pick"><i></i>local</label>
+      <label class="pick"><i></i>national</label>
+    </div>
+    <div class="sortrow">
+      <div class="sortname">deciding how much money the whole country spends on hospitals</div>
+      <label class="pick"><i></i>local</label>
+      <label class="pick"><i></i>national</label>
+    </div>
+    <div class="sortrow">
+      <div class="sortname">emptying the bins</div>
+      <label class="pick"><i></i>local</label>
+      <label class="pick"><i></i>national</label>
+    </div>
+    <div class="sortrow">
+      <div class="sortname">making a new law about seatbelts</div>
+      <label class="pick"><i></i>local</label>
+      <label class="pick"><i></i>national</label>
+    </div>
+    <div class="sortrow">
+      <div class="sortname">putting up street lights</div>
+      <label class="pick"><i></i>local</label>
+      <label class="pick"><i></i>national</label>
+    </div>
+    <div class="sortrow">
+      <div class="sortname">fixing a pothole in your street</div>
+      <label class="pick"><i></i>local</label>
+      <label class="pick"><i></i>national</label>
+    </div>
+  </div>
+
+  <footer>
+    <span>8 to sort &middot; set 202</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Government</span>
+  </footer>
+</div>
+
+<div class="page">
+  <header>
+    <div class="bigletter">&#9993;</div>
+    <div class="htext">
+      <h1>Who Would You Tell?</h1>
+      <p class="sub">Tick who could fix it. Write what you would ask.</p>
+    </div>
+    <div class="nameline">Name</div>
+  </header>
+
+  <div class="problist">
+    <div class="prow">
+      <div class="pwhat">The swing in your local park is broken.</div>
+      <div class="ppick">
+        <label class="pick"><i></i>local</label>
+        <label class="pick"><i></i>national</label>
+      </div>
+            <svg class="row" viewBox="0 0 729.6 97.39" width="100%" role="img" aria-label="what exactly would you ask them to do?">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="38.7" x2="729.6" y2="38.7" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="72.39" x2="729.6" y2="72.39" stroke="#16130F" stroke-width="2.6"/>
+      </svg>
+    </div>
+    <div class="prow">
+      <div class="pwhat">You think the speed limit outside your school should be lower for everyone in the country.</div>
+      <div class="ppick">
+        <label class="pick"><i></i>local</label>
+        <label class="pick"><i></i>national</label>
+      </div>
+            <svg class="row" viewBox="0 0 729.6 97.39" width="100%" role="img" aria-label="what exactly would you ask them to do?">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="38.7" x2="729.6" y2="38.7" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="72.39" x2="729.6" y2="72.39" stroke="#16130F" stroke-width="2.6"/>
+      </svg>
+    </div>
+    <div class="prow">
+      <div class="pwhat">The bins have not been emptied for three weeks.</div>
+      <div class="ppick">
+        <label class="pick"><i></i>local</label>
+        <label class="pick"><i></i>national</label>
+      </div>
+            <svg class="row" viewBox="0 0 729.6 97.39" width="100%" role="img" aria-label="what exactly would you ask them to do?">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="38.7" x2="729.6" y2="38.7" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="72.39" x2="729.6" y2="72.39" stroke="#16130F" stroke-width="2.6"/>
+      </svg>
+    </div>
+    <div class="prow">
+      <div class="pwhat">You think the library should open on Sundays.</div>
+      <div class="ppick">
+        <label class="pick"><i></i>local</label>
+        <label class="pick"><i></i>national</label>
+      </div>
+            <svg class="row" viewBox="0 0 729.6 97.39" width="100%" role="img" aria-label="what exactly would you ask them to do?">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="38.7" x2="729.6" y2="38.7" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="72.39" x2="729.6" y2="72.39" stroke="#16130F" stroke-width="2.6"/>
+      </svg>
+    </div>
+  </div>
+
+  <footer>
+    <span>4 problems &middot; set 202</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Government</span>
+  </footer>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="sheet-kind" content="worksheet">
+<title>PECTOPAH — Russian</title>
+<style>
+  :root { --font: Georgia, "Times New Roman", serif; }
+
+  /* Page margins live HERE only — body padding stays 0 for print so the two
+     don't stack and eat the sheet. */
+  @page { size: letter portrait; margin: 0.45in 0.5in; }
+
+  /*
+   * THE PALETTE. The same one the shop wears (kitchen-table/BRAND.md): warm
+   * near-black ink, one accent, pine kept back for the answer key.
+   *
+   * WHY A SHEET HAS COLOR AT ALL. Every sheet was pure grayscale — #000 rules,
+   * #333 subtitles, #f0f0f0 boxes — which is what you get by never deciding.
+   * The paper is the product and it looked like a fax. A printer set to
+   * grayscale, or one that has no color to give, renders all of this as the
+   * greys it already had, so nothing below costs a parent anything they were
+   * not already spending.
+   *
+   * WHAT STAYS BLACK, ON PURPOSE:
+   *   - anything drawn to be written on (rules, name lines, answer boxes)
+   *   - anything drawn to be traced or colored in (line art, letter guides)
+   *   - the confidence rings, which have to survive a mono laser
+   * Color marks the sheet's own furniture — its rule, its numbering, its
+   * boxes — and never the part a child puts a pencil through.
+   */
+  :root {
+    --ink:    #16130F;
+    --muted:  #6B635A;
+    --rule:   #CFC3B2;
+    --guide:  #BCAE9C;
+    --accent: #C0511D;
+    --tint:   #F7EDE4;
+    --slate:  #2E5A78;
+    --tintslate: #E9EFF4;
+    --deep:   #2C4A45;
+    --tintdeep: #ECF1EF;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font);
+    color: #000; background: #fff;
+    font-size: 12pt; line-height: 1.3;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+
+  /* ORDER MATTERS. This generic rule must come BEFORE the @media screen block:
+     same specificity, so whichever is declared last wins. With it after, the
+     on-screen preview stretches to the viewport instead of 8.5in — print is
+     unaffected, but the proof you check before printing is wrong. */
+  .page { width: 100%; }
+  .page + .page { page-break-before: always; }
+
+  @media screen {
+    body { padding: 0.5in; background: #ddd; }
+    .page {
+      background: #fff; padding: 0.45in 0.5in;
+      width: 8.5in; min-height: 11in;
+      margin: 0 auto 24px; box-shadow: 0 2px 10px rgba(0,0,0,.3);
+    }
+  }
+
+  /* ------------------------------------------------------------- header */
+  header { border-bottom: 3px double var(--accent); padding-bottom: 6px; }
+  header.cont { border-bottom: 1px solid var(--rule); }
+  h1 { font-size: 16pt; margin: 0 0 1px; letter-spacing: .01em; }
+  .sub { font-size: 10pt; font-style: italic; color: var(--muted); margin: 0; }
+
+  .nameline { display: flex; gap: 26px; font-size: 10.5pt; margin: 11px 0 12px; }
+  .nameline span { flex: 1; border-bottom: 1px solid var(--ink); padding-bottom: 1px; }
+  .nameline span.short { flex: 0 0 1.9in; }
+
+  .directions {
+    font-size: 10.5pt; line-height: 1.35;
+    background: var(--tint); border-left: 4px solid var(--accent);
+    padding: 7px 10px; margin: 12px 0 14px;
+  }
+  .directions b { letter-spacing: .03em; }
+  .tip { font-style: italic; margin-top: 3px; }
+
+  /* ------------------------------------------------- problems and grids */
+  .grid { display: grid; gap: 13px 16px; margin-top: 4px; }
+  .prob { page-break-inside: avoid; display: flex; gap: 5px; align-items: flex-start; }
+  .pn { font-weight: bold; font-size: 11pt; min-width: .28in; flex: 0 0 auto; color: var(--accent); }
+  .pbody { flex: 1; min-width: 0; }
+
+  /* Digits need lining figures and even widths whatever the body font is. */
+  .num, .vert, .horiz { font-family: "Trebuchet MS", "Segoe UI", Tahoma, Verdana, sans-serif; font-variant-numeric: lining-nums tabular-nums; }
+
+  /* A stacked column algorithm.
+     Two grid columns — operator, then digits — because a floated or absolutely
+     positioned operator overlaps the digits as soon as the numbers get wide,
+     and "324" with a + sitting on the 3 is unreadable. The grid also lets the
+     rule under the last operand span BOTH columns, which is how it is written
+     by hand. The rule is heavy: it is the line you write the answer beneath. */
+  .vert {
+    display: inline-grid; grid-template-columns: auto auto;
+    font-size: 15pt; line-height: 1.3; text-align: right;
+  }
+  .vert > span { padding: 0 0 1px 0; }
+  .vert .op { text-align: left; padding-right: .16in; }
+  .vert .last { border-bottom: 2.5px solid var(--ink); padding-bottom: 3px; }
+  .vert .ans { height: .4in; }
+  /* Partial-products working, for 2-digit x 1-digit before the short method. */
+  .vert .part { font-size: 11pt; color: var(--muted); }
+  /* A row of worked examples that fade — see lib/formats.js faded(). The
+     caption is what makes the fade legible: without it the third one looks like
+     a question somebody forgot to number. */
+  .egrow { display: flex; gap: .34in; align-items: flex-start; margin: 0 0 4px; }
+  .eg { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; }
+  .eglab { font-size: 8.5pt; color: var(--slate); letter-spacing: .02em; }
+
+  /* The carried digits. Small and grey so the sum still reads as the sum, and
+     tight to the row below it so a carry sits ON the column it goes into. */
+  .vert .carry { font-size: 9pt; color: var(--slate); line-height: 1; padding: 0 0 1px 0; }
+
+  .horiz { font-size: 14pt; white-space: nowrap; }
+
+  /* Row numbers in a word list. Gray and small: they are there so a list can be
+     dictated ("number seven") and marked without counting down the page, and
+     they must not compete with the word itself. */
+  .wn { color: var(--muted); font-size: 9pt; }
+
+  /* The box an answer goes in. inline-block so it can sit mid-sentence. */
+  .abox {
+    display: inline-block; border: 1.6px solid var(--slate); border-radius: 3px;
+    vertical-align: middle; margin: 0 3px; position: relative; background: #fff;
+  }
+  /* Scoped to the box: as a bare ".alab" it pinned any generator's own .alab
+     to the bottom of the page (life-07-signs-and-forms 40, 2026-09-24). */
+  .abox > .alab {
+    position: absolute; bottom: 1px; left: 0; right: 0;
+    text-align: center; font-size: 7pt; color: var(--muted); font-style: italic;
+  }
+
+  /* Confidence marks. The rings are drawn with a border and a gradient rather
+     than an SVG so they stay inline with the question text at any font size,
+     and print black on a mono laser without relying on a background image. */
+  .conf { float: right; margin: 2px 0 0 8px; white-space: nowrap; }
+  .cring {
+    display: inline-block; width: 11px; height: 11px; margin-left: 4px;
+    border: 1.4px solid var(--slate); border-radius: 50%; vertical-align: middle;
+  }
+  .cring-full { background: var(--accent); }
+  .cring-half { background: linear-gradient(90deg, var(--accent) 50%, #fff 50%); }
+  .cring-none { background: #fff; }
+  ol.qs.hasconf li { overflow: hidden; }
+
+  .conflegend {
+    border: 1.2px solid var(--rule); border-radius: 4px;
+    padding: 3px 8px; margin: 0 0 7px;
+    font-size: 8.5pt; color: var(--muted); display: flex; gap: 14px; align-items: center;
+  }
+  .conftitle { font-weight: 700; color: var(--ink); }
+  .confitem { white-space: nowrap; }
+
+  .work {
+    border: 1.4px dashed var(--rule); border-radius: 4px;
+    margin: 6px 0 2px; position: relative;
+  }
+  /* The label S.work() puts in the box: a DIRECT child only. As ".work span"
+     it also caught every span inside any generator's own .work content and
+     stacked them all at the top-left corner (math-11-grade6 47, 2026-09-23). */
+  .work > span {
+    position: absolute; top: 3px; left: 6px;
+    font-size: 8pt; color: var(--muted); font-style: italic;
+  }
+
+  /* ------------------------------------------------------ writing lines */
+  /* Primary rule: solid top, dashed midline, heavy baseline. Capitals reach
+     the top line, lowercase bodies sit under the dashed one. */
+  .write {
+    position: relative; height: 0.375in;
+    margin: 6px 0 0 .3in;
+    border-top: 1px solid var(--rule); border-bottom: 2px solid var(--ink);
+  }
+  .write.flush { margin-left: 0; }
+  .write + .write { margin-top: .17in; }
+  .write::after {
+    content: ""; position: absolute; left: 0; right: 0; top: 50%;
+    border-top: 1px dashed var(--guide);
+  }
+
+  /* ------------------------------------------------------- question list */
+  ol.qs { margin: 0; padding: 0 0 0 .34in; }
+  ol.qs li { margin-bottom: 13px; page-break-inside: avoid; }
+  ol.qs li::marker { font-weight: bold; font-size: 11pt; color: var(--accent); }
+  .qt { display: block; }
+
+  .mcq { display: grid; gap: 3px 14px; margin: 5px 0 2px .12in; font-size: 11pt; }
+  .opt { white-space: nowrap; }
+
+  /* -------------------------------------------------------------- tables */
+  .tbl { border-collapse: collapse; margin: 8px 0; font-size: 11pt; width: 100%; }
+  .tbl th, .tbl td { border: 1.4px solid var(--ink); padding: 5px 8px; text-align: left; }
+  .tbl th { color: var(--slate); }
+  .tbl th { background: var(--tint); font-size: 10pt; letter-spacing: .02em; }
+  .tbl td.blank { height: .34in; }
+  .tbl.narrow { width: auto; }
+  .tbl.center td, .tbl.center th { text-align: center; }
+
+  /* ------------------------------------------------------------ passages */
+  .passage {
+    border: 1.5px solid var(--slate); border-radius: 4px;
+    padding: 11px 14px; margin-bottom: 12px;
+    font-size: 11.5pt; line-height: 1.55;
+  }
+  .passage h2 { font-size: 13pt; margin: 0 0 6px; color: var(--deep); }
+  .passage p { margin: 0 0 8px; }
+  .passage p:last-child { margin-bottom: 0; }
+  .passage .byline { font-size: 9.5pt; font-style: italic; color: var(--muted); margin-bottom: 8px; }
+  /* Numbered paragraphs, so a question can say "in paragraph 2". */
+  .passage p.np { position: relative; padding-left: .3in; }
+  .passage p.np::before {
+    content: attr(data-p); position: absolute; left: 0; top: 0;
+    font-size: 9pt; color: var(--accent); font-weight: bold;
+  }
+
+  .wordbank {
+    border: 1.5px dashed var(--slate); border-radius: 4px;
+    padding: 8px 12px; margin: 10px 0 12px;
+    font-size: 11.5pt; text-align: center;
+  }
+  .wordbank b { display: block; font-size: 9.5pt; letter-spacing: .06em;
+    text-transform: uppercase; margin-bottom: 4px; color: var(--accent); }
+  .wordbank span { display: inline-block; margin: 2px 11px; }
+
+  .note {
+    border-left: 4px solid var(--deep); background: var(--tintdeep);
+    padding: 7px 11px; margin: 10px 0; font-size: 10.5pt;
+  }
+  .note b { letter-spacing: .02em; }
+
+  /* -------------------------------------------------------------- footer */
+  /* THE WORDMARK SITS IN THE FOOTER THAT WAS ALREADY THERE, so it costs no
+     height at all — a sheet that fitted before fits now. Upright where the rest
+     of the line is italic, and a size down: it is a signature, not a message,
+     and it must never compete with "Score: ___ / 10". */
+  .brand { font-style: normal; font-size: 7.5pt; letter-spacing: .04em;
+    color: var(--accent); align-self: center; }
+
+  footer {
+    margin-top: 14px; padding-top: 6px; border-top: 1px solid var(--rule);
+    font-size: 9pt; font-style: italic; color: var(--muted);
+    display: flex; justify-content: space-between;
+  }
+
+  /* ---------------------------------------------------------- answer key */
+  .keybadge {
+    display: inline-block; border: 2px solid var(--deep); color: var(--deep); padding: 2px 9px;
+    font-size: 9.5pt; font-weight: bold; letter-spacing: .08em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .key .why {
+    display: block; font-size: 9pt; font-style: italic; color: var(--muted); margin-top: 1px;
+  }
+  /* Highlight rather than underline: <u> in a key marks WHAT CHANGED, and an
+     underline under a comma is invisible. */
+  .key u { text-decoration: none; background: var(--tint); padding: 0 2px; font-weight: bold; }
+  .keygrid .pbody { font-family: "Trebuchet MS", "Segoe UI", Tahoma, Verdana, sans-serif; font-size: 12pt; }
+  /* A key's pictures scale to their column: at 1fr a wide drawing pushed a
+     three-column key 92px off the paper (art-04-drawing 10, 2026-09-24). */
+  .keygrid svg { max-width: 100%; height: auto; }
+  .keylist .qt { font-weight: normal; }
+
+  /*
+   * The guide page. Four lines per question, and the ASK line is the one that
+   * gets used at the table, so it is the one with a rule beside it — a parent
+   * scanning this page in ten seconds should land on the follow-up question
+   * and nothing else.
+   */
+  .guide { padding-left: .3in; }
+  .guide li { margin-bottom: 11px; page-break-inside: avoid; }
+  .guide .gq { font-weight: bold; font-size: 11pt; margin-bottom: 3px; }
+  /* 9pt, matching the key's own why line, because the guide page is the
+     binding constraint on every open sheet: four lines per question against a
+     key's one, and at 10pt a sheet with seven questions ran onto a second
+     side. Found by measuring, not chosen. (No backticks in here — this CSS
+     lives inside a template literal and one would close it.) */
+  .guide .glook, .guide .gthin, .guide .gstrong {
+    font-size: 9pt; line-height: 1.3; margin-top: 1px;
+  }
+  .guide .gthin { color: var(--muted); }
+  .guide .gstrong { color: var(--muted); font-style: italic; }
+  .guide .gask {
+    font-size: 9.5pt; line-height: 1.3; margin-top: 3px;
+    border-left: 3px solid var(--slate); padding-left: 7px;
+  }
+  .key .qs li { margin-bottom: 9px; }
+
+  /*
+   * INLINE-BLOCK, NOT BLOCK, AND THIS WAS WRONG FOR A LONG TIME. A block-level
+   * svg ignores text-align: center on its parent and sits flush left — so 117
+   * sheets across 35 packs said "centre this diagram" and got a left-aligned
+   * one. Twenty-five of them were origami and paper-plane fold sequences, where
+   * the whole page is diagrams.
+   *
+   * Nobody spotted it because a left-flush diagram looks deliberate; it only
+   * reads as wrong next to a centered one, and no sheet has both.
+   *
+   * inline-block makes text-align do what every one of those authors meant,
+   * and leaves a diagram in a left-aligned container exactly where it was.
+   * vertical-align: top kills the baseline gap that inline elements otherwise
+   * leave underneath them, which would have pushed long pages over.
+   */
+  svg { display: inline-block; vertical-align: top; }
+  svg.inline { vertical-align: middle; }
+
+  .trick { border: 2.6px solid var(--ink); border-radius: 11px; padding: 12px 14px; margin: 13px 0;
+    text-align: center; }
+  .trick .ru { margin-bottom: 6px; }
+  .trick .eyes { font-size: 19pt; letter-spacing: .16em; font-family: Helvetica, Arial, sans-serif; }
+  .trick .lab { font-size: 11pt; color: var(--muted); }
+  .trick .real { font-size: 14pt; margin-top: 5px; }
+  .sortgrid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 7px; margin: 9px 0; }
+  .sortgrid > div { border: 2px solid var(--rule); border-radius: 8px; padding: 5px 2px; text-align: center; }
+  .sortgrid .rm { display: block; font-size: 10pt; color: var(--muted); }
+  .bins { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 11px 0; }
+  .bins .bin { border: 2.4px solid var(--ink); border-radius: 10px; padding: 9px 10px; }
+  .bins .bin h4 { margin: 0 0 2px; font-size: 11pt; }
+  .bins .bin .hint { display: block; font-size: 9pt; color: var(--muted); margin-bottom: 6px; }
+  .bins .bin .slot { border-bottom: 1.6px solid var(--rule); height: .3in; margin-top: 8px; }
+  .pairrow { display: grid; grid-template-columns: 1.1in 22px 1.1in 1fr; gap: 10px; align-items: center;
+    border: 2.2px solid var(--ink); border-radius: 9px; padding: 9px 12px; margin: 9px 0; }
+  .pairrow .arrow { text-align: center; font-size: 15pt; color: var(--muted); }
+  .pairrow .cap { font-size: 9.5pt; color: var(--muted); text-align: center; display: block; }
+  .tenrow { border: 2.2px solid var(--ink); border-radius: 9px; padding: 14px 12px; margin: 12px 0;
+    display: grid; grid-template-columns: 2.9in 1fr 1fr; gap: 12px; align-items: center; }
+  .tenrow .bx { border-bottom: 1.7px solid var(--ink); height: .48in; }
+  .tenrow .lab { font-size: 10.5pt; color: var(--muted); }
+  .tenrow.head { border: none; padding-bottom: 0; font-size: 9.5pt; color: var(--muted); }
+
+</style>
+</head>
+<body>
+
+<div class="page ">
+  <header>
+    
+    <h1>PECTOPAH</h1>
+    <p class="sub">Russian &middot; Page 1 of 3</p>
+  </header>
+  <div class="nameline">
+    <span>Name</span>
+    <span class="short">Date</span>
+  </div>
+  <div class="directions">
+    <b>DIRECTIONS:</b> Read this Russian word out loud before you read anything else.
+  </div>
+
+
+  <div class="trick" style="border-width:3.4px">
+    <div class="ru"><span style="display:inline-flex;align-items:flex-end;vertical-align:-0.14em" aria-label="РЕСТОРАН"><svg viewBox="0 0 100 100" width="88" height="88" role="img" aria-label="Р"><path d="M9.7 16.6L28.6 16.6Q42.6 16.6 49 22.1Q55.4 27.6 55.4 37.6L55.4 37.6Q55.4 43.5 52.8 48.6Q50.1 53.8 43.9 57Q37.6 60.2 26.9 60.2L26.9 60.2L18.7 60.2L18.7 88L9.7 88L9.7 16.6M27.8 24.3L27.8 24.3L18.7 24.3L18.7 52.5L25.9 52.5Q36.1 52.5 41.1 49.2Q46.1 45.9 46.1 38L46.1 38Q46.1 31.1 41.7 27.7Q37.3 24.3 27.8 24.3" fill="#16130F"/></svg><svg viewBox="0 0 100 100" width="88" height="88" role="img" aria-label="Е"><path d="M49.6 80.1L49.6 88L9.7 88L9.7 16.6L49.6 16.6L49.6 24.5L18.7 24.5L18.7 46.8L47.8 46.8L47.8 54.6L18.7 54.6L18.7 80.1L49.6 80.1" fill="#16130F"/></svg><svg viewBox="0 0 100 100" width="88" height="88" role="img" aria-label="С"><path d="M40.3 23.5L40.3 23.5Q28.8 23.5 22.2 31.2Q15.6 38.9 15.6 52.3L15.6 52.3Q15.6 65.6 21.8 73.3Q27.9 81.1 40.2 81.1L40.2 81.1Q44.9 81.1 49.1 80.3Q53.3 79.5 57.3 78.3L57.3 78.3L57.3 86.1Q53.3 87.6 49.1 88.3Q44.8 89 38.9 89L38.9 89Q28 89 20.7 84.5Q13.4 80 9.8 71.7Q6.1 63.4 6.1 52.2L6.1 52.2Q6.1 41.4 10.1 33.1Q14 24.9 21.7 20.3Q29.4 15.6 40.4 15.6L40.4 15.6Q51.7 15.6 60.1 19.8L60.1 19.8L56.5 27.4Q53.2 25.9 49.2 24.7Q45.1 23.5 40.3 23.5" fill="#16130F"/></svg><svg viewBox="0 0 100 100" width="88" height="88" role="img" aria-label="Т"><path d="M32.3 24.5L32.3 88L23.3 88L23.3 24.5L1 24.5L1 16.6L54.5 16.6L54.5 24.5L32.3 24.5" fill="#16130F"/></svg><svg viewBox="0 0 100 100" width="88" height="88" role="img" aria-label="О"><path d="M72 52.2L72 52.2Q72 63.3 68.3 71.5Q64.5 79.8 57.2 84.4Q49.9 89 39.1 89L39.1 89Q28 89 20.7 84.4Q13.3 79.8 9.7 71.5Q6.1 63.2 6.1 52.1L6.1 52.1Q6.1 41.1 9.7 32.9Q13.3 24.7 20.7 20.1Q28 15.5 39.2 15.5L39.2 15.5Q49.9 15.5 57.2 20Q64.5 24.6 68.3 32.8Q72 41.1 72 52.2M15.6 52.2L15.6 52.2Q15.6 65.7 21.3 73.5Q27 81.2 39.1 81.2L39.1 81.2Q51.3 81.2 56.9 73.5Q62.5 65.7 62.5 52.2L62.5 52.2Q62.5 38.7 56.9 31Q51.3 23.4 39.2 23.4L39.2 23.4Q27.1 23.4 21.4 31Q15.6 38.7 15.6 52.2" fill="#16130F"/></svg><svg viewBox="0 0 100 100" width="88" height="88" role="img" aria-label="Р"><path d="M9.7 16.6L28.6 16.6Q42.6 16.6 49 22.1Q55.4 27.6 55.4 37.6L55.4 37.6Q55.4 43.5 52.8 48.6Q50.1 53.8 43.9 57Q37.6 60.2 26.9 60.2L26.9 60.2L18.7 60.2L18.7 88L9.7 88L9.7 16.6M27.8 24.3L27.8 24.3L18.7 24.3L18.7 52.5L25.9 52.5Q36.1 52.5 41.1 49.2Q46.1 45.9 46.1 38L46.1 38Q46.1 31.1 41.7 27.7Q37.3 24.3 27.8 24.3" fill="#16130F"/></svg><svg viewBox="0 0 100 100" width="88" height="88" role="img" aria-label="А"><path d="M63.8 88L54.5 88L45.9 65.9L17.6 65.9L9.1 88L0 88L27.9 16.3L36 16.3L63.8 88M43.2 57.9L35.2 36.3Q34.9 35.5 34.2 33.4Q33.5 31.3 32.9 29Q32.2 26.8 31.8 25.6L31.8 25.6Q31.1 28.7 30.2 31.6Q29.3 34.6 28.7 36.3L28.7 36.3L20.6 57.9L43.2 57.9" fill="#16130F"/></svg><svg viewBox="0 0 100 100" width="88" height="88" role="img" aria-label="Н"><path d="M64.3 16.6L64.3 88L55.3 88L55.3 54.7L18.7 54.7L18.7 88L9.7 88L9.7 16.6L18.7 16.6L18.7 46.8L55.3 46.8L55.3 16.6L64.3 16.6" fill="#16130F"/></svg></span></div>
+    <div class="lab">what your eyes say</div>
+    <div class="eyes">PECTOPAH</div>
+  </div>
+
+  <div class="note"><b>You read &ldquo;pectopah&rdquo;.</b> Every letter looks like one you know, so your eyes answered without asking.</div>
+
+  <div class="note" style="margin-top:10px"><b>It says <i>restaurant</i></b>, roughly <i>rye&#8209;sta&#8209;RAN</i>. Five of the eight letters mean something else.</div>
+
+  <div class="note" style="margin-top:10px"><b>Try it on a grown-up.</b></div>
+
+  <div class="trick">
+    <div class="ru"><span style="display:inline-flex;align-items:flex-end;vertical-align:-0.14em" aria-label="КОСМОНАВТ"><svg viewBox="0 0 100 100" width="74" height="74" role="img" aria-label="К"><path d="M29.4 51.3L61.8 88L51 88L18.7 51.8L18.7 88L9.7 88L9.7 16.6L18.7 16.6L18.7 51.2L50.2 16.6L60.4 16.6L29.4 51.3" fill="#16130F"/></svg><svg viewBox="0 0 100 100" width="74" height="74" role="img" aria-label="О"><path d="M72 52.2L72 52.2Q72 63.3 68.3 71.5Q64.5 79.8 57.2 84.4Q49.9 89 39.1 89L39.1 89Q28 89 20.7 84.4Q13.3 79.8 9.7 71.5Q6.1 63.2 6.1 52.1L6.1 52.1Q6.1 41.1 9.7 32.9Q13.3 24.7 20.7 20.1Q28 15.5 39.2 15.5L39.2 15.5Q49.9 15.5 57.2 20Q64.5 24.6 68.3 32.8Q72 41.1 72 52.2M15.6 52.2L15.6 52.2Q15.6 65.7 21.3 73.5Q27 81.2 39.1 81.2L39.1 81.2Q51.3 81.2 56.9 73.5Q62.5 65.7 62.5 52.2L62.5 52.2Q62.5 38.7 56.9 31Q51.3 23.4 39.2 23.4L39.2 23.4Q27.1 23.4 21.4 31Q15.6 38.7 15.6 52.2" fill="#16130F"/></svg><svg viewBox="0 0 100 100" width="74" height="74" role="img" aria-label="С"><path d="M40.3 23.5L40.3 23.5Q28.8 23.5 22.2 31.2Q15.6 38.9 15.6 52.3L15.6 52.3Q15.6 65.6 21.8 73.3Q27.9 81.1 40.2 81.1L40.2 81.1Q44.9 81.1 49.1 80.3Q53.3 79.5 57.3 78.3L57.3 78.3L57.3 86.1Q53.3 87.6 49.1 88.3Q44.8 89 38.9 89L38.9 89Q28 89 20.7 84.5Q13.4 80 9.8 71.7Q6.1 63.4 6.1 52.2L6.1 52.2Q6.1 41.4 10.1 33.1Q14 24.9 21.7 20.3Q29.4 15.6 40.4 15.6L40.4 15.6Q51.7 15.6 60.1 19.8L60.1 19.8L56.5 27.4Q53.2 25.9 49.2 24.7Q45.1 23.5 40.3 23.5" fill="#16130F"/></svg><svg viewBox="0 0 100 100" width="74" height="74" role="img" aria-label="М"><path d="M48.6 88L41.2 88L17.7 25.4L17.3 25.4Q17.6 28.5 17.8 33.8Q18 39 18 44.7L18 44.7L18 88L9.7 88L9.7 16.6L23 16.6L45 75.1L45.4 75.1L67.8 16.6L81 16.6L81 88L72.1 88L72.1 44.1Q72.1 38.9 72.4 33.8Q72.6 28.7 72.8 25.5L72.8 25.5L72.4 25.5L48.6 88" fill="#16130F"/></svg><svg viewBox="0 0 100 100" width="74" height="74" role="img" aria-label="О"><path d="M72 52.2L72 52.2Q72 63.3 68.3 71.5Q64.5 79.8 57.2 84.4Q49.9 89 39.1 89L39.1 89Q28 89 20.7 84.4Q13.3 79.8 9.7 71.5Q6.1 63.2 6.1 52.1L6.1 52.1Q6.1 41.1 9.7 32.9Q13.3 24.7 20.7 20.1Q28 15.5 39.2 15.5L39.2 15.5Q49.9 15.5 57.2 20Q64.5 24.6 68.3 32.8Q72 41.1 72 52.2M15.6 52.2L15.6 52.2Q15.6 65.7 21.3 73.5Q27 81.2 39.1 81.2L39.1 81.2Q51.3 81.2 56.9 73.5Q62.5 65.7 62.5 52.2L62.5 52.2Q62.5 38.7 56.9 31Q51.3 23.4 39.2 23.4L39.2 23.4Q27.1 23.4 21.4 31Q15.6 38.7 15.6 52.2" fill="#16130F"/></svg><svg viewBox="0 0 100 100" width="74" height="74" role="img" aria-label="Н"><path d="M64.3 16.6L64.3 88L55.3 88L55.3 54.7L18.7 54.7L18.7 88L9.7 88L9.7 16.6L18.7 16.6L18.7 46.8L55.3 46.8L55.3 16.6L64.3 16.6" fill="#16130F"/></svg><svg viewBox="0 0 100 100" width="74" height="74" role="img" aria-label="А"><path d="M63.8 88L54.5 88L45.9 65.9L17.6 65.9L9.1 88L0 88L27.9 16.3L36 16.3L63.8 88M43.2 57.9L35.2 36.3Q34.9 35.5 34.2 33.4Q33.5 31.3 32.9 29Q32.2 26.8 31.8 25.6L31.8 25.6Q31.1 28.7 30.2 31.6Q29.3 34.6 28.7 36.3L28.7 36.3L20.6 57.9L43.2 57.9" fill="#16130F"/></svg><svg viewBox="0 0 100 100" width="74" height="74" role="img" aria-label="В"><path d="M9.7 16.6L30.1 16.6Q43.5 16.6 50.4 20.5Q57.2 24.5 57.2 34.3L57.2 34.3Q57.2 40.6 53.7 44.8Q50.2 48.9 43.6 50.1L43.6 50.1L43.6 50.6Q48.1 51.3 51.8 53.2Q55.4 55.1 57.5 58.6Q59.6 62.1 59.6 67.7L59.6 67.7Q59.6 77.4 53 82.7Q46.3 88 34.8 88L34.8 88L9.7 88L9.7 16.6M18.7 47L31.9 47Q41.1 47 44.5 44Q47.9 41.1 47.9 35.3L47.9 35.3Q47.9 29.4 43.8 26.8Q39.6 24.3 30.5 24.3L30.5 24.3L18.7 24.3L18.7 47M32.4 54.5L18.7 54.5L18.7 80.4L33.1 80.4Q42.6 80.4 46.3 76.7Q50 73 50 67L50 67Q50 61.4 46.2 58Q42.3 54.5 32.4 54.5L32.4 54.5" fill="#16130F"/></svg><svg viewBox="0 0 100 100" width="74" height="74" role="img" aria-label="Т"><path d="M32.3 24.5L32.3 88L23.3 88L23.3 24.5L1 24.5L1 16.6L54.5 16.6L54.5 24.5L32.3 24.5" fill="#16130F"/></svg></span></div>
+    <div class="lab">what your eyes say</div>
+    <div class="eyes">KOCMOHABT</div>
+    <div class="real"><b>1.</b> It really says: <span style="border-bottom:1.6px solid var(--ink);display:inline-block;width:3.2in;height:.4in">&nbsp;</span></div>
+  </div>
+
+  <footer>
+    <span>Three more over the leaf &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>PECTOPAH</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>Three More</h1>
+    <p class="sub">Russian &middot; Page 2 of 3</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> What does each one really say? Each is a word you know.
+  </div>
+
+  <div class="trick">
+    <div class="ru"><span style="display:inline-flex;align-items:flex-end;vertical-align:-0.14em" aria-label="ВЕТЕРАН"><svg viewBox="0 0 100 100" width="74" height="74" role="img" aria-label="В"><path d="M9.7 16.6L30.1 16.6Q43.5 16.6 50.4 20.5Q57.2 24.5 57.2 34.3L57.2 34.3Q57.2 40.6 53.7 44.8Q50.2 48.9 43.6 50.1L43.6 50.1L43.6 50.6Q48.1 51.3 51.8 53.2Q55.4 55.1 57.5 58.6Q59.6 62.1 59.6 67.7L59.6 67.7Q59.6 77.4 53 82.7Q46.3 88 34.8 88L34.8 88L9.7 88L9.7 16.6M18.7 47L31.9 47Q41.1 47 44.5 44Q47.9 41.1 47.9 35.3L47.9 35.3Q47.9 29.4 43.8 26.8Q39.6 24.3 30.5 24.3L30.5 24.3L18.7 24.3L18.7 47M32.4 54.5L18.7 54.5L18.7 80.4L33.1 80.4Q42.6 80.4 46.3 76.7Q50 73 50 67L50 67Q50 61.4 46.2 58Q42.3 54.5 32.4 54.5L32.4 54.5" fill="#16130F"/></svg><svg viewBox="0 0 100 100" width="74" height="74" role="img" aria-label="Е"><path d="M49.6 80.1L49.6 88L9.7 88L9.7 16.6L49.6 16.6L49.6 24.5L18.7 24.5L18.7 46.8L47.8 46.8L47.8 54.6L18.7 54.6L18.7 80.1L49.6 80.1" fill="#16130F"/></svg><svg viewBox="0 0 100 100" width="74" height="74" role="img" aria-label="Т"><path d="M32.3 24.5L32.3 88L23.3 88L23.3 24.5L1 24.5L1 16.6L54.5 16.6L54.5 24.5L32.3 24.5" fill="#16130F"/></svg><svg viewBox="0 0 100 100" width="74" height="74" role="img" aria-label="Е"><path d="M49.6 80.1L49.6 88L9.7 88L9.7 16.6L49.6 16.6L49.6 24.5L18.7 24.5L18.7 46.8L47.8 46.8L47.8 54.6L18.7 54.6L18.7 80.1L49.6 80.1" fill="#16130F"/></svg><svg viewBox="0 0 100 100" width="74" height="74" role="img" aria-label="Р"><path d="M9.7 16.6L28.6 16.6Q42.6 16.6 49 22.1Q55.4 27.6 55.4 37.6L55.4 37.6Q55.4 43.5 52.8 48.6Q50.1 53.8 43.9 57Q37.6 60.2 26.9 60.2L26.9 60.2L18.7 60.2L18.7 88L9.7 88L9.7 16.6M27.8 24.3L27.8 24.3L18.7 24.3L18.7 52.5L25.9 52.5Q36.1 52.5 41.1 49.2Q46.1 45.9 46.1 38L46.1 38Q46.1 31.1 41.7 27.7Q37.3 24.3 27.8 24.3" fill="#16130F"/></svg><svg viewBox="0 0 100 100" width="74" height="74" role="img" aria-label="А"><path d="M63.8 88L54.5 88L45.9 65.9L17.6 65.9L9.1 88L0 88L27.9 16.3L36 16.3L63.8 88M43.2 57.9L35.2 36.3Q34.9 35.5 34.2 33.4Q33.5 31.3 32.9 29Q32.2 26.8 31.8 25.6L31.8 25.6Q31.1 28.7 30.2 31.6Q29.3 34.6 28.7 36.3L28.7 36.3L20.6 57.9L43.2 57.9" fill="#16130F"/></svg><svg viewBox="0 0 100 100" width="74" height="74" role="img" aria-label="Н"><path d="M64.3 16.6L64.3 88L55.3 88L55.3 54.7L18.7 54.7L18.7 88L9.7 88L9.7 16.6L18.7 16.6L18.7 46.8L55.3 46.8L55.3 16.6L64.3 16.6" fill="#16130F"/></svg></span></div>
+    <div class="lab">what your eyes say</div>
+    <div class="eyes">BETEPAH</div>
+    <div class="real"><b>2.</b> It really says: <span style="border-bottom:1.6px solid var(--ink);display:inline-block;width:3.2in;height:.4in">&nbsp;</span></div>
+  </div>
+  <div class="trick">
+    <div class="ru"><span style="display:inline-flex;align-items:flex-end;vertical-align:-0.14em" aria-label="РЕСУРС"><svg viewBox="0 0 100 100" width="74" height="74" role="img" aria-label="Р"><path d="M9.7 16.6L28.6 16.6Q42.6 16.6 49 22.1Q55.4 27.6 55.4 37.6L55.4 37.6Q55.4 43.5 52.8 48.6Q50.1 53.8 43.9 57Q37.6 60.2 26.9 60.2L26.9 60.2L18.7 60.2L18.7 88L9.7 88L9.7 16.6M27.8 24.3L27.8 24.3L18.7 24.3L18.7 52.5L25.9 52.5Q36.1 52.5 41.1 49.2Q46.1 45.9 46.1 38L46.1 38Q46.1 31.1 41.7 27.7Q37.3 24.3 27.8 24.3" fill="#16130F"/></svg><svg viewBox="0 0 100 100" width="74" height="74" role="img" aria-label="Е"><path d="M49.6 80.1L49.6 88L9.7 88L9.7 16.6L49.6 16.6L49.6 24.5L18.7 24.5L18.7 46.8L47.8 46.8L47.8 54.6L18.7 54.6L18.7 80.1L49.6 80.1" fill="#16130F"/></svg><svg viewBox="0 0 100 100" width="74" height="74" role="img" aria-label="С"><path d="M40.3 23.5L40.3 23.5Q28.8 23.5 22.2 31.2Q15.6 38.9 15.6 52.3L15.6 52.3Q15.6 65.6 21.8 73.3Q27.9 81.1 40.2 81.1L40.2 81.1Q44.9 81.1 49.1 80.3Q53.3 79.5 57.3 78.3L57.3 78.3L57.3 86.1Q53.3 87.6 49.1 88.3Q44.8 89 38.9 89L38.9 89Q28 89 20.7 84.5Q13.4 80 9.8 71.7Q6.1 63.4 6.1 52.2L6.1 52.2Q6.1 41.4 10.1 33.1Q14 24.9 21.7 20.3Q29.4 15.6 40.4 15.6L40.4 15.6Q51.7 15.6 60.1 19.8L60.1 19.8L56.5 27.4Q53.2 25.9 49.2 24.7Q45.1 23.5 40.3 23.5" fill="#16130F"/></svg><svg viewBox="0 0 100 100" width="74" height="74" role="img" aria-label="У"><path d="M62.4 16.6L39.6 67.7Q36.4 74.8 33.1 79.5Q29.9 84.3 25.5 86.7Q21.1 89 14.3 89L14.3 89Q11.5 89 9.1 88.6Q6.6 88.2 4.6 87.5L4.6 87.5L4.6 78.6Q6.6 79.5 8.9 80Q11.2 80.6 13.7 80.6L13.7 80.6Q19.3 80.6 22.6 78.2Q25.8 75.8 28.6 69.7L28.6 69.7L1.1 16.6L11 16.6L30.9 55.9Q31.4 56.9 32.1 58.5Q32.8 60 33.3 61.4L33.3 61.4L33.7 61.4Q34.1 60.3 34.7 58.8Q35.3 57.2 35.7 56.2L35.7 56.2L52.9 16.6L62.4 16.6" fill="#16130F"/></svg><svg viewBox="0 0 100 100" width="74" height="74" role="img" aria-label="Р"><path d="M9.7 16.6L28.6 16.6Q42.6 16.6 49 22.1Q55.4 27.6 55.4 37.6L55.4 37.6Q55.4 43.5 52.8 48.6Q50.1 53.8 43.9 57Q37.6 60.2 26.9 60.2L26.9 60.2L18.7 60.2L18.7 88L9.7 88L9.7 16.6M27.8 24.3L27.8 24.3L18.7 24.3L18.7 52.5L25.9 52.5Q36.1 52.5 41.1 49.2Q46.1 45.9 46.1 38L46.1 38Q46.1 31.1 41.7 27.7Q37.3 24.3 27.8 24.3" fill="#16130F"/></svg><svg viewBox="0 0 100 100" width="74" height="74" role="img" aria-label="С"><path d="M40.3 23.5L40.3 23.5Q28.8 23.5 22.2 31.2Q15.6 38.9 15.6 52.3L15.6 52.3Q15.6 65.6 21.8 73.3Q27.9 81.1 40.2 81.1L40.2 81.1Q44.9 81.1 49.1 80.3Q53.3 79.5 57.3 78.3L57.3 78.3L57.3 86.1Q53.3 87.6 49.1 88.3Q44.8 89 38.9 89L38.9 89Q28 89 20.7 84.5Q13.4 80 9.8 71.7Q6.1 63.4 6.1 52.2L6.1 52.2Q6.1 41.4 10.1 33.1Q14 24.9 21.7 20.3Q29.4 15.6 40.4 15.6L40.4 15.6Q51.7 15.6 60.1 19.8L60.1 19.8L56.5 27.4Q53.2 25.9 49.2 24.7Q45.1 23.5 40.3 23.5" fill="#16130F"/></svg></span></div>
+    <div class="lab">what your eyes say</div>
+    <div class="eyes">PECYPC</div>
+    <div class="real"><b>3.</b> It really says: <span style="border-bottom:1.6px solid var(--ink);display:inline-block;width:3.2in;height:.4in">&nbsp;</span></div>
+  </div>
+  <div class="trick">
+    <div class="ru"><span style="display:inline-flex;align-items:flex-end;vertical-align:-0.14em" aria-label="СЕКРЕТ"><svg viewBox="0 0 100 100" width="74" height="74" role="img" aria-label="С"><path d="M40.3 23.5L40.3 23.5Q28.8 23.5 22.2 31.2Q15.6 38.9 15.6 52.3L15.6 52.3Q15.6 65.6 21.8 73.3Q27.9 81.1 40.2 81.1L40.2 81.1Q44.9 81.1 49.1 80.3Q53.3 79.5 57.3 78.3L57.3 78.3L57.3 86.1Q53.3 87.6 49.1 88.3Q44.8 89 38.9 89L38.9 89Q28 89 20.7 84.5Q13.4 80 9.8 71.7Q6.1 63.4 6.1 52.2L6.1 52.2Q6.1 41.4 10.1 33.1Q14 24.9 21.7 20.3Q29.4 15.6 40.4 15.6L40.4 15.6Q51.7 15.6 60.1 19.8L60.1 19.8L56.5 27.4Q53.2 25.9 49.2 24.7Q45.1 23.5 40.3 23.5" fill="#16130F"/></svg><svg viewBox="0 0 100 100" width="74" height="74" role="img" aria-label="Е"><path d="M49.6 80.1L49.6 88L9.7 88L9.7 16.6L49.6 16.6L49.6 24.5L18.7 24.5L18.7 46.8L47.8 46.8L47.8 54.6L18.7 54.6L18.7 80.1L49.6 80.1" fill="#16130F"/></svg><svg viewBox="0 0 100 100" width="74" height="74" role="img" aria-label="К"><path d="M29.4 51.3L61.8 88L51 88L18.7 51.8L18.7 88L9.7 88L9.7 16.6L18.7 16.6L18.7 51.2L50.2 16.6L60.4 16.6L29.4 51.3" fill="#16130F"/></svg><svg viewBox="0 0 100 100" width="74" height="74" role="img" aria-label="Р"><path d="M9.7 16.6L28.6 16.6Q42.6 16.6 49 22.1Q55.4 27.6 55.4 37.6L55.4 37.6Q55.4 43.5 52.8 48.6Q50.1 53.8 43.9 57Q37.6 60.2 26.9 60.2L26.9 60.2L18.7 60.2L18.7 88L9.7 88L9.7 16.6M27.8 24.3L27.8 24.3L18.7 24.3L18.7 52.5L25.9 52.5Q36.1 52.5 41.1 49.2Q46.1 45.9 46.1 38L46.1 38Q46.1 31.1 41.7 27.7Q37.3 24.3 27.8 24.3" fill="#16130F"/></svg><svg viewBox="0 0 100 100" width="74" height="74" role="img" aria-label="Е"><path d="M49.6 80.1L49.6 88L9.7 88L9.7 16.6L49.6 16.6L49.6 24.5L18.7 24.5L18.7 46.8L47.8 46.8L47.8 54.6L18.7 54.6L18.7 80.1L49.6 80.1" fill="#16130F"/></svg><svg viewBox="0 0 100 100" width="74" height="74" role="img" aria-label="Т"><path d="M32.3 24.5L32.3 88L23.3 88L23.3 24.5L1 24.5L1 16.6L54.5 16.6L54.5 24.5L32.3 24.5" fill="#16130F"/></svg></span></div>
+    <div class="lab">what your eyes say</div>
+    <div class="eyes">CEKPET</div>
+    <div class="real"><b>4.</b> It really says: <span style="border-bottom:1.6px solid var(--ink);display:inline-block;width:3.2in;height:.4in">&nbsp;</span></div>
+  </div>
+
+  <footer>
+    <span>Turn over for the answers &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>PECTOPAH</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>Why That Happened</h1>
+    <p class="sub">Russian &middot; Page 3 of 3</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Read this, then answer.
+  </div>
+
+
+  <div class="note"><b>An alphabet you can&rsquo;t read at all is harmless:</b> you know to stop. <b>Russian looks like yours</b>, so it hands you an answer instead of a warning.</div>
+
+  <ol class="qs" start="5"><li><span class="qt">Which is worse for a reader: an alphabet you obviously cannot read, or one you think you can? Say why.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Somebody says "just read the letters more carefully". Why is that not much help here?</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Familiar and wrong is worse than strange</span>
+    <span class="brand">Kitchen Table</span>
+    <span>PECTOPAH</span>
+  </footer>
+</div>
+
+</body>
+</html>

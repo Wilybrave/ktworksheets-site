@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="sheet-kind" content="worksheet">
+<title>Milo</title>
+<style>
+  @page { size: letter portrait; margin: 0.4in 0.45in; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  :root {
+    --ink: #16130F; --muted: #6B635A; --rule: #CFC3B2; --guide: #BCAE9C;
+    --accent: #C0511D; --tint: #F7EDE4; --slate: #2E5A78;
+  }
+  body {
+    font-family: Quicksand, 'URW Gothic', 'Century Gothic', sans-serif;
+    color: #000; background: #fff;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  .page { width: 100%; }
+  .page + .page { page-break-before: always; }
+  /* A screen ignores @page margins, so the preview drew every made sheet edge
+     to edge while the paper has 0.4in / 0.45in of white round it. The shelf's
+     sheets carry the same screen padding; print is untouched. */
+  @media screen { .page { padding: 0.4in 0.45in; } }
+  header {
+    display: flex; align-items: center; gap: 16px;
+    border-bottom: 3px solid var(--slate); padding-bottom: 7px; margin-bottom: 2px;
+  }
+  .bigletter { font-size: 38pt; font-weight: 700; line-height: 1; letter-spacing: .02em; }
+  .htext { flex: 1; }
+  h1 { font-size: 14pt; font-weight: 700; margin: 0 0 2px; }
+  .sub { font-size: 10pt; color: var(--muted); margin: 0; }
+  .nameline {
+    font-size: 9.5pt; color: var(--muted);
+    border-bottom: 1px solid var(--ink); width: 2in;
+    padding-bottom: 1px; align-self: flex-end;
+  }
+  .dir { font-size: 11pt; margin: 12px 0 10px; }
+  footer {
+    margin-top: 10px; padding-top: 6px; border-top: 1px solid var(--rule);
+    font-size: 8.5pt; color: var(--muted);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .brand { font-size: 7pt; letter-spacing: .04em; color: var(--accent); }
+  table { border-collapse: collapse; }
+  /* The parent-copy badge, lifted from the shelf's key pages so the two match
+     on paper. Tinted rather than outlined, because it has to be recognisable
+     at a glance from across a table with the page upside down. */
+  .badgeline {
+    display: inline-block; font-size: 8.5pt; font-weight: 700;
+    letter-spacing: .06em; text-transform: uppercase;
+    color: var(--accent); background: var(--tint);
+    border: 1.5px solid var(--accent); padding: 2px 8px; margin-bottom: 8px;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <div class="bigletter">M</div>
+    <div class="htext">
+      <h1>Milo</h1>
+      <p class="sub">Name tracing</p>
+    </div>
+    <div class="nameline">Name</div>
+  </header>
+  <p class="dir">Trace the grey letters. Start at each dot and follow the arrow.</p>
+  <svg viewBox="0 0 547.1999999999999 583.1999999999999" width="100%" role="img" aria-label="rows to trace the name Milo"><line x1="0" y1="85.82759999999999" x2="547.1999999999999" y2="85.82759999999999" stroke="#CFC3B2" stroke-width="1"/><line x1="0" y1="49.86359999999999" x2="547.1999999999999" y2="49.86359999999999" stroke="#E6DCCF" stroke-width="1" stroke-dasharray="4 4"/><g transform="translate(12 13.9) scale(71.93)"><path d="M0 1 V0 L.34 .62 L.68 0 V1" fill="none" stroke="#C0511D" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0" cy="1" r="0.05" fill="#C0511D"/></g><g transform="translate(72.42 13.9) scale(71.93)"><path d="M.13 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.13" cy="0.34" r="0.04" fill="#C0511D"/><circle cx="0.13" cy="0.5" r="0.05" fill="#C0511D"/></g><g transform="translate(102.63 13.9) scale(71.93)"><path d="M.12 0 V1" fill="none" stroke="#C0511D" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.12" cy="0" r="0.05" fill="#C0511D"/></g><g transform="translate(131.4 13.9) scale(71.93)"><path d="M.25 .5 A.22 .25 0 0 0 .25 1 A.22 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.25" cy="0.5" r="0.05" fill="#C0511D"/></g><line x1="0" y1="183.02759999999998" x2="547.1999999999999" y2="183.02759999999998" stroke="#CFC3B2" stroke-width="1"/><line x1="0" y1="147.06359999999998" x2="547.1999999999999" y2="147.06359999999998" stroke="#E6DCCF" stroke-width="1" stroke-dasharray="4 4"/><g transform="translate(12 111.1) scale(71.93)"><path d="M0 1 V0 L.34 .62 L.68 0 V1" fill="none" stroke="#B09A88" stroke-width="0.03" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.08 0.06"/><circle cx="0" cy="1" r="0.05" fill="#C0511D"/></g><g transform="translate(72.42 111.1) scale(71.93)"><path d="M.13 .5 V1" fill="none" stroke="#B09A88" stroke-width="0.03" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.08 0.06"/><circle cx="0.13" cy="0.34" r="0.04" fill="#B09A88"/><circle cx="0.13" cy="0.5" r="0.05" fill="#C0511D"/></g><g transform="translate(102.63 111.1) scale(71.93)"><path d="M.12 0 V1" fill="none" stroke="#B09A88" stroke-width="0.03" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.08 0.06"/><circle cx="0.12" cy="0" r="0.05" fill="#C0511D"/></g><g transform="translate(131.4 111.1) scale(71.93)"><path d="M.25 .5 A.22 .25 0 0 0 .25 1 A.22 .25 0 0 0 .25 .5" fill="none" stroke="#B09A88" stroke-width="0.03" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.08 0.06"/><circle cx="0.25" cy="0.5" r="0.05" fill="#C0511D"/></g><line x1="0" y1="280.22759999999994" x2="547.1999999999999" y2="280.22759999999994" stroke="#CFC3B2" stroke-width="1"/><line x1="0" y1="244.26359999999997" x2="547.1999999999999" y2="244.26359999999997" stroke="#E6DCCF" stroke-width="1" stroke-dasharray="4 4"/><g transform="translate(12 208.3) scale(71.93)"><path d="M0 1 V0 L.34 .62 L.68 0 V1" fill="none" stroke="#B09A88" stroke-width="0.03" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.08 0.06"/><circle cx="0" cy="1" r="0.05" fill="#C0511D"/></g><g transform="translate(72.42 208.3) scale(71.93)"><path d="M.13 .5 V1" fill="none" stroke="#B09A88" stroke-width="0.03" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.08 0.06"/><circle cx="0.13" cy="0.34" r="0.04" fill="#B09A88"/><circle cx="0.13" cy="0.5" r="0.05" fill="#C0511D"/></g><g transform="translate(102.63 208.3) scale(71.93)"><path d="M.12 0 V1" fill="none" stroke="#B09A88" stroke-width="0.03" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.08 0.06"/><circle cx="0.12" cy="0" r="0.05" fill="#C0511D"/></g><g transform="translate(131.4 208.3) scale(71.93)"><path d="M.25 .5 A.22 .25 0 0 0 .25 1 A.22 .25 0 0 0 .25 .5" fill="none" stroke="#B09A88" stroke-width="0.03" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.08 0.06"/><circle cx="0.25" cy="0.5" r="0.05" fill="#C0511D"/></g><line x1="0" y1="377.4276" x2="547.1999999999999" y2="377.4276" stroke="#CFC3B2" stroke-width="1"/><line x1="0" y1="341.4636" x2="547.1999999999999" y2="341.4636" stroke="#E6DCCF" stroke-width="1" stroke-dasharray="4 4"/><g transform="translate(12 305.5) scale(71.93)"><path d="M0 1 V0 L.34 .62 L.68 0 V1" fill="none" stroke="#B09A88" stroke-width="0.03" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.08 0.06"/><circle cx="0" cy="1" r="0.05" fill="#C0511D"/></g><g transform="translate(72.42 305.5) scale(71.93)"><path d="M.13 .5 V1" fill="none" stroke="#B09A88" stroke-width="0.03" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.08 0.06"/><circle cx="0.13" cy="0.34" r="0.04" fill="#B09A88"/><circle cx="0.13" cy="0.5" r="0.05" fill="#C0511D"/></g><g transform="translate(102.63 305.5) scale(71.93)"><path d="M.12 0 V1" fill="none" stroke="#B09A88" stroke-width="0.03" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.08 0.06"/><circle cx="0.12" cy="0" r="0.05" fill="#C0511D"/></g><g transform="translate(131.4 305.5) scale(71.93)"><path d="M.25 .5 A.22 .25 0 0 0 .25 1 A.22 .25 0 0 0 .25 .5" fill="none" stroke="#B09A88" stroke-width="0.03" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.08 0.06"/><circle cx="0.25" cy="0.5" r="0.05" fill="#C0511D"/></g><line x1="0" y1="474.6276" x2="547.1999999999999" y2="474.6276" stroke="#CFC3B2" stroke-width="1"/><line x1="0" y1="438.6636" x2="547.1999999999999" y2="438.6636" stroke="#E6DCCF" stroke-width="1" stroke-dasharray="4 4"/><g transform="translate(12 402.7) scale(71.93)"><path d="M0 1 V0 L.34 .62 L.68 0 V1" fill="none" stroke="#B09A88" stroke-width="0.03" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.08 0.06"/><circle cx="0" cy="1" r="0.05" fill="#C0511D"/></g><g transform="translate(72.42 402.7) scale(71.93)"><path d="M.13 .5 V1" fill="none" stroke="#B09A88" stroke-width="0.03" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.08 0.06"/><circle cx="0.13" cy="0.34" r="0.04" fill="#B09A88"/><circle cx="0.13" cy="0.5" r="0.05" fill="#C0511D"/></g><g transform="translate(102.63 402.7) scale(71.93)"><path d="M.12 0 V1" fill="none" stroke="#B09A88" stroke-width="0.03" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.08 0.06"/><circle cx="0.12" cy="0" r="0.05" fill="#C0511D"/></g><g transform="translate(131.4 402.7) scale(71.93)"><path d="M.25 .5 A.22 .25 0 0 0 .25 1 A.22 .25 0 0 0 .25 .5" fill="none" stroke="#B09A88" stroke-width="0.03" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.08 0.06"/><circle cx="0.25" cy="0.5" r="0.05" fill="#C0511D"/></g><line x1="0" y1="571.8276" x2="547.1999999999999" y2="571.8276" stroke="#CFC3B2" stroke-width="1"/><line x1="0" y1="535.8635999999999" x2="547.1999999999999" y2="535.8635999999999" stroke="#E6DCCF" stroke-width="1" stroke-dasharray="4 4"/><g transform="translate(12 499.9) scale(71.93)"><path d="M0 1 V0 L.34 .62 L.68 0 V1" fill="none" stroke="#B09A88" stroke-width="0.03" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.08 0.06"/><circle cx="0" cy="1" r="0.05" fill="#C0511D"/></g><g transform="translate(72.42 499.9) scale(71.93)"><path d="M.13 .5 V1" fill="none" stroke="#B09A88" stroke-width="0.03" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.08 0.06"/><circle cx="0.13" cy="0.34" r="0.04" fill="#B09A88"/><circle cx="0.13" cy="0.5" r="0.05" fill="#C0511D"/></g><g transform="translate(102.63 499.9) scale(71.93)"><path d="M.12 0 V1" fill="none" stroke="#B09A88" stroke-width="0.03" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.08 0.06"/><circle cx="0.12" cy="0" r="0.05" fill="#C0511D"/></g><g transform="translate(131.4 499.9) scale(71.93)"><path d="M.25 .5 A.22 .25 0 0 0 .25 1 A.22 .25 0 0 0 .25 .5" fill="none" stroke="#B09A88" stroke-width="0.03" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.08 0.06"/><circle cx="0.25" cy="0.5" r="0.05" fill="#C0511D"/></g></svg>
+  <footer>
+    <span>6 rows</span>
+    <span class="brand">KITCHEN TABLE</span>
+    <span></span>
+  </footer>
+</div>
+
+</body>
+</html>

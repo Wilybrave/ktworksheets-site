@@ -1,0 +1,742 @@
+<!DOCTYPE html><html><head>
+<meta charset="utf-8">
+<meta name="sheet-kind" content="worksheet">
+<title>The Energy of Movement — Grade 4</title>
+<style>
+  :root { --font: Georgia, "Times New Roman", serif; }
+
+  /* Page margins live HERE only — body padding stays 0 for print so the two
+     don't stack and eat the sheet. */
+  @page { size: letter portrait; margin: 0.45in 0.5in; }
+
+  /*
+   * THE PALETTE. The same one the shop wears (kitchen-table/BRAND.md): warm
+   * near-black ink, one accent, pine kept back for the answer key.
+   *
+   * WHY A SHEET HAS COLOR AT ALL. Every sheet was pure grayscale — #000 rules,
+   * #333 subtitles, #f0f0f0 boxes — which is what you get by never deciding.
+   * The paper is the product and it looked like a fax. A printer set to
+   * grayscale, or one that has no color to give, renders all of this as the
+   * greys it already had, so nothing below costs a parent anything they were
+   * not already spending.
+   *
+   * WHAT STAYS BLACK, ON PURPOSE:
+   *   - anything drawn to be written on (rules, name lines, answer boxes)
+   *   - anything drawn to be traced or colored in (line art, letter guides)
+   *   - the confidence rings, which have to survive a mono laser
+   * Color marks the sheet's own furniture — its rule, its numbering, its
+   * boxes — and never the part a child puts a pencil through.
+   */
+  :root {
+    --ink:    #16130F;
+    --muted:  #6B635A;
+    --rule:   #CFC3B2;
+    --guide:  #BCAE9C;
+    --accent: #C0511D;
+    --tint:   #F7EDE4;
+    --slate:  #2E5A78;
+    --tintslate: #E9EFF4;
+    --deep:   #2C4A45;
+    --tintdeep: #ECF1EF;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font);
+    color: #000; background: #fff;
+    font-size: 12pt; line-height: 1.3;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+
+  /* ORDER MATTERS. This generic rule must come BEFORE the @media screen block:
+     same specificity, so whichever is declared last wins. With it after, the
+     on-screen preview stretches to the viewport instead of 8.5in — print is
+     unaffected, but the proof you check before printing is wrong. */
+  .page { width: 100%; }
+  .page + .page { page-break-before: always; }
+
+  @media screen {
+    body { padding: 0.5in; background: #ddd; }
+    .page {
+      background: #fff; padding: 0.45in 0.5in;
+      width: 8.5in; min-height: 11in;
+      margin: 0 auto 24px; box-shadow: 0 2px 10px rgba(0,0,0,.3);
+    }
+  }
+
+  /* ------------------------------------------------------------- header */
+  header { border-bottom: 3px double var(--accent); padding-bottom: 6px; }
+  header.cont { border-bottom: 1px solid var(--rule); }
+  h1 { font-size: 16pt; margin: 0 0 1px; letter-spacing: .01em; }
+  .sub { font-size: 10pt; font-style: italic; color: var(--muted); margin: 0; }
+
+  .nameline { display: flex; gap: 26px; font-size: 10.5pt; margin: 11px 0 12px; }
+  .nameline span { flex: 1; border-bottom: 1px solid var(--ink); padding-bottom: 1px; }
+  .nameline span.short { flex: 0 0 1.9in; }
+
+  .directions {
+    font-size: 10.5pt; line-height: 1.35;
+    background: var(--tint); border-left: 4px solid var(--accent);
+    padding: 7px 10px; margin: 12px 0 14px;
+  }
+  .directions b { letter-spacing: .03em; }
+  .tip { font-style: italic; margin-top: 3px; }
+
+  /* ------------------------------------------------- problems and grids */
+  .grid { display: grid; gap: 13px 16px; margin-top: 4px; }
+  .prob { page-break-inside: avoid; display: flex; gap: 5px; align-items: flex-start; }
+  .pn { font-weight: bold; font-size: 11pt; min-width: .28in; flex: 0 0 auto; color: var(--accent); }
+  .pbody { flex: 1; min-width: 0; }
+
+  /* Digits need lining figures and even widths whatever the body font is. */
+  .num, .vert, .horiz { font-family: "Trebuchet MS", "Segoe UI", Tahoma, Verdana, sans-serif; font-variant-numeric: lining-nums tabular-nums; }
+
+  /* A stacked column algorithm.
+     Two grid columns — operator, then digits — because a floated or absolutely
+     positioned operator overlaps the digits as soon as the numbers get wide,
+     and "324" with a + sitting on the 3 is unreadable. The grid also lets the
+     rule under the last operand span BOTH columns, which is how it is written
+     by hand. The rule is heavy: it is the line you write the answer beneath. */
+  .vert {
+    display: inline-grid; grid-template-columns: auto auto;
+    font-size: 15pt; line-height: 1.3; text-align: right;
+  }
+  .vert > span { padding: 0 0 1px 0; }
+  .vert .op { text-align: left; padding-right: .16in; }
+  .vert .last { border-bottom: 2.5px solid var(--ink); padding-bottom: 3px; }
+  .vert .ans { height: .4in; }
+  /* Partial-products working, for 2-digit x 1-digit before the short method. */
+  .vert .part { font-size: 11pt; color: var(--muted); }
+  /* A row of worked examples that fade — see lib/formats.js faded(). The
+     caption is what makes the fade legible: without it the third one looks like
+     a question somebody forgot to number. */
+  .egrow { display: flex; gap: .34in; align-items: flex-start; margin: 0 0 4px; }
+  .eg { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; }
+  .eglab { font-size: 8.5pt; color: var(--slate); letter-spacing: .02em; }
+
+  /* The carried digits. Small and grey so the sum still reads as the sum, and
+     tight to the row below it so a carry sits ON the column it goes into. */
+  .vert .carry { font-size: 9pt; color: var(--slate); line-height: 1; padding: 0 0 1px 0; }
+
+  .horiz { font-size: 14pt; white-space: nowrap; }
+
+  /* Row numbers in a word list. Gray and small: they are there so a list can be
+     dictated ("number seven") and marked without counting down the page, and
+     they must not compete with the word itself. */
+  .wn { color: var(--muted); font-size: 9pt; }
+
+  /* The box an answer goes in. inline-block so it can sit mid-sentence. */
+  .abox {
+    display: inline-block; border: 1.6px solid var(--slate); border-radius: 3px;
+    vertical-align: middle; margin: 0 3px; position: relative; background: #fff;
+  }
+  /* Scoped to the box: as a bare ".alab" it pinned any generator's own .alab
+     to the bottom of the page (life-07-signs-and-forms 40, 2026-09-24). */
+  .abox > .alab {
+    position: absolute; bottom: 1px; left: 0; right: 0;
+    text-align: center; font-size: 7pt; color: var(--muted); font-style: italic;
+  }
+
+  /* Confidence marks. The rings are drawn with a border and a gradient rather
+     than an SVG so they stay inline with the question text at any font size,
+     and print black on a mono laser without relying on a background image. */
+  .conf { float: right; margin: 2px 0 0 8px; white-space: nowrap; }
+  .cring {
+    display: inline-block; width: 11px; height: 11px; margin-left: 4px;
+    border: 1.4px solid var(--slate); border-radius: 50%; vertical-align: middle;
+  }
+  .cring-full { background: var(--accent); }
+  .cring-half { background: linear-gradient(90deg, var(--accent) 50%, #fff 50%); }
+  .cring-none { background: #fff; }
+  ol.qs.hasconf li { overflow: hidden; }
+
+  .conflegend {
+    border: 1.2px solid var(--rule); border-radius: 4px;
+    padding: 3px 8px; margin: 0 0 7px;
+    font-size: 8.5pt; color: var(--muted); display: flex; gap: 14px; align-items: center;
+  }
+  .conftitle { font-weight: 700; color: var(--ink); }
+  .confitem { white-space: nowrap; }
+
+  .work {
+    border: 1.4px dashed var(--rule); border-radius: 4px;
+    margin: 6px 0 2px; position: relative;
+  }
+  /* The label S.work() puts in the box: a DIRECT child only. As ".work span"
+     it also caught every span inside any generator's own .work content and
+     stacked them all at the top-left corner (math-11-grade6 47, 2026-09-23). */
+  .work > span {
+    position: absolute; top: 3px; left: 6px;
+    font-size: 8pt; color: var(--muted); font-style: italic;
+  }
+
+  /* ------------------------------------------------------ writing lines */
+  /* Primary rule: solid top, dashed midline, heavy baseline. Capitals reach
+     the top line, lowercase bodies sit under the dashed one. */
+  .write {
+    position: relative; height: 0.375in;
+    margin: 6px 0 0 .3in;
+    border-top: 1px solid var(--rule); border-bottom: 2px solid var(--ink);
+  }
+  .write.flush { margin-left: 0; }
+  .write + .write { margin-top: .17in; }
+  .write::after {
+    content: ""; position: absolute; left: 0; right: 0; top: 50%;
+    border-top: 1px dashed var(--guide);
+  }
+
+  /* ------------------------------------------------------- question list */
+  ol.qs { margin: 0; padding: 0 0 0 .34in; }
+  ol.qs li { margin-bottom: 13px; page-break-inside: avoid; }
+  ol.qs li::marker { font-weight: bold; font-size: 11pt; color: var(--accent); }
+  .qt { display: block; }
+
+  .mcq { display: grid; gap: 3px 14px; margin: 5px 0 2px .12in; font-size: 11pt; }
+  .opt { white-space: nowrap; }
+
+  /* -------------------------------------------------------------- tables */
+  .tbl { border-collapse: collapse; margin: 8px 0; font-size: 11pt; width: 100%; }
+  .tbl th, .tbl td { border: 1.4px solid var(--ink); padding: 5px 8px; text-align: left; }
+  .tbl th { color: var(--slate); }
+  .tbl th { background: var(--tint); font-size: 10pt; letter-spacing: .02em; }
+  .tbl td.blank { height: .34in; }
+  .tbl.narrow { width: auto; }
+  .tbl.center td, .tbl.center th { text-align: center; }
+
+  /* ------------------------------------------------------------ passages */
+  .passage {
+    border: 1.5px solid var(--slate); border-radius: 4px;
+    padding: 11px 14px; margin-bottom: 12px;
+    font-size: 11.5pt; line-height: 1.55;
+  }
+  .passage h2 { font-size: 13pt; margin: 0 0 6px; color: var(--deep); }
+  .passage p { margin: 0 0 8px; }
+  .passage p:last-child { margin-bottom: 0; }
+  .passage .byline { font-size: 9.5pt; font-style: italic; color: var(--muted); margin-bottom: 8px; }
+  /* Numbered paragraphs, so a question can say "in paragraph 2". */
+  .passage p.np { position: relative; padding-left: .3in; }
+  .passage p.np::before {
+    content: attr(data-p); position: absolute; left: 0; top: 0;
+    font-size: 9pt; color: var(--accent); font-weight: bold;
+  }
+
+  .wordbank {
+    border: 1.5px dashed var(--slate); border-radius: 4px;
+    padding: 8px 12px; margin: 10px 0 12px;
+    font-size: 11.5pt; text-align: center;
+  }
+  .wordbank b { display: block; font-size: 9.5pt; letter-spacing: .06em;
+    text-transform: uppercase; margin-bottom: 4px; color: var(--accent); }
+  .wordbank span { display: inline-block; margin: 2px 11px; }
+
+  .note {
+    border-left: 4px solid var(--deep); background: var(--tintdeep);
+    padding: 7px 11px; margin: 10px 0; font-size: 10.5pt;
+  }
+  .note b { letter-spacing: .02em; }
+
+  /* -------------------------------------------------------------- footer */
+  /* THE WORDMARK SITS IN THE FOOTER THAT WAS ALREADY THERE, so it costs no
+     height at all — a sheet that fitted before fits now. Upright where the rest
+     of the line is italic, and a size down: it is a signature, not a message,
+     and it must never compete with "Score: ___ / 10". */
+  .brand { font-style: normal; font-size: 7.5pt; letter-spacing: .04em;
+    color: var(--accent); align-self: center; }
+
+  footer {
+    margin-top: 14px; padding-top: 6px; border-top: 1px solid var(--rule);
+    font-size: 9pt; font-style: italic; color: var(--muted);
+    display: flex; justify-content: space-between;
+  }
+
+  /* ---------------------------------------------------------- answer key */
+  .keybadge {
+    display: inline-block; border: 2px solid var(--deep); color: var(--deep); padding: 2px 9px;
+    font-size: 9.5pt; font-weight: bold; letter-spacing: .08em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .key .why {
+    display: block; font-size: 9pt; font-style: italic; color: var(--muted); margin-top: 1px;
+  }
+  /* Highlight rather than underline: <u> in a key marks WHAT CHANGED, and an
+     underline under a comma is invisible. */
+  .key u { text-decoration: none; background: var(--tint); padding: 0 2px; font-weight: bold; }
+  .keygrid .pbody { font-family: "Trebuchet MS", "Segoe UI", Tahoma, Verdana, sans-serif; font-size: 12pt; }
+  /* A key's pictures scale to their column: at 1fr a wide drawing pushed a
+     three-column key 92px off the paper (art-04-drawing 10, 2026-09-24). */
+  .keygrid svg { max-width: 100%; height: auto; }
+  .keylist .qt { font-weight: normal; }
+
+  /*
+   * The guide page. Four lines per question, and the ASK line is the one that
+   * gets used at the table, so it is the one with a rule beside it — a parent
+   * scanning this page in ten seconds should land on the follow-up question
+   * and nothing else.
+   */
+  .guide { padding-left: .3in; }
+  .guide li { margin-bottom: 11px; page-break-inside: avoid; }
+  .guide .gq { font-weight: bold; font-size: 11pt; margin-bottom: 3px; }
+  /* 9pt, matching the key's own why line, because the guide page is the
+     binding constraint on every open sheet: four lines per question against a
+     key's one, and at 10pt a sheet with seven questions ran onto a second
+     side. Found by measuring, not chosen. (No backticks in here — this CSS
+     lives inside a template literal and one would close it.) */
+  .guide .glook, .guide .gthin, .guide .gstrong {
+    font-size: 9pt; line-height: 1.3; margin-top: 1px;
+  }
+  .guide .gthin { color: var(--muted); }
+  .guide .gstrong { color: var(--muted); font-style: italic; }
+  .guide .gask {
+    font-size: 9.5pt; line-height: 1.3; margin-top: 3px;
+    border-left: 3px solid var(--slate); padding-left: 7px;
+  }
+  .key .qs li { margin-bottom: 9px; }
+
+  /*
+   * INLINE-BLOCK, NOT BLOCK, AND THIS WAS WRONG FOR A LONG TIME. A block-level
+   * svg ignores text-align: center on its parent and sits flush left — so 117
+   * sheets across 35 packs said "centre this diagram" and got a left-aligned
+   * one. Twenty-five of them were origami and paper-plane fold sequences, where
+   * the whole page is diagrams.
+   *
+   * Nobody spotted it because a left-flush diagram looks deliberate; it only
+   * reads as wrong next to a centered one, and no sheet has both.
+   *
+   * inline-block makes text-align do what every one of those authors meant,
+   * and leaves a diagram in a left-aligned container exactly where it was.
+   * vertical-align: top kills the baseline gap that inline elements otherwise
+   * leave underneath them, which would have pushed long pages over.
+   */
+  svg { display: inline-block; vertical-align: top; }
+  svg.inline { vertical-align: middle; }
+
+  .tbl.h80 td.blank { height: 0.80in; }
+  .tbl.h45 td.blank { height: 0.45in; }
+  .tbl.h50 td.blank { height: 0.50in; }
+  .tbl.h130 td.blank { height: 1.30in; }
+  .tbl.h160 td.blank { height: 1.60in; }
+  .tbl.h65 td.blank { height: 0.65in; }
+  ol.qs li { margin-bottom: 8px; }
+  .note { margin: 8px 0; }
+
+</style>
+</head><body>
+
+<div class="page ">
+  <header>
+    
+    <h1>The Energy of Movement</h1>
+    <p class="sub">Grade 4 · Energy · Page 1 of 3</p>
+  </header>
+  <div class="nameline">
+    <span>Name</span>
+    <span class="short">Date</span>
+  </div>
+  <div class="directions">
+    <b>DIRECTIONS:</b> The faster and heavier a moving thing is, the more energy it has. Circle the one with more.
+  </div>
+
+
+  <div class="note" style="margin-top:2px"><b>Energy is never made and never destroyed.</b> It only moves or
+  changes kind. A ball that stops rolling passes its energy to the carpet and air as heat and sound.</div>
+
+  <div class="label" style="font-weight:bold;font-size:11pt;margin:12px 0 5px">Which has more energy of movement?</div>
+  <div class="note" style="margin-top:0">Circle one, and say what decided it: <b>speed</b> or <b>mass</b>.</div>
+  <table class="tbl h130">
+    <thead><tr><th>A</th><th>B</th><th>Which has more?</th><th>Because of…</th></tr></thead>
+    <tbody><tr><td><span class="pn">1.</span> a tennis ball thrown slowly</td><td>the same ball thrown hard</td><td class="blank"></td><td class="blank"></td></tr><tr><td><span class="pn">2.</span> a lorry at 10 mph</td><td>a bicycle at 10 mph</td><td class="blank"></td><td class="blank"></td></tr><tr><td><span class="pn">3.</span> a bowling ball rolling fast</td><td>a marble rolling fast</td><td class="blank"></td><td class="blank"></td></tr><tr><td><span class="pn">4.</span> you walking</td><td>you running</td><td class="blank"></td><td class="blank"></td></tr></tbody>
+  </table>
+
+  <footer>
+    <span>Keep going on page 2 →</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Energy of motion</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>The Energy of Movement — continued</h1>
+    <p class="sub">Grade 4 · Energy · Page 2 of 3</p>
+  </header>
+
+
+
+
+  <div class="label" style="font-weight:bold;font-size:11pt;margin:2px 0 5px">Collisions pass energy on.</div>
+  <div class="note" style="margin-top:0">When a moving thing hits a still one, some of its energy passes
+  over.</div>
+  <ol class="qs" start="5"><li><span class="qt">A marble rolls into a line of still marbles and the one at the far end shoots off. Where did that end marble get its energy from?</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">A car crash at 40 mph does far more damage than one at 20 mph — much more than twice as much. Using energy, suggest why.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">A ball rolls across the carpet and slowly stops. Its energy did not disappear. Where did it go? Give <b>two</b> places.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Keep going on page 3 →</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Energy of motion</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>The Energy of Movement — Try It</h1>
+    <p class="sub">Grade 4 · Energy · Page 3 of 3</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Roll a marble down a ramp (a book) at a light object. Try three heights. Change only the height.
+  </div>
+
+
+  
+
+  <table class="tbl h65">
+    <thead><tr><th>Height I released from</th><th>How far the object moved</th><th>Try again — how far?</th></tr></thead>
+    <tbody><tr><td>low</td><td class="blank"></td><td class="blank"></td></tr><tr><td>middle</td><td class="blank"></td><td class="blank"></td></tr><tr><td>high</td><td class="blank"></td><td class="blank"></td></tr></tbody>
+  </table>
+
+  <ol class="qs" start="8"><li><span class="qt">What is the pattern? Write it as a sentence beginning "The higher the marble started…"</span><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">The marble is not moving at all when you let go. So where does its movement energy come from?</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Why did you do each height <b>twice</b>?</span><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Score: ______ / 10</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Energy of motion</span>
+  </footer>
+</div>
+
+
+<div style="page-break-before:always"></div>
+
+
+<div class="page ">
+  <header>
+    
+    <h1>The Longest Line You Have Ever Drawn</h1>
+    <p class="sub">World History &middot; Page 1 of 5</p>
+  </header>
+  <div class="nameline">
+    <span>Name</span>
+    <span class="short">Date</span>
+  </div>
+  <div class="directions">
+    <b>DIRECTIONS:</b> Measure with a ruler. Do not guess.
+  </div>
+
+
+  <p class="look"><b>All of human history.</b> People have been people &mdash; the same as you, same
+  brains &mdash; for about 300 thousand years. This line is all of it.</p>
+
+  <div class="figrow"><svg class="inline" viewBox="0 0 660 96" width="660" height="96" role="img" aria-label="a timeline drawn to scale" xmlns="http://www.w3.org/2000/svg"><line x1="46" y1="46" x2="614" y2="46" stroke="#16130F" stroke-width="2.2" stroke-linecap="round"/><path d="M614,46 l-9,-5 v10 z" fill="#16130F"/><line x1="46" y1="40" x2="46" y2="52" stroke="#C0511D" stroke-width="1.2" stroke-linecap="round"/><text x="46" y="66" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="8.5" font-weight="normal" text-anchor="middle" fill="#6B635A">300000 BC</text><line x1="234.1" y1="40" x2="234.1" y2="52" stroke="#C0511D" stroke-width="1.2" stroke-linecap="round"/><text x="234.1" y="66" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="8.5" font-weight="normal" text-anchor="middle" fill="#6B635A">200000 BC</text><line x1="422.2" y1="40" x2="422.2" y2="52" stroke="#C0511D" stroke-width="1.2" stroke-linecap="round"/><text x="422.2" y="66" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="8.5" font-weight="normal" text-anchor="middle" fill="#6B635A">100000 BC</text><line x1="614" y1="40" x2="614" y2="52" stroke="#C0511D" stroke-width="1.2" stroke-linecap="round"/><text x="614" y="66" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="8.5" font-weight="normal" text-anchor="middle" fill="#6B635A">AD 1969</text><line x1="604.28" y1="40" x2="604.28" y2="16" stroke="#16130F" stroke-width="1.4" stroke-linecap="round"/><circle cx="604.28" cy="46" r="3.4" fill="#16130F" stroke="none" stroke-width="1.6"/><text x="604.28" y="12" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#16130F">all of written history &rarr;</text></svg></div>
+
+  <div class="rules soft">Writing is about 5 thousand years old, so all
+  written history is the last <b>1.7%</b> of the line, at the right-hand end.</div>
+
+  <ol class="qs" start="1"><li><span class="qt">Measure the whole line in centimeters. Then work out how many centimeters the written part is. Show your working.</span><div class="work" style="height:1in"><span>Show your work</span></div></li><li><span class="qt">Nothing is marked on the left-hand nine tenths of that line. Does that mean nothing happened? Say what you think was going on.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+
+  <footer>
+    <span>Keep going on page 2 &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>All of it</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>The Last Five Thousand</h1>
+    <p class="sub">World History &middot; Page 2 of 5</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> The right-hand tip of page 1, stretched out. Measure it.
+  </div>
+
+
+  <div class="figrow"><svg class="inline" viewBox="0 0 660 96" width="660" height="96" role="img" aria-label="a timeline drawn to scale" xmlns="http://www.w3.org/2000/svg"><line x1="46" y1="46" x2="614" y2="46" stroke="#16130F" stroke-width="2.2" stroke-linecap="round"/><path d="M614,46 l-9,-5 v10 z" fill="#16130F"/><line x1="46" y1="40" x2="46" y2="52" stroke="#C0511D" stroke-width="1.2" stroke-linecap="round"/><text x="46" y="66" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="8.5" font-weight="normal" text-anchor="middle" fill="#6B635A">5000 BC</text><line x1="127.5" y1="40" x2="127.5" y2="52" stroke="#C0511D" stroke-width="1.2" stroke-linecap="round"/><text x="127.5" y="66" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="8.5" font-weight="normal" text-anchor="middle" fill="#6B635A">4000 BC</text><line x1="209.01" y1="40" x2="209.01" y2="52" stroke="#C0511D" stroke-width="1.2" stroke-linecap="round"/><text x="209.01" y="66" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="8.5" font-weight="normal" text-anchor="middle" fill="#6B635A">3000 BC</text><line x1="290.51" y1="40" x2="290.51" y2="52" stroke="#C0511D" stroke-width="1.2" stroke-linecap="round"/><text x="290.51" y="66" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="8.5" font-weight="normal" text-anchor="middle" fill="#6B635A">2000 BC</text><line x1="372.02" y1="40" x2="372.02" y2="52" stroke="#C0511D" stroke-width="1.2" stroke-linecap="round"/><text x="372.02" y="66" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="8.5" font-weight="normal" text-anchor="middle" fill="#6B635A">1000 BC</text><line x1="535.02" y1="40" x2="535.02" y2="52" stroke="#C0511D" stroke-width="1.2" stroke-linecap="round"/><text x="535.02" y="66" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="8.5" font-weight="normal" text-anchor="middle" fill="#6B635A">AD 1000</text><line x1="614" y1="40" x2="614" y2="52" stroke="#C0511D" stroke-width="1.2" stroke-linecap="round"/><text x="614" y="66" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="8.5" font-weight="normal" text-anchor="middle" fill="#6B635A">AD 1969</text><line x1="192.71" y1="40" x2="192.71" y2="16" stroke="#16130F" stroke-width="1.4" stroke-linecap="round"/><circle cx="192.71" cy="46" r="3.4" fill="#16130F" stroke="none" stroke-width="1.6"/><text x="192.71" y="12" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#16130F">first writing</text><line x1="244.87" y1="52" x2="244.87" y2="66" stroke="#16130F" stroke-width="1.4" stroke-linecap="round"/><circle cx="244.87" cy="46" r="3.4" fill="#16130F" stroke="none" stroke-width="1.6"/><text x="244.87" y="76" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#16130F">Great Pyramid</text><line x1="451.07" y1="40" x2="451.07" y2="16" stroke="#16130F" stroke-width="1.4" stroke-linecap="round"/><circle cx="451.07" cy="46" r="3.4" fill="#16130F" stroke="none" stroke-width="1.6"/><text x="451.07" y="12" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#16130F">Cleopatra</text><line x1="492.31" y1="52" x2="492.31" y2="66" stroke="#16130F" stroke-width="1.4" stroke-linecap="round"/><circle cx="492.31" cy="46" r="3.4" fill="#16130F" stroke="none" stroke-width="1.6"/><text x="492.31" y="76" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#16130F">Rome falls</text><line x1="614" y1="40" x2="614" y2="16" stroke="#16130F" stroke-width="1.4" stroke-linecap="round"/><circle cx="614" cy="46" r="3.4" fill="#16130F" stroke="none" stroke-width="1.6"/><text x="614" y="12" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#16130F">Moon</text></svg></div>
+
+  <table class="tbl gaps">
+    <thead><tr><th style="width:46%">From&hellip; to&hellip;</th><th>How many years?</th><th>How many cm on the line?</th></tr></thead>
+    <tbody>
+      <tr><td>The first writing &rarr; the Great Pyramid</td><td class="blank"></td><td class="blank"></td></tr>
+      <tr><td>The Great Pyramid &rarr; Cleopatra</td><td class="blank"></td><td class="blank"></td></tr>
+      <tr><td>Cleopatra &rarr; the Moon landing</td><td class="blank"></td><td class="blank"></td></tr>
+      <tr><td>Rome falls &rarr; now</td><td class="blank"></td><td class="blank"></td></tr>
+    </tbody>
+  </table>
+
+  <div class="rules soft">BC years count <b>down</b>: 500 BC is before 100 BC. There is <b>no year 0</b>:
+  1 BC is followed by AD 1. So 100 BC to AD 100 is <b>199</b> years, not 200.</div>
+
+  <ol class="qs" start="3"><li><span class="qt">How many years from 200 BC to AD 200?</span><div class="work" style="height:1.2in"><span>Show your working</span></div></li><li><span class="qt">Look at your second and third rows. Which gap is <b>bigger</b>? Write both numbers down before you answer.</span><div class="work" style="height:1.4in"><span>Show your work</span></div></li></ol>
+
+
+  <footer>
+    <span>Keep going on page 3 &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Five thousand</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>Cleopatra and the Rocket</h1>
+    <p class="sub">World History &middot; Page 3 of 5</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> You measured this. Say why it feels wrong.
+  </div>
+
+
+  <div class="rules"><b>Cleopatra lived nearer in time to the Moon landing than to the building of the
+  Great Pyramid.</b>
+  <div class="bigfacts">
+    <span>Pyramid &rarr; Cleopatra<br><b>2,530 years</b></span>
+    <span>Cleopatra &rarr; Moon landing<br><b>1,999 years</b></span>
+  </div>
+  The pyramid was already ancient when she was born.</div>
+
+  <ol class="qs" start="5"><li><span class="qt">Why do you think the pyramid and Cleopatra feel like they belong together, when they are further apart than she is from us?</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+
+  <footer>
+    <span>Two more overleaf &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Cleopatra</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>Two More About Ancient</h1>
+    <p class="sub">World History &middot; Page 4 of 5</p>
+  </header>
+
+
+
+
+  <ol class="qs" start="6"><li><span class="qt">Ancient Egypt lasted about 3,070 years. That is longer than the 1,999 years from its end to now. Say what that does to the word "ancient".</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Somebody says "the Egyptians built the pyramids and then Cleopatra ruled them". Nothing in that is false. Say what is wrong with it anyway.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+
+  <footer>
+    <span>One more overleaf &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Ancient</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>Your Own Line</h1>
+    <p class="sub">World History &middot; Page 5 of 5</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Draw a line for the last 100 years. Mark when you, a parent and a grandparent were born. Measure the gaps.
+  </div>
+
+
+  <div class="figrow"><svg class="inline" viewBox="0 0 574 178" width="574" height="178" role="img" aria-label="grid" xmlns="http://www.w3.org/2000/svg"><rect x="1" y="1" width="572" height="176" rx="0" fill="none" stroke="#16130F" stroke-width="1.8"/><line x1="23" y1="1" x2="23" y2="177" stroke="#bbb" stroke-width="0.8" stroke-linecap="round"/><line x1="45" y1="1" x2="45" y2="177" stroke="#bbb" stroke-width="0.8" stroke-linecap="round"/><line x1="67" y1="1" x2="67" y2="177" stroke="#bbb" stroke-width="0.8" stroke-linecap="round"/><line x1="89" y1="1" x2="89" y2="177" stroke="#bbb" stroke-width="0.8" stroke-linecap="round"/><line x1="111" y1="1" x2="111" y2="177" stroke="#bbb" stroke-width="0.8" stroke-linecap="round"/><line x1="133" y1="1" x2="133" y2="177" stroke="#bbb" stroke-width="0.8" stroke-linecap="round"/><line x1="155" y1="1" x2="155" y2="177" stroke="#bbb" stroke-width="0.8" stroke-linecap="round"/><line x1="177" y1="1" x2="177" y2="177" stroke="#bbb" stroke-width="0.8" stroke-linecap="round"/><line x1="199" y1="1" x2="199" y2="177" stroke="#bbb" stroke-width="0.8" stroke-linecap="round"/><line x1="221" y1="1" x2="221" y2="177" stroke="#bbb" stroke-width="0.8" stroke-linecap="round"/><line x1="243" y1="1" x2="243" y2="177" stroke="#bbb" stroke-width="0.8" stroke-linecap="round"/><line x1="265" y1="1" x2="265" y2="177" stroke="#bbb" stroke-width="0.8" stroke-linecap="round"/><line x1="287" y1="1" x2="287" y2="177" stroke="#bbb" stroke-width="0.8" stroke-linecap="round"/><line x1="309" y1="1" x2="309" y2="177" stroke="#bbb" stroke-width="0.8" stroke-linecap="round"/><line x1="331" y1="1" x2="331" y2="177" stroke="#bbb" stroke-width="0.8" stroke-linecap="round"/><line x1="353" y1="1" x2="353" y2="177" stroke="#bbb" stroke-width="0.8" stroke-linecap="round"/><line x1="375" y1="1" x2="375" y2="177" stroke="#bbb" stroke-width="0.8" stroke-linecap="round"/><line x1="397" y1="1" x2="397" y2="177" stroke="#bbb" stroke-width="0.8" stroke-linecap="round"/><line x1="419" y1="1" x2="419" y2="177" stroke="#bbb" stroke-width="0.8" stroke-linecap="round"/><line x1="441" y1="1" x2="441" y2="177" stroke="#bbb" stroke-width="0.8" stroke-linecap="round"/><line x1="463" y1="1" x2="463" y2="177" stroke="#bbb" stroke-width="0.8" stroke-linecap="round"/><line x1="485" y1="1" x2="485" y2="177" stroke="#bbb" stroke-width="0.8" stroke-linecap="round"/><line x1="507" y1="1" x2="507" y2="177" stroke="#bbb" stroke-width="0.8" stroke-linecap="round"/><line x1="529" y1="1" x2="529" y2="177" stroke="#bbb" stroke-width="0.8" stroke-linecap="round"/><line x1="551" y1="1" x2="551" y2="177" stroke="#bbb" stroke-width="0.8" stroke-linecap="round"/><line x1="1" y1="23" x2="573" y2="23" stroke="#bbb" stroke-width="0.8" stroke-linecap="round"/><line x1="1" y1="45" x2="573" y2="45" stroke="#bbb" stroke-width="0.8" stroke-linecap="round"/><line x1="1" y1="67" x2="573" y2="67" stroke="#bbb" stroke-width="0.8" stroke-linecap="round"/><line x1="1" y1="89" x2="573" y2="89" stroke="#bbb" stroke-width="0.8" stroke-linecap="round"/><line x1="1" y1="111" x2="573" y2="111" stroke="#bbb" stroke-width="0.8" stroke-linecap="round"/><line x1="1" y1="133" x2="573" y2="133" stroke="#bbb" stroke-width="0.8" stroke-linecap="round"/><line x1="1" y1="155" x2="573" y2="155" stroke="#bbb" stroke-width="0.8" stroke-linecap="round"/></svg></div>
+
+  <ol class="qs" start="8"><li><span class="qt">How many of your lifetimes fit between now and Cleopatra? Between now and the Great Pyramid?</span><div class="work" style="height:0.9in"><span>Show your work</span></div></li><li><span class="qt">A grandparent remembers things you have only read about. Say what that means about how far back "remembered" history actually reaches.</span><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Everything before writing is on page 1 and none of it is on page 2. Write down one thing you would want to know about those people, and say who you would ask.</span><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+
+  <footer>
+    <span>Answer key overleaf</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Your own line</span>
+  </footer>
+</div>
+
+
+<div style="page-break-before:always"></div>
+
+
+<div class="page ">
+  <header>
+    
+    <h1>A Switch That Flips Another Switch</h1>
+    <p class="sub">A Switch That Flips Another Switch</p>
+  </header>
+  <div class="nameline">
+    <span>Name</span>
+    <span class="short">Date</span>
+  </div>
+  <div class="directions">
+    <b>DIRECTIONS:</b> Read how a switch can flip a switch, then trace the chains overleaf.
+  </div>
+
+<div class="plan" style="display:flex;align-items:stretch;gap:.08in;margin:.02in 0 .1in"><div style="flex:1;display:flex;align-items:center;gap:.07in;border:1.8px solid var(--ink);border-radius:5px;padding:.05in .08in"><span style="flex:0 0 auto;display:inline-block;width:.26in;height:.26in;line-height:.26in;border-radius:50%;background:var(--ink);color:#fff;text-align:center;font-weight:700;font-size:11pt">1</span><span style="font-size:10.5pt;font-weight:700;line-height:1.2">Read how a switch flips a switch</span></div><div style="align-self:center;font-size:16pt;font-weight:700;color:var(--ink)">&rarr;</div><div style="flex:1;display:flex;align-items:center;gap:.07in;border:1.8px solid var(--ink);border-radius:5px;padding:.05in .08in"><span style="flex:0 0 auto;display:inline-block;width:.26in;height:.26in;line-height:.26in;border-radius:50%;background:var(--ink);color:#fff;text-align:center;font-weight:700;font-size:11pt">2</span><span style="font-size:10.5pt;font-weight:700;line-height:1.2">Turn over: trace the chains</span></div></div>
+  <div class="pic"><svg class="" viewBox="0 0 470 176" width="470" height="176" role="img" aria-label="a finger-worked switch with two ends beside an electrically worked switch with three" xmlns="http://www.w3.org/2000/svg"><text x="112" y="16" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="10" font-weight="700" text-anchor="middle" fill="#16130F">worked by a finger</text><rect x="24" y="34" width="176" height="108" rx="0" fill="none" stroke="#16130F" stroke-width="1" stroke-dasharray="4 3"/><line x1="40" y1="92" x2="76" y2="92" stroke="#16130F" stroke-width="1.5" stroke-linecap="round"/><circle cx="78" cy="92" r="2.2" fill="#16130F" stroke="#16130F" stroke-width="1"/><circle cx="112" cy="92" r="2.2" fill="none" stroke="#16130F" stroke-width="1"/><line x1="78" y1="92" x2="108" y2="78" stroke="#16130F" stroke-width="2" stroke-linecap="round"/><line x1="114" y1="92" x2="150" y2="92" stroke="#16130F" stroke-width="1.5" stroke-linecap="round"/><circle cx="166" cy="92" r="12" fill="none" stroke="#16130F" stroke-width="1.5"/><line x1="181" y1="92" x2="186" y2="92" stroke="#16130F" stroke-width="0.9" stroke-linecap="round"/><line x1="173.5" y1="104.99" x2="176" y2="109.32" stroke="#16130F" stroke-width="0.9" stroke-linecap="round"/><line x1="158.5" y1="104.99" x2="156" y2="109.32" stroke="#16130F" stroke-width="0.9" stroke-linecap="round"/><line x1="151" y1="92" x2="146" y2="92" stroke="#16130F" stroke-width="0.9" stroke-linecap="round"/><line x1="158.5" y1="79.01" x2="156" y2="74.68" stroke="#16130F" stroke-width="0.9" stroke-linecap="round"/><line x1="173.5" y1="79.01" x2="176" y2="74.68" stroke="#16130F" stroke-width="0.9" stroke-linecap="round"/><path d="M 96 56 q 6 -12 16 -8 q 8 3 4 12" fill="none" stroke="#C0511D" stroke-width="1.4"/><text x="112" y="128" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="8.3" font-weight="normal" text-anchor="middle" fill="#16130F">two ends. Something alive has to touch it.</text><text x="348" y="16" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="10" font-weight="700" text-anchor="middle" fill="#16130F">worked by electricity</text><rect x="252" y="34" width="200" height="108" rx="0" fill="none" stroke="#16130F" stroke-width="1" stroke-dasharray="4 3"/><rect x="300" y="62" width="62" height="46" rx="0" fill="none" stroke="#16130F" stroke-width="1.5"/><circle cx="313" cy="96" r="5" fill="none" stroke="#16130F" stroke-width="0.9"/><circle cx="313" cy="96" r="4.1" fill="none" stroke="#16130F" stroke-width="0.9"/><circle cx="313" cy="96" r="3.2" fill="none" stroke="#16130F" stroke-width="0.9"/><circle cx="313" cy="96" r="2.3" fill="none" stroke="#16130F" stroke-width="0.9"/><circle cx="330" cy="77" r="2.2" fill="#16130F" stroke="#16130F" stroke-width="1"/><circle cx="352" cy="77" r="2.2" fill="none" stroke="#16130F" stroke-width="1"/><line x1="330" y1="77" x2="352" y2="77" stroke="#16130F" stroke-width="2" stroke-linecap="round"/><line x1="313" y1="90" x2="338" y2="81" stroke="#16130F" stroke-width="0.8" stroke-dasharray="2 2" stroke-linecap="round"/><line x1="268" y1="77" x2="300" y2="77" stroke="#16130F" stroke-width="1.5" stroke-linecap="round"/><text x="266" y="71" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="8" font-weight="700" text-anchor="end" fill="#16130F">in</text><line x1="362" y1="77" x2="404" y2="77" stroke="#16130F" stroke-width="1.5" stroke-linecap="round"/><text x="408" y="80" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="8" font-weight="700" text-anchor="start" fill="#16130F">out</text><line x1="268" y1="96" x2="306" y2="96" stroke="#16130F" stroke-width="1.5" stroke-linecap="round"/><text x="266" y="99" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="8" font-weight="700" text-anchor="end" fill="#16130F">flip</text><text x="352" y="128" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="8.3" font-weight="normal" text-anchor="middle" fill="#16130F">three ends. Nothing has to touch it.</text><text x="352" y="160" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="9" font-weight="700" text-anchor="middle" fill="#16130F">that third wire is where computers come from</text></svg></div>
+  <p class="note">A finger switch has <b>two ends</b>, and someone has to press it.</p>
+  <p class="note">Give it a <b>third wire</b>, so current in that wire closes it. The oldest kind is a <b>relay</b>: the third wire is a coil that turns into a magnet and pulls an iron arm across. The first computers used thousands.</p>
+  <div class="box"><b>What just happened</b><p>The thing that flips the switch is now <b>the same kind of thing that comes out of one</b>: electricity. So one switch&rsquo;s <i>out</i> can work the next one&rsquo;s <i>flip</i>, in as long a chain as you like, with no finger anywhere. The rest of this pack is this one idea, stacked.</p></div>
+  <p class="q"><b>A transistor</b> is the same thing with nothing moving inside: in, out, and a third wire that decides. With nothing to move, it can flip billions of times a second.</p>
+
+  <footer>
+    <span>one idea, three wires</span>
+    <span class="brand">Kitchen Table</span>
+    <span>A Switch That Flips Another Switch</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>Follow the Signal</h1>
+    <p class="sub">A Switch That Flips Another Switch</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Trace each chain with a finger, one switch at a time. Write ON or OFF.
+  </div>
+
+  <div class="pic"><svg class="" viewBox="0 0 470 118" width="470" height="118" role="img" aria-label="three electric switches in a chain, each one worked by the output of the one before" xmlns="http://www.w3.org/2000/svg"><text x="16" y="44" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="8.5" font-weight="700" text-anchor="middle" fill="#16130F">in</text><rect x="40" y="24" width="62" height="46" rx="0" fill="none" stroke="#16130F" stroke-width="1.5"/><circle cx="53" cy="58" r="5" fill="none" stroke="#16130F" stroke-width="0.9"/><circle cx="53" cy="58" r="4.1" fill="none" stroke="#16130F" stroke-width="0.9"/><circle cx="53" cy="58" r="3.2" fill="none" stroke="#16130F" stroke-width="0.9"/><circle cx="53" cy="58" r="2.3" fill="none" stroke="#16130F" stroke-width="0.9"/><circle cx="70" cy="39" r="2.2" fill="#16130F" stroke="#16130F" stroke-width="1"/><circle cx="92" cy="39" r="2.2" fill="none" stroke="#16130F" stroke-width="1"/><line x1="70" y1="39" x2="92" y2="39" stroke="#16130F" stroke-width="2" stroke-linecap="round"/><line x1="53" y1="52" x2="78" y2="43" stroke="#16130F" stroke-width="0.8" stroke-dasharray="2 2" stroke-linecap="round"/><text x="71" y="18" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="8.5" font-weight="700" text-anchor="middle" fill="#16130F">switch 1</text><line x1="22" y1="39" x2="40" y2="39" stroke="#16130F" stroke-width="1.4" stroke-linecap="round"/><rect x="178" y="24" width="62" height="46" rx="0" fill="none" stroke="#16130F" stroke-width="1.5"/><circle cx="191" cy="58" r="5" fill="none" stroke="#16130F" stroke-width="0.9"/><circle cx="191" cy="58" r="4.1" fill="none" stroke="#16130F" stroke-width="0.9"/><circle cx="191" cy="58" r="3.2" fill="none" stroke="#16130F" stroke-width="0.9"/><circle cx="191" cy="58" r="2.3" fill="none" stroke="#16130F" stroke-width="0.9"/><circle cx="208" cy="39" r="2.2" fill="#16130F" stroke="#16130F" stroke-width="1"/><circle cx="230" cy="39" r="2.2" fill="none" stroke="#16130F" stroke-width="1"/><line x1="208" y1="39" x2="228" y2="28" stroke="#16130F" stroke-width="2" stroke-linecap="round"/><text x="209" y="18" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="8.5" font-weight="700" text-anchor="middle" fill="#16130F">switch 2</text><line x1="102" y1="39" x2="128" y2="39" stroke="#16130F" stroke-width="1.4" stroke-linecap="round"/><line x1="128" y1="39" x2="128" y2="58" stroke="#16130F" stroke-width="1.4" stroke-linecap="round"/><line x1="128" y1="58" x2="184" y2="58" stroke="#16130F" stroke-width="1.4" stroke-linecap="round"/><line x1="178" y1="39" x2="166" y2="39" stroke="#16130F" stroke-width="1.4" stroke-linecap="round"/><text x="154" y="34" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="7.5" font-weight="normal" text-anchor="middle" fill="#6B635A">in</text><rect x="316" y="24" width="62" height="46" rx="0" fill="none" stroke="#16130F" stroke-width="1.5"/><circle cx="329" cy="58" r="5" fill="none" stroke="#16130F" stroke-width="0.9"/><circle cx="329" cy="58" r="4.1" fill="none" stroke="#16130F" stroke-width="0.9"/><circle cx="329" cy="58" r="3.2" fill="none" stroke="#16130F" stroke-width="0.9"/><circle cx="329" cy="58" r="2.3" fill="none" stroke="#16130F" stroke-width="0.9"/><circle cx="346" cy="39" r="2.2" fill="#16130F" stroke="#16130F" stroke-width="1"/><circle cx="368" cy="39" r="2.2" fill="none" stroke="#16130F" stroke-width="1"/><line x1="346" y1="39" x2="368" y2="39" stroke="#16130F" stroke-width="2" stroke-linecap="round"/><line x1="329" y1="52" x2="354" y2="43" stroke="#16130F" stroke-width="0.8" stroke-dasharray="2 2" stroke-linecap="round"/><text x="347" y="18" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="8.5" font-weight="700" text-anchor="middle" fill="#16130F">switch 3</text><line x1="240" y1="39" x2="266" y2="39" stroke="#16130F" stroke-width="1.4" stroke-linecap="round"/><line x1="266" y1="39" x2="266" y2="58" stroke="#16130F" stroke-width="1.4" stroke-linecap="round"/><line x1="266" y1="58" x2="322" y2="58" stroke="#16130F" stroke-width="1.4" stroke-linecap="round"/><line x1="316" y1="39" x2="304" y2="39" stroke="#16130F" stroke-width="1.4" stroke-linecap="round"/><text x="292" y="34" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="7.5" font-weight="normal" text-anchor="middle" fill="#6B635A">in</text><line x1="378" y1="39" x2="408" y2="39" stroke="#16130F" stroke-width="1.5" stroke-linecap="round"/><circle cx="422" cy="39" r="11" fill="none" stroke="#16130F" stroke-width="1.5"/><text x="422" y="100" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="8" font-weight="normal" text-anchor="middle" fill="#16130F">lamp</text><text x="235" y="112" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="9" font-weight="700" text-anchor="middle" fill="#16130F">nobody is touching any of it</text></svg></div>
+
+  <h3 class="h">Now a chain that flips</h3>
+  <p class="note">A <b>flipper</b> is built the other way round. Current in, nothing out. Nothing in, current out.</p>
+  <table class="tr"><tr><th>Goes in</th><th>How many flippers</th><th>Comes out</th></tr>
+    <tr class="wk"><td><b>ON</b></td><td>2</td><td><span class="wktag">Done for you</span> OFF, ON → <b>ON</b></td></tr>
+    <tr><td><b>ON</b></td><td>3</td><td></td></tr>
+    <tr><td><b>OFF</b></td><td>4</td><td></td></tr>
+    <tr><td><b>ON</b></td><td>5</td><td></td></tr>
+  </table>
+  <p class="q"><b>Look at your answers.</b> What about the <i>number</i> of flippers decides what comes out? Use it on a chain of a hundred.</p>
+
+  <h3 class="h">Two more things a wire can do</h3>
+  <div class="two">
+    <div class="pic"><svg class="" viewBox="0 0 300 130" width="300" height="130" role="img" aria-label="one switch output feeding three separate switch inputs" xmlns="http://www.w3.org/2000/svg"><rect x="14" y="42" width="62" height="46" rx="0" fill="none" stroke="#16130F" stroke-width="1.5"/><circle cx="27" cy="76" r="5" fill="none" stroke="#16130F" stroke-width="0.9"/><circle cx="27" cy="76" r="4.1" fill="none" stroke="#16130F" stroke-width="0.9"/><circle cx="27" cy="76" r="3.2" fill="none" stroke="#16130F" stroke-width="0.9"/><circle cx="27" cy="76" r="2.3" fill="none" stroke="#16130F" stroke-width="0.9"/><circle cx="44" cy="57" r="2.2" fill="#16130F" stroke="#16130F" stroke-width="1"/><circle cx="66" cy="57" r="2.2" fill="none" stroke="#16130F" stroke-width="1"/><line x1="44" y1="57" x2="66" y2="57" stroke="#16130F" stroke-width="2" stroke-linecap="round"/><line x1="27" y1="70" x2="52" y2="61" stroke="#16130F" stroke-width="0.8" stroke-dasharray="2 2" stroke-linecap="round"/><line x1="76" y1="57" x2="100" y2="57" stroke="#16130F" stroke-width="1.5" stroke-linecap="round"/><line x1="100" y1="30" x2="100" y2="108" stroke="#16130F" stroke-width="1.5" stroke-linecap="round"/><circle cx="100" cy="57" r="2.6" fill="#16130F" stroke="#16130F" stroke-width="1"/><line x1="100" y1="30" x2="134" y2="30" stroke="#16130F" stroke-width="1.4" stroke-linecap="round"/><path d="M 138 30 l -7 -4 l 0 8 Z" fill="#16130F"/><text x="144" y="33" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="8" font-weight="normal" text-anchor="start" fill="#16130F">to another switch</text><line x1="100" y1="68" x2="134" y2="68" stroke="#16130F" stroke-width="1.4" stroke-linecap="round"/><path d="M 138 68 l -7 -4 l 0 8 Z" fill="#16130F"/><text x="144" y="71" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="8" font-weight="normal" text-anchor="start" fill="#16130F">to another switch</text><line x1="100" y1="108" x2="134" y2="108" stroke="#16130F" stroke-width="1.4" stroke-linecap="round"/><path d="M 138 108 l -7 -4 l 0 8 Z" fill="#16130F"/><text x="144" y="111" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="8" font-weight="normal" text-anchor="start" fill="#16130F">to another switch</text><text x="150" y="126" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="8.4" font-weight="normal" text-anchor="middle" fill="#16130F">one output, three inputs — this is why a machine can grow</text></svg></div>
+    <div class="side">
+      <p><b>One out, many flips.</b> Split a wire and one output works three switches at once.</p>
+      <p><b>Backwards.</b> What if a switch&rsquo;s output ran back to the flip wire of one before it? Have a think. Sheet 40 has the answer.</p>
+    </div>
+  </div>
+
+  <footer>
+    <span>4 chains to trace</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Follow the Signal</span>
+  </footer>
+</div>
+
+
+<div style="page-break-before:always"></div>
+
+
+<div class="page ">
+  <header>
+    
+    <h1>The Prime Hunt</h1>
+    <p class="sub">Grade 4 · Puzzles · Page 1 of 2</p>
+  </header>
+  <div class="nameline">
+    <span>Name</span>
+    <span class="short">Date</span>
+  </div>
+  <div class="directions">
+    <b>DIRECTIONS:</b> Cross out 1. Circle <b>2</b> and cross out its other multiples. Do the same for <b>3</b>, <b>5</b> and <b>7</b>. What is left is prime.
+  </div>
+
+
+  <table class="tbl hundred" style="margin:10px auto">
+    <tr><td class="sv-x sv-done">1</td><td class="sv-o sv-done"><span>2</span></td><td class="sv-done">3</td><td class="sv-x sv-done">4</td><td class="sv-done">5</td><td class="sv-x sv-done">6</td><td class="sv-done">7</td><td class="sv-x sv-done">8</td><td class="sv-done">9</td><td class="sv-x sv-done">10</td></tr>
+    <tr><td>11</td><td>12</td><td>13</td><td>14</td><td>15</td><td>16</td><td>17</td><td>18</td><td>19</td><td>20</td></tr>
+    <tr><td>21</td><td>22</td><td>23</td><td>24</td><td>25</td><td>26</td><td>27</td><td>28</td><td>29</td><td>30</td></tr>
+    <tr><td>31</td><td>32</td><td>33</td><td>34</td><td>35</td><td>36</td><td>37</td><td>38</td><td>39</td><td>40</td></tr>
+    <tr><td>41</td><td>42</td><td>43</td><td>44</td><td>45</td><td>46</td><td>47</td><td>48</td><td>49</td><td>50</td></tr>
+    <tr><td>51</td><td>52</td><td>53</td><td>54</td><td>55</td><td>56</td><td>57</td><td>58</td><td>59</td><td>60</td></tr>
+    <tr><td>61</td><td>62</td><td>63</td><td>64</td><td>65</td><td>66</td><td>67</td><td>68</td><td>69</td><td>70</td></tr>
+    <tr><td>71</td><td>72</td><td>73</td><td>74</td><td>75</td><td>76</td><td>77</td><td>78</td><td>79</td><td>80</td></tr>
+    <tr><td>81</td><td>82</td><td>83</td><td>84</td><td>85</td><td>86</td><td>87</td><td>88</td><td>89</td><td>90</td></tr>
+    <tr><td>91</td><td>92</td><td>93</td><td>94</td><td>95</td><td>96</td><td>97</td><td>98</td><td>99</td><td>100</td></tr>
+  </table>
+  <div class="sv-note"><span class="sv-tag">Done for you</span> 1 crossed out &middot; 2 circled &middot;
+  4, 6, 8, 10 crossed out (multiples of 2) &mdash; carry on with 12, 14, 16&hellip;</div>
+
+  <ol class="qs" start="1"><li><span class="qt">How many primes are there under 100? Count the ones still standing.</span><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Keep going on page 2 →</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Prime hunt</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>The Prime Hunt — What You Found</h1>
+    <p class="sub">Grade 4 · Puzzles · Page 2 of 2</p>
+  </header>
+
+
+
+<ol class="qs" start="2"><li><span class="qt">Look at the crossed-out numbers. Describe the <b>pattern</b> the multiples of 2 make on the chart, and the pattern the multiples of 5 make.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">2 is the only even prime. Explain why there cannot be another one.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Find two primes that differ by 2 — like 11 and 13. These are called <b>twin primes</b>. List three more pairs.</span><div class="write"></div><div class="write"></div></li><li><span class="qt">Between 1 and 50 there are fifteen primes. Between 50 and 100 there are only ten. What does that suggest happens to primes as numbers get bigger?</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Score: ______ / 5</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Prime hunt</span>
+  </footer>
+</div>
+
+
+<div style="page-break-before:always"></div>
+
+
+<div class="page ">
+  <header>
+    
+    <h1>Five Vowels, One Sound Each</h1>
+    <p class="sub">Spanish · Page 1 of 2</p>
+  </header>
+  <div class="nameline">
+    <span>Name</span>
+    <span class="short">Date</span>
+  </div>
+  <div class="directions">
+    <b>DIRECTIONS:</b> Spanish has five vowel letters and <b>five sounds</b>. Say each word in the table using them.
+  </div>
+
+<div class="note" style="margin-top:0"><b>Say <i>though, through, tough, thought</i>.</b> Same letters, different sounds. Spanish never does that: each vowel always says the sound in the table.</div><div style="display:flex;gap:26px;justify-content:center;align-items:flex-end;margin:6px 0 4px">
+    <div style="text-align:center"><svg class="" viewBox="0 0 220 77" width="220" height="77" role="img" aria-label="Spanish: a dot for every sound each letter can make" xmlns="http://www.w3.org/2000/svg"><text x="22" y="70" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="15" font-weight="bold" text-anchor="middle" fill="#16130F">a</text><line x1="7.92" y1="55" x2="36.08" y2="55" stroke="#16130F" stroke-width="1.6" stroke-linecap="round"/><circle cx="22" cy="43" r="5.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><text x="66" y="70" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="15" font-weight="bold" text-anchor="middle" fill="#16130F">e</text><line x1="51.92" y1="55" x2="80.08" y2="55" stroke="#16130F" stroke-width="1.6" stroke-linecap="round"/><circle cx="66" cy="43" r="5.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><text x="110" y="70" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="15" font-weight="bold" text-anchor="middle" fill="#16130F">i</text><line x1="95.92" y1="55" x2="124.08" y2="55" stroke="#16130F" stroke-width="1.6" stroke-linecap="round"/><circle cx="110" cy="43" r="5.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><text x="154" y="70" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="15" font-weight="bold" text-anchor="middle" fill="#16130F">o</text><line x1="139.92" y1="55" x2="168.08" y2="55" stroke="#16130F" stroke-width="1.6" stroke-linecap="round"/><circle cx="154" cy="43" r="5.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><text x="198" y="70" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="15" font-weight="bold" text-anchor="middle" fill="#16130F">u</text><line x1="183.92" y1="55" x2="212.08" y2="55" stroke="#16130F" stroke-width="1.6" stroke-linecap="round"/><circle cx="198" cy="43" r="5.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><text x="110" y="14" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="11" font-weight="normal" text-anchor="middle" fill="#6B635A">Spanish</text></svg>
+      <div style="font-size:10pt;color:var(--muted)">five letters &middot; five sounds</div></div>
+    <div style="text-align:center"><svg class="" viewBox="0 0 220 145" width="220" height="145" role="img" aria-label="English: a dot for every sound each letter can make" xmlns="http://www.w3.org/2000/svg"><text x="22" y="138" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="15" font-weight="bold" text-anchor="middle" fill="#16130F">a</text><line x1="7.92" y1="123" x2="36.08" y2="123" stroke="#16130F" stroke-width="1.6" stroke-linecap="round"/><circle cx="22" cy="111" r="5.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><circle cx="22" cy="94" r="5.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><circle cx="22" cy="77" r="5.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><circle cx="22" cy="60" r="5.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><circle cx="22" cy="43" r="5.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><text x="66" y="138" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="15" font-weight="bold" text-anchor="middle" fill="#16130F">e</text><line x1="51.92" y1="123" x2="80.08" y2="123" stroke="#16130F" stroke-width="1.6" stroke-linecap="round"/><circle cx="66" cy="111" r="5.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><circle cx="66" cy="94" r="5.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><circle cx="66" cy="77" r="5.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><circle cx="66" cy="60" r="5.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><text x="110" y="138" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="15" font-weight="bold" text-anchor="middle" fill="#16130F">i</text><line x1="95.92" y1="123" x2="124.08" y2="123" stroke="#16130F" stroke-width="1.6" stroke-linecap="round"/><circle cx="110" cy="111" r="5.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><circle cx="110" cy="94" r="5.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><circle cx="110" cy="77" r="5.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><circle cx="110" cy="60" r="5.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><text x="154" y="138" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="15" font-weight="bold" text-anchor="middle" fill="#16130F">o</text><line x1="139.92" y1="123" x2="168.08" y2="123" stroke="#16130F" stroke-width="1.6" stroke-linecap="round"/><circle cx="154" cy="111" r="5.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><circle cx="154" cy="94" r="5.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><circle cx="154" cy="77" r="5.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><circle cx="154" cy="60" r="5.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><circle cx="154" cy="43" r="5.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><text x="198" y="138" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="15" font-weight="bold" text-anchor="middle" fill="#16130F">u</text><line x1="183.92" y1="123" x2="212.08" y2="123" stroke="#16130F" stroke-width="1.6" stroke-linecap="round"/><circle cx="198" cy="111" r="5.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><circle cx="198" cy="94" r="5.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><circle cx="198" cy="77" r="5.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><circle cx="198" cy="60" r="5.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><text x="110" y="14" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="11" font-weight="normal" text-anchor="middle" fill="#6B635A">English</text></svg>
+      <div style="font-size:10pt;color:var(--muted)">five letters &middot; twenty-two sounds</div></div>
+  </div>
+  <table class="sp"><tr><th>Letter</th><th>Always sounds like</th><th>A Spanish word</th><th>Say it</th></tr>
+  <tr><td><span class="es">a</span></td><td>the a in <i>father</i></td><td><span class="es">casa</span> (house)</td><td class="b"></td></tr><tr><td><span class="es">e</span></td><td>the e in <i>bed</i></td><td><span class="es">mesa</span> (table)</td><td class="b"></td></tr><tr><td><span class="es">i</span></td><td>the ee in <i>see</i></td><td><span class="es">libro</span> (book)</td><td class="b"></td></tr><tr><td><span class="es">o</span></td><td>the o in <i>more</i></td><td><span class="es">gato</span> (cat)</td><td class="b"></td></tr><tr><td><span class="es">u</span></td><td>the oo in <i>food</i></td><td><span class="es">luna</span> (moon)</td><td class="b"></td></tr>
+  </table><ol class="qs" start="1"><li><span class="qt">Read these aloud using only the table, then write how each one sounds: <span class="es">mano · dedo · pino · burro · lápiz</span></span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Keep going on page 2 →</span>
+    <span class="brand">Kitchen Table</span>
+    <span>The vowels</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>Five Vowels, One Sound Each — Questions</h1>
+    <p class="sub">Spanish · Page 2 of 2</p>
+  </header>
+
+
+
+<ol class="qs" start="2"><li><span class="qt">You have never seen the word <span class="es">murciélago</span> before. Can you say it? Explain why you can, even though you have no idea what it means.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Write down three English words where the same vowel letter makes different sounds. Then say why that cannot happen in Spanish.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Which do you think is harder for a Spanish child learning English, or an English child learning Spanish? Give a reason.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Score: ______ / 4</span>
+    <span class="brand">Kitchen Table</span>
+    <span>The vowels</span>
+  </footer>
+</div>
+
+</body></html>

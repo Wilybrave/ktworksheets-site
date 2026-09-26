@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="sheet-kind" content="worksheet">
+<title>Past One Hundred</title>
+<style>
+  @page { size: letter portrait; margin: 0.4in 0.45in; }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  :root {
+    --ink:    #16130F;
+    --muted:  #6B635A;
+    --rule:   #CFC3B2;
+    --guide:  #BCAE9C;
+    --accent: #C0511D;
+    --tint:   #F7EDE4;
+    --slate:  #2E5A78;
+    --tintslate: #E9EFF4;
+    --deep:   #2C4A45;
+    --tintdeep: #ECF1EF;
+  }
+
+  body {
+    font-family: Quicksand, 'URW Gothic', 'Century Gothic', sans-serif;
+    color: #000; background: #fff;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+
+  /* ORDER MATTERS. This generic rule must come BEFORE the @media screen block:
+   * both selectors have the same specificity, so whichever is declared last
+   * wins. With it after, it overrode the screen width and the preview stretched
+   * to the viewport — rows scaled up and pages measured 16in tall. Print was
+   * always fine (@media screen doesn't apply), but the on-screen proof lied. */
+  .page { width: 100%; }
+  .page + .page { page-break-before: always; }
+
+  @media screen {
+    body { padding: 0.4in; background: #ddd; }
+    .page {
+      background: #fff; padding: 0.4in 0.45in;
+      width: 8.5in; min-height: 11in;
+      margin: 0 auto 22px; box-shadow: 0 2px 10px rgba(0,0,0,.3);
+    }
+  }
+
+  header {
+    display: flex; align-items: center; gap: 16px;
+    border-bottom: 3px solid var(--slate); padding-bottom: 7px; margin-bottom: 2px;
+  }
+  .bigletter { font-size: 38pt; font-weight: 700; line-height: 1; letter-spacing: .02em; }
+  .htext { flex: 1; }
+  h1 { font-size: 14pt; font-weight: 700; margin: 0 0 2px; }
+  .sub { font-size: 10pt; color: var(--muted); margin: 0; }
+  .nameline {
+    font-size: 9.5pt; color: var(--muted);
+    border-bottom: 1px solid var(--ink); width: 2in;
+    padding-bottom: 1px; align-self: flex-end;
+  }
+
+  .label { font-size: 11.5pt; font-weight: 700; margin: 9px 0 1px; }
+  .label span { font-weight: 400; font-size: 10pt; color: var(--muted); }
+
+  .row { display: block; width: 100%; height: auto; margin-bottom: .06in; }
+  /* Rows that follow the header directly would otherwise jam against its rule. */
+  header + .row { margin-top: .12in; }
+
+  .words {
+    margin-top: 10px; padding-top: 7px; border-top: 1px solid var(--rule);
+    font-size: 12.5pt;
+    display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap;
+  }
+  .words b { font-size: 14pt; }
+  .words em { font-style: normal; color: var(--muted); }
+
+  /* The wordmark rides in the footer line that was already there — see the note
+     in lib/sheet.js. No height, upright, a size down, and never louder than the
+     two slots it sits between. */
+  .brand { font-style: normal; font-size: 7pt; letter-spacing: .04em;
+    color: var(--accent); align-self: center; }
+
+  footer {
+    margin-top: 7px; font-size: 8.5pt; color: var(--muted);
+    display: flex; justify-content: space-between;
+  }
+
+  .chart { display: grid; grid-template-columns: repeat(6, 1fr); gap: 7px; margin-top: 14px; }
+  .cell {
+    border: 2px solid var(--slate); border-radius: 8px; height: 1.35in;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .page.key { background: #fcfcfa; }
+  .page.key header { border-bottom-style: double; border-bottom-width: 3px; }
+  .keylist { font-size: 11pt; line-height: 1.7; }
+  .keylist p { margin: .02in 0; }
+  .keynote { border: 1.5px solid var(--deep); border-radius: 8px; padding: .07in .12in;
+    margin: .1in 0 0; font-size: 10pt; line-height: 1.5; }
+
+  .note { border: 1.5px solid var(--deep); border-radius: 8px; padding: .07in .12in;
+    margin: .06in 0 .12in; font-size: 10pt; color: var(--ink); }
+  .tasknote { border: 1.5px solid var(--deep); border-radius: 8px; padding: .07in .12in;
+    margin: .12in 0 0; font-size: 10.5pt; }
+  svg { display: block; }
+  svg.inline { display: inline-block; vertical-align: middle; }
+
+  .brow { display: flex; align-items: center; gap: .2in;
+    border-bottom: 1px solid var(--rule); padding: .08in 0; }
+  /* At u:7 a ones-cube is seven pixels across and nine of them next to nine
+     tens-bars is a gray smudge. Eleven is the smallest that a six-year-old can
+     actually count without leaning in. */
+  /*
+   * THE PICTURE TAKES THE WIDTH IT NEEDS. This was a fixed 3.2in column, and
+   * the drawings are sized by how many blocks are in them, so the wide ones ran
+   * 85pt past the column and under the answer boxes. A fixed column for a
+   * variable-width drawing is a collision waiting for the right number.
+   *
+   * Now the picture is its own size and the slots take what is left, with a
+   * minimum so they never get squeezed into a stack.
+   */
+  .bpic { flex: 0 1 auto; min-width: 0; }
+  /*
+   * THE SLOTS ARE CAPPED SO THEY WRAP. Left to run in one line they took 3in
+   * of a 7.6in page for three boxes and four words, and the drawing — the part
+   * being read — got what was left. Capped, "so the number is" drops onto a
+   * second line under the two boxes, the group occupies about 1.9in, and the
+   * blocks get the rest.
+   */
+  .bslots { flex: 0 0 auto; margin-left: auto; max-width: 2.2in; justify-content: flex-end; }
+  .bslots { display: flex; align-items: center; gap: .1in; flex-wrap: wrap; }
+  .bslot { display: flex; flex-direction: column; align-items: center; gap: .02in; }
+  .bslot span { font-size: 11pt; color: var(--muted); }
+  .bbox { width: .62in; height: .6in; border: 2px solid var(--slate); border-radius: 5px; }
+  .bbox.wide { width: .95in; }
+  .bis { font-size: 12pt; color: var(--ink); padding: 0 .04in; }
+
+  .crow { display: flex; align-items: center; gap: .1in;
+    border-bottom: 1px solid var(--rule); padding: .12in 0; }
+  .cnum { flex: 0 0 1.2in; }
+  .cis, .cw { font-size: 16pt; }
+  .cbox { width: .7in; height: .62in; border: 2px solid var(--slate); border-radius: 5px; }
+
+  .strip { display: grid; grid-template-columns: repeat(10, 1fr); gap: .04in;
+    margin-bottom: .14in; }
+  .scell { border: 1.4px solid var(--ink); border-radius: 4px; height: .9in;
+    display: flex; align-items: center; justify-content: center; }
+  .scell.blank { border-color: var(--ink); border-width: 2px; }
+
+  .nextrow { margin-top: .4in; }
+  .nlabel { font-size: 14pt; font-weight: 700; margin-bottom: .14in; }
+  .nitem { display: inline-flex; align-items: center; gap: .1in; margin: 0 .4in .24in 0; }
+  .nitem span { font-size: 20pt; }
+  .nbox { width: .95in; height: .75in; border: 2px solid var(--slate); border-radius: 5px; }
+
+  .prow { display: flex; align-items: center; gap: .16in;
+    border-bottom: 1px solid var(--rule); padding: .14in 0; }
+  .ppic { flex: 0 0 3.2in; }
+  .peq { display: flex; align-items: center; gap: .09in; margin-left: auto; }
+  .peq span { font-size: 24pt; font-weight: 700; }
+  .pbox { width: .95in; height: .75in; border: 2.4px solid var(--slate); border-radius: 5px; }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <header>
+    <div class="bigletter">120</div>
+    <div class="htext">
+      <h1>Past One Hundred</h1>
+      <p class="sub">Fill in the missing numbers. Say each row out loud as you go.</p>
+    </div>
+    <div class="nameline">Name</div>
+  </header>
+
+  <div class="strip">
+    <div class="scell"><svg viewBox="0 0 54.93 47.64" height="47.64" role="img" aria-label="101"><g transform="translate(6 6) scale(27)"><path d="M.05 .26 L.25 .04 V.97" fill="none" stroke="#C0511D" stroke-width="0.07" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(20.04 6) scale(27)"><path d="M.275 .03 A.225 .47 0 0 0 .275 .97 A.225 .47 0 0 0 .275 .03" fill="none" stroke="#C0511D" stroke-width="0.07" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(39.21 6) scale(27)"><path d="M.05 .26 L.25 .04 V.97" fill="none" stroke="#C0511D" stroke-width="0.07" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <div class="scell blank"></div>
+    <div class="scell blank"></div>
+    <div class="scell"><svg viewBox="0 0 60.87 47.64" height="47.64" role="img" aria-label="104"><g transform="translate(6 6) scale(27)"><path d="M.05 .26 L.25 .04 V.97" fill="none" stroke="#C0511D" stroke-width="0.07" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(20.04 6) scale(27)"><path d="M.275 .03 A.225 .47 0 0 0 .275 .97 A.225 .47 0 0 0 .275 .03" fill="none" stroke="#C0511D" stroke-width="0.07" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(39.21 6) scale(27)"><path d="M.38 .03 L.04 .68 H.56" fill="none" stroke="#C0511D" stroke-width="0.07" stroke-linecap="round" stroke-linejoin="round"/><path d="M.38 .03 V.97" fill="none" stroke="#C0511D" stroke-width="0.07" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <div class="scell"><svg viewBox="0 0 60.06 47.64" height="47.64" role="img" aria-label="105"><g transform="translate(6 6) scale(27)"><path d="M.05 .26 L.25 .04 V.97" fill="none" stroke="#C0511D" stroke-width="0.07" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(20.04 6) scale(27)"><path d="M.275 .03 A.225 .47 0 0 0 .275 .97 A.225 .47 0 0 0 .275 .03" fill="none" stroke="#C0511D" stroke-width="0.07" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(39.21 6) scale(27)"><path d="M.5 .05 H.16 L.11 .44 C.22 .34 .54 .4 .54 .7 C.54 .97 .16 1.04 .06 .89" fill="none" stroke="#C0511D" stroke-width="0.07" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <div class="scell blank"></div>
+    <div class="scell"><svg viewBox="0 0 59.25 47.64" height="47.64" role="img" aria-label="107"><g transform="translate(6 6) scale(27)"><path d="M.05 .26 L.25 .04 V.97" fill="none" stroke="#C0511D" stroke-width="0.07" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(20.04 6) scale(27)"><path d="M.275 .03 A.225 .47 0 0 0 .275 .97 A.225 .47 0 0 0 .275 .03" fill="none" stroke="#C0511D" stroke-width="0.07" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(39.21 6) scale(27)"><path d="M.04 .05 H.5 L.22 .97" fill="none" stroke="#C0511D" stroke-width="0.07" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <div class="scell"><svg viewBox="0 0 60.06 47.64" height="47.64" role="img" aria-label="108"><g transform="translate(6 6) scale(27)"><path d="M.05 .26 L.25 .04 V.97" fill="none" stroke="#C0511D" stroke-width="0.07" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(20.04 6) scale(27)"><path d="M.275 .03 A.225 .47 0 0 0 .275 .97 A.225 .47 0 0 0 .275 .03" fill="none" stroke="#C0511D" stroke-width="0.07" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(39.21 6) scale(27)"><path d="M.275 .04 A.195 .23 0 0 0 .275 .5 A.195 .23 0 0 0 .275 .04" fill="none" stroke="#C0511D" stroke-width="0.07" stroke-linecap="round" stroke-linejoin="round"/><path d="M.275 .5 A.225 .235 0 0 0 .275 .97 A.225 .235 0 0 0 .275 .5" fill="none" stroke="#C0511D" stroke-width="0.07" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <div class="scell blank"></div>
+    <div class="scell"><svg viewBox="0 0 54.93 47.64" height="47.64" role="img" aria-label="110"><g transform="translate(6 6) scale(27)"><path d="M.05 .26 L.25 .04 V.97" fill="none" stroke="#C0511D" stroke-width="0.07" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(20.04 6) scale(27)"><path d="M.05 .26 L.25 .04 V.97" fill="none" stroke="#C0511D" stroke-width="0.07" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(34.08 6) scale(27)"><path d="M.275 .03 A.225 .47 0 0 0 .275 .97 A.225 .47 0 0 0 .275 .03" fill="none" stroke="#C0511D" stroke-width="0.07" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+  </div>
+  <div class="strip">
+    <div class="scell blank"></div>
+    <div class="scell"><svg viewBox="0 0 54.93 47.64" height="47.64" role="img" aria-label="112"><g transform="translate(6 6) scale(27)"><path d="M.05 .26 L.25 .04 V.97" fill="none" stroke="#C0511D" stroke-width="0.07" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(20.04 6) scale(27)"><path d="M.05 .26 L.25 .04 V.97" fill="none" stroke="#C0511D" stroke-width="0.07" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(34.08 6) scale(27)"><path d="M.06 .26 C.08 .04 .52 .02 .52 .32 C.52 .6 .1 .74 .06 .97 H.54" fill="none" stroke="#C0511D" stroke-width="0.07" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <div class="scell"><svg viewBox="0 0 54.93 47.64" height="47.64" role="img" aria-label="113"><g transform="translate(6 6) scale(27)"><path d="M.05 .26 L.25 .04 V.97" fill="none" stroke="#C0511D" stroke-width="0.07" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(20.04 6) scale(27)"><path d="M.05 .26 L.25 .04 V.97" fill="none" stroke="#C0511D" stroke-width="0.07" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(34.08 6) scale(27)"><path d="M.07 .18 C.14 0 .5 .02 .5 .26 C.5 .45 .3 .5 .22 .5 C.32 .5 .54 .55 .54 .76 C.54 1 .14 1.03 .06 .86" fill="none" stroke="#C0511D" stroke-width="0.07" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <div class="scell blank"></div>
+    <div class="scell blank"></div>
+    <div class="scell blank"></div>
+    <div class="scell"><svg viewBox="0 0 54.12 47.64" height="47.64" role="img" aria-label="117"><g transform="translate(6 6) scale(27)"><path d="M.05 .26 L.25 .04 V.97" fill="none" stroke="#C0511D" stroke-width="0.07" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(20.04 6) scale(27)"><path d="M.05 .26 L.25 .04 V.97" fill="none" stroke="#C0511D" stroke-width="0.07" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(34.08 6) scale(27)"><path d="M.04 .05 H.5 L.22 .97" fill="none" stroke="#C0511D" stroke-width="0.07" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <div class="scell blank"></div>
+    <div class="scell"><svg viewBox="0 0 55.74 47.64" height="47.64" role="img" aria-label="119"><g transform="translate(6 6) scale(27)"><path d="M.05 .26 L.25 .04 V.97" fill="none" stroke="#C0511D" stroke-width="0.07" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(20.04 6) scale(27)"><path d="M.05 .26 L.25 .04 V.97" fill="none" stroke="#C0511D" stroke-width="0.07" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(34.08 6) scale(27)"><path d="M.3 .04 A.24 .27 0 0 0 .3 .58 A.24 .27 0 0 0 .3 .04" fill="none" stroke="#C0511D" stroke-width="0.07" stroke-linecap="round" stroke-linejoin="round"/><path d="M.54 .31 V.97" fill="none" stroke="#C0511D" stroke-width="0.07" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <div class="scell"><svg viewBox="0 0 60.06 47.64" height="47.64" role="img" aria-label="120"><g transform="translate(6 6) scale(27)"><path d="M.05 .26 L.25 .04 V.97" fill="none" stroke="#C0511D" stroke-width="0.07" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(20.04 6) scale(27)"><path d="M.06 .26 C.08 .04 .52 .02 .52 .32 C.52 .6 .1 .74 .06 .97 H.54" fill="none" stroke="#C0511D" stroke-width="0.07" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(39.21 6) scale(27)"><path d="M.275 .03 A.225 .47 0 0 0 .275 .97 A.225 .47 0 0 0 .275 .03" fill="none" stroke="#C0511D" stroke-width="0.07" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+  </div>
+
+  <div class="tasknote">Now say them out loud, 100 to 120.</div>
+
+  <div class="nextrow">
+    <div class="nlabel">Write the number that comes NEXT:</div>
+    <div class="nitem"><svg viewBox="0 0 85.5 67.44" height="67.44" role="img" aria-label="107"><g transform="translate(6 6) scale(42)"><path d="M.05 .26 L.25 .04 V.97" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(27.84 6) scale(42)"><path d="M.275 .03 A.225 .47 0 0 0 .275 .97 A.225 .47 0 0 0 .275 .03" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(57.66 6) scale(42)"><path d="M.04 .05 H.5 L.22 .97" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg><span>&rarr;</span><div class="nbox"></div></div>
+    <div class="nitem"><svg viewBox="0 0 77.52 67.44" height="67.44" role="img" aria-label="117"><g transform="translate(6 6) scale(42)"><path d="M.05 .26 L.25 .04 V.97" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(27.84 6) scale(42)"><path d="M.05 .26 L.25 .04 V.97" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(49.68 6) scale(42)"><path d="M.04 .05 H.5 L.22 .97" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg><span>&rarr;</span><div class="nbox"></div></div>
+    <div class="nitem"><svg viewBox="0 0 78.78 67.44" height="67.44" role="img" aria-label="101"><g transform="translate(6 6) scale(42)"><path d="M.05 .26 L.25 .04 V.97" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(27.84 6) scale(42)"><path d="M.275 .03 A.225 .47 0 0 0 .275 .97 A.225 .47 0 0 0 .275 .03" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(57.66 6) scale(42)"><path d="M.05 .26 L.25 .04 V.97" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg><span>&rarr;</span><div class="nbox"></div></div>
+    <div class="nitem"><svg viewBox="0 0 78.78 67.44" height="67.44" role="img" aria-label="112"><g transform="translate(6 6) scale(42)"><path d="M.05 .26 L.25 .04 V.97" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(27.84 6) scale(42)"><path d="M.05 .26 L.25 .04 V.97" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(49.68 6) scale(42)"><path d="M.06 .26 C.08 .04 .52 .02 .52 .32 C.52 .6 .1 .74 .06 .97 H.54" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg><span>&rarr;</span><div class="nbox"></div></div>
+  </div>
+
+  <div class="nextrow">
+    <div class="nlabel">Write the number that comes BEFORE:</div>
+    <div class="nitem"><div class="nbox"></div><span>&larr;</span><svg viewBox="0 0 78.78 67.44" height="67.44" role="img" aria-label="110"><g transform="translate(6 6) scale(42)"><path d="M.05 .26 L.25 .04 V.97" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(27.84 6) scale(42)"><path d="M.05 .26 L.25 .04 V.97" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(49.68 6) scale(42)"><path d="M.275 .03 A.225 .47 0 0 0 .275 .97 A.225 .47 0 0 0 .275 .03" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <div class="nitem"><div class="nbox"></div><span>&larr;</span><svg viewBox="0 0 86.76 67.44" height="67.44" role="img" aria-label="108"><g transform="translate(6 6) scale(42)"><path d="M.05 .26 L.25 .04 V.97" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(27.84 6) scale(42)"><path d="M.275 .03 A.225 .47 0 0 0 .275 .97 A.225 .47 0 0 0 .275 .03" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(57.66 6) scale(42)"><path d="M.275 .04 A.195 .23 0 0 0 .275 .5 A.195 .23 0 0 0 .275 .04" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.275 .5 A.225 .235 0 0 0 .275 .97 A.225 .235 0 0 0 .275 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <div class="nitem"><div class="nbox"></div><span>&larr;</span><svg viewBox="0 0 88.02 67.44" height="67.44" role="img" aria-label="104"><g transform="translate(6 6) scale(42)"><path d="M.05 .26 L.25 .04 V.97" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(27.84 6) scale(42)"><path d="M.275 .03 A.225 .47 0 0 0 .275 .97 A.225 .47 0 0 0 .275 .03" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(57.66 6) scale(42)"><path d="M.38 .03 L.04 .68 H.56" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.38 .03 V.97" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <div class="nitem"><div class="nbox"></div><span>&larr;</span><svg viewBox="0 0 78.78 67.44" height="67.44" role="img" aria-label="113"><g transform="translate(6 6) scale(42)"><path d="M.05 .26 L.25 .04 V.97" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(27.84 6) scale(42)"><path d="M.05 .26 L.25 .04 V.97" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(49.68 6) scale(42)"><path d="M.07 .18 C.14 0 .5 .02 .5 .26 C.5 .45 .3 .5 .22 .5 C.32 .5 .54 .55 .54 .76 C.54 1 .14 1.03 .06 .86" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+  </div>
+
+  
+
+  <footer>
+    <span>9 missing · 8 to write &middot; set 202</span>
+    <span class="brand">Kitchen Table</span>
+    <span>To 120</span>
+  </footer>
+</div>
+
+</body>
+</html>

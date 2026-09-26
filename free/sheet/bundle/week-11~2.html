@@ -1,0 +1,685 @@
+<!DOCTYPE html><html><head>
+<meta charset="utf-8">
+<meta name="sheet-kind" content="worksheet">
+<title>Most of It Is You — What Keeps a Body Working</title>
+<style>
+  :root { --font: Georgia, "Times New Roman", serif; }
+
+  /* Page margins live HERE only — body padding stays 0 for print so the two
+     don't stack and eat the sheet. */
+  @page { size: letter portrait; margin: 0.45in 0.5in; }
+
+  /*
+   * THE PALETTE. The same one the shop wears (kitchen-table/BRAND.md): warm
+   * near-black ink, one accent, pine kept back for the answer key.
+   *
+   * WHY A SHEET HAS COLOR AT ALL. Every sheet was pure grayscale — #000 rules,
+   * #333 subtitles, #f0f0f0 boxes — which is what you get by never deciding.
+   * The paper is the product and it looked like a fax. A printer set to
+   * grayscale, or one that has no color to give, renders all of this as the
+   * greys it already had, so nothing below costs a parent anything they were
+   * not already spending.
+   *
+   * WHAT STAYS BLACK, ON PURPOSE:
+   *   - anything drawn to be written on (rules, name lines, answer boxes)
+   *   - anything drawn to be traced or colored in (line art, letter guides)
+   *   - the confidence rings, which have to survive a mono laser
+   * Color marks the sheet's own furniture — its rule, its numbering, its
+   * boxes — and never the part a child puts a pencil through.
+   */
+  :root {
+    --ink:    #16130F;
+    --muted:  #6B635A;
+    --rule:   #CFC3B2;
+    --guide:  #BCAE9C;
+    --accent: #C0511D;
+    --tint:   #F7EDE4;
+    --slate:  #2E5A78;
+    --tintslate: #E9EFF4;
+    --deep:   #2C4A45;
+    --tintdeep: #ECF1EF;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font);
+    color: #000; background: #fff;
+    font-size: 12pt; line-height: 1.3;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+
+  /* ORDER MATTERS. This generic rule must come BEFORE the @media screen block:
+     same specificity, so whichever is declared last wins. With it after, the
+     on-screen preview stretches to the viewport instead of 8.5in — print is
+     unaffected, but the proof you check before printing is wrong. */
+  .page { width: 100%; }
+  .page + .page { page-break-before: always; }
+
+  @media screen {
+    body { padding: 0.5in; background: #ddd; }
+    .page {
+      background: #fff; padding: 0.45in 0.5in;
+      width: 8.5in; min-height: 11in;
+      margin: 0 auto 24px; box-shadow: 0 2px 10px rgba(0,0,0,.3);
+    }
+  }
+
+  /* ------------------------------------------------------------- header */
+  header { border-bottom: 3px double var(--accent); padding-bottom: 6px; }
+  header.cont { border-bottom: 1px solid var(--rule); }
+  h1 { font-size: 16pt; margin: 0 0 1px; letter-spacing: .01em; }
+  .sub { font-size: 10pt; font-style: italic; color: var(--muted); margin: 0; }
+
+  .nameline { display: flex; gap: 26px; font-size: 10.5pt; margin: 11px 0 12px; }
+  .nameline span { flex: 1; border-bottom: 1px solid var(--ink); padding-bottom: 1px; }
+  .nameline span.short { flex: 0 0 1.9in; }
+
+  .directions {
+    font-size: 10.5pt; line-height: 1.35;
+    background: var(--tint); border-left: 4px solid var(--accent);
+    padding: 7px 10px; margin: 12px 0 14px;
+  }
+  .directions b { letter-spacing: .03em; }
+  .tip { font-style: italic; margin-top: 3px; }
+
+  /* ------------------------------------------------- problems and grids */
+  .grid { display: grid; gap: 13px 16px; margin-top: 4px; }
+  .prob { page-break-inside: avoid; display: flex; gap: 5px; align-items: flex-start; }
+  .pn { font-weight: bold; font-size: 11pt; min-width: .28in; flex: 0 0 auto; color: var(--accent); }
+  .pbody { flex: 1; min-width: 0; }
+
+  /* Digits need lining figures and even widths whatever the body font is. */
+  .num, .vert, .horiz { font-family: "Trebuchet MS", "Segoe UI", Tahoma, Verdana, sans-serif; font-variant-numeric: lining-nums tabular-nums; }
+
+  /* A stacked column algorithm.
+     Two grid columns — operator, then digits — because a floated or absolutely
+     positioned operator overlaps the digits as soon as the numbers get wide,
+     and "324" with a + sitting on the 3 is unreadable. The grid also lets the
+     rule under the last operand span BOTH columns, which is how it is written
+     by hand. The rule is heavy: it is the line you write the answer beneath. */
+  .vert {
+    display: inline-grid; grid-template-columns: auto auto;
+    font-size: 15pt; line-height: 1.3; text-align: right;
+  }
+  .vert > span { padding: 0 0 1px 0; }
+  .vert .op { text-align: left; padding-right: .16in; }
+  .vert .last { border-bottom: 2.5px solid var(--ink); padding-bottom: 3px; }
+  .vert .ans { height: .4in; }
+  /* Partial-products working, for 2-digit x 1-digit before the short method. */
+  .vert .part { font-size: 11pt; color: var(--muted); }
+  /* A row of worked examples that fade — see lib/formats.js faded(). The
+     caption is what makes the fade legible: without it the third one looks like
+     a question somebody forgot to number. */
+  .egrow { display: flex; gap: .34in; align-items: flex-start; margin: 0 0 4px; }
+  .eg { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; }
+  .eglab { font-size: 8.5pt; color: var(--slate); letter-spacing: .02em; }
+
+  /* The carried digits. Small and grey so the sum still reads as the sum, and
+     tight to the row below it so a carry sits ON the column it goes into. */
+  .vert .carry { font-size: 9pt; color: var(--slate); line-height: 1; padding: 0 0 1px 0; }
+
+  .horiz { font-size: 14pt; white-space: nowrap; }
+
+  /* Row numbers in a word list. Gray and small: they are there so a list can be
+     dictated ("number seven") and marked without counting down the page, and
+     they must not compete with the word itself. */
+  .wn { color: var(--muted); font-size: 9pt; }
+
+  /* The box an answer goes in. inline-block so it can sit mid-sentence. */
+  .abox {
+    display: inline-block; border: 1.6px solid var(--slate); border-radius: 3px;
+    vertical-align: middle; margin: 0 3px; position: relative; background: #fff;
+  }
+  /* Scoped to the box: as a bare ".alab" it pinned any generator's own .alab
+     to the bottom of the page (life-07-signs-and-forms 40, 2026-09-24). */
+  .abox > .alab {
+    position: absolute; bottom: 1px; left: 0; right: 0;
+    text-align: center; font-size: 7pt; color: var(--muted); font-style: italic;
+  }
+
+  /* Confidence marks. The rings are drawn with a border and a gradient rather
+     than an SVG so they stay inline with the question text at any font size,
+     and print black on a mono laser without relying on a background image. */
+  .conf { float: right; margin: 2px 0 0 8px; white-space: nowrap; }
+  .cring {
+    display: inline-block; width: 11px; height: 11px; margin-left: 4px;
+    border: 1.4px solid var(--slate); border-radius: 50%; vertical-align: middle;
+  }
+  .cring-full { background: var(--accent); }
+  .cring-half { background: linear-gradient(90deg, var(--accent) 50%, #fff 50%); }
+  .cring-none { background: #fff; }
+  ol.qs.hasconf li { overflow: hidden; }
+
+  .conflegend {
+    border: 1.2px solid var(--rule); border-radius: 4px;
+    padding: 3px 8px; margin: 0 0 7px;
+    font-size: 8.5pt; color: var(--muted); display: flex; gap: 14px; align-items: center;
+  }
+  .conftitle { font-weight: 700; color: var(--ink); }
+  .confitem { white-space: nowrap; }
+
+  .work {
+    border: 1.4px dashed var(--rule); border-radius: 4px;
+    margin: 6px 0 2px; position: relative;
+  }
+  /* The label S.work() puts in the box: a DIRECT child only. As ".work span"
+     it also caught every span inside any generator's own .work content and
+     stacked them all at the top-left corner (math-11-grade6 47, 2026-09-23). */
+  .work > span {
+    position: absolute; top: 3px; left: 6px;
+    font-size: 8pt; color: var(--muted); font-style: italic;
+  }
+
+  /* ------------------------------------------------------ writing lines */
+  /* Primary rule: solid top, dashed midline, heavy baseline. Capitals reach
+     the top line, lowercase bodies sit under the dashed one. */
+  .write {
+    position: relative; height: 0.375in;
+    margin: 6px 0 0 .3in;
+    border-top: 1px solid var(--rule); border-bottom: 2px solid var(--ink);
+  }
+  .write.flush { margin-left: 0; }
+  .write + .write { margin-top: .17in; }
+  .write::after {
+    content: ""; position: absolute; left: 0; right: 0; top: 50%;
+    border-top: 1px dashed var(--guide);
+  }
+
+  /* ------------------------------------------------------- question list */
+  ol.qs { margin: 0; padding: 0 0 0 .34in; }
+  ol.qs li { margin-bottom: 13px; page-break-inside: avoid; }
+  ol.qs li::marker { font-weight: bold; font-size: 11pt; color: var(--accent); }
+  .qt { display: block; }
+
+  .mcq { display: grid; gap: 3px 14px; margin: 5px 0 2px .12in; font-size: 11pt; }
+  .opt { white-space: nowrap; }
+
+  /* -------------------------------------------------------------- tables */
+  .tbl { border-collapse: collapse; margin: 8px 0; font-size: 11pt; width: 100%; }
+  .tbl th, .tbl td { border: 1.4px solid var(--ink); padding: 5px 8px; text-align: left; }
+  .tbl th { color: var(--slate); }
+  .tbl th { background: var(--tint); font-size: 10pt; letter-spacing: .02em; }
+  .tbl td.blank { height: .34in; }
+  .tbl.narrow { width: auto; }
+  .tbl.center td, .tbl.center th { text-align: center; }
+
+  /* ------------------------------------------------------------ passages */
+  .passage {
+    border: 1.5px solid var(--slate); border-radius: 4px;
+    padding: 11px 14px; margin-bottom: 12px;
+    font-size: 11.5pt; line-height: 1.55;
+  }
+  .passage h2 { font-size: 13pt; margin: 0 0 6px; color: var(--deep); }
+  .passage p { margin: 0 0 8px; }
+  .passage p:last-child { margin-bottom: 0; }
+  .passage .byline { font-size: 9.5pt; font-style: italic; color: var(--muted); margin-bottom: 8px; }
+  /* Numbered paragraphs, so a question can say "in paragraph 2". */
+  .passage p.np { position: relative; padding-left: .3in; }
+  .passage p.np::before {
+    content: attr(data-p); position: absolute; left: 0; top: 0;
+    font-size: 9pt; color: var(--accent); font-weight: bold;
+  }
+
+  .wordbank {
+    border: 1.5px dashed var(--slate); border-radius: 4px;
+    padding: 8px 12px; margin: 10px 0 12px;
+    font-size: 11.5pt; text-align: center;
+  }
+  .wordbank b { display: block; font-size: 9.5pt; letter-spacing: .06em;
+    text-transform: uppercase; margin-bottom: 4px; color: var(--accent); }
+  .wordbank span { display: inline-block; margin: 2px 11px; }
+
+  .note {
+    border-left: 4px solid var(--deep); background: var(--tintdeep);
+    padding: 7px 11px; margin: 10px 0; font-size: 10.5pt;
+  }
+  .note b { letter-spacing: .02em; }
+
+  /* -------------------------------------------------------------- footer */
+  /* THE WORDMARK SITS IN THE FOOTER THAT WAS ALREADY THERE, so it costs no
+     height at all — a sheet that fitted before fits now. Upright where the rest
+     of the line is italic, and a size down: it is a signature, not a message,
+     and it must never compete with "Score: ___ / 10". */
+  .brand { font-style: normal; font-size: 7.5pt; letter-spacing: .04em;
+    color: var(--accent); align-self: center; }
+
+  footer {
+    margin-top: 14px; padding-top: 6px; border-top: 1px solid var(--rule);
+    font-size: 9pt; font-style: italic; color: var(--muted);
+    display: flex; justify-content: space-between;
+  }
+
+  /* ---------------------------------------------------------- answer key */
+  .keybadge {
+    display: inline-block; border: 2px solid var(--deep); color: var(--deep); padding: 2px 9px;
+    font-size: 9.5pt; font-weight: bold; letter-spacing: .08em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .key .why {
+    display: block; font-size: 9pt; font-style: italic; color: var(--muted); margin-top: 1px;
+  }
+  /* Highlight rather than underline: <u> in a key marks WHAT CHANGED, and an
+     underline under a comma is invisible. */
+  .key u { text-decoration: none; background: var(--tint); padding: 0 2px; font-weight: bold; }
+  .keygrid .pbody { font-family: "Trebuchet MS", "Segoe UI", Tahoma, Verdana, sans-serif; font-size: 12pt; }
+  /* A key's pictures scale to their column: at 1fr a wide drawing pushed a
+     three-column key 92px off the paper (art-04-drawing 10, 2026-09-24). */
+  .keygrid svg { max-width: 100%; height: auto; }
+  .keylist .qt { font-weight: normal; }
+
+  /*
+   * The guide page. Four lines per question, and the ASK line is the one that
+   * gets used at the table, so it is the one with a rule beside it — a parent
+   * scanning this page in ten seconds should land on the follow-up question
+   * and nothing else.
+   */
+  .guide { padding-left: .3in; }
+  .guide li { margin-bottom: 11px; page-break-inside: avoid; }
+  .guide .gq { font-weight: bold; font-size: 11pt; margin-bottom: 3px; }
+  /* 9pt, matching the key's own why line, because the guide page is the
+     binding constraint on every open sheet: four lines per question against a
+     key's one, and at 10pt a sheet with seven questions ran onto a second
+     side. Found by measuring, not chosen. (No backticks in here — this CSS
+     lives inside a template literal and one would close it.) */
+  .guide .glook, .guide .gthin, .guide .gstrong {
+    font-size: 9pt; line-height: 1.3; margin-top: 1px;
+  }
+  .guide .gthin { color: var(--muted); }
+  .guide .gstrong { color: var(--muted); font-style: italic; }
+  .guide .gask {
+    font-size: 9.5pt; line-height: 1.3; margin-top: 3px;
+    border-left: 3px solid var(--slate); padding-left: 7px;
+  }
+  .key .qs li { margin-bottom: 9px; }
+
+  /*
+   * INLINE-BLOCK, NOT BLOCK, AND THIS WAS WRONG FOR A LONG TIME. A block-level
+   * svg ignores text-align: center on its parent and sits flush left — so 117
+   * sheets across 35 packs said "centre this diagram" and got a left-aligned
+   * one. Twenty-five of them were origami and paper-plane fold sequences, where
+   * the whole page is diagrams.
+   *
+   * Nobody spotted it because a left-flush diagram looks deliberate; it only
+   * reads as wrong next to a centered one, and no sheet has both.
+   *
+   * inline-block makes text-align do what every one of those authors meant,
+   * and leaves a diagram in a left-aligned container exactly where it was.
+   * vertical-align: top kills the baseline gap that inline elements otherwise
+   * leave underneath them, which would have pushed long pages over.
+   */
+  svg { display: inline-block; vertical-align: top; }
+  svg.inline { vertical-align: middle; }
+
+  .pnote { border: 1.6px solid var(--slate); border-radius: 7px; padding: 8px 11px;
+    margin: 7px 0 11px; font-size: 10.6pt; }
+  .big { border: 2.2px solid var(--ink); border-radius: 8px; padding: 10px 13px; margin: 9px 0;
+    font-size: 11pt; }
+  .band { border-collapse: collapse; width: 100%; margin: 6px 0 10px; }
+  .band th { border: 1.8px solid var(--ink); background: var(--tint); padding: 4px 7px;
+    font-size: 9.5pt; text-align: left; }
+  .band td { border: 1.4px solid var(--rule); padding: 5px 8px; font-size: 10.6pt; }
+  .band td.b { height: 1.2in; }
+  .gen { border-collapse: collapse; width: 100%; margin: 7px 0 9px; }
+  .gen th { border-bottom: 1.8px solid var(--ink); padding: 3px 7px; font-size: 9.5pt; text-align: left; }
+  .gen td { border-bottom: 1px solid var(--rule); padding: 4px 7px; font-size: 10.4pt; }
+  .gen td.b { height: 1.4in; }
+
+</style>
+</head><body>
+
+<div class="page ">
+  <header>
+    
+    <h1>Most of It Is You</h1>
+    <p class="sub">What keeps a body working · Page 1 of 2</p>
+  </header>
+  <div class="nameline">
+    <span>Name</span>
+    <span class="short">Date</span>
+  </div>
+  <div class="directions">
+    <b>DIRECTIONS:</b> You have a cold. Read the box, then say whose side each symptom is on, and what it is for.
+  </div>
+
+
+  <div class="big"><b>Nearly all of it is you.</b>
+  <br><br>A cold virus is not big enough or busy enough to make a whole person ache. What it does is get in and copy itself. What makes you FEEL ill is your own body noticing and responding.
+  <br><br><b>The heat</b> is your body deliberately turning itself up, because most germs copy themselves best at your normal temperature and worse when it is warmer. <b>The runny nose</b> is fluid arriving with the things that fight infection in it. <b>The cough</b> is getting the mess out. <b>The aching and the tiredness</b> are chemical signals that make you lie still, which is exactly what a body fighting something needs you to do.</div>
+  <table class="band">
+    <tr><th style="width:34%">Symptom</th><th>Whose side is it on, and what is it for?</th></tr>
+    <tr><td>Feeling too hot</td><td class="b"></td></tr>
+    <tr><td>A runny nose</td><td class="b"></td></tr>
+    <tr><td>Coughing</td><td class="b"></td></tr>
+    <tr><td>Aching, and not wanting to get up</td><td class="b"></td></tr>
+  </table>
+
+  <footer>
+    <span>Keep going on page 2 →</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Most of it is you</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>Most of It Is You — So Why Take Anything?</h1>
+    <p class="sub">What keeps a body working · Page 2 of 2</p>
+  </header>
+
+
+
+
+  <div class="pnote"><b>Not medical advice.</b> A fever can go too high, and what to do about it is a doctor's call.</div>
+  <ol class="qs" start="1"><li><span class="qt">If a fever is your body helping itself, say why somebody might take medicine to bring it down anyway. Give a real reason, not just "it feels bad".</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Two people catch the same virus. One is much iller than the other. Using this sheet, give an explanation that is <b>not</b> "one of them got more virus".</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Somebody says "I have got rid of my cold, I only have the cough left". Say what is odd about that sentence.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Score: ______ / 3</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Most of it is you</span>
+  </footer>
+</div>
+
+
+<div style="page-break-before:always"></div>
+
+
+<div class="page ">
+  <header>
+    
+    <h1>The Wage That Is Not the Wage</h1>
+    <p class="sub">The Second Number · Page 1 of 3</p>
+  </header>
+  <div class="nameline">
+    <span>Name</span>
+    <span class="short">Date</span>
+  </div>
+  <div class="directions">
+    <b>DIRECTIONS:</b> A first job: <b>$15.00 an hour</b>, 20 hours a week. Work out what actually reaches your account, one line at a time.
+  </div>
+
+
+  <table class="tbl calc">
+    <thead><tr><th>#</th><th>Line</th><th>Working</th><th>Amount</th></tr></thead>
+    <tbody><tr><td><span class="pn">1.</span></td><td>Hours × $15.00</td><td>20 × $15.00</td><td class="blank"></td></tr><tr><td><span class="pn">2.</span></td><td>Taken off before you see it</td><td>about 17.65% of the line above</td><td class="blank"></td></tr><tr><td><span class="pn">3.</span></td><td>What actually arrives</td><td>the first line minus the second</td><td class="blank"></td></tr><tr><td><span class="pn">4.</span></td><td>So what is one PAID hour really worth?</td><td>the line above ÷ 20</td><td class="blank"></td></tr></tbody>
+  </table>
+  <div class="cap">The money taken off is tax and other deductions. It is not optional and nobody asks you first.</div>
+
+  <ol class="qs" start="5"><li><span class="qt">You told a friend the job pays $15.00 an hour. Using your last line, write the sentence that would have been true.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Keep going on page 2 →</span>
+    <span class="brand">Kitchen Table</span>
+    <span>What it costs</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>And You Are Not Paid for All of It</h1>
+    <p class="sub">The Second Number · Page 2 of 3</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Getting there, coming home and waiting for a shift are unpaid time. Read, then answer.
+  </div>
+
+
+  <div class="note">Say that is <b>3 extra hours a week</b>. You cannot use them for anything else.</div>
+
+  <ol class="qs" start="6"><li><span class="qt">How many hours does this job actually take out of your week?</span><div class="work" style="height:0.9in"><span>Working</span></div><div class="write"></div></li><li><span class="qt">Divide what actually arrives by that number. What is an hour of your life worth to this job?</span><div class="work" style="height:1.2in"><span>Working</span></div><div class="write"></div><div class="write"></div></li></ol>
+
+  <div class="bars" style="text-align:center;margin:6px 0"><svg class="inline" viewBox="0 0 400 120" width="400" height="120" role="img" aria-label="three bars comparing an advertised wage with what an hour is really worth" xmlns="http://www.w3.org/2000/svg"><rect x="128" y="14" width="224" height="20" rx="0" fill="#e2e2e2" stroke="#16130F" stroke-width="1"/><text x="122" y="28" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="8.5" font-weight="normal" text-anchor="end" fill="#16130F">what the job says</text><text x="357" y="28" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="8.5" font-weight="normal" text-anchor="start" fill="#16130F">$15.00</text><rect x="128" y="46" width="184.43" height="20" rx="0" fill="#e2e2e2" stroke="#16130F" stroke-width="1"/><text x="122" y="60" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="8.5" font-weight="normal" text-anchor="end" fill="#16130F">after deductions</text><text x="317.43" y="60" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="8.5" font-weight="normal" text-anchor="start" fill="#16130F">$12.35</text><rect x="128" y="78" width="160.38" height="20" rx="0" fill="#e2e2e2" stroke="#16130F" stroke-width="1"/><text x="122" y="92" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="8.5" font-weight="normal" text-anchor="end" fill="#16130F">per hour you give up</text><text x="293.38" y="92" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="8.5" font-weight="normal" text-anchor="start" fill="#16130F">$10.74</text><text x="200" y="116" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="8" font-weight="normal" text-anchor="middle" fill="#6B635A">the same job, three ways of counting an hour</text></svg></div>
+
+  <div class="note">The advert said $15.00; the second number is <b>$10.74</b>. Both are true, answering different questions.</div>
+
+  <footer>
+    <span>Keep going on page 3 →</span>
+    <span class="brand">Kitchen Table</span>
+    <span>What it costs</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>Comparing Two Jobs Properly</h1>
+    <p class="sub">The Second Number · Page 3 of 3</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Two offers. Which pays more per hour you give up?
+  </div>
+
+
+  <table class="tbl ">
+    <thead><tr><th>#</th><th></th><th>Job A</th><th>Job B</th></tr></thead>
+    <tbody><tr><td></td><td>What it says an hour</td><td>$15.00</td><td>$13.50</td></tr><tr><td></td><td>Hours a week</td><td>20</td><td>20</td></tr><tr><td></td><td>Traveling and waiting</td><td>3 hours</td><td>none — it is next door</td></tr><tr><td></td><td>Deductions</td><td>17.65%</td><td>17.65%</td></tr><tr><td><span class="pn">8.</span></td><td>Per hour you actually give up</td><td class="blank"></td><td class="blank"></td></tr></tbody>
+  </table>
+
+  <ol class="qs" start="9"><li><span class="qt">Which job pays more per hour of your life? By how much?</span><div class="write"></div><div class="write"></div></li><li><span class="qt">Job A "pays better" and Job B is better paid. Write the difference between those two sentences.</span><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">What is the question to ask about a job that is NOT "what does it pay"? Write the one you would actually use.</span><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Score: ______ / 11 (each table is marked as one)</span>
+    <span class="brand">Kitchen Table</span>
+    <span>What it costs</span>
+  </footer>
+</div>
+
+
+<div style="page-break-before:always"></div>
+
+
+<div class="page ">
+  <header>
+    
+    <h1>A Box With a Name</h1>
+    <p class="sub">Computing &middot; Page 1 of 2</p>
+  </header>
+  <div class="nameline">
+    <span>Name</span>
+    <span class="short">Date</span>
+  </div>
+  <div class="directions">
+    <b>DIRECTIONS:</b> Work out this Python with a pencil. Fill in what <i>score</i> holds after each line, then what it prints.
+    <div class="tip">A <b>variable</b> is a named box. It holds one thing; putting in something new throws the old one away.</div>
+  </div>
+
+<div class="big" style="--th:.66in">
+  <div class="prog"><div class="ln"><span class="n">1</span><span class="c">score = 0</span></div><div class="ln"><span class="n">2</span><span class="c">score = 7</span></div><div class="ln"><span class="n">3</span><span class="c">score = 2</span></div><div class="ln"><span class="n">4</span><span class="c">print(score)</span></div></div>
+
+  <table class="trace"><tr><th style="width:.5in">line</th><th>score</th></tr><tr><td class="ln">1</td><td class="tfill"></td></tr><tr><td class="ln">2</td><td class="tfill"></td></tr><tr><td class="ln">3</td><td class="tfill"></td></tr><tr><td class="ln">4</td><td class="tfill"></td></tr></table>
+
+  <div class="outbox"><span class="lab">what it prints</span>&nbsp;</div>
+  <div class="note"><b>Where is the 7 after line 3?</b></div>
+  <div class="write"></div><div class="write"></div>
+
+</div>
+
+  <footer>
+    <span>One more on page 2 &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>A box with a name</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>Two Boxes</h1>
+    <p class="sub">Computing &middot; Page 2 of 2</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Two boxes. Fill in what each holds after every line.
+  </div>
+
+
+  <div class="prog"><div class="ln"><span class="n">1</span><span class="c">a = 3</span></div><div class="ln"><span class="n">2</span><span class="c">b = 5</span></div><div class="ln"><span class="n">3</span><span class="c">a = b</span></div><div class="ln"><span class="n">4</span><span class="c">print(a)</span></div><div class="ln"><span class="n">5</span><span class="c">print(b)</span></div></div>
+
+  <table class="trace"><tr><th style="width:.5in">line</th><th>a</th><th>b</th></tr><tr><td class="ln">1</td><td class="tfill"></td><td class="tfill"></td></tr><tr><td class="ln">2</td><td class="tfill"></td><td class="tfill"></td></tr><tr><td class="ln">3</td><td class="tfill"></td><td class="tfill"></td></tr><tr><td class="ln">4</td><td class="tfill"></td><td class="tfill"></td></tr><tr><td class="ln">5</td><td class="tfill"></td><td class="tfill"></td></tr></table>
+
+  <div class="outbox"><span class="lab">what it prints</span>&nbsp;</div>
+
+  <ol class="qs" start="1"><li><span class="qt">After line 3, what is in <i>b</i>? Did line 3 change it?</span><div class="write"></div><div class="write"></div></li><li><span class="qt">Line 3 is <b>a = b</b>. Explain in one sentence which box got changed and which did not.</span><div class="write"></div><div class="write"></div></li><li><span class="qt">The 3 that was in <i>a</i> at line 1 — where is it after line 3? Answer carefully.</span><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Score: ______ / 3</span>
+    <span class="brand">Kitchen Table</span>
+    <span>A box with a name</span>
+  </footer>
+</div>
+
+
+<div style="page-break-before:always"></div>
+
+
+<div class="page rd">
+  <header>
+    
+    <h1>Rereading Feels Like Learning</h1>
+    <p class="sub">How learning works &middot; Page 1 of 3</p>
+  </header>
+  <div class="nameline">
+    <span>Name</span>
+    <span class="short">Date</span>
+  </div>
+  <div class="directions">
+    <b>DIRECTIONS:</b> Read it once and guess in the first box. Read it again and guess in the second. Then put this page <b>face down</b>.
+  </div>
+
+
+  <div class="passage">
+    <h2>The Ship That Sank in Sight of Land</h2>
+    <p>On 10 August 1628 the warship <i>Vasa</i> left Stockholm harbor on her first voyage. She carried
+    sixty-four bronze cannons on two gun decks, more than any ship then sailing in the Baltic. A light wind
+    came off the shore. <i>Vasa</i> leaned, water poured in through her open gun ports, and she sank after
+    sailing about 1,300 meters. Around thirty people drowned.</p>
+    <p>An inquiry was held within weeks and nobody was punished: the ship had been built to a design the
+    king had altered himself, and the shipwright who began her had died before she was finished. The wreck
+    lay in cold water too low in salt for shipworms to live in, which is why the timber did not rot. She was
+    raised in 1961, after 333 years on the bottom, and is now the most complete seventeenth-century ship in
+    the world.</p>
+  </div>
+
+  <div class="predict">
+    <div class="ph">Before you turn over</div>
+    <div class="pline"><span class="plab">Ten questions on the back. After reading it <b>once</b>, how
+      many will you get right?</span><span class="pbox"></span></div>
+    <div class="pline"><span class="plab">Now read it again. After reading it <b>twice</b>, how many will
+      you get right?</span><span class="pbox"></span></div>
+    <div class="pline"><span class="plab">In pen. No changing it.</span></div>
+  </div>
+
+  <footer>
+    <span>Keep going on page 2 &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Rereading</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>Rereading Feels Like Learning &mdash; the test</h1>
+    <p class="sub">How learning works &middot; Page 2 of 3</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Page 1 stays face down. Cannot remember one? Leave it blank.
+  </div>
+
+
+<ol class="qs" start="1"><li><span class="qt">In what year did the <i>Vasa</i> sink?</span><div class="write"></div></li><li><span class="qt">How many bronze cannons did she carry?</span><div class="write"></div></li><li><span class="qt">How many gun decks were the cannons on?</span><div class="write"></div></li><li><span class="qt">About how far did she sail before she sank?</span><div class="write"></div></li><li><span class="qt">About how many people drowned?</span><div class="write"></div></li><li><span class="qt">Water got into the ship through what?</span><div class="write"></div></li><li><span class="qt">Who had altered the design she was built to?</span><div class="write"></div></li><li><span class="qt">What had happened to the shipwright who began her?</span><div class="write"></div></li><li><span class="qt">Why did the timber not rot in three hundred years?</span><div class="write"></div></li><li><span class="qt">How many years was she on the bottom?</span><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Keep going on page 3 &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Rereading</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>Rereading Feels Like Learning &mdash; the gap</h1>
+    <p class="sub">How learning works &middot; Page 3 of 3</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Mark page 2 out of ten.
+  </div>
+
+
+  <table class="tbl ">
+    <thead><tr><th>Your three numbers</th><th>Number</th></tr></thead>
+    <tbody><tr><td>What I predicted after reading it <b>once</b></td><td class="blank"></td></tr><tr><td>What I predicted after reading it <b>twice</b></td><td class="blank"></td></tr><tr><td>What I actually got</td><td class="blank"></td></tr><tr><td><b>The gap</b> &mdash; second prediction minus score</td><td class="blank"></td></tr></tbody>
+  </table>
+
+<ol class="qs" start="11"><li><span class="qt">Reading it the second time felt like learning. Answering question 6 felt like failing. You have three numbers in a column now &mdash; write down which of those two feelings was telling you the truth.</span><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">The second read added something. Say what, exactly &mdash; and whether it was to the score or to the confidence.</span><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Suppose you had spent the second read <b>covering the passage and saying it back to yourself</b> instead. Which of the ten questions do you think would have gone differently, and why that one?</span><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Score: ______ / 10 &nbsp;&middot;&nbsp; and the gap is the sheet</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Rereading</span>
+  </footer>
+</div>
+
+
+<div style="page-break-before:always"></div>
+
+
+<div class="page ">
+  <header>
+    
+    <h1>It Never Comes Back</h1>
+    <p class="sub">Why there are twelve notes · Page 1 of 2</p>
+  </header>
+  <div class="nameline">
+    <span>Name</span>
+    <span class="short">Date</span>
+  </div>
+  <div class="directions">
+    <b>DIRECTIONS:</b> An octave is a ratio of 2; a fifth is <b>3 to 2</b>. Fill the middle column: each row is the row above &times; 3/2. Use a calculator.
+  </div>
+
+
+  <table class="band">
+    <tr><th style="width:26%">How many 3:2 steps</th><th>How much higher than the start</th><th>Check</th></tr>
+    <tr><td>1</td><td class="b"></td><td><span class="num">1.5000</span></td></tr><tr><td>2</td><td class="b"></td><td><span class="num">2.2500</span></td></tr><tr><td>3</td><td class="b"></td><td><span class="num">3.3750</span></td></tr><tr><td>4</td><td class="b"></td><td></td></tr><tr><td>5</td><td class="b"></td><td></td></tr><tr><td>6</td><td class="b"></td><td></td></tr><tr><td>7</td><td class="b"></td><td></td></tr><tr><td>8</td><td class="b"></td><td></td></tr><tr><td>9</td><td class="b"></td><td></td></tr><tr><td>10</td><td class="b"></td><td></td></tr><tr><td>11</td><td class="b"></td><td></td></tr><tr><td>12</td><td class="b"></td><td></td></tr>
+  </table>
+  <div class="pnote">Now work out <b>2 &times; 2 &times; 2 &times; 2 &times; 2 &times; 2 &times; 2</b> — seven octaves — and write it here: ______________</div>
+
+  <footer>
+    <span>Keep going on page 2 →</span>
+    <span class="brand">Kitchen Table</span>
+    <span>It never comes back</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>It Never Comes Back — What You Just Found</h1>
+    <p class="sub">Why there are twelve notes · Page 2 of 2</p>
+  </header>
+
+
+
+
+  <div class="big"><b>Twelve steps of 3:2 come to 129.746. Seven octaves come to 128.</b>
+  <br><br>They should be the same note. Twelve fifths land <b>1.36% above</b> seven octaves: about 23 hundredths of a semitone, enough to hear.
+  <br><br><b>It cannot be fixed.</b> Powers of 3/2 are made of threes; powers of 2 are not. They never meet.</div>
+  <ol class="qs" start="1"><li><span class="qt">Say why this is <b>not</b> a mistake in your arithmetic, a fault in one piano, or something better measuring would fix.</span><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">A tuner tunes twelve perfect fifths, one after another, all the way round, and arrives back at the note they started from. What will be wrong with it?</span><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">You cannot have both. Describe the two things somebody could choose to do about it, before sheet 20 tells you what was chosen.</span><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Score: ______ / 3</span>
+    <span class="brand">Kitchen Table</span>
+    <span>It never comes back</span>
+  </footer>
+</div>
+
+</body></html>

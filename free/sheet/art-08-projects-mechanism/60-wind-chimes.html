@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="sheet-kind" content="open">
+<title>Wind Chimes — Making</title>
+<style>
+  :root { --font: Georgia, "Times New Roman", serif; }
+
+  /* Page margins live HERE only — body padding stays 0 for print so the two
+     don't stack and eat the sheet. */
+  @page { size: letter portrait; margin: 0.45in 0.5in; }
+
+  /*
+   * THE PALETTE. The same one the shop wears (kitchen-table/BRAND.md): warm
+   * near-black ink, one accent, pine kept back for the answer key.
+   *
+   * WHY A SHEET HAS COLOR AT ALL. Every sheet was pure grayscale — #000 rules,
+   * #333 subtitles, #f0f0f0 boxes — which is what you get by never deciding.
+   * The paper is the product and it looked like a fax. A printer set to
+   * grayscale, or one that has no color to give, renders all of this as the
+   * greys it already had, so nothing below costs a parent anything they were
+   * not already spending.
+   *
+   * WHAT STAYS BLACK, ON PURPOSE:
+   *   - anything drawn to be written on (rules, name lines, answer boxes)
+   *   - anything drawn to be traced or colored in (line art, letter guides)
+   *   - the confidence rings, which have to survive a mono laser
+   * Color marks the sheet's own furniture — its rule, its numbering, its
+   * boxes — and never the part a child puts a pencil through.
+   */
+  :root {
+    --ink:    #16130F;
+    --muted:  #6B635A;
+    --rule:   #CFC3B2;
+    --guide:  #BCAE9C;
+    --accent: #C0511D;
+    --tint:   #F7EDE4;
+    --slate:  #2E5A78;
+    --tintslate: #E9EFF4;
+    --deep:   #2C4A45;
+    --tintdeep: #ECF1EF;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font);
+    color: #000; background: #fff;
+    font-size: 12pt; line-height: 1.3;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+
+  /* ORDER MATTERS. This generic rule must come BEFORE the @media screen block:
+     same specificity, so whichever is declared last wins. With it after, the
+     on-screen preview stretches to the viewport instead of 8.5in — print is
+     unaffected, but the proof you check before printing is wrong. */
+  .page { width: 100%; }
+  .page + .page { page-break-before: always; }
+
+  @media screen {
+    body { padding: 0.5in; background: #ddd; }
+    .page {
+      background: #fff; padding: 0.45in 0.5in;
+      width: 8.5in; min-height: 11in;
+      margin: 0 auto 24px; box-shadow: 0 2px 10px rgba(0,0,0,.3);
+    }
+  }
+
+  /* ------------------------------------------------------------- header */
+  header { border-bottom: 3px double var(--accent); padding-bottom: 6px; }
+  header.cont { border-bottom: 1px solid var(--rule); }
+  h1 { font-size: 16pt; margin: 0 0 1px; letter-spacing: .01em; }
+  .sub { font-size: 10pt; font-style: italic; color: var(--muted); margin: 0; }
+
+  .nameline { display: flex; gap: 26px; font-size: 10.5pt; margin: 11px 0 12px; }
+  .nameline span { flex: 1; border-bottom: 1px solid var(--ink); padding-bottom: 1px; }
+  .nameline span.short { flex: 0 0 1.9in; }
+
+  .directions {
+    font-size: 10.5pt; line-height: 1.35;
+    background: var(--tint); border-left: 4px solid var(--accent);
+    padding: 7px 10px; margin: 12px 0 14px;
+  }
+  .directions b { letter-spacing: .03em; }
+  .tip { font-style: italic; margin-top: 3px; }
+
+  /* ------------------------------------------------- problems and grids */
+  .grid { display: grid; gap: 13px 16px; margin-top: 4px; }
+  .prob { page-break-inside: avoid; display: flex; gap: 5px; align-items: flex-start; }
+  .pn { font-weight: bold; font-size: 11pt; min-width: .28in; flex: 0 0 auto; color: var(--accent); }
+  .pbody { flex: 1; min-width: 0; }
+
+  /* Digits need lining figures and even widths whatever the body font is. */
+  .num, .vert, .horiz { font-family: "Trebuchet MS", "Segoe UI", Tahoma, Verdana, sans-serif; font-variant-numeric: lining-nums tabular-nums; }
+
+  /* A stacked column algorithm.
+     Two grid columns — operator, then digits — because a floated or absolutely
+     positioned operator overlaps the digits as soon as the numbers get wide,
+     and "324" with a + sitting on the 3 is unreadable. The grid also lets the
+     rule under the last operand span BOTH columns, which is how it is written
+     by hand. The rule is heavy: it is the line you write the answer beneath. */
+  .vert {
+    display: inline-grid; grid-template-columns: auto auto;
+    font-size: 15pt; line-height: 1.3; text-align: right;
+  }
+  .vert > span { padding: 0 0 1px 0; }
+  .vert .op { text-align: left; padding-right: .16in; }
+  .vert .last { border-bottom: 2.5px solid var(--ink); padding-bottom: 3px; }
+  .vert .ans { height: .4in; }
+  /* Partial-products working, for 2-digit x 1-digit before the short method. */
+  .vert .part { font-size: 11pt; color: var(--muted); }
+  /* A row of worked examples that fade — see lib/formats.js faded(). The
+     caption is what makes the fade legible: without it the third one looks like
+     a question somebody forgot to number. */
+  .egrow { display: flex; gap: .34in; align-items: flex-start; margin: 0 0 4px; }
+  .eg { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; }
+  .eglab { font-size: 8.5pt; color: var(--slate); letter-spacing: .02em; }
+
+  /* The carried digits. Small and grey so the sum still reads as the sum, and
+     tight to the row below it so a carry sits ON the column it goes into. */
+  .vert .carry { font-size: 9pt; color: var(--slate); line-height: 1; padding: 0 0 1px 0; }
+
+  .horiz { font-size: 14pt; white-space: nowrap; }
+
+  /* Row numbers in a word list. Gray and small: they are there so a list can be
+     dictated ("number seven") and marked without counting down the page, and
+     they must not compete with the word itself. */
+  .wn { color: var(--muted); font-size: 9pt; }
+
+  /* The box an answer goes in. inline-block so it can sit mid-sentence. */
+  .abox {
+    display: inline-block; border: 1.6px solid var(--slate); border-radius: 3px;
+    vertical-align: middle; margin: 0 3px; position: relative; background: #fff;
+  }
+  /* Scoped to the box: as a bare ".alab" it pinned any generator's own .alab
+     to the bottom of the page (life-07-signs-and-forms 40, 2026-09-24). */
+  .abox > .alab {
+    position: absolute; bottom: 1px; left: 0; right: 0;
+    text-align: center; font-size: 7pt; color: var(--muted); font-style: italic;
+  }
+
+  /* Confidence marks. The rings are drawn with a border and a gradient rather
+     than an SVG so they stay inline with the question text at any font size,
+     and print black on a mono laser without relying on a background image. */
+  .conf { float: right; margin: 2px 0 0 8px; white-space: nowrap; }
+  .cring {
+    display: inline-block; width: 11px; height: 11px; margin-left: 4px;
+    border: 1.4px solid var(--slate); border-radius: 50%; vertical-align: middle;
+  }
+  .cring-full { background: var(--accent); }
+  .cring-half { background: linear-gradient(90deg, var(--accent) 50%, #fff 50%); }
+  .cring-none { background: #fff; }
+  ol.qs.hasconf li { overflow: hidden; }
+
+  .conflegend {
+    border: 1.2px solid var(--rule); border-radius: 4px;
+    padding: 3px 8px; margin: 0 0 7px;
+    font-size: 8.5pt; color: var(--muted); display: flex; gap: 14px; align-items: center;
+  }
+  .conftitle { font-weight: 700; color: var(--ink); }
+  .confitem { white-space: nowrap; }
+
+  .work {
+    border: 1.4px dashed var(--rule); border-radius: 4px;
+    margin: 6px 0 2px; position: relative;
+  }
+  /* The label S.work() puts in the box: a DIRECT child only. As ".work span"
+     it also caught every span inside any generator's own .work content and
+     stacked them all at the top-left corner (math-11-grade6 47, 2026-09-23). */
+  .work > span {
+    position: absolute; top: 3px; left: 6px;
+    font-size: 8pt; color: var(--muted); font-style: italic;
+  }
+
+  /* ------------------------------------------------------ writing lines */
+  /* Primary rule: solid top, dashed midline, heavy baseline. Capitals reach
+     the top line, lowercase bodies sit under the dashed one. */
+  .write {
+    position: relative; height: 0.375in;
+    margin: 6px 0 0 .3in;
+    border-top: 1px solid var(--rule); border-bottom: 2px solid var(--ink);
+  }
+  .write.flush { margin-left: 0; }
+  .write + .write { margin-top: .17in; }
+  .write::after {
+    content: ""; position: absolute; left: 0; right: 0; top: 50%;
+    border-top: 1px dashed var(--guide);
+  }
+
+  /* ------------------------------------------------------- question list */
+  ol.qs { margin: 0; padding: 0 0 0 .34in; }
+  ol.qs li { margin-bottom: 13px; page-break-inside: avoid; }
+  ol.qs li::marker { font-weight: bold; font-size: 11pt; color: var(--accent); }
+  .qt { display: block; }
+
+  .mcq { display: grid; gap: 3px 14px; margin: 5px 0 2px .12in; font-size: 11pt; }
+  .opt { white-space: nowrap; }
+
+  /* -------------------------------------------------------------- tables */
+  .tbl { border-collapse: collapse; margin: 8px 0; font-size: 11pt; width: 100%; }
+  .tbl th, .tbl td { border: 1.4px solid var(--ink); padding: 5px 8px; text-align: left; }
+  .tbl th { color: var(--slate); }
+  .tbl th { background: var(--tint); font-size: 10pt; letter-spacing: .02em; }
+  .tbl td.blank { height: .34in; }
+  .tbl.narrow { width: auto; }
+  .tbl.center td, .tbl.center th { text-align: center; }
+
+  /* ------------------------------------------------------------ passages */
+  .passage {
+    border: 1.5px solid var(--slate); border-radius: 4px;
+    padding: 11px 14px; margin-bottom: 12px;
+    font-size: 11.5pt; line-height: 1.55;
+  }
+  .passage h2 { font-size: 13pt; margin: 0 0 6px; color: var(--deep); }
+  .passage p { margin: 0 0 8px; }
+  .passage p:last-child { margin-bottom: 0; }
+  .passage .byline { font-size: 9.5pt; font-style: italic; color: var(--muted); margin-bottom: 8px; }
+  /* Numbered paragraphs, so a question can say "in paragraph 2". */
+  .passage p.np { position: relative; padding-left: .3in; }
+  .passage p.np::before {
+    content: attr(data-p); position: absolute; left: 0; top: 0;
+    font-size: 9pt; color: var(--accent); font-weight: bold;
+  }
+
+  .wordbank {
+    border: 1.5px dashed var(--slate); border-radius: 4px;
+    padding: 8px 12px; margin: 10px 0 12px;
+    font-size: 11.5pt; text-align: center;
+  }
+  .wordbank b { display: block; font-size: 9.5pt; letter-spacing: .06em;
+    text-transform: uppercase; margin-bottom: 4px; color: var(--accent); }
+  .wordbank span { display: inline-block; margin: 2px 11px; }
+
+  .note {
+    border-left: 4px solid var(--deep); background: var(--tintdeep);
+    padding: 7px 11px; margin: 10px 0; font-size: 10.5pt;
+  }
+  .note b { letter-spacing: .02em; }
+
+  /* -------------------------------------------------------------- footer */
+  /* THE WORDMARK SITS IN THE FOOTER THAT WAS ALREADY THERE, so it costs no
+     height at all — a sheet that fitted before fits now. Upright where the rest
+     of the line is italic, and a size down: it is a signature, not a message,
+     and it must never compete with "Score: ___ / 10". */
+  .brand { font-style: normal; font-size: 7.5pt; letter-spacing: .04em;
+    color: var(--accent); align-self: center; }
+
+  footer {
+    margin-top: 14px; padding-top: 6px; border-top: 1px solid var(--rule);
+    font-size: 9pt; font-style: italic; color: var(--muted);
+    display: flex; justify-content: space-between;
+  }
+
+  /* ---------------------------------------------------------- answer key */
+  .keybadge {
+    display: inline-block; border: 2px solid var(--deep); color: var(--deep); padding: 2px 9px;
+    font-size: 9.5pt; font-weight: bold; letter-spacing: .08em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .key .why {
+    display: block; font-size: 9pt; font-style: italic; color: var(--muted); margin-top: 1px;
+  }
+  /* Highlight rather than underline: <u> in a key marks WHAT CHANGED, and an
+     underline under a comma is invisible. */
+  .key u { text-decoration: none; background: var(--tint); padding: 0 2px; font-weight: bold; }
+  .keygrid .pbody { font-family: "Trebuchet MS", "Segoe UI", Tahoma, Verdana, sans-serif; font-size: 12pt; }
+  /* A key's pictures scale to their column: at 1fr a wide drawing pushed a
+     three-column key 92px off the paper (art-04-drawing 10, 2026-09-24). */
+  .keygrid svg { max-width: 100%; height: auto; }
+  .keylist .qt { font-weight: normal; }
+
+  /*
+   * The guide page. Four lines per question, and the ASK line is the one that
+   * gets used at the table, so it is the one with a rule beside it — a parent
+   * scanning this page in ten seconds should land on the follow-up question
+   * and nothing else.
+   */
+  .guide { padding-left: .3in; }
+  .guide li { margin-bottom: 11px; page-break-inside: avoid; }
+  .guide .gq { font-weight: bold; font-size: 11pt; margin-bottom: 3px; }
+  /* 9pt, matching the key's own why line, because the guide page is the
+     binding constraint on every open sheet: four lines per question against a
+     key's one, and at 10pt a sheet with seven questions ran onto a second
+     side. Found by measuring, not chosen. (No backticks in here — this CSS
+     lives inside a template literal and one would close it.) */
+  .guide .glook, .guide .gthin, .guide .gstrong {
+    font-size: 9pt; line-height: 1.3; margin-top: 1px;
+  }
+  .guide .gthin { color: var(--muted); }
+  .guide .gstrong { color: var(--muted); font-style: italic; }
+  .guide .gask {
+    font-size: 9.5pt; line-height: 1.3; margin-top: 3px;
+    border-left: 3px solid var(--slate); padding-left: 7px;
+  }
+  .key .qs li { margin-bottom: 9px; }
+
+  /*
+   * INLINE-BLOCK, NOT BLOCK, AND THIS WAS WRONG FOR A LONG TIME. A block-level
+   * svg ignores text-align: center on its parent and sits flush left — so 117
+   * sheets across 35 packs said "centre this diagram" and got a left-aligned
+   * one. Twenty-five of them were origami and paper-plane fold sequences, where
+   * the whole page is diagrams.
+   *
+   * Nobody spotted it because a left-flush diagram looks deliberate; it only
+   * reads as wrong next to a centered one, and no sheet has both.
+   *
+   * inline-block makes text-align do what every one of those authors meant,
+   * and leaves a diagram in a left-aligned container exactly where it was.
+   * vertical-align: top kills the baseline gap that inline elements otherwise
+   * leave underneath them, which would have pushed long pages over.
+   */
+  svg { display: inline-block; vertical-align: top; }
+  svg.inline { vertical-align: middle; }
+
+  .page.g1 .tbl td { font-size: 12pt; padding-top: 7px; padding-bottom: 7px; line-height: 1.38; }
+  .page.g1 .tbl th { font-size: 10.5pt; padding-top: 6px; padding-bottom: 6px; }
+  .page.g1 .tbl td.blank { height: 0.45999999999999996in; }
+  .page.g1 .write + .write { margin-top: 0.25in; }
+  .page.g1 ol.qs li { margin-bottom: 19px; }
+  .page.g1 ol.qs .qt { font-size: 12pt; }
+  .page.g2 .tbl td { font-size: 12.5pt; padding-top: 12px; padding-bottom: 12px; line-height: 1.38; }
+  .page.g2 .tbl th { font-size: 10.5pt; padding-top: 6px; padding-bottom: 6px; }
+  .page.g2 .tbl td.blank { height: 0.62in; }
+  .page.g2 .write + .write { margin-top: 0.33in; }
+  .page.g2 ol.qs li { margin-bottom: 25px; }
+  .page.g2 ol.qs .qt { font-size: 12.5pt; }
+  .page.g3 .tbl td { font-size: 13pt; padding-top: 17px; padding-bottom: 17px; line-height: 1.38; }
+  .page.g3 .tbl th { font-size: 10.5pt; padding-top: 6px; padding-bottom: 6px; }
+  .page.g3 .tbl td.blank { height: 0.78in; }
+  .page.g3 .write + .write { margin-top: 0.41in; }
+  .page.g3 ol.qs li { margin-bottom: 31px; }
+  .page.g3 ol.qs .qt { font-size: 13pt; }
+  .page.g4 .tbl td { font-size: 13.5pt; padding-top: 22px; padding-bottom: 22px; line-height: 1.38; }
+  .page.g4 .tbl th { font-size: 10.5pt; padding-top: 6px; padding-bottom: 6px; }
+  .page.g4 .tbl td.blank { height: 0.94in; }
+  .page.g4 .write + .write { margin-top: 0.45in; }
+  .page.g4 ol.qs li { margin-bottom: 37px; }
+  .page.g4 ol.qs .qt { font-size: 13.5pt; }
+  .page.g5 .tbl td { font-size: 14pt; padding-top: 27px; padding-bottom: 27px; line-height: 1.38; }
+  .page.g5 .tbl th { font-size: 10.5pt; padding-top: 6px; padding-bottom: 6px; }
+  .page.g5 .tbl td.blank { height: 1.1in; }
+  .page.g5 .write + .write { margin-top: 0.45in; }
+  .page.g5 ol.qs li { margin-bottom: 43px; }
+  .page.g5 ol.qs .qt { font-size: 14pt; }
+  .page.g6 .tbl td { font-size: 14.5pt; padding-top: 32px; padding-bottom: 32px; line-height: 1.38; }
+  .page.g6 .tbl th { font-size: 10.5pt; padding-top: 6px; padding-bottom: 6px; }
+  .page.g6 .tbl td.blank { height: 1.26in; }
+  .page.g6 .write + .write { margin-top: 0.45in; }
+  .page.g6 ol.qs li { margin-bottom: 49px; }
+  .page.g6 ol.qs .qt { font-size: 14.5pt; }
+  .rules { font-size: 10pt; background: #FAF7F2; border: 1px solid var(--rule);
+           padding: 6px 9px; margin: 0 0 9px; }
+
+  .find { font-size: 10.5pt; line-height: 1.38; background: #FFFDF7;
+          border-left: 4px solid var(--accent); border-top: 1px solid var(--rule);
+          border-right: 1px solid var(--rule); border-bottom: 1px solid var(--rule);
+          padding: 8px 11px; margin: 10px 0; }
+
+  .modewrap { margin: 10px 0 4px; }
+  .modewrap svg { display: block; width: 100%; max-width: 4.6in; margin: 0 auto; }
+
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 10px 0; align-items: start; }
+  .ttext .find { margin-top: 0; }
+  .fig { text-align: center; }
+  .fig svg { display: block; width: 100%; max-width: 1.9in; margin: 0 auto; }
+  .two.sails .fig svg { max-width: 3.1in; }
+  .two.sails .fig span { font-size: 11pt; }
+  .fig span { display: block; font-size: 9.5pt; font-style: italic; color: var(--muted);
+              margin-top: 2px; line-height: 1.25; }
+
+  .lab { font-size: 10.5pt; font-weight: bold; border-bottom: 1.5px solid var(--accent);
+         padding-bottom: 2px; margin: 14px 0 5px; }
+
+  .rulerwrap { margin: 8px 0 0; }
+  .rulerwrap svg { display: block; margin: 0 auto; }
+  .cap { font-size: 9.5pt; font-style: italic; color: var(--muted); text-align: center; margin-top: 2px; }
+
+  /* Two across, then one — the disc is 3.4in and the leaf 2.6in, which is 6in
+     of the 7.5in a page has. Three across would shrink every one of them below
+     the three inches page 4 says is the minimum. */
+  .sailgrid { display: grid; grid-template-columns: 1.35fr 1fr; gap: 8px 16px;
+              margin: 10px 0 0; justify-items: center; align-items: end; }
+  .sailgrid.one { grid-template-columns: 1fr; margin-top: 14px; }
+  .scell { text-align: center; }
+  .scell svg { display: block; margin: 0 auto 2px; max-width: 100%; height: auto; }
+  .scell b { display: block; font-size: 10pt; }
+  .scell span { display: block; font-size: 8.6pt; font-style: italic; color: var(--muted); line-height: 1.22; }
+
+</style>
+</head>
+<body>
+
+<div class="page ">
+  <header>
+    
+    <h1>Wind Chimes</h1>
+    <p class="sub">Making &middot; Projects &middot; Page 1 of 7</p>
+  </header>
+  <div class="nameline">
+    <span>Name</span>
+    <span class="short">Date</span>
+  </div>
+  <div class="directions">
+    <b>DIRECTIONS:</b> Get a fork from the drawer for the second paragraph.
+  </div>
+
+
+  <div class="rules"><b>Scissors only, with a grown-up in the room.</b> If a step seems to want a knife, snip or fold instead.</div>
+
+  <div class="note"><b>What you need:</b> cutlery &middot; jar lids &middot; bottle tops &middot; string &middot; a stick &middot; card &middot; scissors &middot; a ruler. Old cutlery, not the good set.</div>
+
+  <div class="find"><b>Two spots on a hanging bar hold still while it rings. The string must go through one.</b> Hold a fork by the end and tap: dull. Pinch it a fifth of the way down: it rings.</div>
+
+  <div class="modewrap"><svg viewBox="0 0 360 196" width="100%"
+    role="img" aria-label="a hanging bar drawn at both extremes of its lowest note, with the two still points marked">
+    <path d="M34,62 C74.88,62 81.46640000000001,96 99.46640000000001,96 C129.46640000000002,96 150,123.88 180,123.88 C210,123.88 230.53359999999998,96 260.5336,96 C278.5336,96 285.12,62 326,62" fill="none" stroke="#B9B0A2" stroke-width="1.6" stroke-dasharray="6 4"/>
+    <path d="M34,130 C74.88,130 81.46640000000001,96 99.46640000000001,96 C129.46640000000002,96 150,68.12 180,68.12 C210,68.12 230.53359999999998,96 260.5336,96 C278.5336,96 285.12,130 326,130" fill="none" stroke="#B9B0A2" stroke-width="1.6" stroke-dasharray="6 4"/>
+    <rect x="34" y="89" width="292" height="14" rx="3" fill="#FAF7F2" stroke="#3A3A3A" stroke-width="2.2"/>
+    <path d="M99.46640000000001,52 L99.46640000000001,140 M260.5336,52 L260.5336,140"
+          fill="none" stroke="#C0511D" stroke-width="1.5" stroke-dasharray="5 4"/>
+    <circle cx="99.46640000000001" cy="96" r="6" fill="#C0511D"/>
+    <circle cx="260.5336" cy="96" r="6" fill="#C0511D"/>
+    <text x="99.46640000000001" y="44" font-size="11.5" fill="#C0511D" text-anchor="middle">tie HERE</text>
+    <text x="260.5336" y="44" font-size="11.5" fill="#C0511D" text-anchor="middle">or HERE</text>
+    <text x="99.46640000000001" y="156" font-size="10.5" fill="#C0511D" text-anchor="middle">still</text>
+    <text x="260.5336" y="156" font-size="10.5" fill="#C0511D" text-anchor="middle">still</text>
+    <text x="180" y="156" font-size="10.5" fill="#6A6A6A" text-anchor="middle">moving most</text>
+    <text x="30" y="44" font-size="10.5" fill="#6A6A6A" text-anchor="start">moving</text>
+    <text x="330" y="44" font-size="10.5" fill="#6A6A6A" text-anchor="end">moving</text>
+    <path d="M34,172 L99.46640000000001,172" fill="none" stroke="#3A3A3A" stroke-width="1.3"/>
+    <path d="M34,168 L34,176 M99.46640000000001,168 L99.46640000000001,176"
+          fill="none" stroke="#3A3A3A" stroke-width="1.3"/>
+    <text x="66.73320000000001" y="188" font-size="10.5" fill="#3A3A3A" text-anchor="middle">22.4%</text>
+  </svg></div>
+
+  <div class="note"><b>Shop chimes are drilled 22.4% in from the end.</b> Anywhere else, the knot grips
+  moving metal and kills the ring.</div>
+
+  <ol class="qs" start="1"><li><span class="qt">Pinch the fork at five different places and tap it each time. Which pinch rang longest, and how far down was it? Measure it, then work out what fraction of the whole fork that is.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Test the drawer on page 2 &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Wind chimes</span>
+  </footer>
+</div>
+
+<div class="page g1">
+  <header class="cont">
+    
+    <h1>What Rings, and What Does Not</h1>
+    <p class="sub">Making &middot; Projects &middot; Page 2 of 7</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Dangle each on a string loop, tap it, and count "one elephant, two elephant" until it stops.
+  </div>
+
+
+  <div class="note"><b>Hold it by the string.</b> A finger on it stops it.</div>
+
+  <table class="tbl ">
+    <thead><tr><th>What</th><th>Guess: how long will it ring?</th><th>How long it actually rang</th><th>In the chime?</th></tr></thead>
+    <tbody><tr><td><b>a fork</b></td><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr><tr><td><b>a big spoon</b></td><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr><tr><td><b>a teaspoon</b></td><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr><tr><td><b>a metal jar lid</b></td><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr><tr><td><b>a bottle top</b></td><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr><tr><td><b>a wooden spoon</b></td><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr><tr><td><b>a plastic lid</b></td><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr><tr><td><b>a coin</b></td><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr></tbody>
+  </table>
+
+  <div class="find"><b>Metal rings; wood thumps.</b> Bending rubs a material against itself and turns movement into heat. Metal loses little; wood and plastic lose it at once. <b>A crack stops the ring dead</b>: that is how bells and train wheels are tested.</div>
+
+  <ol class="qs" start="2"><li><span class="qt">Something rang for much longer or much shorter than you guessed. Which was it, and what had you assumed about it?</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Where to tie it &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>What rings, and what does not</span>
+  </footer>
+</div>
+
+<div class="page g1">
+  <header class="cont">
+    
+    <h1>Where to Tie It</h1>
+    <p class="sub">Making &middot; Projects &middot; Page 3 of 7</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Measure it, look it up, and mark it. Then check by ear.
+  </div>
+
+
+  <div class="two">
+    <div>
+      <table class="tbl ">
+    <thead><tr><th>If it is this long</th><th>Tie it this far from the end</th></tr></thead>
+    <tbody><tr><td><b>4 in</b></td><td>7/8 in</td></tr><tr><td><b>5 in</b></td><td>1 1/8 in</td></tr><tr><td><b>6 in</b></td><td>1 3/8 in</td></tr><tr><td><b>7 in</b></td><td>1 9/16 in</td></tr><tr><td><b>8 in</b></td><td>1 13/16 in</td></tr><tr><td><b>9 in</b></td><td>2 in</td></tr><tr><td><b>10 in</b></td><td>2 1/4 in</td></tr><tr><td><b>12 in</b></td><td>2 11/16 in</td></tr></tbody>
+  </table>
+    </div>
+    <div class="ttext">
+      <div class="find"><b>The table works for straight, even bars</b>: 22.4% of the length. <b>A fork is not even</b>, so find its spot by ear:<br><b>1.</b> Pinch near one end and tap.<br><b>2.</b> Move a finger-width along and tap again.<br><b>3.</b> Stop where it rings longest, and tie it there.</div>
+    </div>
+  </div>
+
+  <div class="rulerwrap"><svg class="" viewBox="0 0 688 44" width="688" height="44" role="img" aria-label="7 in ruler" xmlns="http://www.w3.org/2000/svg"><rect x="8" y="6" width="672" height="30" rx="0" fill="none" stroke="#16130F" stroke-width="1.8"/><line x1="8" y1="6" x2="8" y2="21" stroke="#16130F" stroke-width="1.6" stroke-linecap="round"/><text x="8" y="32" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="10" font-weight="normal" text-anchor="middle" fill="#16130F">0</text><line x1="32" y1="6" x2="32" y2="12" stroke="#16130F" stroke-width="1" stroke-linecap="round"/><line x1="56" y1="6" x2="56" y2="16" stroke="#16130F" stroke-width="1" stroke-linecap="round"/><line x1="80" y1="6" x2="80" y2="12" stroke="#16130F" stroke-width="1" stroke-linecap="round"/><line x1="104" y1="6" x2="104" y2="21" stroke="#16130F" stroke-width="1.6" stroke-linecap="round"/><text x="104" y="32" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="10" font-weight="normal" text-anchor="middle" fill="#16130F">1</text><line x1="128" y1="6" x2="128" y2="12" stroke="#16130F" stroke-width="1" stroke-linecap="round"/><line x1="152" y1="6" x2="152" y2="16" stroke="#16130F" stroke-width="1" stroke-linecap="round"/><line x1="176" y1="6" x2="176" y2="12" stroke="#16130F" stroke-width="1" stroke-linecap="round"/><line x1="200" y1="6" x2="200" y2="21" stroke="#16130F" stroke-width="1.6" stroke-linecap="round"/><text x="200" y="32" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="10" font-weight="normal" text-anchor="middle" fill="#16130F">2</text><line x1="224" y1="6" x2="224" y2="12" stroke="#16130F" stroke-width="1" stroke-linecap="round"/><line x1="248" y1="6" x2="248" y2="16" stroke="#16130F" stroke-width="1" stroke-linecap="round"/><line x1="272" y1="6" x2="272" y2="12" stroke="#16130F" stroke-width="1" stroke-linecap="round"/><line x1="296" y1="6" x2="296" y2="21" stroke="#16130F" stroke-width="1.6" stroke-linecap="round"/><text x="296" y="32" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="10" font-weight="normal" text-anchor="middle" fill="#16130F">3</text><line x1="320" y1="6" x2="320" y2="12" stroke="#16130F" stroke-width="1" stroke-linecap="round"/><line x1="344" y1="6" x2="344" y2="16" stroke="#16130F" stroke-width="1" stroke-linecap="round"/><line x1="368" y1="6" x2="368" y2="12" stroke="#16130F" stroke-width="1" stroke-linecap="round"/><line x1="392" y1="6" x2="392" y2="21" stroke="#16130F" stroke-width="1.6" stroke-linecap="round"/><text x="392" y="32" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="10" font-weight="normal" text-anchor="middle" fill="#16130F">4</text><line x1="416" y1="6" x2="416" y2="12" stroke="#16130F" stroke-width="1" stroke-linecap="round"/><line x1="440" y1="6" x2="440" y2="16" stroke="#16130F" stroke-width="1" stroke-linecap="round"/><line x1="464" y1="6" x2="464" y2="12" stroke="#16130F" stroke-width="1" stroke-linecap="round"/><line x1="488" y1="6" x2="488" y2="21" stroke="#16130F" stroke-width="1.6" stroke-linecap="round"/><text x="488" y="32" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="10" font-weight="normal" text-anchor="middle" fill="#16130F">5</text><line x1="512" y1="6" x2="512" y2="12" stroke="#16130F" stroke-width="1" stroke-linecap="round"/><line x1="536" y1="6" x2="536" y2="16" stroke="#16130F" stroke-width="1" stroke-linecap="round"/><line x1="560" y1="6" x2="560" y2="12" stroke="#16130F" stroke-width="1" stroke-linecap="round"/><line x1="584" y1="6" x2="584" y2="21" stroke="#16130F" stroke-width="1.6" stroke-linecap="round"/><text x="584" y="32" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="10" font-weight="normal" text-anchor="middle" fill="#16130F">6</text><line x1="608" y1="6" x2="608" y2="12" stroke="#16130F" stroke-width="1" stroke-linecap="round"/><line x1="632" y1="6" x2="632" y2="16" stroke="#16130F" stroke-width="1" stroke-linecap="round"/><line x1="656" y1="6" x2="656" y2="12" stroke="#16130F" stroke-width="1" stroke-linecap="round"/><line x1="680" y1="6" x2="680" y2="21" stroke="#16130F" stroke-width="1.6" stroke-linecap="round"/><text x="680" y="32" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="10" font-weight="normal" text-anchor="middle" fill="#16130F">7</text><text x="682" y="44" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="9.5" font-weight="normal" text-anchor="end" fill="#6B635A">in</text></svg></div>
+  <div class="cap">A real 7 inches. Lay the fork on it.</div>
+
+  <div class="lab">Your four, measured both ways</div>
+  <table class="tbl ">
+    <thead><tr><th>What it is</th><th>How long</th><th>Table says tie at</th><th>Your ear says tie at</th><th>Which rang better?</th></tr></thead>
+    <tbody><tr><td class="blank"></td><td class="blank"></td><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr><tr><td class="blank"></td><td class="blank"></td><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr><tr><td class="blank"></td><td class="blank"></td><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr><tr><td class="blank"></td><td class="blank"></td><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr></tbody>
+  </table>
+
+  <div class="note"><b>Fill in both columns.</b> The table is for straight bars; on a fork, trust your ear.</div>
+
+  <footer>
+    <span>The bit everybody leaves off &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Where to tie it</span>
+  </footer>
+</div>
+
+<div class="page g6">
+  <header class="cont">
+    
+    <h1>It Needs a Sail</h1>
+    <p class="sub">Making &middot; Projects &middot; Page 4 of 7</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Cut one out: the wind catcher is what makes the chime play.
+  </div>
+
+
+  <div class="find"><b>The flat thing hanging off the bottom of every wind chime is not decoration.
+  It is the engine.</b><br><br>
+  The clapper in the middle is heavy, and a breeze cannot shift it. So the sail hangs below on a
+  longer string, where it has room to swing and a broad face for the wind to push on &mdash; and it
+  drags the clapper into the tubes. <b>Leave the sail off and your chime hangs silent</b> on a day
+  when the one three gardens away is going.</div>
+
+  <div class="two sails">
+    <div class="fig"><svg viewBox="0 0 180 260" width="100%"
+  role="img" aria-label="a wind chime with no sail, hanging still">
+  <path d="M30,26 L150,26" fill="none" stroke="#3A3A3A" stroke-width="4" stroke-linecap="round"/>
+  <path d="M48,26 L48,120 M72,26 L72,138 M108,26 L108,138 M132,26 L132,120"
+        fill="none" stroke="#CFC3B2" stroke-width="1.2"/>
+  <rect x="43" y="52" width="10" height="70" rx="3" fill="#FAF7F2" stroke="#3A3A3A" stroke-width="1.8"/>
+  <rect x="67" y="60" width="10" height="82" rx="3" fill="#FAF7F2" stroke="#3A3A3A" stroke-width="1.8"/>
+  <rect x="103" y="60" width="10" height="82" rx="3" fill="#FAF7F2" stroke="#3A3A3A" stroke-width="1.8"/>
+  <rect x="127" y="52" width="10" height="70" rx="3" fill="#FAF7F2" stroke="#3A3A3A" stroke-width="1.8"/>
+  <path d="M90,26 L90,96" fill="none" stroke="#8A8A8A" stroke-width="1.3"/>
+  <circle cx="90" cy="106" r="12" fill="#E4DED2" stroke="#3A3A3A" stroke-width="1.8"/>
+  <path d="M90,118 L90,150" fill="none" stroke="#8A8A8A" stroke-width="1.3"/>
+  <text x="90" y="248" font-size="11.5" fill="#C0511D" text-anchor="middle">nothing to push</text>
+</svg><span>No sail. The wind goes past a thin clapper and nothing happens.</span></div>
+    <div class="fig"><svg viewBox="0 0 180 260" width="100%"
+  role="img" aria-label="a wind chime with a sail, swinging">
+  <path d="M30,26 L150,26" fill="none" stroke="#3A3A3A" stroke-width="4" stroke-linecap="round"/>
+  <path d="M48,26 L48,120 M72,26 L72,138 M108,26 L108,138 M132,26 L132,120"
+        fill="none" stroke="#CFC3B2" stroke-width="1.2"/>
+  <rect x="43" y="52" width="10" height="70" rx="3" fill="#FAF7F2" stroke="#3A3A3A" stroke-width="1.8"/>
+  <rect x="67" y="60" width="10" height="82" rx="3" fill="#FAF7F2" stroke="#3A3A3A" stroke-width="1.8"/>
+  <rect x="103" y="60" width="10" height="82" rx="3" fill="#FAF7F2" stroke="#3A3A3A" stroke-width="1.8"/>
+  <rect x="127" y="52" width="10" height="70" rx="3" fill="#FAF7F2" stroke="#3A3A3A" stroke-width="1.8"/>
+  <path d="M90,26 L90,96" fill="none" stroke="#8A8A8A" stroke-width="1.3"/>
+  <circle cx="90" cy="106" r="12" fill="#E4DED2" stroke="#3A3A3A" stroke-width="1.8"/>
+  <path d="M90,118 L90,170" fill="none" stroke="#8A8A8A" stroke-width="1.3"/>
+  <ellipse cx="90" cy="196" rx="34" ry="26" fill="#F2EDE4" stroke="#3A3A3A" stroke-width="2"/><path d="M130,186 C146,180 152,192 142,200 M132,206 C148,202 152,214 140,218" fill="none" stroke="#C0511D" stroke-width="2" stroke-linecap="round"/><path d="M50,186 C34,180 28,192 38,200 M48,206 C32,202 28,214 40,218" fill="none" stroke="#C0511D" stroke-width="2" stroke-linecap="round"/><text x="90" y="248" font-size="11.5" fill="#C0511D" text-anchor="middle">the sail catches it</text>
+</svg><span>With a sail. Same breeze, same chime.</span></div>
+  </div>
+
+  <div class="note"><b>At least three inches across.</b> The three on the next page are that size.</div>
+
+  <footer>
+    <span>The sails are on page 5 &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>It needs a sail</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>Three Sails, at the Size That Works</h1>
+    <p class="sub">Making &middot; Projects &middot; Page 5 of 7</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Glue this page onto card (not paper), cut one out, and punch the small circle.
+  </div>
+
+
+  <div class="sailgrid">
+    <div class="scell"><svg viewBox="-3 -3 332 332" width="326" height="326"
+    role="img" aria-label="the disc, a sail to cut out"><circle cx="163" cy="163" r="161" fill="white" stroke="#C0511D" stroke-width="2" stroke-linejoin="round"/>
+      <circle cx="163" cy="14" r="4.5" fill="none" stroke="#C0511D" stroke-width="1.6"/></svg><b>the disc</b><span>The plain one, and the one that works best. Every shop chime uses it.</span></div>
+    <div class="scell"><svg viewBox="-3 -3 256 371" width="250" height="365"
+    role="img" aria-label="the leaf, a sail to cut out"><path d="M125,4 C246,109.5 246,270.1 125,361
+      C4,270.1 4,109.5 125,4 z" fill="white" stroke="#C0511D" stroke-width="2" stroke-linejoin="round"/>
+      <path d="M125,14 L125,351" fill="none" stroke="#CFC3B2" stroke-width="1.4"/>
+      <circle cx="125" cy="58.4" r="4.5" fill="none" stroke="#C0511D" stroke-width="1.6"/></svg><b>the leaf</b><span>Turns edge-on in a strong wind, so it is quieter in a gale. Some people want that.</span></div>
+  </div>
+  <div class="sailgrid one">
+    <div class="scell"><svg viewBox="-3 -3 352 236" width="346" height="230"
+    role="img" aria-label="the fish, a sail to cut out"><path d="M6,32.2 L117.64000000000001,96.6
+      C145.32,10 269.88,14 340,115
+      C269.88,216 145.32,220 117.64000000000001,133.39999999999998
+      L6,197.79999999999998 L14,115 z" fill="white" stroke="#C0511D" stroke-width="2" stroke-linejoin="round"/>
+      <circle cx="249.12" cy="96.6" r="4.5" fill="#2A2A2A"/>
+      <circle cx="186.84" cy="55.199999999999996" r="4.5" fill="none" stroke="#C0511D" stroke-width="1.6"/></svg><b>the fish</b><span>The tail makes it spin as well as swing, which hits the tubes twice as often.</span></div>
+  </div>
+
+  <footer>
+    <span>Build it on page 6 &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Three sails</span>
+  </footer>
+</div>
+
+<div class="page g5">
+  <header class="cont">
+    
+    <h1>Building It, and the Rule That Is Not What You Expect</h1>
+    <p class="sub">Making &middot; Projects &middot; Page 6 of 7</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Hang the longest first, then work round. Tie knots loosely at first.
+  </div>
+
+
+  <table class="tbl ">
+    <thead><tr><th>Step</th><th>How</th><th>Why</th></tr></thead>
+    <tbody><tr><td><b>1. The top</b></td><td>A stick, or a metal jar lid with holes punched round the edge.</td><td>It has to be stiff. A floppy top absorbs the ring, same as a bad knot.</td></tr><tr><td><b>2. Hang them in a ring</b></td><td>All the same distance from the middle, all hanging to the same height at the top.</td><td>The clapper has to be able to reach every one of them. Miss one and it never plays.</td></tr><tr><td><b>3. The clapper</b></td><td>Something wooden, hanging in the middle, at the height of the middle of the tubes.</td><td>Wood on metal is a note. Metal on metal is a clank. And the middle of the tube is where it moves most.</td></tr><tr><td><b>4. The sail</b></td><td>Below the clapper, on a longer string.</td><td>Page 4. It is the engine.</td></tr><tr><td><b>5. Order them</b></td><td>Longest to shortest, going round.</td><td>The wind plays them in the order you hang them, so hanging them in order means it plays a tune rather than a jumble.</td></tr></tbody>
+  </table>
+
+  <div class="find"><b>Halving a string doubles the pitch. Halving a bar makes it four times higher</b>: two octaves. So one short tube pings out above the rest. Try a long fork beside a teaspoon.</div>
+
+  <footer>
+    <span>Last page &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Building it</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>Where to Hang It</h1>
+    <p class="sub">Making &middot; Projects &middot; Page 7 of 7</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> After a week outside.
+  </div>
+
+
+  <div class="note"><b>Where:</b> a little wind, not outside a bedroom window. Under a porch or by a door.</div>
+
+  <table class="tbl ">
+    <thead><tr><th>Where you tried it</th><th>Did it play?</th><th>Too much, too little, or right?</th></tr></thead>
+    <tbody><tr><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr><tr><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr><tr><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr></tbody>
+  </table>
+
+  <ol class="qs" start="3"><li><span class="qt">Move the string on one of the tubes to a wrong place on purpose, and listen. Describe the difference in a way that would convince somebody who has not heard it.</span><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Which of your things ended up in the chime and which got left out, and why? The prettiest is almost never the best ringer.</span><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">You learned that half a string is one octave up and half a bar is two. Say, in your own words, what somebody would get wrong if they only knew the string rule.</span><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Done &mdash; hang it outside</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Where to hang it</span>
+  </footer>
+</div>
+
+</body>
+</html>

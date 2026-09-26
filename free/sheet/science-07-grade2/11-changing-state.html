@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="sheet-kind" content="worksheet">
+<title>Changing From One to Another</title>
+<style>
+  @page { size: letter portrait; margin: 0.4in 0.45in; }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  :root {
+    --ink:    #16130F;
+    --muted:  #6B635A;
+    --rule:   #CFC3B2;
+    --guide:  #BCAE9C;
+    --accent: #C0511D;
+    --tint:   #F7EDE4;
+    --slate:  #2E5A78;
+    --tintslate: #E9EFF4;
+    --deep:   #2C4A45;
+    --tintdeep: #ECF1EF;
+  }
+
+  body {
+    font-family: Quicksand, 'URW Gothic', 'Century Gothic', sans-serif;
+    color: #000; background: #fff;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+
+  /* ORDER MATTERS. This generic rule must come BEFORE the @media screen block:
+   * both selectors have the same specificity, so whichever is declared last
+   * wins. With it after, it overrode the screen width and the preview stretched
+   * to the viewport — rows scaled up and pages measured 16in tall. Print was
+   * always fine (@media screen doesn't apply), but the on-screen proof lied. */
+  .page { width: 100%; }
+  .page + .page { page-break-before: always; }
+
+  @media screen {
+    body { padding: 0.4in; background: #ddd; }
+    .page {
+      background: #fff; padding: 0.4in 0.45in;
+      width: 8.5in; min-height: 11in;
+      margin: 0 auto 22px; box-shadow: 0 2px 10px rgba(0,0,0,.3);
+    }
+  }
+
+  header {
+    display: flex; align-items: center; gap: 16px;
+    border-bottom: 3px solid var(--slate); padding-bottom: 7px; margin-bottom: 2px;
+  }
+  .bigletter { font-size: 38pt; font-weight: 700; line-height: 1; letter-spacing: .02em; }
+  .htext { flex: 1; }
+  h1 { font-size: 14pt; font-weight: 700; margin: 0 0 2px; }
+  .sub { font-size: 10pt; color: var(--muted); margin: 0; }
+  .nameline {
+    font-size: 9.5pt; color: var(--muted);
+    border-bottom: 1px solid var(--ink); width: 2in;
+    padding-bottom: 1px; align-self: flex-end;
+  }
+
+  .label { font-size: 11.5pt; font-weight: 700; margin: 9px 0 1px; }
+  .label span { font-weight: 400; font-size: 10pt; color: var(--muted); }
+
+  .row { display: block; width: 100%; height: auto; margin-bottom: .06in; }
+  /* Rows that follow the header directly would otherwise jam against its rule. */
+  header + .row { margin-top: .12in; }
+
+  .words {
+    margin-top: 10px; padding-top: 7px; border-top: 1px solid var(--rule);
+    font-size: 12.5pt;
+    display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap;
+  }
+  .words b { font-size: 14pt; }
+  .words em { font-style: normal; color: var(--muted); }
+
+  /* The wordmark rides in the footer line that was already there — see the note
+     in lib/sheet.js. No height, upright, a size down, and never louder than the
+     two slots it sits between. */
+  .brand { font-style: normal; font-size: 7pt; letter-spacing: .04em;
+    color: var(--accent); align-self: center; }
+
+  footer {
+    margin-top: 7px; font-size: 8.5pt; color: var(--muted);
+    display: flex; justify-content: space-between;
+  }
+
+  .chart { display: grid; grid-template-columns: repeat(6, 1fr); gap: 7px; margin-top: 14px; }
+  .cell {
+    border: 2px solid var(--slate); border-radius: 8px; height: 1.35in;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .page.key { background: #fcfcfa; }
+  .page.key header { border-bottom-style: double; border-bottom-width: 3px; }
+  .keylist { font-size: 11pt; line-height: 1.7; }
+  .keylist p { margin: .02in 0; }
+  .keynote { border: 1.5px solid var(--deep); border-radius: 8px; padding: .07in .12in;
+    margin: .1in 0 0; font-size: 10pt; line-height: 1.5; }
+
+  .note { border: 1.5px solid var(--deep); border-radius: 8px; padding: .07in .12in;
+    margin: .06in 0 .1in; font-size: 10pt; color: var(--ink); }
+  .tasknote { border: 1.5px solid var(--deep); border-radius: 8px; padding: .07in .12in;
+    margin-top: .1in; font-size: 10.5pt; }
+  svg { display: block; }
+  svg.inline { display: inline-block; vertical-align: middle; }
+
+  .wqs { margin-top: .06in; }
+  .wq { margin-bottom: .03in; }
+  .wqt { font-size: 10.5pt; font-weight: 700; margin-bottom: .01in; }
+  .wordbank { border: 1.5px solid var(--accent); border-radius: 8px; padding: .06in .12in;
+    margin-top: .08in; font-size: 10.5pt; }
+
+  .pick { display: flex; align-items: center; gap: .05in; font-size: 10pt;
+    white-space: nowrap; }
+  .pick i { width: .22in; height: .22in; border: 2px solid var(--slate); border-radius: 4px;
+    display: inline-block; flex: 0 0 auto; }
+
+  .dobox { border: 2.4px solid var(--slate); border-radius: 9px; padding: .08in .12in;
+    margin: .1in 0 .08in; }
+  .dotitle { font-size: 11.5pt; font-weight: 700; margin-bottom: .03in; }
+  .dosteps { margin: 0; padding-left: .22in; }
+  .dosteps li { font-size: 10.5pt; margin-bottom: .02in; }
+
+  .strow { display: flex; align-items: center; gap: .22in;
+    border-bottom: 1px solid var(--rule); padding: .06in 0; }
+  .spic { flex: 0 0 1.75in; }
+  .sname { font-size: 14pt; font-weight: 700; }
+  .sfact { font-size: 10.5pt; }
+  .segs { font-size: 10pt; color: var(--muted); font-style: italic; margin-top: .02in; }
+
+  .sortlist { display: grid; grid-template-columns: 1fr 1fr; gap: 0 .3in; }
+  .sortrow { display: flex; align-items: center; gap: .08in;
+    border-bottom: 1px solid var(--rule); padding: .05in 0; }
+  .sortname { flex: 1; font-size: 10.5pt; }
+
+  .oddbox { border: 2.4px solid var(--slate); border-radius: 9px; padding: .08in .12in;
+    margin-top: .1in; }
+  .otitle { font-size: 11.5pt; font-weight: 700; }
+  .otext { font-size: 10.5pt; margin-bottom: .04in; }
+
+  .changelist { border: 2px solid var(--slate); border-radius: 9px; overflow: hidden; }
+  .chead { display: grid; grid-template-columns: 1fr .9in .9in 1.2in; font-size: 9.5pt;
+    font-weight: 700; border-bottom: 1.6px solid var(--slate); }
+  .chead span { padding: .05in .07in; }
+  .chrow { display: grid; grid-template-columns: 1fr .9in .9in 1.2in;
+    border-bottom: 1px solid var(--rule); min-height: .48in; align-items: stretch; }
+  .chrow:last-child { border-bottom: 0; }
+  .cwhat { font-size: 10.5pt; padding: .1in .07in; }
+  .ccell { border-left: 1px solid var(--ink); }
+
+  .matlist { border: 2px solid var(--slate); border-radius: 9px; overflow: hidden; }
+  .mhead { display: grid; grid-template-columns: 1.4in .9in 1fr; font-size: 9.5pt;
+    font-weight: 700; border-bottom: 1.6px solid var(--slate); }
+  .mhead span { padding: .05in .07in; }
+  .mrow { display: grid; grid-template-columns: 1.4in .9in 1fr;
+    border-bottom: 1px solid var(--rule); min-height: 1.2in; align-items: stretch; }
+  .mrow:last-child { border-bottom: 0; }
+  .mthing { font-size: 13pt; padding: .13in .07in; }
+  .mmade { font-size: 13pt; padding: .13in .07in; border-left: 1px solid var(--slate);
+    border-right: 1px solid var(--rule); }
+
+  .wrow { border-bottom: 1px solid var(--ink); padding: .16in 0 .1in; }
+  .wthing { font-size: 13pt; font-weight: 700; }
+  .wprompt { font-size: 11.5pt; color: var(--muted); }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <header>
+    <div class="bigletter">&#8644;</div>
+    <div class="htext">
+      <h1>Changing From One to Another</h1>
+      <p class="sub">Heat it and it loosens up. Cool it and it tightens up. Nothing is ever lost.</p>
+    </div>
+    <div class="nameline">Name</div>
+  </header>
+
+  <div class="note"><b>A dried puddle has not stopped existing.</b> The water went into the air, and you can get it back.</div>
+
+  <div class="changelist">
+    <div class="chead"><span>What happens</span><span>Starts as</span><span>Ends as</span><span>Called</span></div>
+    <div class="chrow">
+      <div class="cwhat">ice left on a warm windowsill</div>
+      <div class="ccell"></div><div class="ccell"></div><div class="ccell"></div>
+    </div>
+    <div class="chrow">
+      <div class="cwhat">water put in the freezer</div>
+      <div class="ccell"></div><div class="ccell"></div><div class="ccell"></div>
+    </div>
+    <div class="chrow">
+      <div class="cwhat">a puddle on a sunny day</div>
+      <div class="ccell"></div><div class="ccell"></div><div class="ccell"></div>
+    </div>
+    <div class="chrow">
+      <div class="cwhat">chocolate held in a warm hand</div>
+      <div class="ccell"></div><div class="ccell"></div><div class="ccell"></div>
+    </div>
+    <div class="chrow">
+      <div class="cwhat">steam hitting a cold window</div>
+      <div class="ccell"></div><div class="ccell"></div><div class="ccell"></div>
+    </div>
+  </div>
+
+  <div class="wordbank"><b>Word bank:</b> solid &nbsp;·&nbsp; liquid &nbsp;·&nbsp; gas &nbsp;&nbsp;|&nbsp;&nbsp;
+  melting &nbsp;·&nbsp; freezing &nbsp;·&nbsp; evaporating &nbsp;·&nbsp; condensing</div>
+
+  <div class="dobox">
+    <div class="dotitle">Prove the water is still there</div>
+    <ol class="dosteps"><li>Put a little water in a cup and mark the level with a pen.</li><li>Put a clear plastic bag over the top and hold it on with a rubber band.</li><li>Leave it somewhere warm and sunny for a few hours.</li><li>Look at the INSIDE of the bag.</li></ol>
+  </div>
+
+  <div class="wqs">
+    <div class="wq"><div class="wqt">What did you find on the inside of the bag?</div>      <svg class="row" viewBox="0 0 729.6 62.32" width="100%" role="img" aria-label="write here">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="25.16" x2="729.6" y2="25.16" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="45.32" x2="729.6" y2="45.32" stroke="#16130F" stroke-width="2.6"/>
+      </svg></div>
+    <div class="wq"><div class="wqt">Where had that come from?</div>      <svg class="row" viewBox="0 0 729.6 62.32" width="100%" role="img" aria-label="write here">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="25.16" x2="729.6" y2="25.16" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="45.32" x2="729.6" y2="45.32" stroke="#16130F" stroke-width="2.6"/>
+      </svg></div>
+    <div class="wq"><div class="wqt">So when a puddle dries up outside, where does the water actually go?</div>      <svg class="row" viewBox="0 0 729.6 62.32" width="100%" role="img" aria-label="write here">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="25.16" x2="729.6" y2="25.16" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="45.32" x2="729.6" y2="45.32" stroke="#16130F" stroke-width="2.6"/>
+      </svg>      <svg class="row" viewBox="0 0 729.6 62.32" width="100%" role="img" aria-label="write here">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="25.16" x2="729.6" y2="25.16" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="45.32" x2="729.6" y2="45.32" stroke="#16130F" stroke-width="2.6"/>
+      </svg></div>
+  </div>
+
+  <footer>
+    <span>5 changes · 1 experiment · 3 to write</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Matter</span>
+  </footer>
+</div>
+
+</body>
+</html>

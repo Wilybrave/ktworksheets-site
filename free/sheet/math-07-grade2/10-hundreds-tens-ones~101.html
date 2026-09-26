@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="sheet-kind" content="worksheet">
+<title>Hundreds, Tens and Ones</title>
+<style>
+  @page { size: letter portrait; margin: 0.4in 0.45in; }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  :root {
+    --ink:    #16130F;
+    --muted:  #6B635A;
+    --rule:   #CFC3B2;
+    --guide:  #BCAE9C;
+    --accent: #C0511D;
+    --tint:   #F7EDE4;
+    --slate:  #2E5A78;
+    --tintslate: #E9EFF4;
+    --deep:   #2C4A45;
+    --tintdeep: #ECF1EF;
+  }
+
+  body {
+    font-family: Quicksand, 'URW Gothic', 'Century Gothic', sans-serif;
+    color: #000; background: #fff;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+
+  /* ORDER MATTERS. This generic rule must come BEFORE the @media screen block:
+   * both selectors have the same specificity, so whichever is declared last
+   * wins. With it after, it overrode the screen width and the preview stretched
+   * to the viewport — rows scaled up and pages measured 16in tall. Print was
+   * always fine (@media screen doesn't apply), but the on-screen proof lied. */
+  .page { width: 100%; }
+  .page + .page { page-break-before: always; }
+
+  @media screen {
+    body { padding: 0.4in; background: #ddd; }
+    .page {
+      background: #fff; padding: 0.4in 0.45in;
+      width: 8.5in; min-height: 11in;
+      margin: 0 auto 22px; box-shadow: 0 2px 10px rgba(0,0,0,.3);
+    }
+  }
+
+  header {
+    display: flex; align-items: center; gap: 16px;
+    border-bottom: 3px solid var(--slate); padding-bottom: 7px; margin-bottom: 2px;
+  }
+  .bigletter { font-size: 38pt; font-weight: 700; line-height: 1; letter-spacing: .02em; }
+  .htext { flex: 1; }
+  h1 { font-size: 14pt; font-weight: 700; margin: 0 0 2px; }
+  .sub { font-size: 10pt; color: var(--muted); margin: 0; }
+  .nameline {
+    font-size: 9.5pt; color: var(--muted);
+    border-bottom: 1px solid var(--ink); width: 2in;
+    padding-bottom: 1px; align-self: flex-end;
+  }
+
+  .label { font-size: 11.5pt; font-weight: 700; margin: 9px 0 1px; }
+  .label span { font-weight: 400; font-size: 10pt; color: var(--muted); }
+
+  .row { display: block; width: 100%; height: auto; margin-bottom: .06in; }
+  /* Rows that follow the header directly would otherwise jam against its rule. */
+  header + .row { margin-top: .12in; }
+
+  .words {
+    margin-top: 10px; padding-top: 7px; border-top: 1px solid var(--rule);
+    font-size: 12.5pt;
+    display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap;
+  }
+  .words b { font-size: 14pt; }
+  .words em { font-style: normal; color: var(--muted); }
+
+  /* The wordmark rides in the footer line that was already there — see the note
+     in lib/sheet.js. No height, upright, a size down, and never louder than the
+     two slots it sits between. */
+  .brand { font-style: normal; font-size: 7pt; letter-spacing: .04em;
+    color: var(--accent); align-self: center; }
+
+  footer {
+    margin-top: 7px; font-size: 8.5pt; color: var(--muted);
+    display: flex; justify-content: space-between;
+  }
+
+  .chart { display: grid; grid-template-columns: repeat(6, 1fr); gap: 7px; margin-top: 14px; }
+  .cell {
+    border: 2px solid var(--slate); border-radius: 8px; height: 1.35in;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .page.key { background: #fcfcfa; }
+  .page.key header { border-bottom-style: double; border-bottom-width: 3px; }
+  .keylist { font-size: 11pt; line-height: 1.7; }
+  .keylist p { margin: .02in 0; }
+  .keynote { border: 1.5px solid var(--deep); border-radius: 8px; padding: .07in .12in;
+    margin: .1in 0 0; font-size: 10pt; line-height: 1.5; }
+
+  .note { border: 1.5px solid var(--deep); border-radius: 8px; padding: .07in .12in;
+    margin: .06in 0 .1in; font-size: 10pt; color: var(--ink); }
+  .tasknote { border: 1.5px solid var(--deep); border-radius: 8px; padding: .07in .12in;
+    margin-top: .1in; font-size: 10.5pt; }
+  svg { display: block; }
+  svg.inline { display: inline-block; vertical-align: middle; }
+
+  .wqs { margin-top: .08in; }
+  .wq { margin-bottom: .14in; }
+  .wqt { font-size: 12pt; font-weight: 700; margin-bottom: .01in; }
+
+  .brow { display: flex; align-items: center; gap: .16in;
+    border-bottom: 1px solid var(--rule); padding: .05in 0; }
+  .bpic { flex: 0 1 auto; min-width: 0; }
+  /*
+   * Stacked rows: the drawing on one line, the boxes under it and pushed right,
+   * so the picture is never competing with them for width. See blockRow.
+   */
+  .brow.stacked { flex-direction: column; align-items: stretch; gap: .06in; }
+  .brow.stacked .bslots { margin-left: auto; }
+  .bslots { display: flex; align-items: center; gap: .07in; flex-wrap: wrap; }
+  .bslot { display: flex; flex-direction: column; align-items: center; gap: .01in; }
+  .bslot span { font-size: 8pt; color: var(--muted); }
+  .bbox { width: .38in; height: .38in; border: 2px solid var(--slate); border-radius: 5px; }
+  .bbox.wide { width: .68in; }
+  .bis { font-size: 10pt; color: var(--ink); padding: 0 .03in; }
+
+  .crow { display: flex; align-items: center; gap: .07in;
+    border-bottom: 1px solid var(--rule); padding: .16in 0; }
+  .cnum { flex: 0 0 1.3in; }
+  .cis, .cw { font-size: 13pt; }
+  .cbox { width: .66in; height: .62in; border: 2px solid var(--slate); border-radius: 5px; }
+
+  .skiprow { display: flex; align-items: center; gap: .1in; margin-bottom: .16in; }
+  .skiplab { flex: 0 0 .8in; font-size: 13pt; font-weight: 700; }
+  .skipcells { display: grid; grid-template-columns: repeat(10, 1fr); flex: 1; }
+  .scell { border: 1.4px solid var(--ink); margin: -0.7px 0 0 -0.7px; height: .8in;
+    display: flex; align-items: center; justify-content: center; }
+  .scell.blank { border-color: var(--ink); border-width: 2px; }
+
+  .signbox { border: 2.2px solid var(--slate); border-radius: 9px; padding: .07in .12in;
+    margin-bottom: .06in; }
+  .sgrow { display: flex; align-items: baseline; gap: .14in; font-size: 12pt; }
+  .sg { flex: 0 0 .4in; font-size: 19pt; font-weight: 700; }
+
+  .howbox { border: 1.5px solid var(--slate); border-radius: 8px; padding: .06in .12in;
+    margin-bottom: .1in; font-size: 10pt; }
+
+  .cmplist { display: grid; grid-template-columns: 1fr 1fr; gap: 0 .34in; }
+  .cmprow { display: flex; align-items: center; justify-content: center; gap: .12in;
+    border-bottom: 1px solid var(--rule); padding: .3in 0; }
+  .cmpn { flex: 0 0 1.15in; display: flex; justify-content: center; }
+  .cmpbox { width: .8in; height: .76in; border: 2.4px solid var(--slate); border-radius: 5px;
+    flex: 0 0 auto; }
+
+  .orderrow { border-bottom: 1px solid var(--ink); padding: .07in 0; }
+
+  /* EVEN AND ODD had no rules at all until the fill pass (2026-09-24): the
+     rows were bare inline spans and the answer boxes were empty <i> tags that
+     drew nothing, so neither page had anywhere to write the answer. */
+  .pairrow, .dblrow { display: flex; align-items: center; gap: .2in;
+    border-bottom: 1px solid var(--rule); padding: .2in 0; }
+  .pnum, .dnum { flex: 0 0 .85in; }
+  .pdots svg { width: 4.5in; height: auto; }
+  .pans { margin-left: auto; }
+  .pans i, .dbox i { display: block; width: .8in; height: .66in;
+    border: 2.4px solid var(--slate); border-radius: 6px; }
+  .dbox i { width: 1in; }
+  .deq { font-size: 22pt; font-weight: 700; }
+  .secttitle { font-size: 12pt; font-weight: 700; margin: .18in 0 .02in; }
+  .orderfrom { display: flex; gap: .4in; margin-bottom: .06in; }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <header>
+    <div class="bigletter">347</div>
+    <div class="htext">
+      <h1>Hundreds, Tens and Ones</h1>
+      <p class="sub">Count the big squares, then the tall bars, then the loose ones.</p>
+    </div>
+    <div class="nameline">Name</div>
+  </header>
+
+  <div class="note">Ten ones make a bar. Ten bars make a square.</div>
+
+  <div class="brow stacked">
+    <div class="bpic"><svg class="inline" viewBox="0 0 204 116" width="204" height="116" role="img" aria-label="1 hundreds 1 tens 3 ones" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="110" height="110" rx="0" fill="#F0DCC9" stroke="#16130F" stroke-width="1.5"/><line x1="13" y1="2" x2="13" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="2" y1="13" x2="112" y2="13" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="24" y1="2" x2="24" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="2" y1="24" x2="112" y2="24" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="35" y1="2" x2="35" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="2" y1="35" x2="112" y2="35" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="46" y1="2" x2="46" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="2" y1="46" x2="112" y2="46" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="57" y1="2" x2="57" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="2" y1="57" x2="112" y2="57" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="68" y1="2" x2="68" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="2" y1="68" x2="112" y2="68" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="79" y1="2" x2="79" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="2" y1="79" x2="112" y2="79" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="90" y1="2" x2="90" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="2" y1="90" x2="112" y2="90" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="101" y1="2" x2="101" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="2" y1="101" x2="112" y2="101" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><rect x="121" y="2" width="11" height="110" rx="0" fill="#F0DCC9" stroke="#16130F" stroke-width="1.4"/><line x1="121" y1="13" x2="132" y2="13" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="121" y1="24" x2="132" y2="24" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="121" y1="35" x2="132" y2="35" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="121" y1="46" x2="132" y2="46" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="121" y1="57" x2="132" y2="57" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="121" y1="68" x2="132" y2="68" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="121" y1="79" x2="132" y2="79" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="121" y1="90" x2="132" y2="90" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="121" y1="101" x2="132" y2="101" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><rect x="157" y="103" width="11" height="11" rx="0" fill="#F0DCC9" stroke="#16130F" stroke-width="1.4"/><rect x="172" y="103" width="11" height="11" rx="0" fill="#F0DCC9" stroke="#16130F" stroke-width="1.4"/><rect x="187" y="103" width="11" height="11" rx="0" fill="#F0DCC9" stroke="#16130F" stroke-width="1.4"/></svg></div>
+    <div class="bslots">
+      <div class="bslot"><div class="bbox"></div><span>hundreds</span></div>
+      <div class="bslot"><div class="bbox"></div><span>tens</span></div>
+      <div class="bslot"><div class="bbox"></div><span>ones</span></div>
+      <div class="bis">so it is</div>
+      <div class="bslot"><div class="bbox wide"></div></div>
+    </div>
+  </div>
+  <div class="brow stacked">
+    <div class="bpic"><svg class="inline" viewBox="0 0 268 116" width="268" height="116" role="img" aria-label="1 hundreds 5 tens 3 ones" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="110" height="110" rx="0" fill="#F0DCC9" stroke="#16130F" stroke-width="1.5"/><line x1="13" y1="2" x2="13" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="2" y1="13" x2="112" y2="13" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="24" y1="2" x2="24" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="2" y1="24" x2="112" y2="24" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="35" y1="2" x2="35" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="2" y1="35" x2="112" y2="35" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="46" y1="2" x2="46" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="2" y1="46" x2="112" y2="46" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="57" y1="2" x2="57" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="2" y1="57" x2="112" y2="57" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="68" y1="2" x2="68" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="2" y1="68" x2="112" y2="68" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="79" y1="2" x2="79" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="2" y1="79" x2="112" y2="79" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="90" y1="2" x2="90" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="2" y1="90" x2="112" y2="90" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="101" y1="2" x2="101" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="2" y1="101" x2="112" y2="101" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><rect x="121" y="2" width="11" height="110" rx="0" fill="#F0DCC9" stroke="#16130F" stroke-width="1.4"/><line x1="121" y1="13" x2="132" y2="13" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="121" y1="24" x2="132" y2="24" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="121" y1="35" x2="132" y2="35" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="121" y1="46" x2="132" y2="46" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="121" y1="57" x2="132" y2="57" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="121" y1="68" x2="132" y2="68" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="121" y1="79" x2="132" y2="79" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="121" y1="90" x2="132" y2="90" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="121" y1="101" x2="132" y2="101" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><rect x="137" y="2" width="11" height="110" rx="0" fill="#F0DCC9" stroke="#16130F" stroke-width="1.4"/><line x1="137" y1="13" x2="148" y2="13" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="137" y1="24" x2="148" y2="24" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="137" y1="35" x2="148" y2="35" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="137" y1="46" x2="148" y2="46" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="137" y1="57" x2="148" y2="57" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="137" y1="68" x2="148" y2="68" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="137" y1="79" x2="148" y2="79" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="137" y1="90" x2="148" y2="90" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="137" y1="101" x2="148" y2="101" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><rect x="153" y="2" width="11" height="110" rx="0" fill="#F0DCC9" stroke="#16130F" stroke-width="1.4"/><line x1="153" y1="13" x2="164" y2="13" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="153" y1="24" x2="164" y2="24" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="153" y1="35" x2="164" y2="35" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="153" y1="46" x2="164" y2="46" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="153" y1="57" x2="164" y2="57" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="153" y1="68" x2="164" y2="68" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="153" y1="79" x2="164" y2="79" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="153" y1="90" x2="164" y2="90" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="153" y1="101" x2="164" y2="101" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><rect x="169" y="2" width="11" height="110" rx="0" fill="#F0DCC9" stroke="#16130F" stroke-width="1.4"/><line x1="169" y1="13" x2="180" y2="13" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="169" y1="24" x2="180" y2="24" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="169" y1="35" x2="180" y2="35" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="169" y1="46" x2="180" y2="46" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="169" y1="57" x2="180" y2="57" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="169" y1="68" x2="180" y2="68" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="169" y1="79" x2="180" y2="79" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="169" y1="90" x2="180" y2="90" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="169" y1="101" x2="180" y2="101" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><rect x="185" y="2" width="11" height="110" rx="0" fill="#F0DCC9" stroke="#16130F" stroke-width="1.4"/><line x1="185" y1="13" x2="196" y2="13" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="185" y1="24" x2="196" y2="24" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="185" y1="35" x2="196" y2="35" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="185" y1="46" x2="196" y2="46" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="185" y1="57" x2="196" y2="57" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="185" y1="68" x2="196" y2="68" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="185" y1="79" x2="196" y2="79" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="185" y1="90" x2="196" y2="90" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="185" y1="101" x2="196" y2="101" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><rect x="221" y="103" width="11" height="11" rx="0" fill="#F0DCC9" stroke="#16130F" stroke-width="1.4"/><rect x="236" y="103" width="11" height="11" rx="0" fill="#F0DCC9" stroke="#16130F" stroke-width="1.4"/><rect x="251" y="103" width="11" height="11" rx="0" fill="#F0DCC9" stroke="#16130F" stroke-width="1.4"/></svg></div>
+    <div class="bslots">
+      <div class="bslot"><div class="bbox"></div><span>hundreds</span></div>
+      <div class="bslot"><div class="bbox"></div><span>tens</span></div>
+      <div class="bslot"><div class="bbox"></div><span>ones</span></div>
+      <div class="bis">so it is</div>
+      <div class="bslot"><div class="bbox wide"></div></div>
+    </div>
+  </div>
+  <div class="brow stacked">
+    <div class="bpic"><svg class="inline" viewBox="0 0 489 116" width="489" height="116" role="img" aria-label="3 hundreds 3 tens 4 ones" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="110" height="110" rx="0" fill="#F0DCC9" stroke="#16130F" stroke-width="1.5"/><line x1="13" y1="2" x2="13" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="2" y1="13" x2="112" y2="13" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="24" y1="2" x2="24" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="2" y1="24" x2="112" y2="24" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="35" y1="2" x2="35" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="2" y1="35" x2="112" y2="35" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="46" y1="2" x2="46" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="2" y1="46" x2="112" y2="46" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="57" y1="2" x2="57" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="2" y1="57" x2="112" y2="57" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="68" y1="2" x2="68" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="2" y1="68" x2="112" y2="68" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="79" y1="2" x2="79" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="2" y1="79" x2="112" y2="79" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="90" y1="2" x2="90" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="2" y1="90" x2="112" y2="90" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="101" y1="2" x2="101" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="2" y1="101" x2="112" y2="101" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><rect x="121" y="2" width="110" height="110" rx="0" fill="#F0DCC9" stroke="#16130F" stroke-width="1.5"/><line x1="132" y1="2" x2="132" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="121" y1="13" x2="231" y2="13" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="143" y1="2" x2="143" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="121" y1="24" x2="231" y2="24" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="154" y1="2" x2="154" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="121" y1="35" x2="231" y2="35" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="165" y1="2" x2="165" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="121" y1="46" x2="231" y2="46" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="176" y1="2" x2="176" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="121" y1="57" x2="231" y2="57" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="187" y1="2" x2="187" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="121" y1="68" x2="231" y2="68" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="198" y1="2" x2="198" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="121" y1="79" x2="231" y2="79" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="209" y1="2" x2="209" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="121" y1="90" x2="231" y2="90" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="220" y1="2" x2="220" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="121" y1="101" x2="231" y2="101" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><rect x="240" y="2" width="110" height="110" rx="0" fill="#F0DCC9" stroke="#16130F" stroke-width="1.5"/><line x1="251" y1="2" x2="251" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="240" y1="13" x2="350" y2="13" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="262" y1="2" x2="262" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="240" y1="24" x2="350" y2="24" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="273" y1="2" x2="273" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="240" y1="35" x2="350" y2="35" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="284" y1="2" x2="284" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="240" y1="46" x2="350" y2="46" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="295" y1="2" x2="295" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="240" y1="57" x2="350" y2="57" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="306" y1="2" x2="306" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="240" y1="68" x2="350" y2="68" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="317" y1="2" x2="317" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="240" y1="79" x2="350" y2="79" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="328" y1="2" x2="328" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="240" y1="90" x2="350" y2="90" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="339" y1="2" x2="339" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="240" y1="101" x2="350" y2="101" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><rect x="359" y="2" width="11" height="110" rx="0" fill="#F0DCC9" stroke="#16130F" stroke-width="1.4"/><line x1="359" y1="13" x2="370" y2="13" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="359" y1="24" x2="370" y2="24" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="359" y1="35" x2="370" y2="35" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="359" y1="46" x2="370" y2="46" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="359" y1="57" x2="370" y2="57" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="359" y1="68" x2="370" y2="68" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="359" y1="79" x2="370" y2="79" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="359" y1="90" x2="370" y2="90" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="359" y1="101" x2="370" y2="101" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><rect x="375" y="2" width="11" height="110" rx="0" fill="#F0DCC9" stroke="#16130F" stroke-width="1.4"/><line x1="375" y1="13" x2="386" y2="13" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="375" y1="24" x2="386" y2="24" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="375" y1="35" x2="386" y2="35" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="375" y1="46" x2="386" y2="46" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="375" y1="57" x2="386" y2="57" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="375" y1="68" x2="386" y2="68" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="375" y1="79" x2="386" y2="79" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="375" y1="90" x2="386" y2="90" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="375" y1="101" x2="386" y2="101" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><rect x="391" y="2" width="11" height="110" rx="0" fill="#F0DCC9" stroke="#16130F" stroke-width="1.4"/><line x1="391" y1="13" x2="402" y2="13" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="391" y1="24" x2="402" y2="24" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="391" y1="35" x2="402" y2="35" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="391" y1="46" x2="402" y2="46" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="391" y1="57" x2="402" y2="57" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="391" y1="68" x2="402" y2="68" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="391" y1="79" x2="402" y2="79" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="391" y1="90" x2="402" y2="90" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="391" y1="101" x2="402" y2="101" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><rect x="427" y="103" width="11" height="11" rx="0" fill="#F0DCC9" stroke="#16130F" stroke-width="1.4"/><rect x="442" y="103" width="11" height="11" rx="0" fill="#F0DCC9" stroke="#16130F" stroke-width="1.4"/><rect x="457" y="103" width="11" height="11" rx="0" fill="#F0DCC9" stroke="#16130F" stroke-width="1.4"/><rect x="472" y="103" width="11" height="11" rx="0" fill="#F0DCC9" stroke="#16130F" stroke-width="1.4"/></svg></div>
+    <div class="bslots">
+      <div class="bslot"><div class="bbox"></div><span>hundreds</span></div>
+      <div class="bslot"><div class="bbox"></div><span>tens</span></div>
+      <div class="bslot"><div class="bbox"></div><span>ones</span></div>
+      <div class="bis">so it is</div>
+      <div class="bslot"><div class="bbox wide"></div></div>
+    </div>
+  </div>
+  <div class="brow stacked">
+    <div class="bpic"><svg class="inline" viewBox="0 0 521 116" width="521" height="116" role="img" aria-label="3 hundreds 5 tens 4 ones" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="110" height="110" rx="0" fill="#F0DCC9" stroke="#16130F" stroke-width="1.5"/><line x1="13" y1="2" x2="13" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="2" y1="13" x2="112" y2="13" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="24" y1="2" x2="24" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="2" y1="24" x2="112" y2="24" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="35" y1="2" x2="35" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="2" y1="35" x2="112" y2="35" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="46" y1="2" x2="46" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="2" y1="46" x2="112" y2="46" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="57" y1="2" x2="57" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="2" y1="57" x2="112" y2="57" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="68" y1="2" x2="68" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="2" y1="68" x2="112" y2="68" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="79" y1="2" x2="79" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="2" y1="79" x2="112" y2="79" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="90" y1="2" x2="90" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="2" y1="90" x2="112" y2="90" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="101" y1="2" x2="101" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="2" y1="101" x2="112" y2="101" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><rect x="121" y="2" width="110" height="110" rx="0" fill="#F0DCC9" stroke="#16130F" stroke-width="1.5"/><line x1="132" y1="2" x2="132" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="121" y1="13" x2="231" y2="13" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="143" y1="2" x2="143" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="121" y1="24" x2="231" y2="24" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="154" y1="2" x2="154" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="121" y1="35" x2="231" y2="35" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="165" y1="2" x2="165" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="121" y1="46" x2="231" y2="46" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="176" y1="2" x2="176" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="121" y1="57" x2="231" y2="57" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="187" y1="2" x2="187" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="121" y1="68" x2="231" y2="68" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="198" y1="2" x2="198" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="121" y1="79" x2="231" y2="79" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="209" y1="2" x2="209" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="121" y1="90" x2="231" y2="90" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="220" y1="2" x2="220" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="121" y1="101" x2="231" y2="101" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><rect x="240" y="2" width="110" height="110" rx="0" fill="#F0DCC9" stroke="#16130F" stroke-width="1.5"/><line x1="251" y1="2" x2="251" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="240" y1="13" x2="350" y2="13" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="262" y1="2" x2="262" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="240" y1="24" x2="350" y2="24" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="273" y1="2" x2="273" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="240" y1="35" x2="350" y2="35" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="284" y1="2" x2="284" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="240" y1="46" x2="350" y2="46" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="295" y1="2" x2="295" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="240" y1="57" x2="350" y2="57" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="306" y1="2" x2="306" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="240" y1="68" x2="350" y2="68" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="317" y1="2" x2="317" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="240" y1="79" x2="350" y2="79" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="328" y1="2" x2="328" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="240" y1="90" x2="350" y2="90" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="339" y1="2" x2="339" y2="112" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="240" y1="101" x2="350" y2="101" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><rect x="359" y="2" width="11" height="110" rx="0" fill="#F0DCC9" stroke="#16130F" stroke-width="1.4"/><line x1="359" y1="13" x2="370" y2="13" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="359" y1="24" x2="370" y2="24" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="359" y1="35" x2="370" y2="35" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="359" y1="46" x2="370" y2="46" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="359" y1="57" x2="370" y2="57" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="359" y1="68" x2="370" y2="68" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="359" y1="79" x2="370" y2="79" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="359" y1="90" x2="370" y2="90" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="359" y1="101" x2="370" y2="101" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><rect x="375" y="2" width="11" height="110" rx="0" fill="#F0DCC9" stroke="#16130F" stroke-width="1.4"/><line x1="375" y1="13" x2="386" y2="13" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="375" y1="24" x2="386" y2="24" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="375" y1="35" x2="386" y2="35" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="375" y1="46" x2="386" y2="46" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="375" y1="57" x2="386" y2="57" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="375" y1="68" x2="386" y2="68" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="375" y1="79" x2="386" y2="79" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="375" y1="90" x2="386" y2="90" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="375" y1="101" x2="386" y2="101" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><rect x="391" y="2" width="11" height="110" rx="0" fill="#F0DCC9" stroke="#16130F" stroke-width="1.4"/><line x1="391" y1="13" x2="402" y2="13" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="391" y1="24" x2="402" y2="24" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="391" y1="35" x2="402" y2="35" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="391" y1="46" x2="402" y2="46" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="391" y1="57" x2="402" y2="57" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="391" y1="68" x2="402" y2="68" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="391" y1="79" x2="402" y2="79" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="391" y1="90" x2="402" y2="90" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="391" y1="101" x2="402" y2="101" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><rect x="407" y="2" width="11" height="110" rx="0" fill="#F0DCC9" stroke="#16130F" stroke-width="1.4"/><line x1="407" y1="13" x2="418" y2="13" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="407" y1="24" x2="418" y2="24" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="407" y1="35" x2="418" y2="35" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="407" y1="46" x2="418" y2="46" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="407" y1="57" x2="418" y2="57" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="407" y1="68" x2="418" y2="68" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="407" y1="79" x2="418" y2="79" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="407" y1="90" x2="418" y2="90" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="407" y1="101" x2="418" y2="101" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><rect x="423" y="2" width="11" height="110" rx="0" fill="#F0DCC9" stroke="#16130F" stroke-width="1.4"/><line x1="423" y1="13" x2="434" y2="13" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="423" y1="24" x2="434" y2="24" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="423" y1="35" x2="434" y2="35" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="423" y1="46" x2="434" y2="46" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="423" y1="57" x2="434" y2="57" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="423" y1="68" x2="434" y2="68" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="423" y1="79" x2="434" y2="79" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="423" y1="90" x2="434" y2="90" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><line x1="423" y1="101" x2="434" y2="101" stroke="#CFC3B2" stroke-width="0.6" stroke-linecap="round"/><rect x="459" y="103" width="11" height="11" rx="0" fill="#F0DCC9" stroke="#16130F" stroke-width="1.4"/><rect x="474" y="103" width="11" height="11" rx="0" fill="#F0DCC9" stroke="#16130F" stroke-width="1.4"/><rect x="489" y="103" width="11" height="11" rx="0" fill="#F0DCC9" stroke="#16130F" stroke-width="1.4"/><rect x="504" y="103" width="11" height="11" rx="0" fill="#F0DCC9" stroke="#16130F" stroke-width="1.4"/></svg></div>
+    <div class="bslots">
+      <div class="bslot"><div class="bbox"></div><span>hundreds</span></div>
+      <div class="bslot"><div class="bbox"></div><span>tens</span></div>
+      <div class="bslot"><div class="bbox"></div><span>ones</span></div>
+      <div class="bis">so it is</div>
+      <div class="bslot"><div class="bbox wide"></div></div>
+    </div>
+  </div>
+
+  <footer>
+    <span>4 numbers &middot; set 101</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Place value</span>
+  </footer>
+</div>
+
+<div class="page">
+  <header>
+    <div class="bigletter">&#9634;</div>
+    <div class="htext">
+      <h1>Break the Number Up</h1>
+      <p class="sub">No pictures. Read the number and say what it is made of.</p>
+    </div>
+    <div class="nameline">Name</div>
+  </header>
+
+  <div class="note">In 508 the 0 means no tens. Write it; it holds the 8 in the ones place.</div>
+
+  <div class="crow">
+  <div class="cnum"><svg viewBox="0 0 93.88 72.72" height="72.72" role="img" aria-label="801"><g transform="translate(6 6) scale(46)"><path d="M.275 .04 A.195 .23 0 0 0 .275 .5 A.195 .23 0 0 0 .275 .04" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.275 .5 A.225 .235 0 0 0 .275 .97 A.225 .235 0 0 0 .275 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(38.66 6) scale(46)"><path d="M.275 .03 A.225 .47 0 0 0 .275 .97 A.225 .47 0 0 0 .275 .03" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(71.32 6) scale(46)"><path d="M.05 .26 L.25 .04 V.97" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+  <div class="cis">is</div>
+  <div class="cbox"></div><div class="cw">hundreds</div>
+  <div class="cbox"></div><div class="cw">tens</div>
+  <div class="cbox"></div><div class="cw">ones</div>
+</div>
+  <div class="crow">
+  <div class="cnum"><svg viewBox="0 0 101.24 72.72" height="72.72" role="img" aria-label="672"><g transform="translate(6 6) scale(46)"><path d="M.45 .06 C.22 .14 .07 .38 .07 .735" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.07 .735 A.22 .235 0 0 0 .51 .735 A.22 .235 0 0 0 .07 .735" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(38.66 6) scale(46)"><path d="M.04 .05 H.5 L.22 .97" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(69.94 6) scale(46)"><path d="M.06 .26 C.08 .04 .52 .02 .52 .32 C.52 .6 .1 .74 .06 .97 H.54" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+  <div class="cis">is</div>
+  <div class="cbox"></div><div class="cw">hundreds</div>
+  <div class="cbox"></div><div class="cw">tens</div>
+  <div class="cbox"></div><div class="cw">ones</div>
+</div>
+  <div class="crow">
+  <div class="cnum"><svg viewBox="0 0 93.88 72.72" height="72.72" role="img" aria-label="618"><g transform="translate(6 6) scale(46)"><path d="M.45 .06 C.22 .14 .07 .38 .07 .735" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.07 .735 A.22 .235 0 0 0 .51 .735 A.22 .235 0 0 0 .07 .735" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(38.66 6) scale(46)"><path d="M.05 .26 L.25 .04 V.97" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(62.58 6) scale(46)"><path d="M.275 .04 A.195 .23 0 0 0 .275 .5 A.195 .23 0 0 0 .275 .04" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.275 .5 A.225 .235 0 0 0 .275 .97 A.225 .235 0 0 0 .275 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+  <div class="cis">is</div>
+  <div class="cbox"></div><div class="cw">hundreds</div>
+  <div class="cbox"></div><div class="cw">tens</div>
+  <div class="cbox"></div><div class="cw">ones</div>
+</div>
+  <div class="crow">
+  <div class="cnum"><svg viewBox="0 0 104 72.72" height="72.72" role="img" aria-label="289"><g transform="translate(6 6) scale(46)"><path d="M.06 .26 C.08 .04 .52 .02 .52 .32 C.52 .6 .1 .74 .06 .97 H.54" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(38.66 6) scale(46)"><path d="M.275 .04 A.195 .23 0 0 0 .275 .5 A.195 .23 0 0 0 .275 .04" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.275 .5 A.225 .235 0 0 0 .275 .97 A.225 .235 0 0 0 .275 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(71.32 6) scale(46)"><path d="M.3 .04 A.24 .27 0 0 0 .3 .58 A.24 .27 0 0 0 .3 .04" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.54 .31 V.97" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+  <div class="cis">is</div>
+  <div class="cbox"></div><div class="cw">hundreds</div>
+  <div class="cbox"></div><div class="cw">tens</div>
+  <div class="cbox"></div><div class="cw">ones</div>
+</div>
+  <div class="crow">
+  <div class="cnum"><svg viewBox="0 0 96.64 72.72" height="72.72" role="img" aria-label="199"><g transform="translate(6 6) scale(46)"><path d="M.05 .26 L.25 .04 V.97" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(29.92 6) scale(46)"><path d="M.3 .04 A.24 .27 0 0 0 .3 .58 A.24 .27 0 0 0 .3 .04" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.54 .31 V.97" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(63.96 6) scale(46)"><path d="M.3 .04 A.24 .27 0 0 0 .3 .58 A.24 .27 0 0 0 .3 .04" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.54 .31 V.97" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+  <div class="cis">is</div>
+  <div class="cbox"></div><div class="cw">hundreds</div>
+  <div class="cbox"></div><div class="cw">tens</div>
+  <div class="cbox"></div><div class="cw">ones</div>
+</div>
+  <div class="crow">
+  <div class="cnum"><svg viewBox="0 0 86.52 72.72" height="72.72" role="img" aria-label="119"><g transform="translate(6 6) scale(46)"><path d="M.05 .26 L.25 .04 V.97" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(29.92 6) scale(46)"><path d="M.05 .26 L.25 .04 V.97" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(53.84 6) scale(46)"><path d="M.3 .04 A.24 .27 0 0 0 .3 .58 A.24 .27 0 0 0 .3 .04" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.54 .31 V.97" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+  <div class="cis">is</div>
+  <div class="cbox"></div><div class="cw">hundreds</div>
+  <div class="cbox"></div><div class="cw">tens</div>
+  <div class="cbox"></div><div class="cw">ones</div>
+</div>
+  <div class="crow">
+  <div class="cnum"><svg viewBox="0 0 104 72.72" height="72.72" role="img" aria-label="309"><g transform="translate(6 6) scale(46)"><path d="M.07 .18 C.14 0 .5 .02 .5 .26 C.5 .45 .3 .5 .22 .5 C.32 .5 .54 .55 .54 .76 C.54 1 .14 1.03 .06 .86" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(38.66 6) scale(46)"><path d="M.275 .03 A.225 .47 0 0 0 .275 .97 A.225 .47 0 0 0 .275 .03" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(71.32 6) scale(46)"><path d="M.3 .04 A.24 .27 0 0 0 .3 .58 A.24 .27 0 0 0 .3 .04" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.54 .31 V.97" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+  <div class="cis">is</div>
+  <div class="cbox"></div><div class="cw">hundreds</div>
+  <div class="cbox"></div><div class="cw">tens</div>
+  <div class="cbox"></div><div class="cw">ones</div>
+</div>
+
+  <footer>
+    <span>7 numbers &middot; set 101</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Place value</span>
+  </footer>
+</div>
+
+</body>
+</html>

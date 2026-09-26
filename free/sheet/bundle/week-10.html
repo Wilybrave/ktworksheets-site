@@ -1,0 +1,683 @@
+<!DOCTYPE html><html><head>
+<meta charset="utf-8">
+<meta name="sheet-kind" content="worksheet">
+<title>Decimal Place Value</title>
+<style>
+  :root { --font: "Trebuchet MS", "Segoe UI", Tahoma, Verdana, sans-serif; }
+
+  /* Page margins live HERE only — body padding stays 0 for print so the two
+     don't stack and eat the sheet. */
+  @page { size: letter portrait; margin: 0.45in 0.5in; }
+
+  /*
+   * THE PALETTE. The same one the shop wears (kitchen-table/BRAND.md): warm
+   * near-black ink, one accent, pine kept back for the answer key.
+   *
+   * WHY A SHEET HAS COLOR AT ALL. Every sheet was pure grayscale — #000 rules,
+   * #333 subtitles, #f0f0f0 boxes — which is what you get by never deciding.
+   * The paper is the product and it looked like a fax. A printer set to
+   * grayscale, or one that has no color to give, renders all of this as the
+   * greys it already had, so nothing below costs a parent anything they were
+   * not already spending.
+   *
+   * WHAT STAYS BLACK, ON PURPOSE:
+   *   - anything drawn to be written on (rules, name lines, answer boxes)
+   *   - anything drawn to be traced or colored in (line art, letter guides)
+   *   - the confidence rings, which have to survive a mono laser
+   * Color marks the sheet's own furniture — its rule, its numbering, its
+   * boxes — and never the part a child puts a pencil through.
+   */
+  :root {
+    --ink:    #16130F;
+    --muted:  #6B635A;
+    --rule:   #CFC3B2;
+    --guide:  #BCAE9C;
+    --accent: #C0511D;
+    --tint:   #F7EDE4;
+    --slate:  #2E5A78;
+    --tintslate: #E9EFF4;
+    --deep:   #2C4A45;
+    --tintdeep: #ECF1EF;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font);
+    color: #000; background: #fff;
+    font-size: 12pt; line-height: 1.3;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+
+  /* ORDER MATTERS. This generic rule must come BEFORE the @media screen block:
+     same specificity, so whichever is declared last wins. With it after, the
+     on-screen preview stretches to the viewport instead of 8.5in — print is
+     unaffected, but the proof you check before printing is wrong. */
+  .page { width: 100%; }
+  .page + .page { page-break-before: always; }
+
+  @media screen {
+    body { padding: 0.5in; background: #ddd; }
+    .page {
+      background: #fff; padding: 0.45in 0.5in;
+      width: 8.5in; min-height: 11in;
+      margin: 0 auto 24px; box-shadow: 0 2px 10px rgba(0,0,0,.3);
+    }
+  }
+
+  /* ------------------------------------------------------------- header */
+  header { border-bottom: 3px double var(--accent); padding-bottom: 6px; }
+  header.cont { border-bottom: 1px solid var(--rule); }
+  h1 { font-size: 16pt; margin: 0 0 1px; letter-spacing: .01em; }
+  .sub { font-size: 10pt; font-style: italic; color: var(--muted); margin: 0; }
+
+  .nameline { display: flex; gap: 26px; font-size: 10.5pt; margin: 11px 0 12px; }
+  .nameline span { flex: 1; border-bottom: 1px solid var(--ink); padding-bottom: 1px; }
+  .nameline span.short { flex: 0 0 1.9in; }
+
+  .directions {
+    font-size: 10.5pt; line-height: 1.35;
+    background: var(--tint); border-left: 4px solid var(--accent);
+    padding: 7px 10px; margin: 12px 0 14px;
+  }
+  .directions b { letter-spacing: .03em; }
+  .tip { font-style: italic; margin-top: 3px; }
+
+  /* ------------------------------------------------- problems and grids */
+  .grid { display: grid; gap: 13px 16px; margin-top: 4px; }
+  .prob { page-break-inside: avoid; display: flex; gap: 5px; align-items: flex-start; }
+  .pn { font-weight: bold; font-size: 11pt; min-width: .28in; flex: 0 0 auto; color: var(--accent); }
+  .pbody { flex: 1; min-width: 0; }
+
+  /* Digits need lining figures and even widths whatever the body font is. */
+  .num, .vert, .horiz { font-family: "Trebuchet MS", "Segoe UI", Tahoma, Verdana, sans-serif; font-variant-numeric: lining-nums tabular-nums; }
+
+  /* A stacked column algorithm.
+     Two grid columns — operator, then digits — because a floated or absolutely
+     positioned operator overlaps the digits as soon as the numbers get wide,
+     and "324" with a + sitting on the 3 is unreadable. The grid also lets the
+     rule under the last operand span BOTH columns, which is how it is written
+     by hand. The rule is heavy: it is the line you write the answer beneath. */
+  .vert {
+    display: inline-grid; grid-template-columns: auto auto;
+    font-size: 15pt; line-height: 1.3; text-align: right;
+  }
+  .vert > span { padding: 0 0 1px 0; }
+  .vert .op { text-align: left; padding-right: .16in; }
+  .vert .last { border-bottom: 2.5px solid var(--ink); padding-bottom: 3px; }
+  .vert .ans { height: .4in; }
+  /* Partial-products working, for 2-digit x 1-digit before the short method. */
+  .vert .part { font-size: 11pt; color: var(--muted); }
+  /* A row of worked examples that fade — see lib/formats.js faded(). The
+     caption is what makes the fade legible: without it the third one looks like
+     a question somebody forgot to number. */
+  .egrow { display: flex; gap: .34in; align-items: flex-start; margin: 0 0 4px; }
+  .eg { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; }
+  .eglab { font-size: 8.5pt; color: var(--slate); letter-spacing: .02em; }
+
+  /* The carried digits. Small and grey so the sum still reads as the sum, and
+     tight to the row below it so a carry sits ON the column it goes into. */
+  .vert .carry { font-size: 9pt; color: var(--slate); line-height: 1; padding: 0 0 1px 0; }
+
+  .horiz { font-size: 14pt; white-space: nowrap; }
+
+  /* Row numbers in a word list. Gray and small: they are there so a list can be
+     dictated ("number seven") and marked without counting down the page, and
+     they must not compete with the word itself. */
+  .wn { color: var(--muted); font-size: 9pt; }
+
+  /* The box an answer goes in. inline-block so it can sit mid-sentence. */
+  .abox {
+    display: inline-block; border: 1.6px solid var(--slate); border-radius: 3px;
+    vertical-align: middle; margin: 0 3px; position: relative; background: #fff;
+  }
+  /* Scoped to the box: as a bare ".alab" it pinned any generator's own .alab
+     to the bottom of the page (life-07-signs-and-forms 40, 2026-09-24). */
+  .abox > .alab {
+    position: absolute; bottom: 1px; left: 0; right: 0;
+    text-align: center; font-size: 7pt; color: var(--muted); font-style: italic;
+  }
+
+  /* Confidence marks. The rings are drawn with a border and a gradient rather
+     than an SVG so they stay inline with the question text at any font size,
+     and print black on a mono laser without relying on a background image. */
+  .conf { float: right; margin: 2px 0 0 8px; white-space: nowrap; }
+  .cring {
+    display: inline-block; width: 11px; height: 11px; margin-left: 4px;
+    border: 1.4px solid var(--slate); border-radius: 50%; vertical-align: middle;
+  }
+  .cring-full { background: var(--accent); }
+  .cring-half { background: linear-gradient(90deg, var(--accent) 50%, #fff 50%); }
+  .cring-none { background: #fff; }
+  ol.qs.hasconf li { overflow: hidden; }
+
+  .conflegend {
+    border: 1.2px solid var(--rule); border-radius: 4px;
+    padding: 3px 8px; margin: 0 0 7px;
+    font-size: 8.5pt; color: var(--muted); display: flex; gap: 14px; align-items: center;
+  }
+  .conftitle { font-weight: 700; color: var(--ink); }
+  .confitem { white-space: nowrap; }
+
+  .work {
+    border: 1.4px dashed var(--rule); border-radius: 4px;
+    margin: 6px 0 2px; position: relative;
+  }
+  /* The label S.work() puts in the box: a DIRECT child only. As ".work span"
+     it also caught every span inside any generator's own .work content and
+     stacked them all at the top-left corner (math-11-grade6 47, 2026-09-23). */
+  .work > span {
+    position: absolute; top: 3px; left: 6px;
+    font-size: 8pt; color: var(--muted); font-style: italic;
+  }
+
+  /* ------------------------------------------------------ writing lines */
+  /* Primary rule: solid top, dashed midline, heavy baseline. Capitals reach
+     the top line, lowercase bodies sit under the dashed one. */
+  .write {
+    position: relative; height: 0.375in;
+    margin: 6px 0 0 .3in;
+    border-top: 1px solid var(--rule); border-bottom: 2px solid var(--ink);
+  }
+  .write.flush { margin-left: 0; }
+  .write + .write { margin-top: .17in; }
+  .write::after {
+    content: ""; position: absolute; left: 0; right: 0; top: 50%;
+    border-top: 1px dashed var(--guide);
+  }
+
+  /* ------------------------------------------------------- question list */
+  ol.qs { margin: 0; padding: 0 0 0 .34in; }
+  ol.qs li { margin-bottom: 13px; page-break-inside: avoid; }
+  ol.qs li::marker { font-weight: bold; font-size: 11pt; color: var(--accent); }
+  .qt { display: block; }
+
+  .mcq { display: grid; gap: 3px 14px; margin: 5px 0 2px .12in; font-size: 11pt; }
+  .opt { white-space: nowrap; }
+
+  /* -------------------------------------------------------------- tables */
+  .tbl { border-collapse: collapse; margin: 8px 0; font-size: 11pt; width: 100%; }
+  .tbl th, .tbl td { border: 1.4px solid var(--ink); padding: 5px 8px; text-align: left; }
+  .tbl th { color: var(--slate); }
+  .tbl th { background: var(--tint); font-size: 10pt; letter-spacing: .02em; }
+  .tbl td.blank { height: .34in; }
+  .tbl.narrow { width: auto; }
+  .tbl.center td, .tbl.center th { text-align: center; }
+
+  /* ------------------------------------------------------------ passages */
+  .passage {
+    border: 1.5px solid var(--slate); border-radius: 4px;
+    padding: 11px 14px; margin-bottom: 12px;
+    font-size: 11.5pt; line-height: 1.55;
+  }
+  .passage h2 { font-size: 13pt; margin: 0 0 6px; color: var(--deep); }
+  .passage p { margin: 0 0 8px; }
+  .passage p:last-child { margin-bottom: 0; }
+  .passage .byline { font-size: 9.5pt; font-style: italic; color: var(--muted); margin-bottom: 8px; }
+  /* Numbered paragraphs, so a question can say "in paragraph 2". */
+  .passage p.np { position: relative; padding-left: .3in; }
+  .passage p.np::before {
+    content: attr(data-p); position: absolute; left: 0; top: 0;
+    font-size: 9pt; color: var(--accent); font-weight: bold;
+  }
+
+  .wordbank {
+    border: 1.5px dashed var(--slate); border-radius: 4px;
+    padding: 8px 12px; margin: 10px 0 12px;
+    font-size: 11.5pt; text-align: center;
+  }
+  .wordbank b { display: block; font-size: 9.5pt; letter-spacing: .06em;
+    text-transform: uppercase; margin-bottom: 4px; color: var(--accent); }
+  .wordbank span { display: inline-block; margin: 2px 11px; }
+
+  .note {
+    border-left: 4px solid var(--deep); background: var(--tintdeep);
+    padding: 7px 11px; margin: 10px 0; font-size: 10.5pt;
+  }
+  .note b { letter-spacing: .02em; }
+
+  /* -------------------------------------------------------------- footer */
+  /* THE WORDMARK SITS IN THE FOOTER THAT WAS ALREADY THERE, so it costs no
+     height at all — a sheet that fitted before fits now. Upright where the rest
+     of the line is italic, and a size down: it is a signature, not a message,
+     and it must never compete with "Score: ___ / 10". */
+  .brand { font-style: normal; font-size: 7.5pt; letter-spacing: .04em;
+    color: var(--accent); align-self: center; }
+
+  footer {
+    margin-top: 14px; padding-top: 6px; border-top: 1px solid var(--rule);
+    font-size: 9pt; font-style: italic; color: var(--muted);
+    display: flex; justify-content: space-between;
+  }
+
+  /* ---------------------------------------------------------- answer key */
+  .keybadge {
+    display: inline-block; border: 2px solid var(--deep); color: var(--deep); padding: 2px 9px;
+    font-size: 9.5pt; font-weight: bold; letter-spacing: .08em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .key .why {
+    display: block; font-size: 9pt; font-style: italic; color: var(--muted); margin-top: 1px;
+  }
+  /* Highlight rather than underline: <u> in a key marks WHAT CHANGED, and an
+     underline under a comma is invisible. */
+  .key u { text-decoration: none; background: var(--tint); padding: 0 2px; font-weight: bold; }
+  .keygrid .pbody { font-family: "Trebuchet MS", "Segoe UI", Tahoma, Verdana, sans-serif; font-size: 12pt; }
+  /* A key's pictures scale to their column: at 1fr a wide drawing pushed a
+     three-column key 92px off the paper (art-04-drawing 10, 2026-09-24). */
+  .keygrid svg { max-width: 100%; height: auto; }
+  .keylist .qt { font-weight: normal; }
+
+  /*
+   * The guide page. Four lines per question, and the ASK line is the one that
+   * gets used at the table, so it is the one with a rule beside it — a parent
+   * scanning this page in ten seconds should land on the follow-up question
+   * and nothing else.
+   */
+  .guide { padding-left: .3in; }
+  .guide li { margin-bottom: 11px; page-break-inside: avoid; }
+  .guide .gq { font-weight: bold; font-size: 11pt; margin-bottom: 3px; }
+  /* 9pt, matching the key's own why line, because the guide page is the
+     binding constraint on every open sheet: four lines per question against a
+     key's one, and at 10pt a sheet with seven questions ran onto a second
+     side. Found by measuring, not chosen. (No backticks in here — this CSS
+     lives inside a template literal and one would close it.) */
+  .guide .glook, .guide .gthin, .guide .gstrong {
+    font-size: 9pt; line-height: 1.3; margin-top: 1px;
+  }
+  .guide .gthin { color: var(--muted); }
+  .guide .gstrong { color: var(--muted); font-style: italic; }
+  .guide .gask {
+    font-size: 9.5pt; line-height: 1.3; margin-top: 3px;
+    border-left: 3px solid var(--slate); padding-left: 7px;
+  }
+  .key .qs li { margin-bottom: 9px; }
+
+  /*
+   * INLINE-BLOCK, NOT BLOCK, AND THIS WAS WRONG FOR A LONG TIME. A block-level
+   * svg ignores text-align: center on its parent and sits flush left — so 117
+   * sheets across 35 packs said "centre this diagram" and got a left-aligned
+   * one. Twenty-five of them were origami and paper-plane fold sequences, where
+   * the whole page is diagrams.
+   *
+   * Nobody spotted it because a left-flush diagram looks deliberate; it only
+   * reads as wrong next to a centered one, and no sheet has both.
+   *
+   * inline-block makes text-align do what every one of those authors meant,
+   * and leaves a diagram in a left-aligned container exactly where it was.
+   * vertical-align: top kills the baseline gap that inline elements otherwise
+   * leave underneath them, which would have pushed long pages over.
+   */
+  svg { display: inline-block; vertical-align: top; }
+  svg.inline { vertical-align: middle; }
+
+  .fill .grid { row-gap: var(--row, 13px); }
+</style>
+</head><body>
+
+<div class="page ">
+  <header>
+    
+    <h1>Decimal Place Value</h1>
+    <p class="sub">Grade 5 · Decimals · Page 1 of 2</p>
+  </header>
+  <div class="nameline">
+    <span>Name</span>
+    <span class="short">Date</span>
+  </div>
+  <div class="directions">
+    <b>DIRECTIONS:</b> Write each number in words, then compare.
+  </div>
+
+<div class="fill" style="zoom:1.1">
+  <table class="tbl ">
+    <thead><tr><th>hundreds</th><th>tens</th><th>ones</th><th>·</th><th>tenths</th><th>hundredths</th><th>thousandths</th></tr></thead>
+    <tbody><tr><td>100</td><td>10</td><td>1</td><td></td><td>0.1</td><td>0.01</td><td>0.001</td></tr></tbody>
+  </table>
+
+  <div class="note"><b>0.4 = 0.40 = 0.400.</b> But 0.04 is ten times smaller.</div>
+
+  <div class="label" style="font-weight:bold;font-size:11pt;margin:14px 0 6px">Part A — Write each in words.</div>
+  <div class="grid " style="grid-template-columns:repeat(2,1fr)"><div class="prob"><span class="pn">1.</span><div class="pbody"><b>7.559</b><br><div class="write"></div><div class="write"></div></div></div><div class="prob"><span class="pn">2.</span><div class="pbody"><b>5.973</b><br><div class="write"></div><div class="write"></div></div></div><div class="prob"><span class="pn">3.</span><div class="pbody"><b>7.767</b><br><div class="write"></div><div class="write"></div></div></div><div class="prob"><span class="pn">4.</span><div class="pbody"><b>1.092</b><br><div class="write"></div><div class="write"></div></div></div><div class="prob"><span class="pn">5.</span><div class="pbody"><b>3.981</b><br><div class="write"></div><div class="write"></div></div></div><div class="prob"><span class="pn">6.</span><div class="pbody"><b>8.523</b><br><div class="write"></div><div class="write"></div></div></div></div>
+
+  <div class="label" style="font-weight:bold;font-size:11pt;margin:14px 0 6px">Part B — Write &gt;, &lt; or =.</div>
+  <div class="grid " style="grid-template-columns:repeat(3,1fr)"><div class="prob"><span class="pn">7.</span><div class="pbody">7.45 &nbsp;<span class="abox" style="width:0.42in;height:0.36in"></span>&nbsp; 7.85</div></div><div class="prob"><span class="pn">8.</span><div class="pbody">8.24 &nbsp;<span class="abox" style="width:0.42in;height:0.36in"></span>&nbsp; 8.29</div></div><div class="prob"><span class="pn">9.</span><div class="pbody">3.64 &nbsp;<span class="abox" style="width:0.42in;height:0.36in"></span>&nbsp; 3.59</div></div><div class="prob"><span class="pn">10.</span><div class="pbody">7.62 &nbsp;<span class="abox" style="width:0.42in;height:0.36in"></span>&nbsp; 7.57</div></div><div class="prob"><span class="pn">11.</span><div class="pbody">4.39 &nbsp;<span class="abox" style="width:0.42in;height:0.36in"></span>&nbsp; 4.44</div></div><div class="prob"><span class="pn">12.</span><div class="pbody">8.57 &nbsp;<span class="abox" style="width:0.42in;height:0.36in"></span>&nbsp; 8.62</div></div></div></div>
+
+  <footer>
+    <span>Keep going on page 2 &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Decimals</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>Decimal Place Value — continued</h1>
+    <p class="sub">Grade 5 · Decimals · Page 2 of 2</p>
+  </header>
+
+
+
+
+  <div class="label" style="font-weight:bold;font-size:11pt;margin:8px 0 6px">Part C — Round each one.</div>
+  <div class="note" style="margin-top:0">Look only at the next digit to the right: 5 or more, round up.</div>
+  <table class="tbl ">
+    <thead><tr><th>Number</th><th>to the nearest tenth</th><th>to the nearest whole</th></tr></thead>
+    <tbody><tr><td>4.450</td><td class="blank"></td><td class="blank"></td></tr><tr><td>3.671</td><td class="blank"></td><td class="blank"></td></tr><tr><td>40.326</td><td class="blank"></td><td class="blank"></td></tr><tr><td>1.648</td><td class="blank"></td><td class="blank"></td></tr><tr><td>34.873</td><td class="blank"></td><td class="blank"></td></tr><tr><td>8.512</td><td class="blank"></td><td class="blank"></td></tr></tbody>
+  </table>
+
+  <div class="label" style="font-weight:bold;font-size:11pt;margin:16px 0 6px">Part D — Explain it.</div>
+  <ol class="qs" start="13"><li><span class="qt">Mia says 0.7 is smaller than 0.65 because 65 is bigger than 7. What has she done wrong?</span><div class="write"></div><div class="write"></div></li><li><span class="qt">Write a number that is bigger than 3.4 and smaller than 3.5. Then write another one.</span><div class="write"></div><div class="write"></div></li><li><span class="qt">Why does adding a zero to the end of 2.3 not change it, when adding a zero to the end of 23 does?</span><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Score: ______ / 21</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Decimals</span>
+  </footer>
+</div>
+
+
+<div style="page-break-before:always"></div>
+
+
+<!-- ============ PAGE 1 — STUDENT, 1–5 ============ -->
+<div class="page">
+  <header>
+    <h1>Daily Language Review — Set 1</h1>
+    <p class="sub">Grade 5 &nbsp;·&nbsp; Mixed Review &nbsp;·&nbsp; Page 1 of 2</p>
+  </header>
+
+  <div class="nameline">
+    <span>Name</span>
+    <span class="short">Date</span>
+  </div>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Fix every mistake and write the sentence right on the lines. Number 1 is done.
+    <div class="cups"><b>Remember CUPS:</b> Capital letters &nbsp;·&nbsp; Usage (right word) &nbsp;·&nbsp; Punctuation &nbsp;·&nbsp; Spelling</div>
+  </div>
+
+  <ol>
+    <li data-n="1" class="done"><span class="bad">by friday we have finished the whole model and we was proud of it</span><span class="donetag">Done for you</span><div class="write filled"><span class="fixedlabel">Fixed:</span><span class="donefix" style="font-size:12.5pt"><u>B</u>y <u>F</u>riday we <u>had</u> finished the whole model<u>,</u> and we <u>were</u> proud of it<u>.</u></span></div></li>
+    <li data-n="2"><span class="bad">the list of ingredients were on the counter but its missing now</span><div class="write"></div><div class="write"></div></li>
+    <li data-n="3"><span class="bad">we read a poem called the road not taken and a book called hatchet</span><div class="write"></div><div class="write"></div></li>
+    <li data-n="4"><span class="bad">i have never seen so many people neither has my sister</span><div class="write"></div><div class="write"></div></li>
+    <li data-n="5"><span class="bad">after we had ate lunch we walked down to the harbor</span><div class="write"></div><div class="write"></div></li>
+  </ol>
+
+  <footer>
+    <span>Keep going on page 2 &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Set 1</span>
+  </footer>
+</div>
+
+<!-- ============ PAGE 2 — STUDENT, 6–10 ============ -->
+<div class="page">
+  <header class="cont">
+    <h1>Set 1, continued</h1>
+    <p class="sub">Grade 5 &nbsp;·&nbsp; Mixed Review &nbsp;·&nbsp; Page 2 of 2</p>
+  </header>
+
+  <ol style="margin-top:16px">
+    <li data-n="6"><span class="bad">whose going to carry the tent asked marcus</span><div class="write"></div><div class="write"></div></li>
+    <li data-n="7"><span class="bad">the dog wagged its tail and than it ran off with my glove</span><div class="write"></div><div class="write"></div></li>
+    <li data-n="8"><span class="bad">my aunt who lives in denver has flew here twice this year</span><div class="write"></div><div class="write"></div></li>
+    <li data-n="9"><span class="bad">their were fewer chairs then people so we stood at the back</span><div class="write"></div><div class="write"></div></li>
+    <li data-n="10"><span class="bad">the team have practiced all season and they has won every game</span><div class="write"></div><div class="write"></div></li>
+  </ol>
+
+  <footer>
+    <!-- / 9, not / 10: number 1 is the worked example (2026-09-23). -->
+    <span>Score: ______ / 9</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Set 1</span>
+  </footer>
+</div>
+
+<!-- ============ PAGE 3 — ANSWER KEY ============ -->
+
+<div style="page-break-before:always"></div>
+
+
+<div class="page ">
+  <header>
+    
+    <h1>The Line You Drew Was the Wrong Line</h1>
+    <p class="sub">Nothing Was Watching · Page 1 of 4</p>
+  </header>
+  <div class="nameline">
+    <span>Name</span>
+    <span class="short">Date</span>
+  </div>
+  <div class="directions">
+    <b>DIRECTIONS:</b> Your history line held all 300,000 years of people. How much longer is the Earth's story?
+  </div>
+
+
+  <div style="text-align:center;margin:4px 0"><svg class="inline" viewBox="0 0 680 206" width="680" height="206" role="img" aria-label="the whole age of the earth as one strip, with six events marked" xmlns="http://www.w3.org/2000/svg"><rect x="16" y="94" width="650" height="28" rx="0" fill="#f4f4f4" stroke="#16130F" stroke-width="1.2"/><line x1="16" y1="94" x2="16" y2="80" stroke="#16130F" stroke-width="1" stroke-linecap="round"/><text x="13" y="76" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="11" font-weight="normal" text-anchor="start" fill="#16130F">4,540</text><text x="13" y="63" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="10" font-weight="normal" text-anchor="start" fill="#6B635A">Earth forms</text><line x1="136.26" y1="94" x2="136.26" y2="80" stroke="#16130F" stroke-width="1" stroke-linecap="round"/><text x="136.26" y="76" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="11" font-weight="normal" text-anchor="middle" fill="#16130F">3,700</text><text x="136.26" y="63" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="10" font-weight="normal" text-anchor="middle" fill="#6B635A">first life</text><line x1="322.39" y1="94" x2="322.39" y2="136" stroke="#16130F" stroke-width="1" stroke-linecap="round"/><text x="322.39" y="151" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="11" font-weight="normal" text-anchor="middle" fill="#16130F">2,400</text><text x="322.39" y="164" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="10" font-weight="normal" text-anchor="middle" fill="#6B635A">oxygen in the air</text><line x1="588.83" y1="94" x2="588.83" y2="80" stroke="#16130F" stroke-width="1" stroke-linecap="round"/><text x="591.83" y="76" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="11" font-weight="normal" text-anchor="end" fill="#16130F">539</text><text x="591.83" y="63" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="10" font-weight="normal" text-anchor="end" fill="#6B635A">Cambrian explosion</text><line x1="633.07" y1="94" x2="633.07" y2="136" stroke="#16130F" stroke-width="1" stroke-linecap="round"/><text x="636.07" y="151" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="11" font-weight="normal" text-anchor="end" fill="#16130F">230</text><text x="636.07" y="164" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="10" font-weight="normal" text-anchor="end" fill="#6B635A">first dinosaurs</text><line x1="656.55" y1="94" x2="656.55" y2="50" stroke="#16130F" stroke-width="1" stroke-linecap="round"/><text x="659.55" y="46" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="11" font-weight="normal" text-anchor="end" fill="#16130F">66</text><text x="659.55" y="33" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="10" font-weight="normal" text-anchor="end" fill="#6B635A">the asteroid</text><text x="666" y="184" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="11" font-weight="normal" text-anchor="end" fill="#16130F">↑ now</text><text x="340" y="202" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="10" font-weight="normal" text-anchor="middle" fill="#6B635A">millions of years ago · every mark measured, none of it spaced to look nice</text></svg></div>
+
+  <table class="tbl h10">
+    <thead><tr><th>#</th><th></th><th>How long</th><th>In millions of years</th></tr></thead>
+    <tbody><tr><td><span class="pn">1.</span></td><td>All of human history — your old line</td><td>300,000 years</td><td class="blank"></td></tr><tr><td><span class="pn">2.</span></td><td>The age of the Earth</td><td>4,540 million years</td><td class="blank"></td></tr></tbody>
+  </table>
+
+  <ol class="qs" start="3"><li><span class="qt">Divide the second by the first. How many times longer is the Earth's history than the whole of human history?</span><div class="work" style="height:1.5in"><span>Show your work</span></div><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Keep going on page 2 →</span>
+    <span class="brand">Kitchen Table</span>
+    <span>How long is long</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>Now Draw It Properly</h1>
+    <p class="sub">Nothing Was Watching · Page 2 of 4</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> New scale: <b>all 300,000 years of people = 1 centimeter.</b> How long is the Earth's line?
+  </div>
+
+
+  <ol class="qs" start="4"><li><span class="qt">If 300,000 years is 1 cm, how many centimeters is 4,540 million years? Then turn that into meters.</span><div class="work" style="height:2.2in"><span>Show your work</span></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Is there anywhere in your house that long? Where would you have to go to draw it?</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+  <div class="note">Check: about <b>151 meters</b>, a football field and a half. All of writing is
+  the last sixth of a millimeter.</div>
+
+  <footer>
+    <span>Keep going on page 3 →</span>
+    <span class="brand">Kitchen Table</span>
+    <span>How long is long</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>Where Things Land on It</h1>
+    <p class="sub">Nothing Was Watching · Page 3 of 4</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Place each event on the 151 m line, from the left end where the Earth forms: (4,540 − date) ÷ 4,540 × 151 m.
+  </div>
+
+
+  <table class="tbl h10">
+    <thead><tr><th>#</th><th>Event</th><th>Millions of years ago</th><th>How far along the 151 m line (meters)</th></tr></thead>
+    <tbody><tr><td><span class="pn">6.</span></td><td>The first life</td><td>3,700</td><td class="blank"></td></tr><tr><td><span class="pn">7.</span></td><td>Oxygen appears in the air</td><td>2,400</td><td class="blank"></td></tr><tr><td><span class="pn">8.</span></td><td>The Cambrian explosion</td><td>539</td><td class="blank"></td></tr><tr><td><span class="pn">9.</span></td><td>The first dinosaurs</td><td>230</td><td class="blank"></td></tr><tr><td><span class="pn">10.</span></td><td>The asteroid, and the end of the dinosaurs</td><td>66</td><td class="blank"></td></tr></tbody>
+  </table>
+
+  <ol class="qs" start="11"><li><span class="qt">The dinosaurs are the thing most people picture when they hear "long ago". How much of the line is BEFORE the first dinosaur?</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Keep going on page 4 →</span>
+    <span class="brand">Kitchen Table</span>
+    <span>How long is long</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>What Was Happening in the Empty Part</h1>
+    <p class="sub">Nothing Was Watching · Page 4 of 4</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Did nothing happen in the long empty part of the line? Read, then answer.
+  </div>
+
+
+  <div class="note">For the first 3,000 million years, everything alive was a <b>single cell</b>. About 2,400 million
+  years ago, living things began putting <b>oxygen</b> into the air, and it poisoned most of what was alive.</div>
+
+  <ol class="qs" start="12"><li><span class="qt">Somebody says "the Earth is really old — like, dinosaurs old." Using your line, explain what is wrong with that sentence.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Why do you think almost everything you have been taught about the past sits in the last few centimeters? Give a reason that is about EVIDENCE, not about importance.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Score: ______ / 13 (each table is marked as one)</span>
+    <span class="brand">Kitchen Table</span>
+    <span>How long is long</span>
+  </footer>
+</div>
+
+
+<div style="page-break-before:always"></div>
+
+
+<div class="page ">
+  <header>
+    
+    <h1>Before Anyone Sailed</h1>
+    <p class="sub">Grade 5 · First peoples · Page 1 of 3</p>
+  </header>
+  <div class="nameline">
+    <span>Name</span>
+    <span class="short">Date</span>
+  </div>
+  <div class="directions">
+    <b>DIRECTIONS:</b> Hundreds of nations lived here, each fitted to its own land. Read, then fill in the table.
+  </div>
+
+
+  
+  <table class="tbl ">
+    <thead><tr><th>Where they lived</th><th>What the land is like</th><th>How they got food</th><th>What their homes were like</th></tr></thead>
+    <tbody><tr><td><span class="pn">1.</span> the far north (Arctic)</td><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr><tr><td><span class="pn">2.</span> the northwest coast</td><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr><tr><td><span class="pn">3.</span> the dry southwest</td><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr><tr><td><span class="pn">4.</span> the Great Plains</td><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr><tr><td><span class="pn">5.</span> the eastern woodlands</td><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr><tr><td><span class="pn">6.</span> the southeast</td><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr></tbody>
+  </table>
+
+  <footer>
+    <span>Keep going on page 2 →</span>
+    <span class="brand">Kitchen Table</span>
+    <span>First peoples</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>The Land Does the Explaining</h1>
+    <p class="sub">Grade 5 · First peoples · Page 2 of 3</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Give the reason for each answer on page 1. It is nearly always the land.
+  </div>
+
+
+  <div class="note" style="margin-top:2px"><b>People build with what is there:</b> wood where forest was thick, earth or hide
+  where there were no trees. Where corn grew, people stayed and built towns; where the food moved, so did they.</div>
+
+  <ol class="qs" start="7"><li><span class="qt">Why did people on the Plains live in homes that could be taken down and moved?</span><div class="write"></div><div class="write"></div></li><li><span class="qt">Why did people of the northwest coast build large permanent wooden houses?</span><div class="write"></div><div class="write"></div></li><li><span class="qt">Corn, beans and squash were grown together across much of the continent. What does growing your own food let a people do that hunting alone does not?</span><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Nations traded shells, copper, obsidian and food over thousands of miles. What does that tell you about how connected they were?</span><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Keep going on page 3 →</span>
+    <span class="brand">Kitchen Table</span>
+    <span>First peoples</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>Reading a Place</h1>
+    <p class="sub">Grade 5 · First peoples · Page 3 of 3</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Given the land, work out the life.
+  </div>
+
+
+  <div class="note" style="margin-top:2px"><b>A place you have never heard of.</b> Wide grassland, no trees for a
+  hundred miles, hot summers, hard winters, and enormous herds of grazing animals passing through twice a year.</div>
+
+  <ol class="qs" start="11"><li><span class="qt">What would people there eat, and how would they get it?</span><div class="write"></div><div class="write"></div></li><li><span class="qt">What would they build houses out of, and would those houses move?</span><div class="write"></div><div class="write"></div></li><li><span class="qt">Would they be likely to have large permanent towns? Say why.</span><div class="write"></div><div class="write"></div></li><li><span class="qt">Many of these nations still exist today, with governments, courts and members. Why do you think so much teaching about them is written as though they only existed long ago?</span><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Score: ______ / 14</span>
+    <span class="brand">Kitchen Table</span>
+    <span>First peoples</span>
+  </footer>
+</div>
+
+
+<div style="page-break-before:always"></div>
+
+
+<div class="page ">
+  <header>
+    
+    <h1>How Many Weeks</h1>
+    <p class="sub">Money that waits · Page 1 of 2</p>
+  </header>
+  <div class="nameline">
+    <span>Name</span>
+    <span class="short">Date</span>
+  </div>
+  <div class="directions">
+    <b>DIRECTIONS:</b> How many weeks of saving for each? Round up: part of a week is still a week.
+  </div>
+
+
+  <table class="tbl roomy">
+    <thead><tr><th>What it is</th><th>Price</th><th>Saved each week</th><th>How many weeks?</th></tr></thead>
+    <tbody><tr><td><span class="pn">1.</span> A game</td><td>$45</td><td>$5</td><td class="blank"></td></tr><tr><td><span class="pn">2.</span> A pair of trainers</td><td>$60</td><td>$8</td><td class="blank"></td></tr><tr><td><span class="pn">3.</span> A bike</td><td>$130</td><td>$10</td><td class="blank"></td></tr><tr><td><span class="pn">4.</span> A book</td><td>$12</td><td>$5</td><td class="blank"></td></tr></tbody>
+  </table>
+  <div class="test"><b>Say the number out loud.</b> Thirteen weeks is a season: start in the cold, finish in the warm. <b>"Can I afford it?" and "Will I wait that long?" are different questions</b>, and only the second is hard.</div>
+  <div class="note">The bike, one box a week. Cross one off each week.</div>
+  <div class="weeks"><div class="wk"></div><div class="wk"></div><div class="wk"></div><div class="wk"></div><div class="wk"></div><div class="wk"></div><div class="wk"></div><div class="wk"></div><div class="wk"></div><div class="wk"></div><div class="wk"></div><div class="wk"></div><div class="wk"></div></div>
+
+  <footer>
+    <span>Keep going on page 2 →</span>
+    <span class="brand">Kitchen Table</span>
+    <span>How many weeks</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>How Many Weeks — Making It Shorter</h1>
+    <p class="sub">Money that waits · Page 2 of 2</p>
+  </header>
+
+
+
+
+  <ol class="qs" start="5"><li><span class="qt">There are only two ways to make the wait shorter. Write both of them down.</span><div class="write"></div><div class="write"></div></li><li><span class="qt">The bike is $130 and you save $10 a week. Somebody offers you $4 a week for walking their dog. How many weeks now — and how many weeks did that save you?</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">A $45 game and a $12 book, at $5 a week. Say how many weeks each, and then say something true about buying the book first.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Somebody says "I will just get it now and pay it back later." Using the weeks, say what has actually changed and what has not.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Score: ______ / 8</span>
+    <span class="brand">Kitchen Table</span>
+    <span>How many weeks</span>
+  </footer>
+</div>
+
+</body></html>

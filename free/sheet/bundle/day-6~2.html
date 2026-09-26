@@ -1,0 +1,306 @@
+<!DOCTYPE html><html><head>
+<meta charset="utf-8">
+<meta name="sheet-kind" content="worksheet">
+<title>What You Need to See</title>
+<style>
+  @page { size: letter portrait; margin: 0.4in 0.45in; }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  :root {
+    --ink:    #16130F;
+    --muted:  #6B635A;
+    --rule:   #CFC3B2;
+    --guide:  #BCAE9C;
+    --accent: #C0511D;
+    --tint:   #F7EDE4;
+    --slate:  #2E5A78;
+    --tintslate: #E9EFF4;
+    --deep:   #2C4A45;
+    --tintdeep: #ECF1EF;
+  }
+
+  body {
+    font-family: Quicksand, 'URW Gothic', 'Century Gothic', sans-serif;
+    color: #000; background: #fff;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+
+  /* ORDER MATTERS. This generic rule must come BEFORE the @media screen block:
+   * both selectors have the same specificity, so whichever is declared last
+   * wins. With it after, it overrode the screen width and the preview stretched
+   * to the viewport — rows scaled up and pages measured 16in tall. Print was
+   * always fine (@media screen doesn't apply), but the on-screen proof lied. */
+  .page { width: 100%; }
+  .page + .page { page-break-before: always; }
+
+  @media screen {
+    body { padding: 0.4in; background: #ddd; }
+    .page {
+      background: #fff; padding: 0.4in 0.45in;
+      width: 8.5in; min-height: 11in;
+      margin: 0 auto 22px; box-shadow: 0 2px 10px rgba(0,0,0,.3);
+    }
+  }
+
+  header {
+    display: flex; align-items: center; gap: 16px;
+    border-bottom: 3px solid var(--slate); padding-bottom: 7px; margin-bottom: 2px;
+  }
+  .bigletter { font-size: 38pt; font-weight: 700; line-height: 1; letter-spacing: .02em; }
+  .htext { flex: 1; }
+  h1 { font-size: 14pt; font-weight: 700; margin: 0 0 2px; }
+  .sub { font-size: 10pt; color: var(--muted); margin: 0; }
+  .nameline {
+    font-size: 9.5pt; color: var(--muted);
+    border-bottom: 1px solid var(--ink); width: 2in;
+    padding-bottom: 1px; align-self: flex-end;
+  }
+
+  .label { font-size: 11.5pt; font-weight: 700; margin: 9px 0 1px; }
+  .label span { font-weight: 400; font-size: 10pt; color: var(--muted); }
+
+  .row { display: block; width: 100%; height: auto; margin-bottom: .06in; }
+  /* Rows that follow the header directly would otherwise jam against its rule. */
+  header + .row { margin-top: .12in; }
+
+  .words {
+    margin-top: 10px; padding-top: 7px; border-top: 1px solid var(--rule);
+    font-size: 12.5pt;
+    display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap;
+  }
+  .words b { font-size: 14pt; }
+  .words em { font-style: normal; color: var(--muted); }
+
+  /* The wordmark rides in the footer line that was already there — see the note
+     in lib/sheet.js. No height, upright, a size down, and never louder than the
+     two slots it sits between. */
+  .brand { font-style: normal; font-size: 7pt; letter-spacing: .04em;
+    color: var(--accent); align-self: center; }
+
+  footer {
+    margin-top: 7px; font-size: 8.5pt; color: var(--muted);
+    display: flex; justify-content: space-between;
+  }
+
+  .chart { display: grid; grid-template-columns: repeat(6, 1fr); gap: 7px; margin-top: 14px; }
+  .cell {
+    border: 2px solid var(--slate); border-radius: 8px; height: 1.35in;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .page.key { background: #fcfcfa; }
+  .page.key header { border-bottom-style: double; border-bottom-width: 3px; }
+  .keylist { font-size: 11pt; line-height: 1.7; }
+  .keylist p { margin: .02in 0; }
+  .keynote { border: 1.5px solid var(--deep); border-radius: 8px; padding: .07in .12in;
+    margin: .1in 0 0; font-size: 10pt; line-height: 1.5; }
+
+  .note { border: 1.5px solid var(--deep); border-radius: 8px; padding: .07in .12in;
+    margin: .06in 0 .1in; font-size: 10pt; color: var(--ink); }
+  .tasknote { border: 1.5px solid var(--deep); border-radius: 8px; padding: .07in .12in;
+    margin: .12in 0 0; font-size: 10.5pt; }
+  svg { display: block; }
+  svg.inline { display: inline-block; vertical-align: middle; }
+
+  .dobox { border: 2.4px solid var(--slate); border-radius: 9px; padding: .09in .13in;
+    margin-bottom: .1in; }
+  .dotitle { font-size: 12pt; font-weight: 700; margin-bottom: .04in; }
+  .dosteps { margin: 0; padding-left: .22in; }
+  .dosteps li { font-size: 11pt; margin-bottom: .03in; }
+
+  .wqs { margin-top: .06in; }
+  .wq { margin-bottom: .04in; }
+  .wqt { font-size: 11pt; font-weight: 700; margin-bottom: .01in; }
+
+  .pick { display: flex; align-items: center; gap: .06in; font-size: 13pt;
+    white-space: nowrap; }
+  .pick i { width: .32in; height: .32in; border: 2px solid var(--slate); border-radius: 4px;
+    display: inline-block; flex: 0 0 auto; }
+
+  .skypair { display: flex; gap: .24in; margin-bottom: .12in; }
+  .skycell { flex: 1; border: 2px solid var(--ink); border-radius: 9px; padding: .08in .1in;
+    display: flex; flex-direction: column; align-items: flex-start; gap: .04in; }
+  .skylab { font-size: 15pt; font-weight: 700; }
+
+  .sortlist { display: grid; grid-template-columns: 1fr 1fr; gap: 0 .28in; }
+  /* One column when the tick labels are long sentences. At two columns
+     "a shiny spoon" wrapped onto three lines and "a page of a book" onto
+     three more, which made a simple sorting list look like a wall. */
+  .sortlist.wide { grid-template-columns: 1fr; }
+  .sortlist.wide .sortrow { padding: .12in 0; }
+  .sortrow { display: flex; align-items: center; gap: .1in;
+    border-bottom: 1px solid var(--rule); padding: .06in 0; }
+  .sortname { font-size: 14pt; flex: 1; }
+
+  .shadowpic { display: flex; justify-content: center; margin-bottom: .1in; }
+
+  .matlist { border: 2px solid var(--slate); border-radius: 9px; overflow: hidden;
+    margin-bottom: .1in; }
+  .mathead { display: grid; grid-template-columns: 1.5in 1fr 1fr 1fr;
+    font-size: 12pt; font-weight: 700; border-bottom: 1.6px solid var(--slate);
+    text-align: center; }
+  .mathead span { padding: .05in .04in; }
+  .matrow { display: grid; grid-template-columns: 1.5in 1fr 1fr 1fr;
+    align-items: center; border-bottom: 1px solid var(--rule); }
+  .matrow:last-child { border-bottom: 0; }
+  .matname { font-size: 14pt; padding: .06in .08in; }
+  .matrow i { width: .34in; height: .34in; border: 2px solid var(--ink); border-radius: 4px;
+    display: block; margin: .06in auto; }
+
+  .predrow { display: flex; align-items: center; gap: .16in;
+    border-bottom: 1px solid var(--rule); padding: .6in 0; }
+  .predq { font-size: 15pt; flex: 1; }
+  .predpick { display: flex; gap: .18in; }
+</style>
+</head><body>
+
+<div class="page">
+  <header>
+    <div class="bigletter">&#9788;</div>
+    <div class="htext">
+      <h1>Can You See In the Dark?</h1>
+      <p class="sub">Find out for yourself with a box and a small thing to hide in it.</p>
+    </div>
+    <div class="nameline">Name</div>
+  </header>
+
+  <div class="note"><b>Eyes cannot make light, only catch it.</b> No light in the box, nothing to see.</div>
+
+  <div class="dobox">
+    <div class="dotitle">Try this, then write what happened</div>
+    <ol class="dosteps"><li>Put a small toy in a shoebox and put the lid on.</li><li>Make a tiny hole in the lid and look through it. Can you see the toy?</li><li>Now lift the lid a crack so a bit of light gets in. Look again.</li><li>Now take the lid right off.</li></ol>
+  </div>
+
+  <div class="wqs">
+    <div class="wq"><div class="wqt">With the lid on, what could you see?</div>      <svg class="row" viewBox="0 0 729.6 67.16" width="100%" role="img" aria-label="write here">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="27.08" x2="729.6" y2="27.08" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="49.16" x2="729.6" y2="49.16" stroke="#16130F" stroke-width="2.6"/>
+      </svg>      <svg class="row" viewBox="0 0 729.6 67.16" width="100%" role="img" aria-label="write here">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="27.08" x2="729.6" y2="27.08" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="49.16" x2="729.6" y2="49.16" stroke="#16130F" stroke-width="2.6"/>
+      </svg></div>
+    <div class="wq"><div class="wqt">With the lid open a crack, what could you see?</div>      <svg class="row" viewBox="0 0 729.6 67.16" width="100%" role="img" aria-label="write here">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="27.08" x2="729.6" y2="27.08" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="49.16" x2="729.6" y2="49.16" stroke="#16130F" stroke-width="2.6"/>
+      </svg>      <svg class="row" viewBox="0 0 729.6 67.16" width="100%" role="img" aria-label="write here">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="27.08" x2="729.6" y2="27.08" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="49.16" x2="729.6" y2="49.16" stroke="#16130F" stroke-width="2.6"/>
+      </svg></div>
+    <div class="wq"><div class="wqt">So what does your eye need before it can see anything?</div>      <svg class="row" viewBox="0 0 729.6 67.16" width="100%" role="img" aria-label="write here">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="27.08" x2="729.6" y2="27.08" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="49.16" x2="729.6" y2="49.16" stroke="#16130F" stroke-width="2.6"/>
+      </svg>      <svg class="row" viewBox="0 0 729.6 67.16" width="100%" role="img" aria-label="write here">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="27.08" x2="729.6" y2="27.08" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="49.16" x2="729.6" y2="49.16" stroke="#16130F" stroke-width="2.6"/>
+      </svg>      <svg class="row" viewBox="0 0 729.6 67.16" width="100%" role="img" aria-label="write here">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="27.08" x2="729.6" y2="27.08" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="49.16" x2="729.6" y2="49.16" stroke="#16130F" stroke-width="2.6"/>
+      </svg></div>
+  </div>
+
+  <div class="tasknote">Say the rule: <b>light has to get to my eye.</b></div>
+
+  <footer>
+    <span>1 experiment · 3 to write</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Light</span>
+  </footer>
+</div>
+
+<div class="page">
+  <header>
+    <div class="bigletter">&#9728;</div>
+    <div class="htext">
+      <h1>Which Ones Make Light?</h1>
+      <p class="sub">Tick one box for each. Some of these only look bright.</p>
+    </div>
+    <div class="nameline">Name</div>
+  </header>
+
+  <div class="note"><b>The moon makes no light.</b> It is a gray rock. Sunlight bounces off it, like a mirror.</div>
+
+  <div class="skypair">
+    <div class="skycell">
+      <svg viewBox="0 0 66 66" height="66" role="img" aria-label="sun"><image href="data:image/png;base64,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" x="6" y="6" width="54" height="54"/></svg>
+      <div class="skylab">the sun</div>
+      <label class="pick"><i></i>makes its own light</label>
+      <label class="pick"><i></i>only looks bright</label>
+    </div>
+    <div class="skycell">
+      <svg viewBox="0 0 66 66" height="66" role="img" aria-label="moon"><image href="data:image/png;base64,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" x="6" y="6" width="54" height="54"/></svg>
+      <div class="skylab">the moon</div>
+      <label class="pick"><i></i>makes its own light</label>
+      <label class="pick"><i></i>only looks bright</label>
+    </div>
+  </div>
+
+  <div class="sortlist wide">
+    <div class="sortrow">
+      <div class="sortname">a shiny spoon</div>
+      <label class="pick"><i></i>makes its own light</label>
+      <label class="pick"><i></i>only looks bright</label>
+    </div>
+    <div class="sortrow">
+      <div class="sortname">a page of a book</div>
+      <label class="pick"><i></i>makes its own light</label>
+      <label class="pick"><i></i>only looks bright</label>
+    </div>
+    <div class="sortrow">
+      <div class="sortname">a white shirt</div>
+      <label class="pick"><i></i>makes its own light</label>
+      <label class="pick"><i></i>only looks bright</label>
+    </div>
+    <div class="sortrow">
+      <div class="sortname">a fire</div>
+      <label class="pick"><i></i>makes its own light</label>
+      <label class="pick"><i></i>only looks bright</label>
+    </div>
+    <div class="sortrow">
+      <div class="sortname">a phone screen</div>
+      <label class="pick"><i></i>makes its own light</label>
+      <label class="pick"><i></i>only looks bright</label>
+    </div>
+    <div class="sortrow">
+      <div class="sortname">a window</div>
+      <label class="pick"><i></i>makes its own light</label>
+      <label class="pick"><i></i>only looks bright</label>
+    </div>
+    <div class="sortrow">
+      <div class="sortname">a torch</div>
+      <label class="pick"><i></i>makes its own light</label>
+      <label class="pick"><i></i>only looks bright</label>
+    </div>
+    <div class="sortrow">
+      <div class="sortname">a mirror</div>
+      <label class="pick"><i></i>makes its own light</label>
+      <label class="pick"><i></i>only looks bright</label>
+    </div>
+    <div class="sortrow">
+      <div class="sortname">a candle</div>
+      <label class="pick"><i></i>makes its own light</label>
+      <label class="pick"><i></i>only looks bright</label>
+    </div>
+    <div class="sortrow">
+      <div class="sortname">a lamp</div>
+      <label class="pick"><i></i>makes its own light</label>
+      <label class="pick"><i></i>only looks bright</label>
+    </div>
+  </div>
+
+  <footer>
+    <span>12 to sort</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Light</span>
+  </footer>
+</div>
+
+</body></html>

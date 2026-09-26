@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="sheet-kind" content="worksheet">
+<title>September</title>
+<style>
+  @page { size: letter portrait; margin: 0.4in 0.45in; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  :root {
+    --ink: #16130F; --muted: #6B635A; --rule: #CFC3B2; --guide: #BCAE9C;
+    --accent: #C0511D; --tint: #F7EDE4; --slate: #2E5A78;
+  }
+  body {
+    font-family: Quicksand, 'URW Gothic', 'Century Gothic', sans-serif;
+    color: #000; background: #fff;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  .page { width: 100%; }
+  .page + .page { page-break-before: always; }
+  /* A screen ignores @page margins, so the preview drew every made sheet edge
+     to edge while the paper has 0.4in / 0.45in of white round it. The shelf's
+     sheets carry the same screen padding; print is untouched. */
+  @media screen { .page { padding: 0.4in 0.45in; } }
+  header {
+    display: flex; align-items: center; gap: 16px;
+    border-bottom: 3px solid var(--slate); padding-bottom: 7px; margin-bottom: 2px;
+  }
+  .bigletter { font-size: 38pt; font-weight: 700; line-height: 1; letter-spacing: .02em; }
+  .htext { flex: 1; }
+  h1 { font-size: 14pt; font-weight: 700; margin: 0 0 2px; }
+  .sub { font-size: 10pt; color: var(--muted); margin: 0; }
+  .nameline {
+    font-size: 9.5pt; color: var(--muted);
+    border-bottom: 1px solid var(--ink); width: 2in;
+    padding-bottom: 1px; align-self: flex-end;
+  }
+  .dir { font-size: 11pt; margin: 12px 0 10px; }
+  footer {
+    margin-top: 10px; padding-top: 6px; border-top: 1px solid var(--rule);
+    font-size: 8.5pt; color: var(--muted);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .brand { font-size: 7pt; letter-spacing: .04em; color: var(--accent); }
+  table { border-collapse: collapse; }
+  /* The parent-copy badge, lifted from the shelf's key pages so the two match
+     on paper. Tinted rather than outlined, because it has to be recognisable
+     at a glance from across a table with the page upside down. */
+  .badgeline {
+    display: inline-block; font-size: 8.5pt; font-weight: 700;
+    letter-spacing: .06em; text-transform: uppercase;
+    color: var(--accent); background: var(--tint);
+    border: 1.5px solid var(--accent); padding: 2px 8px; margin-bottom: 8px;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <div class="bigletter">31</div>
+    <div class="htext">
+      <h1>September</h1>
+      <p class="sub">Write the dates in yourself</p>
+    </div>
+    <div class="nameline">Name</div>
+  </header>
+  
+  
+<style>
+  /* A WRITING LINE, NOT A HAIRLINE. First version drew this in --rule at 34px
+   * and it read as part of the header chrome rather than as somewhere to
+   * write. It is the month name slot on a wall calendar and it should be the
+   * most obvious empty thing on the page. */
+  .writetop { margin: 4px 0 12px; }
+  .writetop i { display: block; height: 46px; border-bottom: 2.5px solid var(--ink); }
+  .drawtop { height: 1.5in; border: 2px dashed var(--rule); border-radius: 8px; margin: 0 0 10px; }
+
+  .dayhead { display: grid; grid-template-columns: repeat(7, 1fr); }
+  .dayhead div { font-size: 9pt; font-weight: 700; text-align: center; padding: 3px 0;
+    letter-spacing: .4px; }
+  .grid { display: grid; grid-template-columns: repeat(7, 1fr); border-top: 2px solid var(--ink);
+    border-left: 2px solid var(--ink); }
+  .cell { border-right: 2px solid var(--ink); border-bottom: 2px solid var(--ink);
+    height: 1.16in; padding: 3px 4px; position: relative; }
+  .cell .n { font-size: 11pt; font-weight: 700; }
+
+  .fill { position: absolute; left: 4px; right: 4px; bottom: 4px; top: 20px; }
+  .fill .ln { display: block; border-bottom: 1px solid var(--rule); height: 22px; }
+  .fill .tick { display: block; width: 15px; height: 15px; border: 1.6px solid var(--rule);
+    border-radius: 3px; margin-top: 2px; }
+  .fill.dots { background-image: radial-gradient(var(--guide) 0.9px, transparent 0.9px);
+    background-size: 9px 9px; }
+
+  .weeklist { border-top: 2px solid var(--ink); }
+  .wrow { display: flex; align-items: stretch; border-bottom: 2px solid var(--ink); }
+  .wday { width: 1.35in; flex: 0 0 auto; font-size: 11pt; font-weight: 700; padding: 8px 6px;
+    border-right: 2px solid var(--ink); }
+  .wbody { flex: 1; position: relative; height: 1.16in; }
+  .wbody .fill { top: 6px; }
+
+  /* FOUR ACROSS AND THREE DOWN. Three across ran the twelfth month off the
+   * bottom of the page — six rows of square cells at a third of the width come
+   * to over two inches a month, and four rows of that is nine. Four across is
+   * also the layout every year planner already uses. */
+  .yeargrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .ymonth { border: 1.6px solid var(--ink); border-radius: 6px; padding: 6px; }
+  .ytitle { height: 20px; border-bottom: 1.6px solid var(--rule); margin-bottom: 5px; }
+  .ygrid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+  .ygrid i { display: block; aspect-ratio: 1; border: 1px solid var(--rule); border-radius: 2px; }
+
+  .band svg { display: block; width: 100%; }
+  .band svg circle, .band svg path, .band svg rect { fill: none; stroke: var(--ink); stroke-width: 2.4; }
+  .band { margin: 8px 0 10px; }
+  .band svg { height: auto; }
+  .band + .band, .cal + .band, .weeklist + .band, .yeargrid + .band { margin: 10px 0 0; }
+
+  
+</style>
+
+<div class="writetop"><i></i></div>
+  <div class="cal">
+    <div class="dayhead"><div>Monday</div><div>Tuesday</div><div>Wednesday</div><div>Thursday</div><div>Friday</div><div>Saturday</div><div>Sunday</div></div>
+    <div class="grid">
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+    </div>
+  </div>
+
+
+  <footer>
+    <span>A month</span>
+    <span class="brand">KITCHEN TABLE</span>
+    <span>Calendar</span>
+  </footer>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,263 @@
+<!DOCTYPE html><html><head>
+<meta charset="utf-8">
+<meta name="sheet-kind" content="worksheet">
+<title>What Living Things Need</title>
+<style>
+  @page { size: letter portrait; margin: 0.4in 0.45in; }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  :root {
+    --ink:    #16130F;
+    --muted:  #6B635A;
+    --rule:   #CFC3B2;
+    --guide:  #BCAE9C;
+    --accent: #C0511D;
+    --tint:   #F7EDE4;
+    --slate:  #2E5A78;
+    --tintslate: #E9EFF4;
+    --deep:   #2C4A45;
+    --tintdeep: #ECF1EF;
+  }
+
+  body {
+    font-family: Quicksand, 'URW Gothic', 'Century Gothic', sans-serif;
+    color: #000; background: #fff;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+
+  /* ORDER MATTERS. This generic rule must come BEFORE the @media screen block:
+   * both selectors have the same specificity, so whichever is declared last
+   * wins. With it after, it overrode the screen width and the preview stretched
+   * to the viewport — rows scaled up and pages measured 16in tall. Print was
+   * always fine (@media screen doesn't apply), but the on-screen proof lied. */
+  .page { width: 100%; }
+  .page + .page { page-break-before: always; }
+
+  @media screen {
+    body { padding: 0.4in; background: #ddd; }
+    .page {
+      background: #fff; padding: 0.4in 0.45in;
+      width: 8.5in; min-height: 11in;
+      margin: 0 auto 22px; box-shadow: 0 2px 10px rgba(0,0,0,.3);
+    }
+  }
+
+  header {
+    display: flex; align-items: center; gap: 16px;
+    border-bottom: 3px solid var(--slate); padding-bottom: 7px; margin-bottom: 2px;
+  }
+  .bigletter { font-size: 38pt; font-weight: 700; line-height: 1; letter-spacing: .02em; }
+  .htext { flex: 1; }
+  h1 { font-size: 14pt; font-weight: 700; margin: 0 0 2px; }
+  .sub { font-size: 10pt; color: var(--muted); margin: 0; }
+  .nameline {
+    font-size: 9.5pt; color: var(--muted);
+    border-bottom: 1px solid var(--ink); width: 2in;
+    padding-bottom: 1px; align-self: flex-end;
+  }
+
+  .label { font-size: 11.5pt; font-weight: 700; margin: 9px 0 1px; }
+  .label span { font-weight: 400; font-size: 10pt; color: var(--muted); }
+
+  .row { display: block; width: 100%; height: auto; margin-bottom: .06in; }
+  /* Rows that follow the header directly would otherwise jam against its rule. */
+  header + .row { margin-top: .12in; }
+
+  .words {
+    margin-top: 10px; padding-top: 7px; border-top: 1px solid var(--rule);
+    font-size: 12.5pt;
+    display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap;
+  }
+  .words b { font-size: 14pt; }
+  .words em { font-style: normal; color: var(--muted); }
+
+  /* The wordmark rides in the footer line that was already there — see the note
+     in lib/sheet.js. No height, upright, a size down, and never louder than the
+     two slots it sits between. */
+  .brand { font-style: normal; font-size: 7pt; letter-spacing: .04em;
+    color: var(--accent); align-self: center; }
+
+  footer {
+    margin-top: 7px; font-size: 8.5pt; color: var(--muted);
+    display: flex; justify-content: space-between;
+  }
+
+  .chart { display: grid; grid-template-columns: repeat(6, 1fr); gap: 7px; margin-top: 14px; }
+  .cell {
+    border: 2px solid var(--slate); border-radius: 8px; height: 1.35in;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .page.key { background: #fcfcfa; }
+  .page.key header { border-bottom-style: double; border-bottom-width: 3px; }
+  .keylist { font-size: 11pt; line-height: 1.7; }
+  .keylist p { margin: .02in 0; }
+  .keynote { border: 1.5px solid var(--deep); border-radius: 8px; padding: .07in .12in;
+    margin: .1in 0 0; font-size: 10pt; line-height: 1.5; }
+
+  .note { border: 1.5px solid var(--deep); border-radius: 8px; padding: .07in .12in;
+    margin: .06in 0 .1in; font-size: 10pt; color: var(--ink); }
+  svg { display: block; }
+
+  /* tick-box pairs — one label per choice, box on the left of the word */
+  .picks { display: flex; gap: .22in; margin-left: auto; }
+  .pick { display: flex; align-items: center; gap: .07in; font-size: 11.5pt; }
+  .pick i { width: .28in; height: .28in; border: 2.2px solid var(--slate); border-radius: 5px;
+    display: block; flex: 0 0 auto; }
+  .pick.small { font-size: 9pt; color: var(--muted); }
+  .pick.small i { width: .2in; height: .2in; border-width: 1.8px; }
+
+  .needs { display: flex; justify-content: space-around; margin: .2in 0 .14in; }
+  .need { display: flex; flex-direction: column; align-items: center; gap: .05in; }
+  .need span { font-size: 16pt; font-weight: 700; }
+  .need .tick { width: .34in; height: .34in; border: 2.2px solid var(--slate); border-radius: 5px; display: block; }
+
+  .task { border-top: 2.4px solid var(--slate); margin-top: .16in; padding-top: .1in; }
+  .tasktitle { font-size: 11.5pt; font-weight: 700; margin: .1in 0 .03in; }
+  .taskrow { font-size: 11pt; }
+  .twoboxes { display: flex; gap: .2in; }
+  .tbcell { flex: 1; display: flex; flex-direction: column; align-items: center; }
+  .tbcell span { font-size: 10pt; color: var(--muted); }
+  .tbox { width: 100%; height: 2.7in; border: 2.5px solid var(--slate); border-radius: 10px; }
+  .widebox { height: 2.5in; border: 2.5px solid var(--slate); border-radius: 10px; }
+
+  .grid4 { display: flex; gap: .12in; margin-top: .12in; }
+  .gcell { flex: 1; display: flex; flex-direction: column; gap: .04in; }
+  .glabel { font-size: 12pt; font-weight: 700; text-align: center; }
+  .gbox { height: 4.3in; border: 2.5px solid var(--slate); border-radius: 10px; }
+  .gask { font-size: 9.5pt; color: var(--muted); }
+
+  .matchgrid { display: grid; grid-template-columns: auto 1fr auto; row-gap: .34in;
+    align-items: center; margin-top: .3in; }
+  .mcell { display: flex; align-items: center; gap: 14px; border: 2px solid var(--ink);
+    border-radius: 10px; padding: 6px 16px; }
+  .mcell.left { justify-content: flex-end; }
+  .mcell.right { justify-content: flex-start; }
+  .mcell span { font-size: 12.5pt; color: var(--ink); }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--ink); display: block; }
+  .mgap { min-width: 1.5in; }
+
+  .boxes { display: flex; gap: .16in; margin-top: .14in; }
+  .sortbox { flex: 1; height: 6.3in; border: 2.5px solid var(--slate); border-radius: 10px; }
+  .bhead { display: flex; align-items: center; justify-content: center; gap: .08in;
+    font-size: 13pt; font-weight: 700; padding: .05in 0; border-bottom: 2px solid var(--slate); }
+  .cutline { margin: .2in 0 .12in; border-top: 2.6px dashed var(--accent); text-align: center; }
+  .cutline span { display: inline-block; transform: translateY(-.09in); background: #fff;
+    padding: 0 .1in; font-size: 9pt; color: var(--muted); }
+  .tray { display: flex; flex-wrap: wrap; gap: .08in; }
+  .piece { display: flex; flex-direction: column; align-items: center;
+    border: 2px dashed var(--slate); border-radius: 6px; padding: .03in .06in; }
+  .piece span { font-size: 10.5pt; color: var(--ink); }
+
+  .frow { display: flex; align-items: center; gap: .1in;
+    border-bottom: 1px solid var(--rule); padding: .09in .02in; }
+  .fhand, .fobj { flex: 0 0 auto; }
+  .farrow { width: 1.3in; }
+
+  .srow { display: flex; align-items: center; justify-content: space-around;
+    border-bottom: 1px solid var(--rule); padding: .04in 0; }
+  .scell { display: flex; flex-direction: column; align-items: center; }
+  .scell span { font-size: 11.5pt; color: var(--ink); }
+
+  /* The label goes ABOVE the track, not at its right end — on the end it
+     reads like a finish line, which is the one thing the track must not have. */
+  .track { height: .5in; border-bottom: 2.4px solid var(--slate); margin: 0 0 .1in;
+    display: flex; align-items: flex-end; }
+  .tstart { font-size: 8.5pt; color: var(--muted); border-left: 2.4px solid var(--slate); padding-left: .04in; }
+  .tlabel { font-size: 11pt; font-weight: 700; margin-top: .08in; }
+
+  .dngrid { display: flex; gap: .18in; margin-top: .14in; }
+  .dncell { flex: 1; }
+  .dnhead { display: flex; align-items: center; justify-content: center; gap: .08in;
+    font-size: 16pt; font-weight: 700; margin-bottom: .06in; }
+  .dnbox { height: 5in; border: 2.5px solid var(--slate); border-radius: 10px; }
+
+  .wrow { display: flex; align-items: center; gap: .2in;
+    border-bottom: 1px solid var(--rule); padding: .36in .02in; }
+  .wtext { font-size: 17pt; }
+</style>
+</head><body>
+
+<div class="page">
+  <header>
+    <div class="bigletter">&#10047;</div>
+    <div class="htext">
+      <h1>What a Plant Needs</h1>
+      <p class="sub">Four things, and a plant dies without any one of them. Say each one out loud.</p>
+    </div>
+    <div class="nameline">Name</div>
+  </header>
+  <div class="needs">
+    <div class="need"><svg viewBox="0 0 170 170" height="170" role="img" aria-label="water"><image href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAFPklEQVR42u3cQW7jOBQAUTP3vzOzD2BDDiDL+vXeaqZ3TVLFzwQz60HV/vPvy5L0/FgCH/+LP0MACHz8IiAAgABQvf1NAQJA/OMXAQEABIDq7W8KEADiH78ICAAgAFRvf1OAAAACQPX2NwUIAIM//vU4/h8BiYAAMMh68s8IAEZ/U4AAMHn0P/JnIiAADB79/xsBBIDQ6G8KEACGjv6eAgIAngICQP329xQQAHz8ngICAJ4CAoDR3xQgAHQ/fk8BAcBTAAHA6G8KEACSH7+ngADgKYAAYPQ3BQgAyY/fU0AA8BQQAQHA6I8AkPz4TQECQPzmFwEBAASA6rvfFCAARD9+ERAAQACo3v6mAAEg/vGLgAAAAkD19jcFCADxj18EBAAQAKq3vylAAIh//CIgAIAAUL39TQECQPzjFwEBgHFBEwDc/hevEQLg4/cUQACMyf6OCICx1pohAEZ/TwEEwFjs74wAGGOtIQJg9PcUQACMwdYAATC2WlMEwOjvKSAAGHutiQBgTLXGAoDR31NAADDmWiMBwI1kzQUAo7+ngABgrLVmAoAbyB4IgIPnJvMUEABAANz+bn9TgADg47eWAuD2x94IgNEfTwEBcFCxtgJgvMReCYDRH08BATCeYq0FwDiJvRMANxLWXADcINhDAbjXwXETff8UIAICYAy1BwiAG8OeIgBuHnuBALgp7K0A4MaxJwLAsRvCQbt3BEwBAuBg2GsEwJhpjwQAN4I9FwDcLPZKANwE2HsBwI1izwTADeAgjY/AFgBAANz+bn9TgAAAAuD2dzxMAQIACIDbH1OAAAAC4PbHFCAAgAC4/TEFCEDhYIAADL39EfvcmTEBuP0xAbj9Ef3i2TEBgAkgffsb/00B2SnABAAmALc/poDiFGACABOA2x9TQHEKMAGACUDxMQUIQGf8B2crOgG4/WFoANz+nH05bAEABMD4jzMiAMZ/arYAKDsIgCITvSy2AAACYPzHmREA4z81WwAAATDK4ewIgBEMzwABAATACIczJACAAHh74ecAAmB0w1kSAEAAjP94BggAIADebDhTAgAIgPc/zqYAAALg/Y+zJQCAAAC9APgBIM6oCcD7HwQAXDICAAgAIACAAACjAuBXgDirJoCn/AoQZ80TABAAQAAAAQAEABAAQABAAAABAAQAEABAAAABAAQAEABAAAABAAQAEABAAGC2LQA2BQTgg/xff3FWTQCAAAACAAgAIAB+E4AzNjkAfhOAM2oCAAQAEAA/B8DZEgAgEAA/CMTZNAEAAuDnADhTuQB4BuBMmgAAAfAMwFkSAKATAD8HwFk0AXgG4AwJAJALgGcAV9/+SwCMcCAApgBilgCYAnBmBECJQQAUncpZWQIACMCNngGmANz+JgBgYgBMAbj9TQAigDNRDYBfCeJsmQAUH6N/NQCmAIhPAH4giNvfE0AEsPfVAHgK4AzFJwBPAYz+ngAigL2uBmA5GLy5x0sARAAfvwAAAmAKwO0vACKAj18ARAAfvwCIAD5+AXCQsGcCMHYKcKDmfvxLAERABHz8AiACIuDjFwAREAEfv0PvIFlD+2UCEEXTgI9fAERABHz8AiACIuDj9zMAh8262gsTgEiaBnz8JgCH0BpbcwFwIK21dfYEEE3PAh+/CcAhte7WVAAcWutvDQXAAbYP1k0AHGh7Yo0EwAEv7o11EQAhiO2TNRAAEQjt23ZGBYDPheDqfdzOpwDwPR/MWfu7nUsB4L4hcB6x4GLgDGLxhcDZwyaIgfOGDREDZ0wAEAPnSgAQBWco5ReJiQ3pPzVJlQAAAABJRU5ErkJggg==" x="6" y="6" width="158" height="158"/></svg><span>water</span><i class="tick"></i></div>
+    <div class="need"><svg viewBox="0 0 170 170" height="170" role="img" aria-label="sun"><image href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAG5klEQVR42u3d2Y7bSAxAUVHw//9y5bXRQJDYllRczn0azJJxcblkyW73cQAYSwjBSJY6wHEcxykE45v/b38PBIABzU8CBACAAAAQAAACAEAAAAgAAAEAIAAABACAAAAQAAACAEAAAAgAAAEAIAAABACAAAAQAIA9vIad17fhQk0M3QB8Gy5+5358TZyDm58EML4mPAOABh8MASgIuSYAKAwQAEDyxzHonYApAoiLCwQ2PAIgAQyuEwIwLWD1JwB2B5kTgKsADAcCMD1g9ScAtgd5E4CrAAwDAiABWP0JwEoJzU8AVkCQNAG4CoD0CcCUgdWfAEwFkDIBuAqA5AmABGD1JwCAhAnAFgCrPwGQAKz+BGAVNQk1PwFoGGeFpJs4354p5IIAcN2KL6aa3xWAKAECmCgB7wqY/gRAAtD8BKBoIY4E4HkA5IUAXAVg9ScAAARg5YQ8bOYlBF8XX4U1fzVtLM0vgOkbLJI3eva6WeqXAKpKIJo0/O5aWmqXAODHjiFRml6NQXI0vlqDpGh8NQfJ0PhqD5Kg8dUgBF/jX5njpRYJADUav/qHjtTjv+Md2QK+JHNb04Rzja2ZyC4ACb2nQWLIWdXMAzF6+n4YEjmqIRYR3BqzcgKYltSl+MUhcx+FxCr4InEJ8cgnAGueIhejwtfCSHSYDsnV/K6QpXolOh9OMYubxn8+iBPfE9b8e2IYGj9vc00RwdL4Yll1G45iwciWcM0vpqWvwZU/Ox4KlQSSxLbs868oHqxKZ9D898c5NP5Ma2beZjR+v1i3ecfL3Unzk8DAxs9aoNm3As0/UwJtP+PS6a21u8+p+edJoP2H23yQ4vrXovnrS2DMp1qz/3bguDCAa9N/i1lD647aHSuADMG0+s/YFq6SfVSqg7NYQr8Nbpcv5LQF5NveomINTPvZ6rjpz9b8uXN/pzBK5/5sUAR3mde9v88Au2NIxNFA/GezYogNpjb9Z4klOuW8c/F+84sUrP6uAiM4G5/tblMrJoOMAAZPE8gtAZg4kBMCMCEgxwRg0kBuCMBkgFwTgAkDOSIAEwEZJSDnBGCygAAAEID13/R3DSAAAAQADNkCCMD6r4jUAAEAIADANYAAoHhAAO5+UAsEAIAAABCA+z/kkgAAEEBFPACEmrABADYAAAQAgABwHJ4ayykBAOjO68dfV34Kyu7YQfmeORscpMPrh5rb8vrPRs1DAlBrb57DMwBgMAQAEACAqQLo8gTdOwFQa2+e42xyIM0PNffB639pImDu4PEMABj+DAAAAeAHPlQkpwQAgAAAEADQmiAAyQYIAAABTMdTY7kkAAAEAHQmCEDSrY4gAMD9nwAAEIBrANQAAVghIXcEAIAATBJY/wlAEYC0CQAAAQzYAkyUXtPf5kcAAAHAvVKOCMA1QAjkmgBgwsgNAZgMkGMCgEkjJwRgQii4Fs1v+v/iNagg4k0JaHBSaS+QGJC0T89rqsyd/mtKzkMRkIC8f3y18+vBExTAuim5R4I/F73qjwA2N13c/O+j/tY3SgRn0cQ/GWzvCvSQ/xPSXwQw27IkkCvGoU7rr7gryTlHPRzS/Klqb6QAVsIzksC8yb8691o0bv5oVoiaf2/cW4ogNH7JYtT8dfKfuiZC45OA5p8rgtD4JKD554qgctAqCowEesa1bD1H0WCFYtX8DWph+5ncmfadjQj6yrSMCELjk4DYza39SH74ak2yBpxR8zcSgQ9MkIA4DRZBdD9gwUSHxlcbT8UiNH7aRIuHeNwekwwCMPF6x0fjJ+6dnT8yOenOO3FDshUW6KNdApj61HvCA9LpD4Gfjl8pAXjf+/pvi4lmZ1Ij/x/TMs8AJPV+ETwZ68qvvVONRKaALwlN00hX5SH765tcJyHwRFAd9ScBGCgCdScRGCgC9SYhGCgDdSYxGCYCtSVJo5s0Bsrgqa9iV7cEUGI6x+b/f4f6WWqXACqv59W/eHXnOXzAjABa3M3FmQBScgpBy7u4+IMAQAIggN2FZ00FAWh+fEBcnA8QAEgABGD6AwSg+W0BBACQAAHA9Aeron/zV/7hGiK2AaQsuMrnWYXO6SpAALYpMgMBWDfJlvAIwLQkAXkkAKs/QABWf/K1BRCA1Z8E5JUArP4AAVj9ydgWQACKgwTkmQCs/gABWP1tAQQAxUACBADTHwRg+mt+WwABaH6QAAHA9AcBWP1hCyAAzQ8SIAAABGD6wxZAAJofJEAAAAjA9IctgAB6FwfkmQAAkiCALgk1FTS4DWBo0hUDCYytB8U/i6Ue4BkAAAIACAAAAQAgAAAEAIAAABAAAAIAQAAACAAAAQAgAAAEAIAAABAAAAJAHuLDfwYCQGMJaH4AmMYf0siM2h3iNYQAAAAASUVORK5CYII=" x="6" y="6" width="158" height="158"/></svg><span>light</span><i class="tick"></i></div>
+    <div class="need"><svg viewBox="0 0 170 170" height="170" role="img" aria-label="wind"><image href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAE/0lEQVR42u3d0W7bOBAFUI3h//9l9ikFGiCpZFHSDOect93u1hTLe0naSbptAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAwE5hCphsWI8KAKG3PhUAQm+dKgAE33pVAAi+dZvLyxRQLPwZx+MEgPBbwwoAwbeOTRzCv2udDWtZAbBW+KPoaysAhD/RWhrWtAIgf/gj4bis6518DMiZzSNuep27rxIKALt/oh02Nru6KwCPhz+M1wkAm4VxKAAa7f7ZQheTn08BIPyLnkiUgALAkRsFwGrhV04KgIbHf8+rALC7OgUoAEABMPU4XG1XjUnPrQAABQAoAFjqGoACoHGQvA+gAFoTABQAoABAAZgCUACAAmBxPipDAaAgUABCLvwWgylgIcN6dwJA+FEAgAIAFACgAOh7//cGoAIAFADddn8UAI05/isA7P4oAEAB0Gb3d/xXADj6owDoFn67vwJA+FEAOPajAGgRfru/iaLprm9NOwEg/OzxNgW457sCQPXgW8smjYY7vTVs8mh6nLd+J06g+xc2r2Zewo/w955I4Ufwm/IxIIKvAEDwJyn1kaYrAEKfI/SPzEnc9AAg9AnnSQEg7PmDf9k8RtKHQ7AF/4Y59+4q1Av+tBz7dmCoHf5T43QCgNrhP5VpBQDXhz9uLppQAPBM+CPBGHaPQwHA+eBFwjHtGpcCgM+DFsnH998xKgCo9QNIp47Vx4AI//EwPblxTn1tBQD5d/2zJTQUAJzb/TNel0+XgAKAmuGfMjYFgN2/bviPjnEoAFB8CgAW2f1PjVUB4PjfuLAUANTf/T8uQAUAjYtLAUBjCgB6ngKGAgAnAEABAEeO0Es8gwJAwPsaCgAl8O+/i+6TACyyw7sCAAoAUACAAgAUACgAQAEACgBQAEBte37sWSgAcAIAFACgAID17//btm3vg/8TZOU7W09MmvCjGPrs/n/nJYQfpdAz/N+vANBxl2x9dfAmIMpgjVPwR3/duRMA1D8VfFxg3gSE2u8VjDPP83IPgrLXg9NjE3xaHHUXPBGMGWNXACiJekUwZo1XAaAU6hTBmD1OBYAyyF8E46qxKQCUQd4yGFePRQHAte8bxENjiSsGB8ogv5j+H4IiWCf4X3wvAKyxOUaHhwSngYk5VgBQtwzi8d8AFEHd64kCgBplEGV+U1AGNfKpACBHMcgiAAAAAAAAAAAAcJAvPySLYf0qAITdelYACLx1baIQeuvbBCH01rmJQeCtdxOC0FvzJgOBt+5NBMJu7ZsEaoc9HnqOUAAI+RrrbsiAhxdma82XFH/44EPGWGhzGQpg/4MLPyueKJXAjocWfla+Rg4FoADoE3glcMDbekYoev/hOgHQIexOAb88rBIQ9A6Gufn5YZWAgCuAZvNnoaAEGufiZT1AXwoAFAC04dqrAOBXQwEACgBQAHD0CO3rSgrwvQBceXf++mdvvDkB0Cz8e38NBQAoALqeELLxpcCgiBQAoAAABQDrH/9DAYD7twKAA1b58eAKABYLoh8FpgBQOCgAMlwDRsLwhwKAdXZmO7/Wo0i4Y7HXdwKAB3brIfwentqhjhtfSwFYpyTf2ePCE0P79a8AqHK8t/a9B4BNRvgVAEpA+E0GrgPWuklBEVjnJgZFYH2bIBSBdW2iaFcG1jIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABwpT8/c706cXAscwAAAABJRU5ErkJggg==" x="6" y="6" width="158" height="158"/></svg><span>air</span><i class="tick"></i></div>
+    <div class="need"><svg viewBox="0 0 170 170" height="170" role="img" aria-label="soil"><image href="data:image/png;base64,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" x="6" y="6" width="158" height="158"/></svg><span>soil</span><i class="tick"></i></div>
+  </div>
+  <div class="task">
+    <div class="tasktitle">Now go and look at a plant you can see.</div>
+    <div class="taskrow">Where does it get its water from?      <svg class="row" viewBox="0 0 729.6 72" width="100%" role="img" aria-label="write or draw">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="29" x2="729.6" y2="29" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="53" x2="729.6" y2="53" stroke="#16130F" stroke-width="2.6"/>
+      </svg></div>
+    <div class="taskrow">Where does its light come from?      <svg class="row" viewBox="0 0 729.6 72" width="100%" role="img" aria-label="write or draw">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="29" x2="729.6" y2="29" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="53" x2="729.6" y2="53" stroke="#16130F" stroke-width="2.6"/>
+      </svg></div>
+    <div class="tasktitle">Draw the plant you looked at.</div>
+    <div class="widebox"></div>
+  </div>
+
+  <div class="note"><b>Use a real plant.</b> Tick each box when he can point to where it gets that thing.</div>
+
+
+  <footer>
+    <span>4 things</span>
+    <span class="brand">Kitchen Table</span>
+    <span>What plants need</span>
+  </footer>
+</div>
+
+<div class="page">
+  <header>
+    <div class="bigletter">&#9829;</div>
+    <div class="htext">
+      <h1>What an Animal Needs</h1>
+      <p class="sub">Three of these are the same as a plant. One is different. Which one?</p>
+    </div>
+    <div class="nameline">Name</div>
+  </header>
+  <div class="needs">
+    <div class="need"><svg viewBox="0 0 170 170" height="170" role="img" aria-label="apple"><image href="data:image/png;base64,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" x="6" y="6" width="158" height="158"/></svg><span>food</span><i class="tick"></i></div>
+    <div class="need"><svg viewBox="0 0 170 170" height="170" role="img" aria-label="water"><image href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAFPklEQVR42u3cQW7jOBQAUTP3vzOzD2BDDiDL+vXeaqZ3TVLFzwQz60HV/vPvy5L0/FgCH/+LP0MACHz8IiAAgABQvf1NAQJA/OMXAQEABIDq7W8KEADiH78ICAAgAFRvf1OAAAACQPX2NwUIAIM//vU4/h8BiYAAMMh68s8IAEZ/U4AAMHn0P/JnIiAADB79/xsBBIDQ6G8KEACGjv6eAgIAngICQP329xQQAHz8ngICAJ4CAoDR3xQgAHQ/fk8BAcBTAAHA6G8KEACSH7+ngADgKYAAYPQ3BQgAyY/fU0AA8BQQAQHA6I8AkPz4TQECQPzmFwEBAASA6rvfFCAARD9+ERAAQACo3v6mAAEg/vGLgAAAAkD19jcFCADxj18EBAAQAKq3vylAAIh//CIgAIAAUL39TQECQPzjFwEBgHFBEwDc/hevEQLg4/cUQACMyf6OCICx1pohAEZ/TwEEwFjs74wAGGOtIQJg9PcUQACMwdYAATC2WlMEwOjvKSAAGHutiQBgTLXGAoDR31NAADDmWiMBwI1kzQUAo7+ngABgrLVmAoAbyB4IgIPnJvMUEABAANz+bn9TgADg47eWAuD2x94IgNEfTwEBcFCxtgJgvMReCYDRH08BATCeYq0FwDiJvRMANxLWXADcINhDAbjXwXETff8UIAICYAy1BwiAG8OeIgBuHnuBALgp7K0A4MaxJwLAsRvCQbt3BEwBAuBg2GsEwJhpjwQAN4I9FwDcLPZKANwE2HsBwI1izwTADeAgjY/AFgBAANz+bn9TgAAAAuD2dzxMAQIACIDbH1OAAAAC4PbHFCAAgAC4/TEFCEDhYIAADL39EfvcmTEBuP0xAbj9Ef3i2TEBgAkgffsb/00B2SnABAAmALc/poDiFGACABOA2x9TQHEKMAGACUDxMQUIQGf8B2crOgG4/WFoANz+nH05bAEABMD4jzMiAMZ/arYAKDsIgCITvSy2AAACYPzHmREA4z81WwAAATDK4ewIgBEMzwABAATACIczJACAAHh74ecAAmB0w1kSAEAAjP94BggAIADebDhTAgAIgPc/zqYAAALg/Y+zJQCAAAC9APgBIM6oCcD7HwQAXDICAAgAIACAAACjAuBXgDirJoCn/AoQZ80TABAAQAAAAQAEABAAQABAAAABAAQAEABAAAABAAQAEABAAAABAAQAEABAAGC2LQA2BQTgg/xff3FWTQCAAAACAAgAIAB+E4AzNjkAfhOAM2oCAAQAEAA/B8DZEgAgEAA/CMTZNAEAAuDnADhTuQB4BuBMmgAAAfAMwFkSAKATAD8HwFk0AXgG4AwJAJALgGcAV9/+SwCMcCAApgBilgCYAnBmBECJQQAUncpZWQIACMCNngGmANz+JgBgYgBMAbj9TQAigDNRDYBfCeJsmQAUH6N/NQCmAIhPAH4giNvfE0AEsPfVAHgK4AzFJwBPAYz+ngAigL2uBmA5GLy5x0sARAAfvwAAAmAKwO0vACKAj18ARAAfvwCIAD5+AXCQsGcCMHYKcKDmfvxLAERABHz8AiACIuDjFwAREAEfv0PvIFlD+2UCEEXTgI9fAERABHz8AiACIuDj9zMAh8262gsTgEiaBnz8JgCH0BpbcwFwIK21dfYEEE3PAh+/CcAhte7WVAAcWutvDQXAAbYP1k0AHGh7Yo0EwAEv7o11EQAhiO2TNRAAEQjt23ZGBYDPheDqfdzOpwDwPR/MWfu7nUsB4L4hcB6x4GLgDGLxhcDZwyaIgfOGDREDZ0wAEAPnSgAQBWco5ReJiQ3pPzVJlQAAAABJRU5ErkJggg==" x="6" y="6" width="158" height="158"/></svg><span>water</span><i class="tick"></i></div>
+    <div class="need"><svg viewBox="0 0 170 170" height="170" role="img" aria-label="wind"><image href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAE/0lEQVR42u3d0W7bOBAFUI3h//9l9ikFGiCpZFHSDOect93u1hTLe0naSbptAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAwE5hCphsWI8KAKG3PhUAQm+dKgAE33pVAAi+dZvLyxRQLPwZx+MEgPBbwwoAwbeOTRzCv2udDWtZAbBW+KPoaysAhD/RWhrWtAIgf/gj4bis6518DMiZzSNuep27rxIKALt/oh02Nru6KwCPhz+M1wkAm4VxKAAa7f7ZQheTn08BIPyLnkiUgALAkRsFwGrhV04KgIbHf8+rALC7OgUoAEABMPU4XG1XjUnPrQAABQAoAFjqGoACoHGQvA+gAFoTABQAoABAAZgCUACAAmBxPipDAaAgUABCLvwWgylgIcN6dwJA+FEAgAIAFACgAOh7//cGoAIAFADddn8UAI05/isA7P4oAEAB0Gb3d/xXADj6owDoFn67vwJA+FEAOPajAGgRfru/iaLprm9NOwEg/OzxNgW457sCQPXgW8smjYY7vTVs8mh6nLd+J06g+xc2r2Zewo/w955I4Ufwm/IxIIKvAEDwJyn1kaYrAEKfI/SPzEnc9AAg9AnnSQEg7PmDf9k8RtKHQ7AF/4Y59+4q1Av+tBz7dmCoHf5T43QCgNrhP5VpBQDXhz9uLppQAPBM+CPBGHaPQwHA+eBFwjHtGpcCgM+DFsnH998xKgCo9QNIp47Vx4AI//EwPblxTn1tBQD5d/2zJTQUAJzb/TNel0+XgAKAmuGfMjYFgN2/bviPjnEoAFB8CgAW2f1PjVUB4PjfuLAUANTf/T8uQAUAjYtLAUBjCgB6ngKGAgAnAEABAEeO0Es8gwJAwPsaCgAl8O+/i+6TACyyw7sCAAoAUACAAgAUACgAQAEACgBQAEBte37sWSgAcAIAFACgAID17//btm3vg/8TZOU7W09MmvCjGPrs/n/nJYQfpdAz/N+vANBxl2x9dfAmIMpgjVPwR3/duRMA1D8VfFxg3gSE2u8VjDPP83IPgrLXg9NjE3xaHHUXPBGMGWNXACiJekUwZo1XAaAU6hTBmD1OBYAyyF8E46qxKQCUQd4yGFePRQHAte8bxENjiSsGB8ogv5j+H4IiWCf4X3wvAKyxOUaHhwSngYk5VgBQtwzi8d8AFEHd64kCgBplEGV+U1AGNfKpACBHMcgiAAAAAAAAAAAAcJAvPySLYf0qAITdelYACLx1baIQeuvbBCH01rmJQeCtdxOC0FvzJgOBt+5NBMJu7ZsEaoc9HnqOUAAI+RrrbsiAhxdma82XFH/44EPGWGhzGQpg/4MLPyueKJXAjocWfla+Rg4FoADoE3glcMDbekYoev/hOgHQIexOAb88rBIQ9A6Gufn5YZWAgCuAZvNnoaAEGufiZT1AXwoAFAC04dqrAOBXQwEACgBQAHD0CO3rSgrwvQBceXf++mdvvDkB0Cz8e38NBQAoALqeELLxpcCgiBQAoAAABQDrH/9DAYD7twKAA1b58eAKABYLoh8FpgBQOCgAMlwDRsLwhwKAdXZmO7/Wo0i4Y7HXdwKAB3brIfwentqhjhtfSwFYpyTf2ePCE0P79a8AqHK8t/a9B4BNRvgVAEpA+E0GrgPWuklBEVjnJgZFYH2bIBSBdW2iaFcG1jIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABwpT8/c706cXAscwAAAABJRU5ErkJggg==" x="6" y="6" width="158" height="158"/></svg><span>air</span><i class="tick"></i></div>
+    <div class="need"><svg viewBox="0 0 170 170" height="170" role="img" aria-label="house"><image href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAFVklEQVR42u3d204cMRAEUNza//9l5w2JiEg7m7nYXec8RhGCGVe5bRB8fQEAAAAArQ2PINK0FvDShd+aCFcegfB/8H9QADQMvxJQAISHXwkoAMLDrwRCuPARfGvFBEBo+MeBYJsGFADNwn90d1cCjgBsHv5xcnmgAGgQ/qs+Fo4AbBT+d/+v44ACoGH4lYACIDz8SkABEB5+JRDARU7P4F/xbn2HwARAaPiPfEzTgAmAZuF/6viBAmDRwCkBRwCCg+ZyUAEQvssqAQVA+IitBNwB4Hzt24QmAFLDf+RzMg2YAGi8g5oETAAEh8YkYALAjrn1cUYBICC+RkcABOOOTcZxwAQg/M3fjctBEwDBI7HLQROA4HsnnoMCEH7vw+WgI4CFHr3YXQ4qAOEP3+mUgCOAERfPygRgQduITAImAOH37Dw/E4Dw25BMAwpA+JWAEnAEMLZ6tp6rCUD4bVAmAQUg/EpACSgA4VcCSsAdgHOpZ+/5mwCE34ZlGlAAwq8ElIACEH4loAQUgPArASVg4V4YfM9QSZsAhJ8NNjKTgAIQfiWARSz83qF3aAKwcKI3NdOAxXxoMXhWCt0EIPyYBEwAwo/3bAKwKGiz0U0PRvCF37uPeu9lAVgENrzcScDfohN+k0DwWigvXPhNArnTwBB+wTcJ5K6P8oKF3ySQOwmU8KMEcktgCD/krpvyEuHQuphpX3Cn4As/NpGGYRB+rKnQI4Dw8+TmOBWA8KMEHAGc03AcUADCT3IRbLXuykuAUzfMqQCEHyWgAIQfJeAO4I7gCz/WZsMJQPjpsIFOBSD8KAFHAOd9HAcUgPCTXATLrN/y8OD2TXUqAOFHCSgA4UcJ5N4BuOnHncCD63sIP+Su9fJAYJmNdiYUgPCjBBYpgbFg+AUfx4GbcjCEH5YtgsvzUMIPyx4JZocCEH5YtARK+CG3BMaDwRd+eDgzJfywzSRw+jRQwg+5JVDCD7klMG4Mv+DDYrkq4Yetp4H5ZAEIP2xcAiX8kFsC46LgCz9scCcwhB/alcDbGSzhh3bHgbfzWsIPuSVw1uWC4MOG9wIl/NB+GpifFIDwQ/MSKOGH3BIo4YfcEijhh9wSGAeCL/ywj7c28yM/CCT80GwSKGM/5JbA+Lr21w4rDrhnnP9IebaQa4W/CwA8lKEypkOs7+8CKAEIC//fRwAlABnB/87667dWcN6HPXbwM+4AgFAKABQAoAAABQAoAEABAAoAUACAAgAUAKAAAAUAKABAAQAKAFjWa8HPqcMvFvHblayNLdZGecGQu8YdARSZZ+oOAFAAQJTX4p/fmRcm88aPjfWxxfowAYAjAKAAAHcALKPL3YIfjDIBEBr+bl+LAkBgUACAAgB25RJwHztdpDnCmAAABQAoAEABAAoAUACAAgAUAKAAgLus/pOAc9OPjfVhAgAUAKAAAHcAx/i1z1gfJgBAAQAKAFAAgAIAFACgAAAFACgAQAEACgBQAIACABQAKABAAQAKAFAAQHN+LTg7sz5MAIACABTAIoZH4JkqAGBpq10Canmsj+ACYF1TIB0BEP53/h0FQPPwKwEFQOAZfPwy+isBBUDz3X84/ysAQAEACoCEM/+/zvnO/Q34OQA+vRNwH2ACIGwKQAGgBH78u4JwBMAkgAkAUACAAgAUAKAAAAUAKABAAQAKAFAAgAIAFACgAAAFACgAQAEACgBQAIACABQAoAAABQAoAEABAAoAUACgAAAFACgAQAEACgBQAIACABQAoAAABQAoAEABADsZJ36s6XHCXtk1AYAjAKAAAAXw5JkEuC9rteonBsgYAAAAAPCf/gAacQvhhoz85wAAAABJRU5ErkJggg==" x="6" y="6" width="158" height="158"/></svg><span>a home</span><i class="tick"></i></div>
+  </div>
+  <div class="task">
+    <div class="tasktitle">Choose an animal. Draw where it lives, and what it eats.</div>
+    <div class="twoboxes">
+      <div class="tbcell"><div class="tbox"></div><span>where it lives</span></div>
+      <div class="tbcell"><div class="tbox"></div><span>what it eats</span></div>
+    </div>
+    <div class="tasktitle">Which one of the four is the odd one out?</div>
+          <svg class="row" viewBox="0 0 729.6 72" width="100%" role="img" aria-label="write here">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="29" x2="729.6" y2="29" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="53" x2="729.6" y2="53" stroke="#16130F" stroke-width="2.6"/>
+      </svg>
+  </div>
+
+  <div class="note"><b>Food is the odd one out:</b> a plant makes its own from light.</div>
+
+
+  <footer>
+    <span>4 things</span>
+    <span class="brand">Kitchen Table</span>
+    <span>What animals need</span>
+  </footer>
+</div>
+
+</body></html>

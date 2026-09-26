@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="sheet-kind" content="form">
+<title>The Affirmations Key — Feelings</title>
+<style>
+  :root { --font: Georgia, "Times New Roman", serif; }
+
+  /* Page margins live HERE only — body padding stays 0 for print so the two
+     don't stack and eat the sheet. */
+  @page { size: letter portrait; margin: 0.45in 0.5in; }
+
+  /*
+   * THE PALETTE. The same one the shop wears (kitchen-table/BRAND.md): warm
+   * near-black ink, one accent, pine kept back for the answer key.
+   *
+   * WHY A SHEET HAS COLOR AT ALL. Every sheet was pure grayscale — #000 rules,
+   * #333 subtitles, #f0f0f0 boxes — which is what you get by never deciding.
+   * The paper is the product and it looked like a fax. A printer set to
+   * grayscale, or one that has no color to give, renders all of this as the
+   * greys it already had, so nothing below costs a parent anything they were
+   * not already spending.
+   *
+   * WHAT STAYS BLACK, ON PURPOSE:
+   *   - anything drawn to be written on (rules, name lines, answer boxes)
+   *   - anything drawn to be traced or colored in (line art, letter guides)
+   *   - the confidence rings, which have to survive a mono laser
+   * Color marks the sheet's own furniture — its rule, its numbering, its
+   * boxes — and never the part a child puts a pencil through.
+   */
+  :root {
+    --ink:    #16130F;
+    --muted:  #6B635A;
+    --rule:   #CFC3B2;
+    --guide:  #BCAE9C;
+    --accent: #C0511D;
+    --tint:   #F7EDE4;
+    --slate:  #2E5A78;
+    --tintslate: #E9EFF4;
+    --deep:   #2C4A45;
+    --tintdeep: #ECF1EF;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font);
+    color: #000; background: #fff;
+    font-size: 12pt; line-height: 1.3;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+
+  /* ORDER MATTERS. This generic rule must come BEFORE the @media screen block:
+     same specificity, so whichever is declared last wins. With it after, the
+     on-screen preview stretches to the viewport instead of 8.5in — print is
+     unaffected, but the proof you check before printing is wrong. */
+  .page { width: 100%; }
+  .page + .page { page-break-before: always; }
+
+  @media screen {
+    body { padding: 0.5in; background: #ddd; }
+    .page {
+      background: #fff; padding: 0.45in 0.5in;
+      width: 8.5in; min-height: 11in;
+      margin: 0 auto 24px; box-shadow: 0 2px 10px rgba(0,0,0,.3);
+    }
+  }
+
+  /* ------------------------------------------------------------- header */
+  header { border-bottom: 3px double var(--accent); padding-bottom: 6px; }
+  header.cont { border-bottom: 1px solid var(--rule); }
+  h1 { font-size: 16pt; margin: 0 0 1px; letter-spacing: .01em; }
+  .sub { font-size: 10pt; font-style: italic; color: var(--muted); margin: 0; }
+
+  .nameline { display: flex; gap: 26px; font-size: 10.5pt; margin: 11px 0 12px; }
+  .nameline span { flex: 1; border-bottom: 1px solid var(--ink); padding-bottom: 1px; }
+  .nameline span.short { flex: 0 0 1.9in; }
+
+  .directions {
+    font-size: 10.5pt; line-height: 1.35;
+    background: var(--tint); border-left: 4px solid var(--accent);
+    padding: 7px 10px; margin: 12px 0 14px;
+  }
+  .directions b { letter-spacing: .03em; }
+  .tip { font-style: italic; margin-top: 3px; }
+
+  /* ------------------------------------------------- problems and grids */
+  .grid { display: grid; gap: 13px 16px; margin-top: 4px; }
+  .prob { page-break-inside: avoid; display: flex; gap: 5px; align-items: flex-start; }
+  .pn { font-weight: bold; font-size: 11pt; min-width: .28in; flex: 0 0 auto; color: var(--accent); }
+  .pbody { flex: 1; min-width: 0; }
+
+  /* Digits need lining figures and even widths whatever the body font is. */
+  .num, .vert, .horiz { font-family: "Trebuchet MS", "Segoe UI", Tahoma, Verdana, sans-serif; font-variant-numeric: lining-nums tabular-nums; }
+
+  /* A stacked column algorithm.
+     Two grid columns — operator, then digits — because a floated or absolutely
+     positioned operator overlaps the digits as soon as the numbers get wide,
+     and "324" with a + sitting on the 3 is unreadable. The grid also lets the
+     rule under the last operand span BOTH columns, which is how it is written
+     by hand. The rule is heavy: it is the line you write the answer beneath. */
+  .vert {
+    display: inline-grid; grid-template-columns: auto auto;
+    font-size: 15pt; line-height: 1.3; text-align: right;
+  }
+  .vert > span { padding: 0 0 1px 0; }
+  .vert .op { text-align: left; padding-right: .16in; }
+  .vert .last { border-bottom: 2.5px solid var(--ink); padding-bottom: 3px; }
+  .vert .ans { height: .4in; }
+  /* Partial-products working, for 2-digit x 1-digit before the short method. */
+  .vert .part { font-size: 11pt; color: var(--muted); }
+  /* A row of worked examples that fade — see lib/formats.js faded(). The
+     caption is what makes the fade legible: without it the third one looks like
+     a question somebody forgot to number. */
+  .egrow { display: flex; gap: .34in; align-items: flex-start; margin: 0 0 4px; }
+  .eg { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; }
+  .eglab { font-size: 8.5pt; color: var(--slate); letter-spacing: .02em; }
+
+  /* The carried digits. Small and grey so the sum still reads as the sum, and
+     tight to the row below it so a carry sits ON the column it goes into. */
+  .vert .carry { font-size: 9pt; color: var(--slate); line-height: 1; padding: 0 0 1px 0; }
+
+  .horiz { font-size: 14pt; white-space: nowrap; }
+
+  /* Row numbers in a word list. Gray and small: they are there so a list can be
+     dictated ("number seven") and marked without counting down the page, and
+     they must not compete with the word itself. */
+  .wn { color: var(--muted); font-size: 9pt; }
+
+  /* The box an answer goes in. inline-block so it can sit mid-sentence. */
+  .abox {
+    display: inline-block; border: 1.6px solid var(--slate); border-radius: 3px;
+    vertical-align: middle; margin: 0 3px; position: relative; background: #fff;
+  }
+  /* Scoped to the box: as a bare ".alab" it pinned any generator's own .alab
+     to the bottom of the page (life-07-signs-and-forms 40, 2026-09-24). */
+  .abox > .alab {
+    position: absolute; bottom: 1px; left: 0; right: 0;
+    text-align: center; font-size: 7pt; color: var(--muted); font-style: italic;
+  }
+
+  /* Confidence marks. The rings are drawn with a border and a gradient rather
+     than an SVG so they stay inline with the question text at any font size,
+     and print black on a mono laser without relying on a background image. */
+  .conf { float: right; margin: 2px 0 0 8px; white-space: nowrap; }
+  .cring {
+    display: inline-block; width: 11px; height: 11px; margin-left: 4px;
+    border: 1.4px solid var(--slate); border-radius: 50%; vertical-align: middle;
+  }
+  .cring-full { background: var(--accent); }
+  .cring-half { background: linear-gradient(90deg, var(--accent) 50%, #fff 50%); }
+  .cring-none { background: #fff; }
+  ol.qs.hasconf li { overflow: hidden; }
+
+  .conflegend {
+    border: 1.2px solid var(--rule); border-radius: 4px;
+    padding: 3px 8px; margin: 0 0 7px;
+    font-size: 8.5pt; color: var(--muted); display: flex; gap: 14px; align-items: center;
+  }
+  .conftitle { font-weight: 700; color: var(--ink); }
+  .confitem { white-space: nowrap; }
+
+  .work {
+    border: 1.4px dashed var(--rule); border-radius: 4px;
+    margin: 6px 0 2px; position: relative;
+  }
+  /* The label S.work() puts in the box: a DIRECT child only. As ".work span"
+     it also caught every span inside any generator's own .work content and
+     stacked them all at the top-left corner (math-11-grade6 47, 2026-09-23). */
+  .work > span {
+    position: absolute; top: 3px; left: 6px;
+    font-size: 8pt; color: var(--muted); font-style: italic;
+  }
+
+  /* ------------------------------------------------------ writing lines */
+  /* Primary rule: solid top, dashed midline, heavy baseline. Capitals reach
+     the top line, lowercase bodies sit under the dashed one. */
+  .write {
+    position: relative; height: 0.375in;
+    margin: 6px 0 0 .3in;
+    border-top: 1px solid var(--rule); border-bottom: 2px solid var(--ink);
+  }
+  .write.flush { margin-left: 0; }
+  .write + .write { margin-top: .17in; }
+  .write::after {
+    content: ""; position: absolute; left: 0; right: 0; top: 50%;
+    border-top: 1px dashed var(--guide);
+  }
+
+  /* ------------------------------------------------------- question list */
+  ol.qs { margin: 0; padding: 0 0 0 .34in; }
+  ol.qs li { margin-bottom: 13px; page-break-inside: avoid; }
+  ol.qs li::marker { font-weight: bold; font-size: 11pt; color: var(--accent); }
+  .qt { display: block; }
+
+  .mcq { display: grid; gap: 3px 14px; margin: 5px 0 2px .12in; font-size: 11pt; }
+  .opt { white-space: nowrap; }
+
+  /* -------------------------------------------------------------- tables */
+  .tbl { border-collapse: collapse; margin: 8px 0; font-size: 11pt; width: 100%; }
+  .tbl th, .tbl td { border: 1.4px solid var(--ink); padding: 5px 8px; text-align: left; }
+  .tbl th { color: var(--slate); }
+  .tbl th { background: var(--tint); font-size: 10pt; letter-spacing: .02em; }
+  .tbl td.blank { height: .34in; }
+  .tbl.narrow { width: auto; }
+  .tbl.center td, .tbl.center th { text-align: center; }
+
+  /* ------------------------------------------------------------ passages */
+  .passage {
+    border: 1.5px solid var(--slate); border-radius: 4px;
+    padding: 11px 14px; margin-bottom: 12px;
+    font-size: 11.5pt; line-height: 1.55;
+  }
+  .passage h2 { font-size: 13pt; margin: 0 0 6px; color: var(--deep); }
+  .passage p { margin: 0 0 8px; }
+  .passage p:last-child { margin-bottom: 0; }
+  .passage .byline { font-size: 9.5pt; font-style: italic; color: var(--muted); margin-bottom: 8px; }
+  /* Numbered paragraphs, so a question can say "in paragraph 2". */
+  .passage p.np { position: relative; padding-left: .3in; }
+  .passage p.np::before {
+    content: attr(data-p); position: absolute; left: 0; top: 0;
+    font-size: 9pt; color: var(--accent); font-weight: bold;
+  }
+
+  .wordbank {
+    border: 1.5px dashed var(--slate); border-radius: 4px;
+    padding: 8px 12px; margin: 10px 0 12px;
+    font-size: 11.5pt; text-align: center;
+  }
+  .wordbank b { display: block; font-size: 9.5pt; letter-spacing: .06em;
+    text-transform: uppercase; margin-bottom: 4px; color: var(--accent); }
+  .wordbank span { display: inline-block; margin: 2px 11px; }
+
+  .note {
+    border-left: 4px solid var(--deep); background: var(--tintdeep);
+    padding: 7px 11px; margin: 10px 0; font-size: 10.5pt;
+  }
+  .note b { letter-spacing: .02em; }
+
+  /* -------------------------------------------------------------- footer */
+  /* THE WORDMARK SITS IN THE FOOTER THAT WAS ALREADY THERE, so it costs no
+     height at all — a sheet that fitted before fits now. Upright where the rest
+     of the line is italic, and a size down: it is a signature, not a message,
+     and it must never compete with "Score: ___ / 10". */
+  .brand { font-style: normal; font-size: 7.5pt; letter-spacing: .04em;
+    color: var(--accent); align-self: center; }
+
+  footer {
+    margin-top: 14px; padding-top: 6px; border-top: 1px solid var(--rule);
+    font-size: 9pt; font-style: italic; color: var(--muted);
+    display: flex; justify-content: space-between;
+  }
+
+  /* ---------------------------------------------------------- answer key */
+  .keybadge {
+    display: inline-block; border: 2px solid var(--deep); color: var(--deep); padding: 2px 9px;
+    font-size: 9.5pt; font-weight: bold; letter-spacing: .08em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .key .why {
+    display: block; font-size: 9pt; font-style: italic; color: var(--muted); margin-top: 1px;
+  }
+  /* Highlight rather than underline: <u> in a key marks WHAT CHANGED, and an
+     underline under a comma is invisible. */
+  .key u { text-decoration: none; background: var(--tint); padding: 0 2px; font-weight: bold; }
+  .keygrid .pbody { font-family: "Trebuchet MS", "Segoe UI", Tahoma, Verdana, sans-serif; font-size: 12pt; }
+  /* A key's pictures scale to their column: at 1fr a wide drawing pushed a
+     three-column key 92px off the paper (art-04-drawing 10, 2026-09-24). */
+  .keygrid svg { max-width: 100%; height: auto; }
+  .keylist .qt { font-weight: normal; }
+
+  /*
+   * The guide page. Four lines per question, and the ASK line is the one that
+   * gets used at the table, so it is the one with a rule beside it — a parent
+   * scanning this page in ten seconds should land on the follow-up question
+   * and nothing else.
+   */
+  .guide { padding-left: .3in; }
+  .guide li { margin-bottom: 11px; page-break-inside: avoid; }
+  .guide .gq { font-weight: bold; font-size: 11pt; margin-bottom: 3px; }
+  /* 9pt, matching the key's own why line, because the guide page is the
+     binding constraint on every open sheet: four lines per question against a
+     key's one, and at 10pt a sheet with seven questions ran onto a second
+     side. Found by measuring, not chosen. (No backticks in here — this CSS
+     lives inside a template literal and one would close it.) */
+  .guide .glook, .guide .gthin, .guide .gstrong {
+    font-size: 9pt; line-height: 1.3; margin-top: 1px;
+  }
+  .guide .gthin { color: var(--muted); }
+  .guide .gstrong { color: var(--muted); font-style: italic; }
+  .guide .gask {
+    font-size: 9.5pt; line-height: 1.3; margin-top: 3px;
+    border-left: 3px solid var(--slate); padding-left: 7px;
+  }
+  .key .qs li { margin-bottom: 9px; }
+
+  /*
+   * INLINE-BLOCK, NOT BLOCK, AND THIS WAS WRONG FOR A LONG TIME. A block-level
+   * svg ignores text-align: center on its parent and sits flush left — so 117
+   * sheets across 35 packs said "centre this diagram" and got a left-aligned
+   * one. Twenty-five of them were origami and paper-plane fold sequences, where
+   * the whole page is diagrams.
+   *
+   * Nobody spotted it because a left-flush diagram looks deliberate; it only
+   * reads as wrong next to a centered one, and no sheet has both.
+   *
+   * inline-block makes text-align do what every one of those authors meant,
+   * and leaves a diagram in a left-aligned container exactly where it was.
+   * vertical-align: top kills the baseline gap that inline elements otherwise
+   * leave underneath them, which would have pushed long pages over.
+   */
+  svg { display: inline-block; vertical-align: top; }
+  svg.inline { vertical-align: middle; }
+
+  .rules { border: 1.5px solid var(--accent); padding: .06in .09in; margin: .04in 0 .06in;
+    font-size: 10.5pt; line-height: 1.4; }
+  .rules.soft { border: 1px solid var(--accent); }
+
+  .cgrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: .16in .18in; margin-top: .12in; }
+  .ccell { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: .09in;
+    border: 1px solid var(--rule); border-radius: 8px; padding: .14in .12in; }
+  .ccell b { font-size: 15pt; }
+  .ccell span { grid-column: 2; font-size: 11pt; color: var(--muted); }
+  img.sm { width: 1.15in; height: 1.15in; object-fit: contain; grid-row: span 2; display: block; }
+
+  .ghead { display: flex; align-items: center; gap: .12in; margin: .04in 0 .08in; }
+  img.big { width: 1.35in; height: 1.35in; object-fit: contain; display: block; }
+  .gnote { font-size: 12pt; color: var(--ink); }
+
+  ul.lines { list-style: none; margin: 0; padding: 0; }
+  ul.lines li { display: flex; align-items: flex-start; gap: .1in; padding: .13in .02in;
+    border-bottom: 1px solid #eee; font-size: 15pt; line-height: 1.3; }
+  .box { flex: none; width: .27in; height: .27in; border: 1.5px solid var(--slate); border-radius: 3px;
+    margin-top: .02in; }
+  .own { margin-top: .16in; font-size: 12pt; }
+  .ownline { border-bottom: 1.5px solid var(--slate); height: .48in; }
+
+</style>
+</head>
+<body>
+
+<div class="page ">
+  <header>
+    
+    <h1>Seventy-Two</h1>
+    <p class="sub">Feelings &middot; The Affirmations Key &middot; Page 1 of 9</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Go to the one page that matches today.
+  </div>
+
+
+  <div class="plan" style="display:flex;align-items:stretch;gap:.08in;margin:.02in 0 .1in"><div style="flex:1;display:flex;align-items:center;gap:.07in;border:1.8px solid var(--ink);border-radius:5px;padding:.05in .08in"><span style="flex:0 0 auto;display:inline-block;width:.26in;height:.26in;line-height:.26in;border-radius:50%;background:var(--ink);color:#fff;text-align:center;font-weight:700;font-size:11pt">1</span><span style="font-size:10.5pt;font-weight:700;line-height:1.2">Pick the pile you need</span></div><div style="align-self:center;font-size:16pt;font-weight:700;color:var(--ink)">&rarr;</div><div style="flex:1;display:flex;align-items:center;gap:.07in;border:1.8px solid var(--ink);border-radius:5px;padding:.05in .08in"><span style="flex:0 0 auto;display:inline-block;width:.26in;height:.26in;line-height:.26in;border-radius:50%;background:var(--ink);color:#fff;text-align:center;font-weight:700;font-size:11pt">2</span><span style="font-size:10.5pt;font-weight:700;line-height:1.2">Turn to its page</span></div><div style="align-self:center;font-size:16pt;font-weight:700;color:var(--ink)">&rarr;</div><div style="flex:1;display:flex;align-items:center;gap:.07in;border:1.8px solid var(--ink);border-radius:5px;padding:.05in .08in"><span style="flex:0 0 auto;display:inline-block;width:.26in;height:.26in;line-height:.26in;border-radius:50%;background:var(--ink);color:#fff;text-align:center;font-weight:700;font-size:11pt">3</span><span style="font-size:10.5pt;font-weight:700;line-height:1.2">Tick two or three</span></div></div>
+  <div class="rules soft"><b>These are things you are aiming at</b>, not things you believe yet.</div>
+
+  <div class="cgrid">
+    <div class="ccell"><img class="sm" alt="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAFnUlEQVR42u3cUXKdOhAEUKNi/1smX6n8pa4vIM2oz1lBDOqeEfZ7Pz8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADAhw6PAG65OmdKAcD90LfNlQKA54LfLlsKAJ4Lfbt8nd4vPB78NhQABAZfAUBo6H0DgHnBPxQAZE788vlSAAh+cMZ8A0Dwgw2PAOHPZQNA8L9b6bcoFt8AEPzvsrLFnwUrAAT/+3xc3XPmCoDwBw9GBYDgB2/ECgDBD74KKwCSwx//DcxHQAR/zr+pZNb8IRBJ4T8eDmL7AeoKgKkfTAGQMPVxBUD4sQEg+CgAtgy/4HtgmPplf4ZyebMBYOoH8xEQ4fcNAFqFX/BtADQN/o7hb1tINgBM/RrXGRsAwt90wh6TnoMCQPhxBWD/8Au+AsDUxxUA4a/vUAAIPwoA4afHc1IAVDrU7v4KABMNBUBa+E1/BUCj4Jv835fYpQAw9U1/BYD7PgqA3PCb/goA4UcBYO33XBUAEYd01+nf6ufyXwOyYjpZ/V0BEH4UAMKPAkD4UQAIv+euABD+1tr8zApA+AXBFQDhF/5E/g5A8IVfASD8gu8KgPAL/+znsfQ3ATYAwRd8VwCEX/BdARB+4VcACP9/gi/8GxWlK4Dwm/g9tzAvlmlTn/ffy5LnbAMQfsEPpgCEX/AVAIIv/In8FkD4/wZf+N9xKACqhl/w997oXAEcEKs+NgDhF35sAIIPDkXefdB77vNOp74rG8DewRd+fAMQfrABJAVf+LEBCD8ogKrBF35mDgUFEPCChb+uku/GN4B9ml34sQEIPygA4QcFsDz4l8dAwaGhADZ5gaZ/L+XelwJo3N5wl98C9A2+6Y8NYJPw+z/zoACCw2/6s2SjVADrXpKpn6nUO/cNoM7U9/EQVwArv/UfBSD8oADc9/EdQAH0Dz+s2DgVgPCDAhB+UADCj+8ACqB3+P29gLOoAAo+8Ltf+m0N2AAah3+bqYACEP414bcFoABMflsAc961AugZfiWwh+VnaAh/uRd3KAEUgMmvBFAAoeE/lAAKIPu+pgScq9ffbWIBXA3C7zqADUD4/V0ACiB98rsKoADCp68S4JV3Ojw4Pze5w2YIQZu796EEUACZ4VcCKIDw8CsBFEB4+Dv+W3n2nV4KQKC+/TfbAti+AK6A8NsEUAAm3FclYAtQ6FsWwO73fpsAj5d48jeAI/jnsQWwVQFc4eGH2AIQfluAa0BoATjEthvvzxVAOCCtAKz+EFoAwv/Mz+sKFX4FHok/NLiq5nwDsPrDJgVg9YfQAhB+cAUAbgzGlgVg+pNmyhkeHhy4Amy74gB9C8DqDy8OySH87pnkvh+/BTARcAUw/UEBCD9EbX2uAA4Cwd8BRvPDa/oXPVi4Agg/KADTy/rPpPN+dS0AB1eBEroBWP2VKK4Awi/8zD4Lw8GNC78SdW0rUQAOLoReAYTfc8Q3AFyfWHk2RoODa2o9E37P0XcAG4Dwwz+n6W/lxzcA4d83/J5j5jXgozNzCv/WU99zxDcA4Yd1BWD6//55CT9TsjeEf6up7xn6DvArZ/HDLPjCT8g3gEP4PT/2CJ3VX/Cpc4aOmRuA8As/TZxFD7bgCz4NC8BBfr8YhZ+Sh8nqb+rT7DvAWeyQC77wM9FYdNAP4f/4OQk/r53JIfwlwy/4TMnT6PSPDQo/THEuPuzCL/g0XB+s/oJPzzN43L0CCL8rEZucoyH8y6a/8LPcEP7p4feFnzLndrx82IXf1KfwNeB02KeEX/BpeQUQfuEntACEf9FaBrMG2RD+16a/8FN+4AzhF340xt3wAw3zP4Qfcg3hh+wrgPBD+AYAKABAAQAxBeB31pDpsAGAK4AtANKmv0cAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJ/5A5E9Es7JqOtqAAAAAElFTkSuQmCC"><b>When something is hard</b><span>page 2</span></div>
+    <div class="ccell"><img class="sm" alt="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAD10lEQVR42u3dWXIkIQwFQEPU/a/MXMCeqIVNIvN7PBEtpAeUu9s/PwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACMURK/tmZ5h/WC2iaZ42LwedgT6psoDIrBRwicGwY1yeBrSFdHXgT1ZceHI0KgZAmAN4Nvx5oTokUNPz9MLYPWsv32f9dghTb8exzvmzpvuW6Pn91cQQbfjjSnrmXwejAvwG+tU928QZshDzH81iDOSa7tHgBPBr8IBsPP+xC4Nm/MOy/KfXT8dcrwxw6BtvMVoNeOT99dwtUr9xq31SeA1qHR7P7jj/6GP7G6qBF77fil4zH32F1g4lWCgwNg5lFfg/atlaBNugHUBINfhMCyWqmxE8B/h37Wju9OOr5WglYAdNvtew2+Y+rcWgkBAbDd4Dum7hECHHQcfDNcxcCn6gt1/t7ns3+N3XqdAHbe8e1Q6sxN14vB1yD5NesnAL4c98ri5sUVgA4B0A5q6FN3+p7D7xuBgqmd7vjRG9rwf/85dU5wAoh8x3ckXTfEhj94ALTgC21XmlMrJ6yEAZD1zR8as2+tDP8BV4CIC6wxx9dKjZOqhza04VcrbgRAS9LowB8BcOePCew6VHawb7USlgLg0T2waewjQ0CND7gClOBBoEGFAB2eAUQMAl9UIQToFABvgsDzgByEgAB4HQSeB8Q7Bfiq8MNdL4ar3WyG3T8kxLfwaOp8xgkg2jMCV4F1VwEOCIAoQYAQZWAA7BoEwsa1SvAOeAbQ6xlBG/hifSx4Tq3UOUkQjvgw0KoTgaacswOpsytAmKuBprw/xIb/wNPEjI8DzwgCH3U1/GwaAE8bpXVoaPrWyvALgC1PAxpz3TVJjROc/OrCpht1LdCY469JauwEsEUQeO//t6H1vn8BsE1zelehEGDy6a9u2KBPg8ApYEyD3Dnyq3Pwtd31W4F7nAg0Z9/7uxDIM/xl9wB4GgTMuQpYi0TDHyEAvgaB3WlOCKjzXoN/ez1qwKYtQkAI8OvQP36WU4K/aNY9J1D/BGt6JXhBGhFehnmmhzqCYN4JQK1znOJSPtXVnIbf+o34x4JA46hr/KEHAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAYIZ/SiTgiIfkGSYAAAAASUVORK5CYII="><b>When something goes wrong</b><span>page 3</span></div>
+    <div class="ccell"><img class="sm" alt="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAD20lEQVR42u3dS5IaQQxAQURw/yvLay9sD+76qZS59QDd0HpVMMT49QIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIDqYuJ9p6cXps/ZI2/DD9NlpwAYfiji7SmAvrsAAQA7AEAAgFlCAICjfDwF0G/l3x2AWU9KLn78rH4B4DMAQADKW736gwAAAmD1BwEABMDqDwIACIDVHwQAEACrPwgAIABWfxAAQACs/iAAgABY/UEAAAGw+oMdANAvAFZ/sAMAugXA6g92AEC3AFj9wQ4A6BYAqz/YAQDdAmD1BzsAoFsArP5gBwB0C4DVHxaKjUPsOQY7AEAAAAEABAAQAEAAAAEABAAY5LPpcW/5cowvPWEHAAgAIACAAAACAAgAIACAAAACAAgAIACAAAACAAgAIACAAAACAAgAIACAAAACAAgAIACAAAACAAgAIACAAIAAAAIACAAgAIAAAAIACAAgAIAAAAIACAAgAIAAAAIACAAgAIAAAAIACAAgAIAAAAIACAAgAIAAAAIACAAgAIAAAAIACAAgAIAAAAIA/ObjKeAw+Zd/C0+PAHD/oH97G2EQAC4c+P+9b0EQABoM/k8eUwwEgAZD/69jEQIBoNHgC8EP+DUgHYa/4nHaAWCg7AbsADD8jt8OgCaDE4sft/VuQADYNfwx8DY56Lzigtfiq3PwFoDVwx8TBm3UfVb6IDNHnIMdACvEhsfJhxGIg4d/2G7GDoCZq2NsHKSnj52XvAZfldnvSPuunqMvvrhocKLg8ce3P2T4hWDEhXjyB2nVQpCzjzUMvwgMvCArfIqeBV6HZaEKwy8CAy7Oir9Dz8Nejy3HIwAC0NmOLzTlSdeGAAiACDS+LgTA8FM7BI+uibeLCsrGNUbegZ2AC/SGVbvDV4LDRYWt+fzrPW8dfAGg+/vxKBSCKHfHUGi1PTEGcc2DQJFt9s63CFHhhOHGwZ8xFyX+FyMBwOA3ng8BwOA3nhN/EATDf//x2wFw3fDEpmENAYC1gx8XHs/u1yIEgJOHPxof36pzDQHgtAGLIsdZIQJZ/QToM/xR8JhPnaOseuD0C8Atfz245F9vFgB2XoBR/PhPOqesdLD0joC/HnxIrASA1RdnXHAOu0MwLE4CwKoBigvO4bUpCDnr8QUA9oVgh/AZAPSLQFR/PwZCMPgthwDAvRGIxz8AlAtBDP9B4PgQxPQbAMfFIJbfENgagzjmToCpQTCnAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8Ee/ACCujDCUNRKQAAAAAElFTkSuQmCC"><b>When you are scared</b><span>page 4</span></div>
+    <div class="ccell"><img class="sm" alt="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAFX0lEQVR42u3cy04jQRQEURfy//+y2bPiYeO+N07sRhohpqsyMtugOTfgdzy+/Pl4JPNwaPhr8N2pwXx4BHhi+L/7d0AAAAgAm9rfCiAAAASAavuDACD8IABU8aNAAoD2BwFA+EEAAAgA2h8EAIAAoP1BABB+EAAAAoD2BwFgavj9FiABACAAmP4gAAAEAO0PAsBifABIAND+IAAIPwgAwg8CAEAA0P4gAAAEAO0PAsAO/A4AAUD7gwCwIfwanQBgzoMAUJz+XhsIAKY/CACmP2kQABLTHwQA7Q8CQLX9LQgCQCj82p8AYPqDAFCe/iAAmP4gAJj+IADkpv9Pvx6REAC0PwgA09ufHAgAy8N/XvR1QQAw/UEAmDj9CYUAoP1BAND+IACsCf958dcHAcD0BwHA9AcBQPuDAKD9QQB4Q/i1PwjA9Pd6AQIw/QEC0P4AAWh/awMEsDD82h8EYPp7zQABmP5eF0AApj9AAKb/M8VDOAQAsxoEgOntDwKA9gcBYFL4tT8IwPQHCMD0Jx8QgOkPEIDpDxCA6Q8QgPYnIxCA9gcIQPsDBDCo/YUfBGD6AwRQC/+52PdljRAAvPeDAGD6gwAAEABmvfsDBODdn5QIAFdqfyEDAYSnP0AApj9JgQC0P/Bi7h5Bsv2Jbd/5WABDQ+KDP/IjAJcEzpcATEuQAAG4GL5fEMDuMGl/sicA0x8gAG0AEID2t0CcHwFofxfZMyOAheE/LjQIQHv4vpyff5T2h7OzAFwgXPnsvALAygqH/xAANIjwEwBcIGe3C/8hiPZ3ZmFxWwCvu0jaX/MTgEsEi40AXCSY/gRg+sNqIwDAYiMA7Q/TnwBMSAg/AZiREH4C0P5wZgSg/eG8CGDCZdIkpj8BmJFwZgRgSsJaIwCXCc6LAMxIWGoE4ELhzWdF2ASg/Z0XCED7e+9HXgAuFFHDK4DwOy8C0Ciw1AgALpTwE4BLBedEAC6VRhkYfmdFAKa/8IMATEqiBgGY/iQNC0D4TX8EBaBViBoWgEvlFQ01AWh/4Uf0QQr/9c/de78FgKgghZ8AtL/nJPwEAOIBAbhcwq/9CQAQ/n/k7hFA81sAmgLOkwCAS7U/CEBrDH5Opj8BvO1yu0De++FBC9uw9ncnLQB47wcBYGLYTH8CQPS1T/gJABB+AsAV5/YV21/4CQAxEYEAAO1PAJjeuqY/ASDatsJPAIi2v/d+AkC0/f28nwBgfQg/AcD0Fn4CQCJ43vsJANH2N/0JABB+AkAtfH7eTwCIzn/hJwBE29+HfgQAi0P7EwCK81/4CQDB+W/6EwCi7W/6EwDC7S/8BABrQ/gJAKX5L/wEgOj896EfAcDK0P4EgNL8F34CQHz+Cz8BQPuDAFBpf9MfBGBdCD8BoDj/hR8EEJz/ftkHBGBZAAQgpNqfADyCxPw3/UEA0fY3/UEA0fb3Iz8QgEUh/CCA0vwXfhBAfP4LPwhA+wMEQCbaHwRg/gs/CGDn/PfLPiCAaPt77wcBWBHaHwRQmv/CDwKIz3/hBwFof4AAKu1v+oMAIPwgAK8Pwg8CWBvgI/wgAAg/CCAaYp/4gwCCnJtP/EEAEH4QQG/+m/4gAGh/EECt/YUfBADhBwFA+EEA5j9AAND+IADtL/wgAAAEYPoDBCD8AAEsf/8XfhCA5gcIoNb+AAFof4AAhB8ggPXzX/hBAAAIwPQHCCAx/4UfBKD5AQKotT9AANofIADhBwhg/fwXfhAAAHOz1P7OARYAAAKwwgACSMx/4QcBACAA0x8ggMT8F34QgOYHCKDU/sIPAgBAAKY/QADCDxCAQAMEQBYAAWwJtvBDOwV4eK6YyCd7X+wFxR2mIwAAAABJRU5ErkJggg=="><b>When you are cross</b><span>page 5</span></div>
+    <div class="ccell"><img class="sm" alt="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAFMElEQVR42u3dwY7zOA6F0bDe/52ZfcGFQgJHkXjP2XUvBt229JHOj5mpB6n611+XR5LnxyMAASB7+v/19xAAAi6/CAgAIACkTn8EAERCAAABIHay2wIEABAAUr/rbQECAAgAadPfFiAABKiH/xKQAGD6IwDkTX8REQBMf58BAgC2AAEg4sKWLQABwBYgAIQx6REAk1ocEADT32eAAGD62wIEAGwBAsDQi/nKZLcFCADYAgSAtOlvCxAAsAUIAKnT3xYgAGALEABOVpv8ZyAALJ7AtcE/AwKATQIBYPLktQUIACY2AsDUiVsb/jMhAJj+CIDpbwtAAEx/EADT3xaAAJj+IACmvy0AATD9QQBMf1sAAmD6gwCY/rYAAeDQy2/6IwDYAhAA0x8EAFsAAmD6gwBgC0AATP89IoAAEDwlbQECwPAJawsQAExHW4AAkDpZbQECgKno31cASJ2otgAB4IZpWKH/3ggANhcEwPT3WwACwMgtQAQEwPS3PiMA2AIQANPf9EcAXH5bAAIACIDpbwtAABABBMD0BwFw+W0BCAAgAKa/LQABYE4EEADT3/NDAPApgACY/iAAvn1tAQiAb1dRRACs/p4rAoAIIACmv88ABMB0GhoBz1kATDexRQAcSLFEABxoEIBdp7/L77cAAQAREADTHwTA5ccWIABwTwQQANPf+0AATCsRQAAcNGFFAFz+rAh4PwJgSoEArJ/+Lr8tQABABATA9AcBiLj82AIEwEHEsxcAqz+2NwEABMD0x28BAgAiIACmPwjA+GmDLUAABk9/EACXH1uAADhgiIAAREx/lx8BAJuaAJj+TH7fAgB+CxAA08D09ykgAOBTQABMf2wBAgC2AAEw/bEFCADYAgTA9McWIABgCxAA0x9bgAAAAmBCcMY7bgHwnYffAgTAZAABUHbEXgAcCHwGCIAXiugLABgaAmASgAAoOeIvAA4AhocAgCEgAAoOAqD8GCIC4MVx9jBoATD9QQDAUBAAQAB8/4MAWPWYrwXAi8JwEAAvGFuAAIAhIQCAAAAC4BsNBMC3HVO1AIBhIQDKDAIAPgMEwEqHMyMAgAAAAgAIgG85nB0B+A5/PIizMzwAbQMAGwCs+gRoAQAEABAAQAAAAVjHH/OBDeCSPwLE8PEJAAgA2CIFABAAEACPAAQAEABAAAABAAQAEABAACBLC4CXB1dKALwEEABAAAABAAQAzub/GQi4VAJwxsvwR4FEX/L0DcAfE+ITIDgANgDwGwAgAEBcAHwG4MwMD4Af+3DWbACAAPgMwFkRALD+5wTA7wBgAwAEwO8AOCMCAD4xcwLgdwBMfxuAlwypAbAF4EzZAGwBOBMCAKZ/XAD+e2m2AOLPgg0AQqd/QgBsAWADgLeGgP9VYFsAvv0FABAAWwAx078EABAAWwCmvwCAyy8AtgAQABHA9BeA0IOCdyoAg7cAnAkBMDGw+gtAcvFFwOUXABHAFicAIsC0y18CAC6/ANgCbAHWfgEQAYcr4fKb/gIgAi4/AmDNdPkFgDcOiQi4/AIgAkJgExOA5Ag4iPtfftNfAETA5UcARMDlRwBEwOXHQ/rkAfR8PXcBcCA9Y89aAEwlz9rz9RtAdDz9NuDy2wAcWM/eM7QBCKmNwOW3ATjM4e/BsxIABzvsnXg2AiAEge/GsxAAEQh7T+18CgD3heCEd9bOpgDw+QuyyztsZ1IA+P7FWfVO21kUAPa/UM4gHr4QOHt4CWLgvOGFiIEzhpcjCM4UXpYYOEcCgEg4I7GewlL/3LQFfpoAAAAASUVORK5CYII="><b>When you are sad</b><span>page 6</span></div>
+    <div class="ccell"><img class="sm" alt="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAPpklEQVR42u2d244jNwxETcH//8vMSxaYbMbuG8XrIZCHIJO2RFYVSbVaer0wDMMwDMMwDMMwDMMwDMMwDMMwDMMwDMMwDMMwDKtrggvcTIknhgBAekv/67/PUGKLIQB5CS9Dx4EhAGOJL0nHRdwxgLCJYMJ4MQSAbM8cMASAjM98MAQA4tebI7hAALCBpTKtAQKADSdCt7krHEEAIH9/P1hvutIJ3EEAIH9lf6gzttvtq0AAIP8d3wjj6YEXAA75K/ko69uYsvgB5JC/AgmrvIYt97pYADM+SQz0ivsvSmGKBS78kZGcHbdbCwIA+RGBnlm/7Hx4vw35swC883brtHNb4BfyG/tPIf8WHyEAlJctRXRKTFKKwIL82AaAKzGpIQILsGJBIjBVkFPNc4oA8K17LhGYXo3dqZYQADJ/C4DTiiUSgQkCoPAxTQwgPxmR0n8g8anGkmKUfQBYRIKB/Elagc4CQPbHMCoALFkVgBgnqogWzsWIRdrKFQGo4ESMWFQVx4VTMUfyIwasAWDDMz8ikChhdb7iiuyfu2QnPgnw+8bfEB2hnmsIAGSX4N9ne/D/568IQI3yMuO9cxm338pJouur4e07EKVHWel195w0If3T+Ogw7Ia0RwhAPKH0Rqx0SHwVHCMAVx1XMYMqsTXzjSAAMwXgzsc/mY4IV+Jq7htBAGYKwLe5Zb4X4Erfq4Nj2x3rCIARSKQI8Y+ALonbl2rtUZX7BV3GOTFLSKHxS8AzJvgku18QgA3kl0Ljl2DSdPNJJSFw3SE5oUSUYUCvLgS7T3LKLgQIgBH5pxI/6neyE7+KCCAAzckfkZkrvfmQBBiSYH+4/b5A/jFgz1gNZBlPFoF0/0JSIP8ogGUVooxiFOUX199cxYhf8TSZjGCPvKU2azsiF5ONZ2IbLQD66vXNuCQdh4fAZn8zIVmIiQB8LlWlkAhkFy5xrAaqvJaMFAGuBruY9Vnwq98SvBABbgd+kimkKKAQgZoiYN0qhfp5FSd/hewvhUGPCPgRd/zFIHqiP4X8fURAmojAk4ogXGBXEsJwMiwtS3V/XBWCFIliJSB/J/B1upI89N76wqJ4RgjS4GQlIr9A/jLzm1pVyIW/+SQEqcR0JSI/RivQxV/yoSJIh/sVQPwdTsi0j1waiwCtwOf4ysG/p0x6K4gkE8iCCOxtKSqKQrr5r2bkJ0MhbpV8MfY1IEdWz5yzNBUBPeknz28v0gjAlAW/CRnSuhXoJJ56AfdpRGA1Ij8lKkIX7Ysrq/3ySrDAupqQP0pNdTgp1JA0XX0iF/zhfujNakZ+rGYVoMP9FCaKqxn5I06UleEioEZx6nLc210shojAakTICRmlcytQLW47Dqd1F4EF8bBAga8qAuroE60iAPT9WHcR8FqkcxOB1ZD8khxEXUt/bT5P769Xy1wNljHzeyzQRS4CagIsnL1W6+xlFxUuC5EADmz90EyyDzAxQXfd4qJOcXzyO3rh7+ThmKrcFbiTB9ue/U6YiaaX0l4lodwYk27Ghbx+31IrSUl/NHbLWG159tsRUFj+1unseK6efSfJRGBXpbFTBLb4QoycmP1STgl+dtXbjC2zvWx6brak5YE5s+e/kzqxEui/KbIO8NnZrGdRCTzJtlSohk6pdATWDkX+VkLqUPDtqAQqCqjH4rOZH1Zz8nuWlBHviismE30oFtMzuen8V5aBODnM4xALGUZ8S8E88jX3QBrbMgb/9DJX8I2ZECj4O8SZegtAVaCLEVAh/77E8O38/Kk+SVUBVA/KExGA/H64IMs7VgHvh0Sq6LSfWUYMwCiQ3X0MrK8Y2btQ4L1EgAx0Pv5yEy/4vJgAdM52gO+8X66ccXdFNK4KAlWA4xqAQvhR5b7VfoYn7/DPvErNjkup8BtrGPgtyN+1fN2xkUkM8CMPWg3soQDoAPKfAfnRza/VSV9hByMisCGxrcEOkpMZ6s7Nr118kqX6OhqfdiBj1jWAbuQXQ1JXPH/QO+OL0zOpBBCAr0A/C3Jp7pMu880sAmUuw3k37P8tQX7101WB+CFE0yJxKFMBVL2myaK0vSp8Vc5D8Cj3o1qlLG9mtIsAVMsSk7/DvyqIXS2LCLT+HLgK+aOCqIl9MkEQI0Wg5CLkKl7aZslwGe9DmJD1M1cCZQWg6uWMsum5lTJBZvJ7vjKdJAJqLQD0+7RCVAIDyv9qAuBV8lu8MlTIP7IdEASArE/mnyUCpduLVUDJvACuxmBTyD+qEpBE82tTAXgDXAqJAOR/LgJqHINofrQSgC4AV3yTVgR2VH6lW4Ashz56A1wdgAb5c4uABmMmXAC0UMCqAU0hfwlM6Y04SAcByLyFtQvQKlUZE8T87uEirTYVLchfZj1Am/smkxCcva5MOggA5M+f9djPHrc2kBWjJud1rEQT6ZzdLFsBsr+/CLQV4JUMVFPArTf/FvKDQdOxruCJTwL3nd1okD8vsTJ99Wm2BiCQP40I0PcjAm4tQFkFayoCvO+v06a1/BhIAwkxXQQ4vCLnOOWXf37+vTqPTXYKAKV/jAh0Pb67ukjJhRjSAkB+qp8B5P+7MvAQAfO7OhYxRwSw2+T/JAT6KrJ/YH2Z9M6TUwA9ItA1JjvOHdiS/c9UAAr5wwHH60D/7C8GsSyxPrCSgBxDBDKV/moYz9/eFtw9e0C8BMByUQPw2vgKP/r621rY77YGW8foWQGQ/W36ScyG+BHf/V9tDba3zruvBgOwz/vQXYtK+Pk7MT0rgt9i6hLj5URksv8zf5VZVEqOhaP7JSKuTT+zRiBRAmCxFgD57fxltag0veT/lvElWczDK4C7IgAor/tKLgCmWkWgCYh/1scSMGaJ8N3aFMhtry2wr6ChGjju9atWfxopAHzHnhs0CMFx1pebZNRkcwurAK5+x072Rwg8M7AV8TMRXHaLwHoYwCnfsVcUAkkkBArxb5N/qwismwCj3KxZFXSJlToRXwLj5lIJvB8MENLXKY+/iYD3OZBi8IwMJN2V/Y9eT6qlP62DUTkwGjjmiN/2it3T1XgNxtfuN1p3BM1MBKUQkKoHOqv47Izh3edqIjztxMUTIpuIgCQH0AQByLpnQi9g6DcB67R9fIdAWxD48TPECTCCAJQTgCeiUJ3wu2NkuY7x6FnvjcD4uVDIzsAeJgYCMR0DO04fur0wuDYB4+c7zCqvoTLu/OomENJ0XlHk//Qc9RaAo9cYfMU2JyNK43lqQvI/et5yHkTGXWoT+utoEaDs9/fHKTy9E4BEA52EUeF0Iv/lDXorCUC+fciiCYIGUbAqmf/S+R3vZAD+tOfZY2OIJgCLNAU+5Pc/c9CtBVCHyXz6LatDHwAsVY1leZ2hnZUfyVMyrgFYA0oPyHz10g19UZZj13FRai3L8lsASRqsKlmsy2apzofCHM0tG/kPY/F+9TaLnWtUApT/v7UBetCeSrLx/moLkJ46REJffm8lKq9HTFtLqfAK++sO1/cLO62WB0AXx98n+9PymNiC92bAfVodaCMigJ2cY1MEYH8g77QKvIasLXJlKx5agL3l+JlW4dPx6lWPsxbIP0sAOh4QanUPoj54dsW3D5CfCmAE+eUBIa62BtLAXxOTQYmq9m3sKIH85qJQxa8C+akAugdanMijRURAh+ChU5v7Hyy9IfyvJIy+WfbTJRCZsq0Ow0VLEZAdDy2m7BZ/G0W2LGPqeNyXNJz3/+Y4RQDukrlK1hXIv60a/Pb/SPX5LieARk72b7BeCZokm5ucnCel//3EMOrDr9UYIFYlfDZASBIhqJ79dTLx/5j1kWDaiPjZ7dtXXrtK1OqlPwfPOlQAWcr93QTIVhHI5vFCfgQgLVF293JVwPLtdOWpfb9C/s88eW8AoAYTH/s9Dnff0lT1cfRejhIt5HIOQAfya6EAP72FqQv5p1aEh+NfOx++kSzRFy6UDfgFIahY9lPuX8TCcgpKt7JfG4jAt3lUK5/1xTv9W7YcwdaB/B1KvzMfHlUjP8S/mbSWE1m0Afk7VAFHLUEl8j/d5Yk5tABWIkBfF1PNSAHig4fEAmAhAtmCne37gCktDX1+UQF4UjpnVfopt/gqxG8VZ4kSADEAlhQlURXye2wn3jVGYl6gArgqAhOOms5ErG++jtjaTZ+/OftHtABnN6RUIH/VtYAzxIoUAcr9Ib3sJyBWU/7s16N/+2xYbsRp11wrxV27YDP7u/QKyp+1WrH07c6jyCp+tNNGAKLPA+hQ2lU8rltuzHFHW0C5H4eBFAJwBEbt6PSAMVgR68xW4jPjYxdfkqo0y4lA1UUgy6upo4wqm+arN4AJ8RMkodVxUsPG+imbyhfy6iYR0IvihAUnJklKmqcr1+lLr00ic3VhTxzG0vFknqyLgJfxl/FqMDkAkTYBURTxd8RLi4yV0j9p73plPNlLyR1VwI456+YxvhoLQLZbsG7jI5MAiCHgpGIwAua1uw3oKgKZBOAR3jJtBJIN4JPgYJwdR9SGKIsq4O6CohQmf8bq+daYsqwBiPH/qwHE0oHl8ZUFPqtjyjHDtvDd1Dln31NbVQ/TsuBV8v/5b4hAIvJ3FoA7RFMjUk8kv1ycsxYXAelA/kkCEBXUbq/CrN7py5dWTYrNv5rv/2MrwYQ6l4AC+Q/9I4lINsn34QJAZVEns3lctfXkCrNp/b50AOe0HX0Zy9yjfjJqG2/W7cOe6xUuPpAhzkQEroMsy47LbOOQDsT/Y+9EwJtY2lU5TCT6W4Of4+p6WGyI33kL4A/mSq/AJOFYNHlbZZEIpXuAJ3/Rl6Ws7XAeo1fm3PkxVqi/IwVg+g6waABoA/J7zMnq7IWUfkYAZopAR/JfrXDOzPVulVSmukIA5onA9IM6dAC/EABEAPI7ikNZ/yEAc0RAIT7t0d+2kjoas/UP5H+eFFv6i28BcgNPIX+KWLT1FwLQWwQgf902uf3kWAfYuybARRzPfd/eZysZyLHPhFXIDyZpARCBI/BCfsiPAAwUAS7epPcvJQBCG2AiAmR9sj8VwFARYJV/D/kFAcAoWyE/AkD5RRmLgCIAHg4HvDbkxo/3fDqyeqIFqEt+eX1e6UcEEMpSJc94JTboUVkQpO9HAAAp4L5RSVEBIALtMhRCAPlLCQAisAekCAE+KCkAkwK1OztNzn6Qv5AATAtYBDGn+JeSv6gATAFptnsBuGYLAYAgQ+fVZe2Fcr+RAHQLavZ5KBhBACjpGHelY7Ep9YcIQDWl7wTMbHOB9IMFoBIoOwJTHTGlTbGLADQSgunZSA3wpoPwigAEkPHp8eP64zkAc8baAgIwLDPhNwzDMAzDMAzDMAzDMAzDMAzDMAzDMAzDMAzDMAzDMKyY/QNWuuMLozStsgAAAABJRU5ErkJggg=="><b>When it is too much</b><span>page 7</span></div>
+    <div class="ccell"><img class="sm" alt="" src="data:image/png;base64,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"><b>With other people</b><span>page 8</span></div>
+    <div class="ccell"><img class="sm" alt="" src="data:image/png;base64,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"><b>About being me</b><span>page 9</span></div>
+  </div>
+
+
+  <footer>
+    <span>72 to choose from</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Seventy-two</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>When something is hard</h1>
+    <p class="sub">Feelings &middot; The Affirmations Key &middot; Page 2 of 9</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Tick two or three you would really say.
+  </div>
+
+  <div class="ghead"><img class="big" alt="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAFnUlEQVR42u3cUXKdOhAEUKNi/1smX6n8pa4vIM2oz1lBDOqeEfZ7Pz8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADAhw6PAG65OmdKAcD90LfNlQKA54LfLlsKAJ4Lfbt8nd4vPB78NhQABAZfAUBo6H0DgHnBPxQAZE788vlSAAh+cMZ8A0Dwgw2PAOHPZQNA8L9b6bcoFt8AEPzvsrLFnwUrAAT/+3xc3XPmCoDwBw9GBYDgB2/ECgDBD74KKwCSwx//DcxHQAR/zr+pZNb8IRBJ4T8eDmL7AeoKgKkfTAGQMPVxBUD4sQEg+CgAtgy/4HtgmPplf4ZyebMBYOoH8xEQ4fcNAFqFX/BtADQN/o7hb1tINgBM/RrXGRsAwt90wh6TnoMCQPhxBWD/8Au+AsDUxxUA4a/vUAAIPwoA4afHc1IAVDrU7v4KABMNBUBa+E1/BUCj4Jv835fYpQAw9U1/BYD7PgqA3PCb/goA4UcBYO33XBUAEYd01+nf6ufyXwOyYjpZ/V0BEH4UAMKPAkD4UQAIv+euABD+1tr8zApA+AXBFQDhF/5E/g5A8IVfASD8gu8KgPAL/+znsfQ3ATYAwRd8VwCEX/BdARB+4VcACP9/gi/8GxWlK4Dwm/g9tzAvlmlTn/ffy5LnbAMQfsEPpgCEX/AVAIIv/In8FkD4/wZf+N9xKACqhl/w997oXAEcEKs+NgDhF35sAIIPDkXefdB77vNOp74rG8DewRd+fAMQfrABJAVf+LEBCD8ogKrBF35mDgUFEPCChb+uku/GN4B9ml34sQEIPygA4QcFsDz4l8dAwaGhADZ5gaZ/L+XelwJo3N5wl98C9A2+6Y8NYJPw+z/zoACCw2/6s2SjVADrXpKpn6nUO/cNoM7U9/EQVwArv/UfBSD8oADc9/EdQAH0Dz+s2DgVgPCDAhB+UADCj+8ACqB3+P29gLOoAAo+8Ltf+m0N2AAah3+bqYACEP414bcFoABMflsAc961AugZfiWwh+VnaAh/uRd3KAEUgMmvBFAAoeE/lAAKIPu+pgScq9ffbWIBXA3C7zqADUD4/V0ACiB98rsKoADCp68S4JV3Ojw4Pze5w2YIQZu796EEUACZ4VcCKIDw8CsBFEB4+Dv+W3n2nV4KQKC+/TfbAti+AK6A8NsEUAAm3FclYAtQ6FsWwO73fpsAj5d48jeAI/jnsQWwVQFc4eGH2AIQfluAa0BoATjEthvvzxVAOCCtAKz+EFoAwv/Mz+sKFX4FHok/NLiq5nwDsPrDJgVg9YfQAhB+cAUAbgzGlgVg+pNmyhkeHhy4Amy74gB9C8DqDy8OySH87pnkvh+/BTARcAUw/UEBCD9EbX2uAA4Cwd8BRvPDa/oXPVi4Agg/KADTy/rPpPN+dS0AB1eBEroBWP2VKK4Awi/8zD4Lw8GNC78SdW0rUQAOLoReAYTfc8Q3AFyfWHk2RoODa2o9E37P0XcAG4Dwwz+n6W/lxzcA4d83/J5j5jXgozNzCv/WU99zxDcA4Yd1BWD6//55CT9TsjeEf6up7xn6DvArZ/HDLPjCT8g3gEP4PT/2CJ3VX/Cpc4aOmRuA8As/TZxFD7bgCz4NC8BBfr8YhZ+Sh8nqb+rT7DvAWeyQC77wM9FYdNAP4f/4OQk/r53JIfwlwy/4TMnT6PSPDQo/THEuPuzCL/g0XB+s/oJPzzN43L0CCL8rEZucoyH8y6a/8LPcEP7p4feFnzLndrx82IXf1KfwNeB02KeEX/BpeQUQfuEntACEf9FaBrMG2RD+16a/8FN+4AzhF340xt3wAw3zP4Qfcg3hh+wrgPBD+AYAKABAAQAxBeB31pDpsAGAK4AtANKmv0cAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJ/5A5E9Es7JqOtqAAAAAElFTkSuQmCC"><div class="gnote">These are for the middle of a thing, not the end of it.</div></div>
+  <ul class="lines">
+    <li><i class="box"></i><span>I can do hard things slowly.</span></li>
+    <li><i class="box"></i><span>I am allowed to be bad at something new.</span></li>
+    <li><i class="box"></i><span>I can ask for help and still be doing it myself.</span></li>
+    <li><i class="box"></i><span>Not yet is different from never.</span></li>
+    <li><i class="box"></i><span>I can stop, and come back to it.</span></li>
+    <li><i class="box"></i><span>I can do the first bit and decide about the rest afterwards.</span></li>
+    <li><i class="box"></i><span>Hard is not the same as impossible.</span></li>
+    <li><i class="box"></i><span>I have done things before that I could not do at first.</span></li>
+    <li><i class="box"></i><span>I can do it badly on purpose to get started.</span></li>
+  </ul>
+  <div class="own"><b>Or write your own.</b><div class="ownline"></div><div class="ownline"></div><div class="ownline"></div></div>
+
+  <footer>
+    <span>9 to pick from</span>
+    <span class="brand">Kitchen Table</span>
+    <span>when something is hard</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>When something goes wrong</h1>
+    <p class="sub">Feelings &middot; The Affirmations Key &middot; Page 3 of 9</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Tick two or three you would really say.
+  </div>
+
+  <div class="ghead"><img class="big" alt="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAD10lEQVR42u3dWXIkIQwFQEPU/a/MXMCeqIVNIvN7PBEtpAeUu9s/PwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACMURK/tmZ5h/WC2iaZ42LwedgT6psoDIrBRwicGwY1yeBrSFdHXgT1ZceHI0KgZAmAN4Nvx5oTokUNPz9MLYPWsv32f9dghTb8exzvmzpvuW6Pn91cQQbfjjSnrmXwejAvwG+tU928QZshDzH81iDOSa7tHgBPBr8IBsPP+xC4Nm/MOy/KfXT8dcrwxw6BtvMVoNeOT99dwtUr9xq31SeA1qHR7P7jj/6GP7G6qBF77fil4zH32F1g4lWCgwNg5lFfg/atlaBNugHUBINfhMCyWqmxE8B/h37Wju9OOr5WglYAdNvtew2+Y+rcWgkBAbDd4Dum7hECHHQcfDNcxcCn6gt1/t7ns3+N3XqdAHbe8e1Q6sxN14vB1yD5NesnAL4c98ri5sUVgA4B0A5q6FN3+p7D7xuBgqmd7vjRG9rwf/85dU5wAoh8x3ckXTfEhj94ALTgC21XmlMrJ6yEAZD1zR8as2+tDP8BV4CIC6wxx9dKjZOqhza04VcrbgRAS9LowB8BcOePCew6VHawb7USlgLg0T2waewjQ0CND7gClOBBoEGFAB2eAUQMAl9UIQToFABvgsDzgByEgAB4HQSeB8Q7Bfiq8MNdL4ar3WyG3T8kxLfwaOp8xgkg2jMCV4F1VwEOCIAoQYAQZWAA7BoEwsa1SvAOeAbQ6xlBG/hifSx4Tq3UOUkQjvgw0KoTgaacswOpsytAmKuBprw/xIb/wNPEjI8DzwgCH3U1/GwaAE8bpXVoaPrWyvALgC1PAxpz3TVJjROc/OrCpht1LdCY469JauwEsEUQeO//t6H1vn8BsE1zelehEGDy6a9u2KBPg8ApYEyD3Dnyq3Pwtd31W4F7nAg0Z9/7uxDIM/xl9wB4GgTMuQpYi0TDHyEAvgaB3WlOCKjzXoN/ez1qwKYtQkAI8OvQP36WU4K/aNY9J1D/BGt6JXhBGhFehnmmhzqCYN4JQK1znOJSPtXVnIbf+o34x4JA46hr/KEHAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAYIZ/SiTgiIfkGSYAAAAASUVORK5CYII="><div class="gnote">For after the mistake, when the useful question is what happens next.</div></div>
+  <ul class="lines">
+    <li><i class="box"></i><span>One bad go is one bad go.</span></li>
+    <li><i class="box"></i><span>I can be wrong without being stupid.</span></li>
+    <li><i class="box"></i><span>I can say sorry and still like myself.</span></li>
+    <li><i class="box"></i><span>Getting it wrong is how I find out what I do not know.</span></li>
+    <li><i class="box"></i><span>This will be smaller tomorrow.</span></li>
+    <li><i class="box"></i><span>I can fix some of it, and that counts.</span></li>
+    <li><i class="box"></i><span>I am allowed to be disappointed and still be alright.</span></li>
+    <li><i class="box"></i><span>I can tell somebody what happened.</span></li>
+    <li><i class="box"></i><span>Nobody is keeping the list I think they are keeping.</span></li>
+  </ul>
+  <div class="own"><b>Or write your own.</b><div class="ownline"></div><div class="ownline"></div><div class="ownline"></div></div>
+
+  <footer>
+    <span>9 to pick from</span>
+    <span class="brand">Kitchen Table</span>
+    <span>when something goes wrong</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>When you are scared</h1>
+    <p class="sub">Feelings &middot; The Affirmations Key &middot; Page 4 of 9</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Tick two or three you would really say.
+  </div>
+
+  <div class="ghead"><img class="big" alt="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAD20lEQVR42u3dS5IaQQxAQURw/yvLay9sD+76qZS59QDd0HpVMMT49QIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIDqYuJ9p6cXps/ZI2/DD9NlpwAYfiji7SmAvrsAAQA7AEAAgFlCAICjfDwF0G/l3x2AWU9KLn78rH4B4DMAQADKW736gwAAAmD1BwEABMDqDwIACIDVHwQAEACrPwgAIABWfxAAQACs/iAAgABY/UEAAAGw+oMdANAvAFZ/sAMAugXA6g92AEC3AFj9wQ4A6BYAqz/YAQDdAmD1BzsAoFsArP5gBwB0C4DVHxaKjUPsOQY7AEAAAAEABAAQAEAAAAEABAAY5LPpcW/5cowvPWEHAAgAIACAAAACAAgAIACAAAACAAgAIACAAAACAAgAIACAAAACAAgAIACAAAACAAgAIACAAAACAAgAIACAAIAAAAIACAAgAIAAAAIACAAgAIAAAAIACAAgAIAAAAIACAAgAIAAAAIACAAgAIAAAAIACAAgAIAAAAIACAAgAIAAAAIACAAgAIAAAAIA/ObjKeAw+Zd/C0+PAHD/oH97G2EQAC4c+P+9b0EQABoM/k8eUwwEgAZD/69jEQIBoNHgC8EP+DUgHYa/4nHaAWCg7AbsADD8jt8OgCaDE4sft/VuQADYNfwx8DY56Lzigtfiq3PwFoDVwx8TBm3UfVb6IDNHnIMdACvEhsfJhxGIg4d/2G7GDoCZq2NsHKSnj52XvAZfldnvSPuunqMvvrhocKLg8ce3P2T4hWDEhXjyB2nVQpCzjzUMvwgMvCArfIqeBV6HZaEKwy8CAy7Oir9Dz8Nejy3HIwAC0NmOLzTlSdeGAAiACDS+LgTA8FM7BI+uibeLCsrGNUbegZ2AC/SGVbvDV4LDRYWt+fzrPW8dfAGg+/vxKBSCKHfHUGi1PTEGcc2DQJFt9s63CFHhhOHGwZ8xFyX+FyMBwOA3ng8BwOA3nhN/EATDf//x2wFw3fDEpmENAYC1gx8XHs/u1yIEgJOHPxof36pzDQHgtAGLIsdZIQJZ/QToM/xR8JhPnaOseuD0C8Atfz245F9vFgB2XoBR/PhPOqesdLD0joC/HnxIrASA1RdnXHAOu0MwLE4CwKoBigvO4bUpCDnr8QUA9oVgh/AZAPSLQFR/PwZCMPgthwDAvRGIxz8AlAtBDP9B4PgQxPQbAMfFIJbfENgagzjmToCpQTCnAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8Ee/ACCujDCUNRKQAAAAAElFTkSuQmCC"><div class="gnote">None of these says the fear is silly. It is not, and saying so does not help.</div></div>
+  <ul class="lines">
+    <li><i class="box"></i><span>I can be scared and do it anyway.</span></li>
+    <li><i class="box"></i><span>Scared means it matters, not that I should stop.</span></li>
+    <li><i class="box"></i><span>I can go first for ten seconds and see.</span></li>
+    <li><i class="box"></i><span>I have been this frightened before and it passed.</span></li>
+    <li><i class="box"></i><span>I can take somebody with me.</span></li>
+    <li><i class="box"></i><span>I can say out loud that I am frightened.</span></li>
+    <li><i class="box"></i><span>The waiting is usually worse than the thing.</span></li>
+    <li><i class="box"></i><span>I am allowed to be frightened of things other people are not.</span></li>
+    <li><i class="box"></i><span>My body does this. It does not decide for me.</span></li>
+  </ul>
+  <div class="own"><b>Or write your own.</b><div class="ownline"></div><div class="ownline"></div><div class="ownline"></div></div>
+
+  <footer>
+    <span>9 to pick from</span>
+    <span class="brand">Kitchen Table</span>
+    <span>when you are scared</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>When you are cross</h1>
+    <p class="sub">Feelings &middot; The Affirmations Key &middot; Page 5 of 9</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Tick two or three you would really say.
+  </div>
+
+  <div class="ghead"><img class="big" alt="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAFX0lEQVR42u3cy04jQRQEURfy//+y2bPiYeO+N07sRhohpqsyMtugOTfgdzy+/Pl4JPNwaPhr8N2pwXx4BHhi+L/7d0AAAAgAm9rfCiAAAASAavuDACD8IABU8aNAAoD2BwFA+EEAAAgA2h8EAIAAoP1BABB+EAAAAoD2BwFgavj9FiABACAAmP4gAAAEAO0PAsBifABIAND+IAAIPwgAwg8CAEAA0P4gAAAEAO0PAsAO/A4AAUD7gwCwIfwanQBgzoMAUJz+XhsIAKY/CACmP2kQABLTHwQA7Q8CQLX9LQgCQCj82p8AYPqDAFCe/iAAmP4gAJj+IADkpv9Pvx6REAC0PwgA09ufHAgAy8N/XvR1QQAw/UEAmDj9CYUAoP1BAND+IACsCf958dcHAcD0BwHA9AcBQPuDAKD9QQB4Q/i1PwjA9Pd6AQIw/QEC0P4AAWh/awMEsDD82h8EYPp7zQABmP5eF0AApj9AAKb/M8VDOAQAsxoEgOntDwKA9gcBYFL4tT8IwPQHCMD0Jx8QgOkPEIDpDxCA6Q8QgPYnIxCA9gcIQPsDBDCo/YUfBGD6AwRQC/+52PdljRAAvPeDAGD6gwAAEABmvfsDBODdn5QIAFdqfyEDAYSnP0AApj9JgQC0P/Bi7h5Bsv2Jbd/5WABDQ+KDP/IjAJcEzpcATEuQAAG4GL5fEMDuMGl/sicA0x8gAG0AEID2t0CcHwFofxfZMyOAheE/LjQIQHv4vpyff5T2h7OzAFwgXPnsvALAygqH/xAANIjwEwBcIGe3C/8hiPZ3ZmFxWwCvu0jaX/MTgEsEi40AXCSY/gRg+sNqIwDAYiMA7Q/TnwBMSAg/AZiREH4C0P5wZgSg/eG8CGDCZdIkpj8BmJFwZgRgSsJaIwCXCc6LAMxIWGoE4ELhzWdF2ASg/Z0XCED7e+9HXgAuFFHDK4DwOy8C0Ciw1AgALpTwE4BLBedEAC6VRhkYfmdFAKa/8IMATEqiBgGY/iQNC0D4TX8EBaBViBoWgEvlFQ01AWh/4Uf0QQr/9c/de78FgKgghZ8AtL/nJPwEAOIBAbhcwq/9CQAQ/n/k7hFA81sAmgLOkwCAS7U/CEBrDH5Opj8BvO1yu0De++FBC9uw9ncnLQB47wcBYGLYTH8CQPS1T/gJABB+AsAV5/YV21/4CQAxEYEAAO1PAJjeuqY/ASDatsJPAIi2v/d+AkC0/f28nwBgfQg/AcD0Fn4CQCJ43vsJANH2N/0JABB+AkAtfH7eTwCIzn/hJwBE29+HfgQAi0P7EwCK81/4CQDB+W/6EwCi7W/6EwDC7S/8BABrQ/gJAKX5L/wEgOj896EfAcDK0P4EgNL8F34CQHz+Cz8BQPuDAFBpf9MfBGBdCD8BoDj/hR8EEJz/ftkHBGBZAAQgpNqfADyCxPw3/UEA0fY3/UEA0fb3Iz8QgEUh/CCA0vwXfhBAfP4LPwhA+wMEQCbaHwRg/gs/CGDn/PfLPiCAaPt77wcBWBHaHwRQmv/CDwKIz3/hBwFof4AAKu1v+oMAIPwgAK8Pwg8CWBvgI/wgAAg/CCAaYp/4gwCCnJtP/EEAEH4QQG/+m/4gAGh/EECt/YUfBADhBwFA+EEA5j9AAND+IADtL/wgAAAEYPoDBCD8AAEsf/8XfhCA5gcIoNb+AAFof4AAhB8ggPXzX/hBAAAIwPQHCCAx/4UfBKD5AQKotT9AANofIADhBwhg/fwXfhAAAHOz1P7OARYAAAKwwgACSMx/4QcBACAA0x8ggMT8F34QgOYHCKDU/sIPAgBAAKY/QADCDxCAQAMEQBYAAWwJtvBDOwV4eK6YyCd7X+wFxR2mIwAAAABJRU5ErkJggg=="><div class="gnote">All of these assume the feeling is allowed. Sheet 30 is the one about hands.</div></div>
+  <ul class="lines">
+    <li><i class="box"></i><span>I am allowed to be angry.</span></li>
+    <li><i class="box"></i><span>I can be furious and still choose what I do.</span></li>
+    <li><i class="box"></i><span>I can say I am cross instead of showing it.</span></li>
+    <li><i class="box"></i><span>I can come back to this in ten minutes.</span></li>
+    <li><i class="box"></i><span>Being right does not mean I have to win now.</span></li>
+    <li><i class="box"></i><span>I can be cross with somebody and still like them.</span></li>
+    <li><i class="box"></i><span>I do not have to answer straight away.</span></li>
+    <li><i class="box"></i><span>I can leave the room and that is not running away.</span></li>
+    <li><i class="box"></i><span>The loudest thing I could do is usually not the best one.</span></li>
+  </ul>
+  <div class="own"><b>Or write your own.</b><div class="ownline"></div><div class="ownline"></div><div class="ownline"></div></div>
+
+  <footer>
+    <span>9 to pick from</span>
+    <span class="brand">Kitchen Table</span>
+    <span>when you are cross</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>When you are sad</h1>
+    <p class="sub">Feelings &middot; The Affirmations Key &middot; Page 6 of 9</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Tick two or three you would really say.
+  </div>
+
+  <div class="ghead"><img class="big" alt="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAFMElEQVR42u3dwY7zOA6F0bDe/52ZfcGFQgJHkXjP2XUvBt229JHOj5mpB6n611+XR5LnxyMAASB7+v/19xAAAi6/CAgAIACkTn8EAERCAAABIHay2wIEABAAUr/rbQECAAgAadPfFiAABKiH/xKQAGD6IwDkTX8REQBMf58BAgC2AAEg4sKWLQABwBYgAIQx6REAk1ocEADT32eAAGD62wIEAGwBAsDQi/nKZLcFCADYAgSAtOlvCxAAsAUIAKnT3xYgAGALEABOVpv8ZyAALJ7AtcE/AwKATQIBYPLktQUIACY2AsDUiVsb/jMhAJj+CIDpbwtAAEx/EADT3xaAAJj+IACmvy0AATD9QQBMf1sAAmD6gwCY/rYAAeDQy2/6IwDYAhAA0x8EAFsAAmD6gwBgC0AATP89IoAAEDwlbQECwPAJawsQAExHW4AAkDpZbQECgKno31cASJ2otgAB4IZpWKH/3ggANhcEwPT3WwACwMgtQAQEwPS3PiMA2AIQANPf9EcAXH5bAAIACIDpbwtAABABBMD0BwFw+W0BCAAgAKa/LQABYE4EEADT3/NDAPApgACY/iAAvn1tAQiAb1dRRACs/p4rAoAIIACmv88ABMB0GhoBz1kATDexRQAcSLFEABxoEIBdp7/L77cAAQAREADTHwTA5ccWIABwTwQQANPf+0AATCsRQAAcNGFFAFz+rAh4PwJgSoEArJ/+Lr8tQABABATA9AcBiLj82AIEwEHEsxcAqz+2NwEABMD0x28BAgAiIACmPwjA+GmDLUAABk9/EACXH1uAADhgiIAAREx/lx8BAJuaAJj+TH7fAgB+CxAA08D09ykgAOBTQABMf2wBAgC2AAEw/bEFCADYAgTA9McWIABgCxAA0x9bgAAAAmBCcMY7bgHwnYffAgTAZAABUHbEXgAcCHwGCIAXiugLABgaAmASgAAoOeIvAA4AhocAgCEgAAoOAqD8GCIC4MVx9jBoATD9QQDAUBAAQAB8/4MAWPWYrwXAi8JwEAAvGFuAAIAhIQCAAAAC4BsNBMC3HVO1AIBhIQDKDAIAPgMEwEqHMyMAgAAAAgAIgG85nB0B+A5/PIizMzwAbQMAGwCs+gRoAQAEABAAQAAAAVjHH/OBDeCSPwLE8PEJAAgA2CIFABAAEACPAAQAEABAAAABAAQAEABAACBLC4CXB1dKALwEEABAAAABAAQAzub/GQi4VAJwxsvwR4FEX/L0DcAfE+ITIDgANgDwGwAgAEBcAHwG4MwMD4Af+3DWbACAAPgMwFkRALD+5wTA7wBgAwAEwO8AOCMCAD4xcwLgdwBMfxuAlwypAbAF4EzZAGwBOBMCAKZ/XAD+e2m2AOLPgg0AQqd/QgBsAWADgLeGgP9VYFsAvv0FABAAWwAx078EABAAWwCmvwCAyy8AtgAQABHA9BeA0IOCdyoAg7cAnAkBMDGw+gtAcvFFwOUXABHAFicAIsC0y18CAC6/ANgCbAHWfgEQAYcr4fKb/gIgAi4/AmDNdPkFgDcOiQi4/AIgAkJgExOA5Ag4iPtfftNfAETA5UcARMDlRwBEwOXHQ/rkAfR8PXcBcCA9Y89aAEwlz9rz9RtAdDz9NuDy2wAcWM/eM7QBCKmNwOW3ATjM4e/BsxIABzvsnXg2AiAEge/GsxAAEQh7T+18CgD3heCEd9bOpgDw+QuyyztsZ1IA+P7FWfVO21kUAPa/UM4gHr4QOHt4CWLgvOGFiIEzhpcjCM4UXpYYOEcCgEg4I7GewlL/3LQFfpoAAAAASUVORK5CYII="><div class="gnote">Not one of these tells anybody to cheer up. That sentence has never worked.</div></div>
+  <ul class="lines">
+    <li><i class="box"></i><span>I am allowed to be sad for as long as it takes.</span></li>
+    <li><i class="box"></i><span>Sad is not the same as broken.</span></li>
+    <li><i class="box"></i><span>I do not have to explain it to be allowed it.</span></li>
+    <li><i class="box"></i><span>I can be sad and still do the next small thing.</span></li>
+    <li><i class="box"></i><span>This feeling has an end even when I cannot see it.</span></li>
+    <li><i class="box"></i><span>I can tell one person.</span></li>
+    <li><i class="box"></i><span>Crying is a thing bodies do, not a thing that goes wrong.</span></li>
+    <li><i class="box"></i><span>I can want to be on my own for a bit.</span></li>
+    <li><i class="box"></i><span>I can ask somebody to sit with me and say nothing.</span></li>
+  </ul>
+  <div class="own"><b>Or write your own.</b><div class="ownline"></div><div class="ownline"></div><div class="ownline"></div></div>
+
+  <footer>
+    <span>9 to pick from</span>
+    <span class="brand">Kitchen Table</span>
+    <span>when you are sad</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>When it is too much</h1>
+    <p class="sub">Feelings &middot; The Affirmations Key &middot; Page 7 of 9</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Tick two or three you would really say.
+  </div>
+
+  <div class="ghead"><img class="big" alt="" src="data:image/png;base64,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"><div class="gnote">Check this page first when everything feels worse than usual.</div></div>
+  <ul class="lines">
+    <li><i class="box"></i><span>I can do one thing, and then look again.</span></li>
+    <li><i class="box"></i><span>Tired makes everything else louder.</span></li>
+    <li><i class="box"></i><span>I am allowed to stop before I have finished.</span></li>
+    <li><i class="box"></i><span>I can put some of it down.</span></li>
+    <li><i class="box"></i><span>I do not have to decide anything important tonight.</span></li>
+    <li><i class="box"></i><span>Rest is not a reward for finishing.</span></li>
+    <li><i class="box"></i><span>I can ask what actually has to happen today.</span></li>
+    <li><i class="box"></i><span>Slower still counts.</span></li>
+    <li><i class="box"></i><span>I can say I have had enough.</span></li>
+  </ul>
+  <div class="own"><b>Or write your own.</b><div class="ownline"></div><div class="ownline"></div><div class="ownline"></div></div>
+
+  <footer>
+    <span>9 to pick from</span>
+    <span class="brand">Kitchen Table</span>
+    <span>when it is too much</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>With other people</h1>
+    <p class="sub">Feelings &middot; The Affirmations Key &middot; Page 8 of 9</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Tick two or three you would really say.
+  </div>
+
+  <div class="ghead"><img class="big" alt="" src="data:image/png;base64,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"><div class="gnote">The ones about the space between you and somebody else.</div></div>
+  <ul class="lines">
+    <li><i class="box"></i><span>I do not have to be liked by everybody.</span></li>
+    <li><i class="box"></i><span>I can say what I want and still be kind.</span></li>
+    <li><i class="box"></i><span>I can say no.</span></li>
+    <li><i class="box"></i><span>What somebody else thinks of me is mostly about them.</span></li>
+    <li><i class="box"></i><span>I can be the one who says hello first.</span></li>
+    <li><i class="box"></i><span>I can ask instead of guessing what they meant.</span></li>
+    <li><i class="box"></i><span>I am allowed to change who I spend time with.</span></li>
+    <li><i class="box"></i><span>Being left out is a thing that happened, not a thing I am.</span></li>
+    <li><i class="box"></i><span>I can disagree out loud and still be somebody they like.</span></li>
+  </ul>
+  <div class="own"><b>Or write your own.</b><div class="ownline"></div><div class="ownline"></div><div class="ownline"></div></div>
+
+  <footer>
+    <span>9 to pick from</span>
+    <span class="brand">Kitchen Table</span>
+    <span>with other people</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>About being me</h1>
+    <p class="sub">Feelings &middot; The Affirmations Key &middot; Page 9 of 9</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Tick two or three you would really say.
+  </div>
+
+  <div class="ghead"><img class="big" alt="" src="data:image/png;base64,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"><div class="gnote">These are the slowest ones. Nobody says them once and believes them.</div></div>
+  <ul class="lines">
+    <li><i class="box"></i><span>I am worth the same whatever I am good at.</span></li>
+    <li><i class="box"></i><span>I can change my mind.</span></li>
+    <li><i class="box"></i><span>I do not have to be the best at it to enjoy it.</span></li>
+    <li><i class="box"></i><span>I am allowed to take up room.</span></li>
+    <li><i class="box"></i><span>I can like something nobody else likes.</span></li>
+    <li><i class="box"></i><span>I am allowed to be proud of myself out loud.</span></li>
+    <li><i class="box"></i><span>I can be a work in progress and still be alright now.</span></li>
+    <li><i class="box"></i><span>I do not have to earn being here.</span></li>
+    <li><i class="box"></i><span>I can be different on different days.</span></li>
+  </ul>
+  <div class="own"><b>Or write your own.</b><div class="ownline"></div><div class="ownline"></div><div class="ownline"></div></div>
+
+  <footer>
+    <span>9 to pick from</span>
+    <span class="brand">Kitchen Table</span>
+    <span>about being me</span>
+  </footer>
+</div>
+
+</body>
+</html>

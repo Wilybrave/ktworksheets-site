@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="sheet-kind" content="worksheet">
+<title>Solid, Liquid, Gas</title>
+<style>
+  @page { size: letter portrait; margin: 0.4in 0.45in; }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  :root {
+    --ink:    #16130F;
+    --muted:  #6B635A;
+    --rule:   #CFC3B2;
+    --guide:  #BCAE9C;
+    --accent: #C0511D;
+    --tint:   #F7EDE4;
+    --slate:  #2E5A78;
+    --tintslate: #E9EFF4;
+    --deep:   #2C4A45;
+    --tintdeep: #ECF1EF;
+  }
+
+  body {
+    font-family: Quicksand, 'URW Gothic', 'Century Gothic', sans-serif;
+    color: #000; background: #fff;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+
+  /* ORDER MATTERS. This generic rule must come BEFORE the @media screen block:
+   * both selectors have the same specificity, so whichever is declared last
+   * wins. With it after, it overrode the screen width and the preview stretched
+   * to the viewport — rows scaled up and pages measured 16in tall. Print was
+   * always fine (@media screen doesn't apply), but the on-screen proof lied. */
+  .page { width: 100%; }
+  .page + .page { page-break-before: always; }
+
+  @media screen {
+    body { padding: 0.4in; background: #ddd; }
+    .page {
+      background: #fff; padding: 0.4in 0.45in;
+      width: 8.5in; min-height: 11in;
+      margin: 0 auto 22px; box-shadow: 0 2px 10px rgba(0,0,0,.3);
+    }
+  }
+
+  header {
+    display: flex; align-items: center; gap: 16px;
+    border-bottom: 3px solid var(--slate); padding-bottom: 7px; margin-bottom: 2px;
+  }
+  .bigletter { font-size: 38pt; font-weight: 700; line-height: 1; letter-spacing: .02em; }
+  .htext { flex: 1; }
+  h1 { font-size: 14pt; font-weight: 700; margin: 0 0 2px; }
+  .sub { font-size: 10pt; color: var(--muted); margin: 0; }
+  .nameline {
+    font-size: 9.5pt; color: var(--muted);
+    border-bottom: 1px solid var(--ink); width: 2in;
+    padding-bottom: 1px; align-self: flex-end;
+  }
+
+  .label { font-size: 11.5pt; font-weight: 700; margin: 9px 0 1px; }
+  .label span { font-weight: 400; font-size: 10pt; color: var(--muted); }
+
+  .row { display: block; width: 100%; height: auto; margin-bottom: .06in; }
+  /* Rows that follow the header directly would otherwise jam against its rule. */
+  header + .row { margin-top: .12in; }
+
+  .words {
+    margin-top: 10px; padding-top: 7px; border-top: 1px solid var(--rule);
+    font-size: 12.5pt;
+    display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap;
+  }
+  .words b { font-size: 14pt; }
+  .words em { font-style: normal; color: var(--muted); }
+
+  /* The wordmark rides in the footer line that was already there — see the note
+     in lib/sheet.js. No height, upright, a size down, and never louder than the
+     two slots it sits between. */
+  .brand { font-style: normal; font-size: 7pt; letter-spacing: .04em;
+    color: var(--accent); align-self: center; }
+
+  footer {
+    margin-top: 7px; font-size: 8.5pt; color: var(--muted);
+    display: flex; justify-content: space-between;
+  }
+
+  .chart { display: grid; grid-template-columns: repeat(6, 1fr); gap: 7px; margin-top: 14px; }
+  .cell {
+    border: 2px solid var(--slate); border-radius: 8px; height: 1.35in;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .page.key { background: #fcfcfa; }
+  .page.key header { border-bottom-style: double; border-bottom-width: 3px; }
+  .keylist { font-size: 11pt; line-height: 1.7; }
+  .keylist p { margin: .02in 0; }
+  .keynote { border: 1.5px solid var(--deep); border-radius: 8px; padding: .07in .12in;
+    margin: .1in 0 0; font-size: 10pt; line-height: 1.5; }
+
+  .note { border: 1.5px solid var(--deep); border-radius: 8px; padding: .07in .12in;
+    margin: .06in 0 .1in; font-size: 10pt; color: var(--ink); }
+  .tasknote { border: 1.5px solid var(--deep); border-radius: 8px; padding: .07in .12in;
+    margin-top: .1in; font-size: 10.5pt; }
+  svg { display: block; }
+  svg.inline { display: inline-block; vertical-align: middle; }
+
+  .wqs { margin-top: .06in; }
+  .wq { margin-bottom: .03in; }
+  .wqt { font-size: 10.5pt; font-weight: 700; margin-bottom: .01in; }
+  .wordbank { border: 1.5px solid var(--accent); border-radius: 8px; padding: .06in .12in;
+    margin-top: .08in; font-size: 10.5pt; }
+
+  .pick { display: flex; align-items: center; gap: .05in; font-size: 10pt;
+    white-space: nowrap; }
+  .pick i { width: .22in; height: .22in; border: 2px solid var(--slate); border-radius: 4px;
+    display: inline-block; flex: 0 0 auto; }
+
+  .dobox { border: 2.4px solid var(--slate); border-radius: 9px; padding: .08in .12in;
+    margin: .1in 0 .08in; }
+  .dotitle { font-size: 11.5pt; font-weight: 700; margin-bottom: .03in; }
+  .dosteps { margin: 0; padding-left: .22in; }
+  .dosteps li { font-size: 10.5pt; margin-bottom: .02in; }
+
+  .strow { display: flex; align-items: center; gap: .22in;
+    border-bottom: 1px solid var(--rule); padding: .06in 0; }
+  .spic { flex: 0 0 1.75in; }
+  .sname { font-size: 14pt; font-weight: 700; }
+  .sfact { font-size: 10.5pt; }
+  .segs { font-size: 10pt; color: var(--muted); font-style: italic; margin-top: .02in; }
+
+  .sortlist { display: grid; grid-template-columns: 1fr 1fr; gap: 0 .3in; }
+  .sortrow { display: flex; align-items: center; gap: .08in;
+    border-bottom: 1px solid var(--rule); padding: .05in 0; }
+  .sortname { flex: 1; font-size: 10.5pt; }
+
+  .oddbox { border: 2.4px solid var(--slate); border-radius: 9px; padding: .08in .12in;
+    margin-top: .1in; }
+  .otitle { font-size: 11.5pt; font-weight: 700; }
+  .otext { font-size: 10.5pt; margin-bottom: .04in; }
+
+  .changelist { border: 2px solid var(--slate); border-radius: 9px; overflow: hidden; }
+  .chead { display: grid; grid-template-columns: 1fr .9in .9in 1.2in; font-size: 9.5pt;
+    font-weight: 700; border-bottom: 1.6px solid var(--slate); }
+  .chead span { padding: .05in .07in; }
+  .chrow { display: grid; grid-template-columns: 1fr .9in .9in 1.2in;
+    border-bottom: 1px solid var(--rule); min-height: .48in; align-items: stretch; }
+  .chrow:last-child { border-bottom: 0; }
+  .cwhat { font-size: 10.5pt; padding: .1in .07in; }
+  .ccell { border-left: 1px solid var(--ink); }
+
+  .matlist { border: 2px solid var(--slate); border-radius: 9px; overflow: hidden; }
+  .mhead { display: grid; grid-template-columns: 1.4in .9in 1fr; font-size: 9.5pt;
+    font-weight: 700; border-bottom: 1.6px solid var(--slate); }
+  .mhead span { padding: .05in .07in; }
+  .mrow { display: grid; grid-template-columns: 1.4in .9in 1fr;
+    border-bottom: 1px solid var(--rule); min-height: 1.2in; align-items: stretch; }
+  .mrow:last-child { border-bottom: 0; }
+  .mthing { font-size: 13pt; padding: .13in .07in; }
+  .mmade { font-size: 13pt; padding: .13in .07in; border-left: 1px solid var(--slate);
+    border-right: 1px solid var(--rule); }
+
+  .wrow { border-bottom: 1px solid var(--ink); padding: .16in 0 .1in; }
+  .wthing { font-size: 13pt; font-weight: 700; }
+  .wprompt { font-size: 11.5pt; color: var(--muted); }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <header>
+    <div class="bigletter">&#9633;</div>
+    <div class="htext">
+      <h1>Solid, Liquid, Gas</h1>
+      <p class="sub">The test is not how it feels. It is what happens when you put it in a jar.</p>
+    </div>
+    <div class="nameline">Name</div>
+  </header>
+
+  <div class="note"><b>Do not go by touch</b> (sand is hard, a towel is wet). Ask: <b>poured into a new container, does it keep its shape or take the container's?</b></div>
+
+  <div class="strow">
+    <div class="spic"><svg class="" viewBox="0 0 158 172" width="158" height="172" role="img" aria-label="a jar holding a solid brick" xmlns="http://www.w3.org/2000/svg"><rect x="38" y="100" width="82" height="54" rx="0" fill="#F0DCC9" stroke="#16130F" stroke-width="2"/><line x1="14" y1="14" x2="14" y2="156" stroke="#16130F" stroke-width="2.4" stroke-linecap="round"/><line x1="144" y1="14" x2="144" y2="156" stroke="#16130F" stroke-width="2.4" stroke-linecap="round"/><line x1="14" y1="156" x2="144" y2="156" stroke="#16130F" stroke-width="2.4" stroke-linecap="round"/></svg></div>
+    <div class="sinfo">
+      <div class="sname">Solid</div>
+      <div class="sfact"><b>Shape:</b> keeps its own shape</div>
+      <div class="sfact"><b>Space:</b> takes up the same space wherever you put it</div>
+      <div class="segs">for example: a brick, a spoon, an ice cube, you</div>
+    </div>
+  </div>
+  <div class="strow">
+    <div class="spic"><svg class="" viewBox="0 0 158 172" width="158" height="172" role="img" aria-label="a jar holding a liquid" xmlns="http://www.w3.org/2000/svg"><rect x="14" y="80.1" width="130" height="75.9" rx="0" fill="#F0DCC9" stroke="#16130F" stroke-width="0"/><line x1="14" y1="80.1" x2="144" y2="80.1" stroke="#16130F" stroke-width="2" stroke-linecap="round"/><line x1="14" y1="14" x2="14" y2="156" stroke="#16130F" stroke-width="2.4" stroke-linecap="round"/><line x1="144" y1="14" x2="144" y2="156" stroke="#16130F" stroke-width="2.4" stroke-linecap="round"/><line x1="14" y1="156" x2="144" y2="156" stroke="#16130F" stroke-width="2.4" stroke-linecap="round"/></svg></div>
+    <div class="sinfo">
+      <div class="sname">Liquid</div>
+      <div class="sfact"><b>Shape:</b> takes the shape of whatever you pour it into</div>
+      <div class="sfact"><b>Space:</b> always takes up the same amount of space</div>
+      <div class="segs">for example: water, milk, honey, petrol</div>
+    </div>
+  </div>
+  <div class="strow">
+    <div class="spic"><svg class="" viewBox="0 0 158 172" width="158" height="172" role="img" aria-label="a jar holding a gas" xmlns="http://www.w3.org/2000/svg"><rect x="14" y="18" width="130" height="138" rx="0" fill="#F0DCC9" stroke="#16130F" stroke-width="0"/><circle cx="24" cy="30" r="3.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><circle cx="61" cy="83" r="3.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><circle cx="98" cy="136" r="3.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><circle cx="25" cy="75" r="3.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><circle cx="62" cy="128" r="3.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><circle cx="99" cy="67" r="3.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><circle cx="26" cy="120" r="3.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><circle cx="63" cy="59" r="3.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><circle cx="100" cy="112" r="3.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><line x1="14" y1="14" x2="14" y2="156" stroke="#16130F" stroke-width="2.4" stroke-linecap="round"/><line x1="144" y1="14" x2="144" y2="156" stroke="#16130F" stroke-width="2.4" stroke-linecap="round"/><line x1="14" y1="156" x2="144" y2="156" stroke="#16130F" stroke-width="2.4" stroke-linecap="round"/></svg></div>
+    <div class="sinfo">
+      <div class="sname">Gas</div>
+      <div class="sfact"><b>Shape:</b> spreads out and fills the whole container</div>
+      <div class="sfact"><b>Space:</b> takes up as much space as it is given</div>
+      <div class="segs">for example: air, steam, the bubbles in a fizzy drink</div>
+    </div>
+  </div>
+  <div class="note"><b>Tick one for each.</b> <b>Honey is the one that argues back.</b> It pours so slowly that it looks like it is keeping its shape &mdash; but leave it long enough and it will spread out flat and take the shape of the plate. Slow is not the same as solid.</div>
+  <div class="sortlist">
+    <div class="sortrow">
+      <div class="sortname">steam from a kettle</div>
+      <label class="pick"><i></i>solid</label>
+      <label class="pick"><i></i>liquid</label>
+      <label class="pick"><i></i>gas</label>
+    </div>
+    <div class="sortrow">
+      <div class="sortname">the air in a balloon</div>
+      <label class="pick"><i></i>solid</label>
+      <label class="pick"><i></i>liquid</label>
+      <label class="pick"><i></i>gas</label>
+    </div>
+    <div class="sortrow">
+      <div class="sortname">milk</div>
+      <label class="pick"><i></i>solid</label>
+      <label class="pick"><i></i>liquid</label>
+      <label class="pick"><i></i>gas</label>
+    </div>
+    <div class="sortrow">
+      <div class="sortname">a rock</div>
+      <label class="pick"><i></i>solid</label>
+      <label class="pick"><i></i>liquid</label>
+      <label class="pick"><i></i>gas</label>
+    </div>
+    <div class="sortrow">
+      <div class="sortname">the bubbles in lemonade</div>
+      <label class="pick"><i></i>solid</label>
+      <label class="pick"><i></i>liquid</label>
+      <label class="pick"><i></i>gas</label>
+    </div>
+    <div class="sortrow">
+      <div class="sortname">a wooden spoon</div>
+      <label class="pick"><i></i>solid</label>
+      <label class="pick"><i></i>liquid</label>
+      <label class="pick"><i></i>gas</label>
+    </div>
+    <div class="sortrow">
+      <div class="sortname">a sweater</div>
+      <label class="pick"><i></i>solid</label>
+      <label class="pick"><i></i>liquid</label>
+      <label class="pick"><i></i>gas</label>
+    </div>
+    <div class="sortrow">
+      <div class="sortname">orange juice</div>
+      <label class="pick"><i></i>solid</label>
+      <label class="pick"><i></i>liquid</label>
+      <label class="pick"><i></i>gas</label>
+    </div>
+    <div class="sortrow">
+      <div class="sortname">an ice cube</div>
+      <label class="pick"><i></i>solid</label>
+      <label class="pick"><i></i>liquid</label>
+      <label class="pick"><i></i>gas</label>
+    </div>
+    <div class="sortrow">
+      <div class="sortname">honey</div>
+      <label class="pick"><i></i>solid</label>
+      <label class="pick"><i></i>liquid</label>
+      <label class="pick"><i></i>gas</label>
+    </div>
+  </div>
+
+  <footer>
+    <span>3 states · 10 to sort · sand overleaf &middot; set 101</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Matter</span>
+  </footer>
+</div>
+
+<div class="page">
+  <header>
+    <div class="bigletter">&#9635;</div>
+    <div class="htext">
+      <h1>Which Is It? Sand</h1>
+      <p class="sub">The one the jar test gets wrong.</p>
+    </div>
+    <div class="nameline">Name</div>
+  </header>
+
+  <div class="oddbox">
+    <div class="otitle">And now the difficult one: <b>sand</b></div>
+    <div class="otext">Sand pours. It takes the shape of the bucket you tip it into, just like water does.
+    So is it a liquid? Look at ONE grain of sand very closely and answer these.</div>
+    <div class="wq"><div class="wqt">Does one single grain of sand keep its own shape?</div>      <svg class="row" viewBox="0 0 729.6 62.32" width="100%" role="img" aria-label="write here">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="25.16" x2="729.6" y2="25.16" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="45.32" x2="729.6" y2="45.32" stroke="#16130F" stroke-width="2.6"/>
+      </svg>      <svg class="row" viewBox="0 0 729.6 62.32" width="100%" role="img" aria-label="write here">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="25.16" x2="729.6" y2="25.16" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="45.32" x2="729.6" y2="45.32" stroke="#16130F" stroke-width="2.6"/>
+      </svg>      <svg class="row" viewBox="0 0 729.6 62.32" width="100%" role="img" aria-label="write here">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="25.16" x2="729.6" y2="25.16" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="45.32" x2="729.6" y2="45.32" stroke="#16130F" stroke-width="2.6"/>
+      </svg>      <svg class="row" viewBox="0 0 729.6 62.32" width="100%" role="img" aria-label="write here">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="25.16" x2="729.6" y2="25.16" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="45.32" x2="729.6" y2="45.32" stroke="#16130F" stroke-width="2.6"/>
+      </svg></div>
+    <div class="wq"><div class="wqt">So is sand a solid or a liquid? Say why.</div>      <svg class="row" viewBox="0 0 729.6 62.32" width="100%" role="img" aria-label="write here">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="25.16" x2="729.6" y2="25.16" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="45.32" x2="729.6" y2="45.32" stroke="#16130F" stroke-width="2.6"/>
+      </svg>      <svg class="row" viewBox="0 0 729.6 62.32" width="100%" role="img" aria-label="write here">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="25.16" x2="729.6" y2="25.16" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="45.32" x2="729.6" y2="45.32" stroke="#16130F" stroke-width="2.6"/>
+      </svg>      <svg class="row" viewBox="0 0 729.6 62.32" width="100%" role="img" aria-label="write here">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="25.16" x2="729.6" y2="25.16" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="45.32" x2="729.6" y2="45.32" stroke="#16130F" stroke-width="2.6"/>
+      </svg>      <svg class="row" viewBox="0 0 729.6 62.32" width="100%" role="img" aria-label="write here">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="25.16" x2="729.6" y2="25.16" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="45.32" x2="729.6" y2="45.32" stroke="#16130F" stroke-width="2.6"/>
+      </svg>      <svg class="row" viewBox="0 0 729.6 62.32" width="100%" role="img" aria-label="write here">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="25.16" x2="729.6" y2="25.16" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="45.32" x2="729.6" y2="45.32" stroke="#16130F" stroke-width="2.6"/>
+      </svg></div>
+  </div>
+
+  <footer>
+    <span>2 to write &middot; set 101</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Matter</span>
+  </footer>
+</div>
+
+</body>
+</html>

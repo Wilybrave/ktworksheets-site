@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="sheet-kind" content="open">
+<title>The Weather Vane — Making</title>
+<style>
+  :root { --font: Georgia, "Times New Roman", serif; }
+
+  /* Page margins live HERE only — body padding stays 0 for print so the two
+     don't stack and eat the sheet. */
+  @page { size: letter portrait; margin: 0.45in 0.5in; }
+
+  /*
+   * THE PALETTE. The same one the shop wears (kitchen-table/BRAND.md): warm
+   * near-black ink, one accent, pine kept back for the answer key.
+   *
+   * WHY A SHEET HAS COLOR AT ALL. Every sheet was pure grayscale — #000 rules,
+   * #333 subtitles, #f0f0f0 boxes — which is what you get by never deciding.
+   * The paper is the product and it looked like a fax. A printer set to
+   * grayscale, or one that has no color to give, renders all of this as the
+   * greys it already had, so nothing below costs a parent anything they were
+   * not already spending.
+   *
+   * WHAT STAYS BLACK, ON PURPOSE:
+   *   - anything drawn to be written on (rules, name lines, answer boxes)
+   *   - anything drawn to be traced or colored in (line art, letter guides)
+   *   - the confidence rings, which have to survive a mono laser
+   * Color marks the sheet's own furniture — its rule, its numbering, its
+   * boxes — and never the part a child puts a pencil through.
+   */
+  :root {
+    --ink:    #16130F;
+    --muted:  #6B635A;
+    --rule:   #CFC3B2;
+    --guide:  #BCAE9C;
+    --accent: #C0511D;
+    --tint:   #F7EDE4;
+    --slate:  #2E5A78;
+    --tintslate: #E9EFF4;
+    --deep:   #2C4A45;
+    --tintdeep: #ECF1EF;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font);
+    color: #000; background: #fff;
+    font-size: 12pt; line-height: 1.3;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+
+  /* ORDER MATTERS. This generic rule must come BEFORE the @media screen block:
+     same specificity, so whichever is declared last wins. With it after, the
+     on-screen preview stretches to the viewport instead of 8.5in — print is
+     unaffected, but the proof you check before printing is wrong. */
+  .page { width: 100%; }
+  .page + .page { page-break-before: always; }
+
+  @media screen {
+    body { padding: 0.5in; background: #ddd; }
+    .page {
+      background: #fff; padding: 0.45in 0.5in;
+      width: 8.5in; min-height: 11in;
+      margin: 0 auto 24px; box-shadow: 0 2px 10px rgba(0,0,0,.3);
+    }
+  }
+
+  /* ------------------------------------------------------------- header */
+  header { border-bottom: 3px double var(--accent); padding-bottom: 6px; }
+  header.cont { border-bottom: 1px solid var(--rule); }
+  h1 { font-size: 16pt; margin: 0 0 1px; letter-spacing: .01em; }
+  .sub { font-size: 10pt; font-style: italic; color: var(--muted); margin: 0; }
+
+  .nameline { display: flex; gap: 26px; font-size: 10.5pt; margin: 11px 0 12px; }
+  .nameline span { flex: 1; border-bottom: 1px solid var(--ink); padding-bottom: 1px; }
+  .nameline span.short { flex: 0 0 1.9in; }
+
+  .directions {
+    font-size: 10.5pt; line-height: 1.35;
+    background: var(--tint); border-left: 4px solid var(--accent);
+    padding: 7px 10px; margin: 12px 0 14px;
+  }
+  .directions b { letter-spacing: .03em; }
+  .tip { font-style: italic; margin-top: 3px; }
+
+  /* ------------------------------------------------- problems and grids */
+  .grid { display: grid; gap: 13px 16px; margin-top: 4px; }
+  .prob { page-break-inside: avoid; display: flex; gap: 5px; align-items: flex-start; }
+  .pn { font-weight: bold; font-size: 11pt; min-width: .28in; flex: 0 0 auto; color: var(--accent); }
+  .pbody { flex: 1; min-width: 0; }
+
+  /* Digits need lining figures and even widths whatever the body font is. */
+  .num, .vert, .horiz { font-family: "Trebuchet MS", "Segoe UI", Tahoma, Verdana, sans-serif; font-variant-numeric: lining-nums tabular-nums; }
+
+  /* A stacked column algorithm.
+     Two grid columns — operator, then digits — because a floated or absolutely
+     positioned operator overlaps the digits as soon as the numbers get wide,
+     and "324" with a + sitting on the 3 is unreadable. The grid also lets the
+     rule under the last operand span BOTH columns, which is how it is written
+     by hand. The rule is heavy: it is the line you write the answer beneath. */
+  .vert {
+    display: inline-grid; grid-template-columns: auto auto;
+    font-size: 15pt; line-height: 1.3; text-align: right;
+  }
+  .vert > span { padding: 0 0 1px 0; }
+  .vert .op { text-align: left; padding-right: .16in; }
+  .vert .last { border-bottom: 2.5px solid var(--ink); padding-bottom: 3px; }
+  .vert .ans { height: .4in; }
+  /* Partial-products working, for 2-digit x 1-digit before the short method. */
+  .vert .part { font-size: 11pt; color: var(--muted); }
+  /* A row of worked examples that fade — see lib/formats.js faded(). The
+     caption is what makes the fade legible: without it the third one looks like
+     a question somebody forgot to number. */
+  .egrow { display: flex; gap: .34in; align-items: flex-start; margin: 0 0 4px; }
+  .eg { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; }
+  .eglab { font-size: 8.5pt; color: var(--slate); letter-spacing: .02em; }
+
+  /* The carried digits. Small and grey so the sum still reads as the sum, and
+     tight to the row below it so a carry sits ON the column it goes into. */
+  .vert .carry { font-size: 9pt; color: var(--slate); line-height: 1; padding: 0 0 1px 0; }
+
+  .horiz { font-size: 14pt; white-space: nowrap; }
+
+  /* Row numbers in a word list. Gray and small: they are there so a list can be
+     dictated ("number seven") and marked without counting down the page, and
+     they must not compete with the word itself. */
+  .wn { color: var(--muted); font-size: 9pt; }
+
+  /* The box an answer goes in. inline-block so it can sit mid-sentence. */
+  .abox {
+    display: inline-block; border: 1.6px solid var(--slate); border-radius: 3px;
+    vertical-align: middle; margin: 0 3px; position: relative; background: #fff;
+  }
+  /* Scoped to the box: as a bare ".alab" it pinned any generator's own .alab
+     to the bottom of the page (life-07-signs-and-forms 40, 2026-09-24). */
+  .abox > .alab {
+    position: absolute; bottom: 1px; left: 0; right: 0;
+    text-align: center; font-size: 7pt; color: var(--muted); font-style: italic;
+  }
+
+  /* Confidence marks. The rings are drawn with a border and a gradient rather
+     than an SVG so they stay inline with the question text at any font size,
+     and print black on a mono laser without relying on a background image. */
+  .conf { float: right; margin: 2px 0 0 8px; white-space: nowrap; }
+  .cring {
+    display: inline-block; width: 11px; height: 11px; margin-left: 4px;
+    border: 1.4px solid var(--slate); border-radius: 50%; vertical-align: middle;
+  }
+  .cring-full { background: var(--accent); }
+  .cring-half { background: linear-gradient(90deg, var(--accent) 50%, #fff 50%); }
+  .cring-none { background: #fff; }
+  ol.qs.hasconf li { overflow: hidden; }
+
+  .conflegend {
+    border: 1.2px solid var(--rule); border-radius: 4px;
+    padding: 3px 8px; margin: 0 0 7px;
+    font-size: 8.5pt; color: var(--muted); display: flex; gap: 14px; align-items: center;
+  }
+  .conftitle { font-weight: 700; color: var(--ink); }
+  .confitem { white-space: nowrap; }
+
+  .work {
+    border: 1.4px dashed var(--rule); border-radius: 4px;
+    margin: 6px 0 2px; position: relative;
+  }
+  /* The label S.work() puts in the box: a DIRECT child only. As ".work span"
+     it also caught every span inside any generator's own .work content and
+     stacked them all at the top-left corner (math-11-grade6 47, 2026-09-23). */
+  .work > span {
+    position: absolute; top: 3px; left: 6px;
+    font-size: 8pt; color: var(--muted); font-style: italic;
+  }
+
+  /* ------------------------------------------------------ writing lines */
+  /* Primary rule: solid top, dashed midline, heavy baseline. Capitals reach
+     the top line, lowercase bodies sit under the dashed one. */
+  .write {
+    position: relative; height: 0.375in;
+    margin: 6px 0 0 .3in;
+    border-top: 1px solid var(--rule); border-bottom: 2px solid var(--ink);
+  }
+  .write.flush { margin-left: 0; }
+  .write + .write { margin-top: .17in; }
+  .write::after {
+    content: ""; position: absolute; left: 0; right: 0; top: 50%;
+    border-top: 1px dashed var(--guide);
+  }
+
+  /* ------------------------------------------------------- question list */
+  ol.qs { margin: 0; padding: 0 0 0 .34in; }
+  ol.qs li { margin-bottom: 13px; page-break-inside: avoid; }
+  ol.qs li::marker { font-weight: bold; font-size: 11pt; color: var(--accent); }
+  .qt { display: block; }
+
+  .mcq { display: grid; gap: 3px 14px; margin: 5px 0 2px .12in; font-size: 11pt; }
+  .opt { white-space: nowrap; }
+
+  /* -------------------------------------------------------------- tables */
+  .tbl { border-collapse: collapse; margin: 8px 0; font-size: 11pt; width: 100%; }
+  .tbl th, .tbl td { border: 1.4px solid var(--ink); padding: 5px 8px; text-align: left; }
+  .tbl th { color: var(--slate); }
+  .tbl th { background: var(--tint); font-size: 10pt; letter-spacing: .02em; }
+  .tbl td.blank { height: .34in; }
+  .tbl.narrow { width: auto; }
+  .tbl.center td, .tbl.center th { text-align: center; }
+
+  /* ------------------------------------------------------------ passages */
+  .passage {
+    border: 1.5px solid var(--slate); border-radius: 4px;
+    padding: 11px 14px; margin-bottom: 12px;
+    font-size: 11.5pt; line-height: 1.55;
+  }
+  .passage h2 { font-size: 13pt; margin: 0 0 6px; color: var(--deep); }
+  .passage p { margin: 0 0 8px; }
+  .passage p:last-child { margin-bottom: 0; }
+  .passage .byline { font-size: 9.5pt; font-style: italic; color: var(--muted); margin-bottom: 8px; }
+  /* Numbered paragraphs, so a question can say "in paragraph 2". */
+  .passage p.np { position: relative; padding-left: .3in; }
+  .passage p.np::before {
+    content: attr(data-p); position: absolute; left: 0; top: 0;
+    font-size: 9pt; color: var(--accent); font-weight: bold;
+  }
+
+  .wordbank {
+    border: 1.5px dashed var(--slate); border-radius: 4px;
+    padding: 8px 12px; margin: 10px 0 12px;
+    font-size: 11.5pt; text-align: center;
+  }
+  .wordbank b { display: block; font-size: 9.5pt; letter-spacing: .06em;
+    text-transform: uppercase; margin-bottom: 4px; color: var(--accent); }
+  .wordbank span { display: inline-block; margin: 2px 11px; }
+
+  .note {
+    border-left: 4px solid var(--deep); background: var(--tintdeep);
+    padding: 7px 11px; margin: 10px 0; font-size: 10.5pt;
+  }
+  .note b { letter-spacing: .02em; }
+
+  /* -------------------------------------------------------------- footer */
+  /* THE WORDMARK SITS IN THE FOOTER THAT WAS ALREADY THERE, so it costs no
+     height at all — a sheet that fitted before fits now. Upright where the rest
+     of the line is italic, and a size down: it is a signature, not a message,
+     and it must never compete with "Score: ___ / 10". */
+  .brand { font-style: normal; font-size: 7.5pt; letter-spacing: .04em;
+    color: var(--accent); align-self: center; }
+
+  footer {
+    margin-top: 14px; padding-top: 6px; border-top: 1px solid var(--rule);
+    font-size: 9pt; font-style: italic; color: var(--muted);
+    display: flex; justify-content: space-between;
+  }
+
+  /* ---------------------------------------------------------- answer key */
+  .keybadge {
+    display: inline-block; border: 2px solid var(--deep); color: var(--deep); padding: 2px 9px;
+    font-size: 9.5pt; font-weight: bold; letter-spacing: .08em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .key .why {
+    display: block; font-size: 9pt; font-style: italic; color: var(--muted); margin-top: 1px;
+  }
+  /* Highlight rather than underline: <u> in a key marks WHAT CHANGED, and an
+     underline under a comma is invisible. */
+  .key u { text-decoration: none; background: var(--tint); padding: 0 2px; font-weight: bold; }
+  .keygrid .pbody { font-family: "Trebuchet MS", "Segoe UI", Tahoma, Verdana, sans-serif; font-size: 12pt; }
+  /* A key's pictures scale to their column: at 1fr a wide drawing pushed a
+     three-column key 92px off the paper (art-04-drawing 10, 2026-09-24). */
+  .keygrid svg { max-width: 100%; height: auto; }
+  .keylist .qt { font-weight: normal; }
+
+  /*
+   * The guide page. Four lines per question, and the ASK line is the one that
+   * gets used at the table, so it is the one with a rule beside it — a parent
+   * scanning this page in ten seconds should land on the follow-up question
+   * and nothing else.
+   */
+  .guide { padding-left: .3in; }
+  .guide li { margin-bottom: 11px; page-break-inside: avoid; }
+  .guide .gq { font-weight: bold; font-size: 11pt; margin-bottom: 3px; }
+  /* 9pt, matching the key's own why line, because the guide page is the
+     binding constraint on every open sheet: four lines per question against a
+     key's one, and at 10pt a sheet with seven questions ran onto a second
+     side. Found by measuring, not chosen. (No backticks in here — this CSS
+     lives inside a template literal and one would close it.) */
+  .guide .glook, .guide .gthin, .guide .gstrong {
+    font-size: 9pt; line-height: 1.3; margin-top: 1px;
+  }
+  .guide .gthin { color: var(--muted); }
+  .guide .gstrong { color: var(--muted); font-style: italic; }
+  .guide .gask {
+    font-size: 9.5pt; line-height: 1.3; margin-top: 3px;
+    border-left: 3px solid var(--slate); padding-left: 7px;
+  }
+  .key .qs li { margin-bottom: 9px; }
+
+  /*
+   * INLINE-BLOCK, NOT BLOCK, AND THIS WAS WRONG FOR A LONG TIME. A block-level
+   * svg ignores text-align: center on its parent and sits flush left — so 117
+   * sheets across 35 packs said "centre this diagram" and got a left-aligned
+   * one. Twenty-five of them were origami and paper-plane fold sequences, where
+   * the whole page is diagrams.
+   *
+   * Nobody spotted it because a left-flush diagram looks deliberate; it only
+   * reads as wrong next to a centered one, and no sheet has both.
+   *
+   * inline-block makes text-align do what every one of those authors meant,
+   * and leaves a diagram in a left-aligned container exactly where it was.
+   * vertical-align: top kills the baseline gap that inline elements otherwise
+   * leave underneath them, which would have pushed long pages over.
+   */
+  svg { display: inline-block; vertical-align: top; }
+  svg.inline { vertical-align: middle; }
+
+  .page.g1 .tbl td { font-size: 12pt; padding-top: 7px; padding-bottom: 7px; line-height: 1.38; }
+  .page.g1 .tbl th { font-size: 10.5pt; padding-top: 6px; padding-bottom: 6px; }
+  .page.g1 .tbl td.blank { height: 0.45999999999999996in; }
+  .page.g1 .write + .write { margin-top: 0.25in; }
+  .page.g1 ol.qs li { margin-bottom: 19px; }
+  .page.g1 ol.qs .qt { font-size: 12pt; }
+  .page.g2 .tbl td { font-size: 12.5pt; padding-top: 12px; padding-bottom: 12px; line-height: 1.38; }
+  .page.g2 .tbl th { font-size: 10.5pt; padding-top: 6px; padding-bottom: 6px; }
+  .page.g2 .tbl td.blank { height: 0.62in; }
+  .page.g2 .write + .write { margin-top: 0.33in; }
+  .page.g2 ol.qs li { margin-bottom: 25px; }
+  .page.g2 ol.qs .qt { font-size: 12.5pt; }
+  .page.g3 .tbl td { font-size: 13pt; padding-top: 17px; padding-bottom: 17px; line-height: 1.38; }
+  .page.g3 .tbl th { font-size: 10.5pt; padding-top: 6px; padding-bottom: 6px; }
+  .page.g3 .tbl td.blank { height: 0.78in; }
+  .page.g3 .write + .write { margin-top: 0.41in; }
+  .page.g3 ol.qs li { margin-bottom: 31px; }
+  .page.g3 ol.qs .qt { font-size: 13pt; }
+  .page.g4 .tbl td { font-size: 13.5pt; padding-top: 22px; padding-bottom: 22px; line-height: 1.38; }
+  .page.g4 .tbl th { font-size: 10.5pt; padding-top: 6px; padding-bottom: 6px; }
+  .page.g4 .tbl td.blank { height: 0.94in; }
+  .page.g4 .write + .write { margin-top: 0.45in; }
+  .page.g4 ol.qs li { margin-bottom: 37px; }
+  .page.g4 ol.qs .qt { font-size: 13.5pt; }
+  .page.g5 .tbl td { font-size: 14pt; padding-top: 27px; padding-bottom: 27px; line-height: 1.38; }
+  .page.g5 .tbl th { font-size: 10.5pt; padding-top: 6px; padding-bottom: 6px; }
+  .page.g5 .tbl td.blank { height: 1.1in; }
+  .page.g5 .write + .write { margin-top: 0.45in; }
+  .page.g5 ol.qs li { margin-bottom: 43px; }
+  .page.g5 ol.qs .qt { font-size: 14pt; }
+  .page.g6 .tbl td { font-size: 14.5pt; padding-top: 32px; padding-bottom: 32px; line-height: 1.38; }
+  .page.g6 .tbl th { font-size: 10.5pt; padding-top: 6px; padding-bottom: 6px; }
+  .page.g6 .tbl td.blank { height: 1.26in; }
+  .page.g6 .write + .write { margin-top: 0.45in; }
+  .page.g6 ol.qs li { margin-bottom: 49px; }
+  .page.g6 ol.qs .qt { font-size: 14.5pt; }
+  .rules { font-size: 10pt; background: #FAF7F2; border: 1px solid var(--rule);
+           padding: 6px 9px; margin: 0 0 9px; }
+
+  .find { font-size: 10.5pt; line-height: 1.38; background: #FFFDF7;
+          border-left: 4px solid var(--accent); border-top: 1px solid var(--rule);
+          border-right: 1px solid var(--rule); border-bottom: 1px solid var(--rule);
+          padding: 8px 11px; margin: 10px 0; }
+
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 10px 0; align-items: start; }
+  .fig { text-align: center; }
+  .fig svg { display: block; margin: 0 auto; max-width: 100%; height: auto; }
+  /* fill pass: the two centers one above the other, each the width of the page */
+  .two.centres { grid-template-columns: 1fr; gap: 22px; }
+  .two.centres .fig svg { width: 5.6in; }
+
+  /* True size, so no percentage width. The template is cut out and the rose is
+     filled in a box at a time — both are real measurements on paper. */
+  .vane { margin: 8px 0; }
+  .vane svg { display: block; margin: 0 auto; }
+  .rose { margin: 10px 0; }
+  .rose svg { display: block; margin: 0 auto; }
+
+</style>
+</head>
+<body>
+
+<div class="page g5">
+  <header>
+    
+    <h1>The Weather Vane</h1>
+    <p class="sub">Making &middot; Projects &middot; Page 1 of 6</p>
+  </header>
+  <div class="nameline">
+    <span>Name</span>
+    <span class="short">Date</span>
+  </div>
+  <div class="directions">
+    <b>DIRECTIONS:</b> Answer question 1 in pen first.
+  </div>
+
+
+  <div class="rules"><b>Scissors only, with a grown-up in the room.</b> If a step seems to want a knife, snip or fold instead.</div>
+
+  <div class="note"><b>What you need:</b> card &middot; scissors &middot; straws &middot; paper clips &middot; poster putty &middot; jar lids &middot; coins &middot; a pencil.</div>
+
+  <ol class="qs" start="1"><li><span class="qt">A weather vane on a church is pointing north. Is the wind blowing towards the north, or coming from the north?</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+  <div class="find"><b>Coming FROM the north.</b> The arrow points into the wind. <b>A north wind comes out of the north.</b></div>
+
+  <div class="note"><b>Why it matters:</b> if cold weather comes on a north-east wind, a vane swinging to
+  north-east is a warning. Read backwards, it is a wrong one.</div>
+
+  <footer>
+    <span>Why most homemade ones fail &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>The weather vane</span>
+  </footer>
+</div>
+
+<div class="page g6">
+  <header class="cont">
+    
+    <h1>Two Centers</h1>
+    <p class="sub">Making &middot; Projects &middot; Page 2 of 6</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Read this before you cut anything, or your vane will just spin.
+  </div>
+
+
+  <div class="find"><b>A big tail alone does not work.</b> A vane needs two centers in different places: the <b>center of weight</b> (the pivot goes there) and the <b>center of area</b> (where the wind pushes). In one flat piece of card they are the same place, so nothing turns.</div>
+
+  <div class="two centres">
+    <div class="fig"><svg viewBox="0 0 400 205" width="100%"
+  role="img" aria-label="a vane whose pivot sits on the center of area, so the wind has no lever and it just spins">
+  <path d="M16,64 L92,64" fill="none" stroke="#3A3A3A" stroke-width="2.4"/>
+  <path d="M80,57 L96,64 L80,71" fill="none" stroke="#3A3A3A" stroke-width="2.4" stroke-linejoin="round"/>
+  <text x="52" y="52" font-size="11.5" fill="#3A3A3A" text-anchor="middle">wind</text>
+  <g transform="translate(12,31) scale(0.5)">
+    <path d="M0,125 L90,96 L150,116 L420,116 L420,18 L618,18 L618,232 L420,232 L420,134 L150,134 L90,154 z" fill="#FAF7F2" stroke="#3A3A3A" stroke-width="4"/>
+  </g>
+  <circle cx="240.3" cy="93.5" r="6" fill="none" stroke="#8A8A8A" stroke-width="2.4"/>
+  <text x="240.3" y="78.5" font-size="11" fill="#6A6A6A" text-anchor="middle">center of area</text>
+  <circle cx="240.3" cy="93.5" r="5.5" fill="#C0511D"/>
+         <text x="240.3" y="117.5" font-size="11" fill="#C0511D" text-anchor="middle">pivot, in the same place</text>
+         <text x="200" y="184" font-size="12" fill="#C0511D" text-anchor="middle">no lever, nothing to turn it</text>
+         <text x="200" y="199" font-size="12" fill="#C0511D" text-anchor="middle">&mdash; it just spins</text>
+</svg></div>
+    <div class="fig"><svg viewBox="0 0 400 205" width="100%"
+  role="img" aria-label="a vane with its pivot forward of the center of area, so the wind swings the tail downwind">
+  <path d="M16,64 L92,64" fill="none" stroke="#3A3A3A" stroke-width="2.4"/>
+  <path d="M80,57 L96,64 L80,71" fill="none" stroke="#3A3A3A" stroke-width="2.4" stroke-linejoin="round"/>
+  <text x="52" y="52" font-size="11.5" fill="#3A3A3A" text-anchor="middle">wind</text>
+  <g transform="translate(12,31) scale(0.5)">
+    <path d="M0,125 L90,96 L150,116 L420,116 L420,18 L618,18 L618,232 L420,232 L420,134 L150,134 L90,154 z" fill="#FAF7F2" stroke="#3A3A3A" stroke-width="4"/>
+  </g>
+  <circle cx="240.3" cy="93.5" r="6" fill="none" stroke="#8A8A8A" stroke-width="2.4"/>
+  <text x="240.3" y="78.5" font-size="11" fill="#6A6A6A" text-anchor="middle">center of area</text>
+  <circle cx="185.1" cy="93.5" r="5.5" fill="#C0511D"/>
+         <text x="185.1" y="117.5" font-size="11" fill="#C0511D" text-anchor="middle">pivot, further forward</text>
+         <path d="M200,170 q52,20 104,2" fill="none" stroke="#C0511D" stroke-width="2.4"/>
+         <path d="M290,164 L308,171 L292,180" fill="none" stroke="#C0511D" stroke-width="2.4" stroke-linejoin="round"/>
+         <text x="200" y="199" font-size="12" fill="#3A3A3A" text-anchor="middle">the tail is pushed downwind, so the head aims into it</text>
+</svg></div>
+  </div>
+
+  <div class="note"><b>So drag the balance point forwards:</b> tape coins or putty onto the head until it
+  balances <b>in front of</b> the dot on page 3.</div>
+
+  <footer>
+    <span>The template &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Two centers</span>
+  </footer>
+</div>
+
+<div class="page g6">
+  <header class="cont">
+    
+    <h1>The Vane</h1>
+    <p class="sub">Making &middot; Projects &middot; Page 3 of 6</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Glue onto card, cut two, glue them together. Copy the dot onto both sides.
+    <div class="tip">The pivot goes in front of the dot (page 2).</div>
+  </div>
+
+
+  <div class="vane"><svg viewBox="0 0 650 322" width="650" height="322"
+    role="img" aria-label="the vane at true size, with its computed center of area marked and the pivot line shown forward of it">
+    <g transform="translate(16,16)">
+      <path d="M0,125 L90,96 L150,116 L420,116 L420,18 L618,18 L618,232 L420,232 L420,134 L150,134 L90,154 z" fill="white" stroke="#C0511D" stroke-width="2" stroke-linejoin="round"/>
+      <path d="M346.1,92 L346.1,158" fill="none" stroke="#8A8A8A" stroke-width="1.6" stroke-dasharray="6 4"/>
+      <circle cx="456.5" cy="125.0" r="8" fill="#FFFFFF" stroke="#C0511D" stroke-width="2.4"/>
+      <circle cx="456.5" cy="125.0" r="2.6" fill="#C0511D"/>
+      <path d="M456.5,137.0 L456.5,234" fill="none" stroke="#C0511D" stroke-width="1.3"/>
+      <text x="456.5" y="250" font-size="14" fill="#C0511D" text-anchor="middle">center of area &mdash; the wind pushes here</text>
+      <path d="M346.1,158 L346.1,234" fill="none" stroke="#8A8A8A" stroke-width="1.3"/>
+      <text x="346.1" y="268" font-size="13" fill="#6A6A6A" text-anchor="middle">your pivot, roughly &mdash; find it by balancing</text>
+    </g>
+    <text x="325" y="312" font-size="12.5" fill="#8A8A8A" text-anchor="middle">Cut two and glue them together. One thickness bends in the first gust.</text>
+  </svg></div>
+
+  <div class="find"><b>The dot is the center of area</b>, 74 per cent back from the tip. <b>Add weight to the head until the vane balances about an inch in front of it.</b></div>
+
+  <footer>
+    <span>The pivot &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>The vane</span>
+  </footer>
+</div>
+
+<div class="page g3">
+  <header class="cont">
+    
+    <h1>The Pivot, and Pointing It North</h1>
+    <p class="sub">Making &middot; Projects &middot; Page 4 of 6</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Build it indoors and test it with a puff of breath before it goes out.
+  </div>
+
+
+  <table class="tbl ">
+    <thead><tr><th>Step</th><th>How</th><th>Why</th></tr></thead>
+    <tbody><tr><td><b>Straighten a paper clip</b></td><td>One end straight and as long as you can make it. Leave a little hook at the bottom.</td><td>This is the spindle. It is thin, so there is almost nothing for the vane to rub against — and friction is the difference between a vane that answers a breeze and one that only moves in a gale.</td></tr><tr><td><b>Stand it in putty on a jar lid</b></td><td>A lump of poster putty or modeling clay in a jar lid, wire pushed in, standing straight up.</td><td>It has to be vertical. A leaning spindle makes the vane roll to the low side and sit there whatever the wind is doing.</td></tr><tr><td><b>Tape a straw across the vane at the balance mark</b></td><td>Straw upright, taped flat to the side of the card, its middle on the mark.</td><td>The straw is the bearing. Taping it anywhere but the balance mark puts the pivot in the wrong place and undoes page 2.</td></tr><tr><td><b>Drop the straw over the wire</b></td><td>It should spin with a puff of breath. If it does not, the wire is bent or the straw is squashed.</td><td>Test it indoors before it ever goes outside. Outdoors you cannot tell a stuck vane from a steady wind.</td></tr><tr><td><b>Point the lid’s north mark at TRUE north</b></td><td>Find north with a stick and two stones — the method is on sheet 11.</td><td>A vane that is a compass-error out reads the wrong direction all year, and nothing about it will look wrong.</td></tr></tbody>
+  </table>
+
+  <div class="note"><b>Mark the eight directions round the lid</b>: N, NE, E, SE, S, SW, W, NW.</div>
+
+  <footer>
+    <span>The wind rose &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>The pivot, and pointing it north</span>
+  </footer>
+</div>
+
+<div class="page g6">
+  <header class="cont">
+    
+    <h1>The Wind Rose</h1>
+    <p class="sub">Making &middot; Projects &middot; Page 5 of 6</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> One box a day, same time, from the middle outwards along the way the vane pointed.
+  </div>
+
+
+  <div class="rose"><svg viewBox="0 0 608 608"
+    width="608" height="608"
+    role="img" aria-label="a wind rose with eight spokes of ten boxes each, to fill in one box a day">
+    <rect x="294.0" y="260.0" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="294.0" y="237.0" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="294.0" y="214.0" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="294.0" y="191.0" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="294.0" y="168.0" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="294.0" y="145.0" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="294.0" y="122.0" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="294.0" y="99.0" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="294.0" y="76.0" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="294.0" y="53.0" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <text x="304.0" y="33.0" font-size="15" fill="#C0511D" text-anchor="middle" font-weight="bold">N</text>
+    <rect x="318.0" y="270.0" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="334.3" y="253.7" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="350.6" y="237.4" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="366.8" y="221.2" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="383.1" y="204.9" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="399.4" y="188.6" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="415.6" y="172.4" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="431.9" y="156.1" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="448.1" y="139.9" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="464.4" y="123.6" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <text x="499.2" y="113.8" font-size="15" fill="#C0511D" text-anchor="middle" font-weight="bold">NE</text>
+    <rect x="328.0" y="294.0" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="351.0" y="294.0" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="374.0" y="294.0" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="397.0" y="294.0" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="420.0" y="294.0" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="443.0" y="294.0" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="466.0" y="294.0" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="489.0" y="294.0" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="512.0" y="294.0" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="535.0" y="294.0" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <text x="580.0" y="309.0" font-size="15" fill="#C0511D" text-anchor="middle" font-weight="bold">E</text>
+    <rect x="318.0" y="318.0" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="334.3" y="334.3" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="350.6" y="350.6" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="366.8" y="366.8" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="383.1" y="383.1" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="399.4" y="399.4" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="415.6" y="415.6" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="431.9" y="431.9" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="448.1" y="448.1" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="464.4" y="464.4" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <text x="499.2" y="504.2" font-size="15" fill="#C0511D" text-anchor="middle" font-weight="bold">SE</text>
+    <rect x="294.0" y="328.0" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="294.0" y="351.0" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="294.0" y="374.0" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="294.0" y="397.0" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="294.0" y="420.0" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="294.0" y="443.0" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="294.0" y="466.0" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="294.0" y="489.0" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="294.0" y="512.0" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="294.0" y="535.0" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <text x="304.0" y="585.0" font-size="15" fill="#C0511D" text-anchor="middle" font-weight="bold">S</text>
+    <rect x="270.0" y="318.0" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="253.7" y="334.3" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="237.4" y="350.6" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="221.2" y="366.8" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="204.9" y="383.1" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="188.6" y="399.4" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="172.4" y="415.6" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="156.1" y="431.9" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="139.9" y="448.1" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="123.6" y="464.4" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <text x="108.8" y="504.2" font-size="15" fill="#C0511D" text-anchor="middle" font-weight="bold">SW</text>
+    <rect x="260.0" y="294.0" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="237.0" y="294.0" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="214.0" y="294.0" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="191.0" y="294.0" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="168.0" y="294.0" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="145.0" y="294.0" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="122.0" y="294.0" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="99.0" y="294.0" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="76.0" y="294.0" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="53.0" y="294.0" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <text x="28.0" y="309.0" font-size="15" fill="#C0511D" text-anchor="middle" font-weight="bold">W</text>
+    <rect x="270.0" y="270.0" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="253.7" y="253.7" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="237.4" y="237.4" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="221.2" y="221.2" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="204.9" y="204.9" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="188.6" y="188.6" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="172.4" y="172.4" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="156.1" y="156.1" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="139.9" y="139.9" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <rect x="123.6" y="123.6" width="20" height="20" rx="2" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="1.2"/>
+    <text x="108.8" y="113.8" font-size="15" fill="#C0511D" text-anchor="middle" font-weight="bold">NW</text>
+    <circle cx="304" cy="304" r="22" fill="#FAF7F2" stroke="#C0511D" stroke-width="2"/>
+    <text x="304" y="309" font-size="12" fill="#C0511D" text-anchor="middle">start</text>
+  </svg></div>
+
+  <div class="note"><b>A bar chart bent into a circle.</b> After a few weeks the longest arm is your
+  <b>prevailing wind</b>.</div>
+
+  <footer>
+    <span>A month later &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>The wind rose</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>A Month Later</h1>
+    <p class="sub">Making &middot; Projects &middot; Page 6 of 6</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Wind rose in front of you.
+  </div>
+
+
+  <ol class="qs" start="2"><li><span class="qt">Which arm is longest? That is where your weather mostly comes from. Was it the one you would have guessed a month ago?</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Is there a direction the wind almost never comes from? Go and look that way — is there a hill, a big building, or nothing at all?</span><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Pick the three wettest days from your rain gauge log. Which way was the wind on each? Do wet days arrive from one particular direction?</span><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Somebody says "the wind is going north today." What would you ask them to make sure you both mean the same thing?</span><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Done &mdash; keep it out there</span>
+    <span class="brand">Kitchen Table</span>
+    <span>A month later</span>
+  </footer>
+</div>
+
+</body>
+</html>

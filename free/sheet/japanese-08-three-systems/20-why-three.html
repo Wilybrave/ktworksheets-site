@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="sheet-kind" content="worksheet">
+<title>Why There Are Three — Japanese</title>
+<style>
+  :root { --font: Georgia, "Times New Roman", serif; }
+
+  /* Page margins live HERE only — body padding stays 0 for print so the two
+     don't stack and eat the sheet. */
+  @page { size: letter portrait; margin: 0.45in 0.5in; }
+
+  /*
+   * THE PALETTE. The same one the shop wears (kitchen-table/BRAND.md): warm
+   * near-black ink, one accent, pine kept back for the answer key.
+   *
+   * WHY A SHEET HAS COLOR AT ALL. Every sheet was pure grayscale — #000 rules,
+   * #333 subtitles, #f0f0f0 boxes — which is what you get by never deciding.
+   * The paper is the product and it looked like a fax. A printer set to
+   * grayscale, or one that has no color to give, renders all of this as the
+   * greys it already had, so nothing below costs a parent anything they were
+   * not already spending.
+   *
+   * WHAT STAYS BLACK, ON PURPOSE:
+   *   - anything drawn to be written on (rules, name lines, answer boxes)
+   *   - anything drawn to be traced or colored in (line art, letter guides)
+   *   - the confidence rings, which have to survive a mono laser
+   * Color marks the sheet's own furniture — its rule, its numbering, its
+   * boxes — and never the part a child puts a pencil through.
+   */
+  :root {
+    --ink:    #16130F;
+    --muted:  #6B635A;
+    --rule:   #CFC3B2;
+    --guide:  #BCAE9C;
+    --accent: #C0511D;
+    --tint:   #F7EDE4;
+    --slate:  #2E5A78;
+    --tintslate: #E9EFF4;
+    --deep:   #2C4A45;
+    --tintdeep: #ECF1EF;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font);
+    color: #000; background: #fff;
+    font-size: 12pt; line-height: 1.3;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+
+  /* ORDER MATTERS. This generic rule must come BEFORE the @media screen block:
+     same specificity, so whichever is declared last wins. With it after, the
+     on-screen preview stretches to the viewport instead of 8.5in — print is
+     unaffected, but the proof you check before printing is wrong. */
+  .page { width: 100%; }
+  .page + .page { page-break-before: always; }
+
+  @media screen {
+    body { padding: 0.5in; background: #ddd; }
+    .page {
+      background: #fff; padding: 0.45in 0.5in;
+      width: 8.5in; min-height: 11in;
+      margin: 0 auto 24px; box-shadow: 0 2px 10px rgba(0,0,0,.3);
+    }
+  }
+
+  /* ------------------------------------------------------------- header */
+  header { border-bottom: 3px double var(--accent); padding-bottom: 6px; }
+  header.cont { border-bottom: 1px solid var(--rule); }
+  h1 { font-size: 16pt; margin: 0 0 1px; letter-spacing: .01em; }
+  .sub { font-size: 10pt; font-style: italic; color: var(--muted); margin: 0; }
+
+  .nameline { display: flex; gap: 26px; font-size: 10.5pt; margin: 11px 0 12px; }
+  .nameline span { flex: 1; border-bottom: 1px solid var(--ink); padding-bottom: 1px; }
+  .nameline span.short { flex: 0 0 1.9in; }
+
+  .directions {
+    font-size: 10.5pt; line-height: 1.35;
+    background: var(--tint); border-left: 4px solid var(--accent);
+    padding: 7px 10px; margin: 12px 0 14px;
+  }
+  .directions b { letter-spacing: .03em; }
+  .tip { font-style: italic; margin-top: 3px; }
+
+  /* ------------------------------------------------- problems and grids */
+  .grid { display: grid; gap: 13px 16px; margin-top: 4px; }
+  .prob { page-break-inside: avoid; display: flex; gap: 5px; align-items: flex-start; }
+  .pn { font-weight: bold; font-size: 11pt; min-width: .28in; flex: 0 0 auto; color: var(--accent); }
+  .pbody { flex: 1; min-width: 0; }
+
+  /* Digits need lining figures and even widths whatever the body font is. */
+  .num, .vert, .horiz { font-family: "Trebuchet MS", "Segoe UI", Tahoma, Verdana, sans-serif; font-variant-numeric: lining-nums tabular-nums; }
+
+  /* A stacked column algorithm.
+     Two grid columns — operator, then digits — because a floated or absolutely
+     positioned operator overlaps the digits as soon as the numbers get wide,
+     and "324" with a + sitting on the 3 is unreadable. The grid also lets the
+     rule under the last operand span BOTH columns, which is how it is written
+     by hand. The rule is heavy: it is the line you write the answer beneath. */
+  .vert {
+    display: inline-grid; grid-template-columns: auto auto;
+    font-size: 15pt; line-height: 1.3; text-align: right;
+  }
+  .vert > span { padding: 0 0 1px 0; }
+  .vert .op { text-align: left; padding-right: .16in; }
+  .vert .last { border-bottom: 2.5px solid var(--ink); padding-bottom: 3px; }
+  .vert .ans { height: .4in; }
+  /* Partial-products working, for 2-digit x 1-digit before the short method. */
+  .vert .part { font-size: 11pt; color: var(--muted); }
+  /* A row of worked examples that fade — see lib/formats.js faded(). The
+     caption is what makes the fade legible: without it the third one looks like
+     a question somebody forgot to number. */
+  .egrow { display: flex; gap: .34in; align-items: flex-start; margin: 0 0 4px; }
+  .eg { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; }
+  .eglab { font-size: 8.5pt; color: var(--slate); letter-spacing: .02em; }
+
+  /* The carried digits. Small and grey so the sum still reads as the sum, and
+     tight to the row below it so a carry sits ON the column it goes into. */
+  .vert .carry { font-size: 9pt; color: var(--slate); line-height: 1; padding: 0 0 1px 0; }
+
+  .horiz { font-size: 14pt; white-space: nowrap; }
+
+  /* Row numbers in a word list. Gray and small: they are there so a list can be
+     dictated ("number seven") and marked without counting down the page, and
+     they must not compete with the word itself. */
+  .wn { color: var(--muted); font-size: 9pt; }
+
+  /* The box an answer goes in. inline-block so it can sit mid-sentence. */
+  .abox {
+    display: inline-block; border: 1.6px solid var(--slate); border-radius: 3px;
+    vertical-align: middle; margin: 0 3px; position: relative; background: #fff;
+  }
+  /* Scoped to the box: as a bare ".alab" it pinned any generator's own .alab
+     to the bottom of the page (life-07-signs-and-forms 40, 2026-09-24). */
+  .abox > .alab {
+    position: absolute; bottom: 1px; left: 0; right: 0;
+    text-align: center; font-size: 7pt; color: var(--muted); font-style: italic;
+  }
+
+  /* Confidence marks. The rings are drawn with a border and a gradient rather
+     than an SVG so they stay inline with the question text at any font size,
+     and print black on a mono laser without relying on a background image. */
+  .conf { float: right; margin: 2px 0 0 8px; white-space: nowrap; }
+  .cring {
+    display: inline-block; width: 11px; height: 11px; margin-left: 4px;
+    border: 1.4px solid var(--slate); border-radius: 50%; vertical-align: middle;
+  }
+  .cring-full { background: var(--accent); }
+  .cring-half { background: linear-gradient(90deg, var(--accent) 50%, #fff 50%); }
+  .cring-none { background: #fff; }
+  ol.qs.hasconf li { overflow: hidden; }
+
+  .conflegend {
+    border: 1.2px solid var(--rule); border-radius: 4px;
+    padding: 3px 8px; margin: 0 0 7px;
+    font-size: 8.5pt; color: var(--muted); display: flex; gap: 14px; align-items: center;
+  }
+  .conftitle { font-weight: 700; color: var(--ink); }
+  .confitem { white-space: nowrap; }
+
+  .work {
+    border: 1.4px dashed var(--rule); border-radius: 4px;
+    margin: 6px 0 2px; position: relative;
+  }
+  /* The label S.work() puts in the box: a DIRECT child only. As ".work span"
+     it also caught every span inside any generator's own .work content and
+     stacked them all at the top-left corner (math-11-grade6 47, 2026-09-23). */
+  .work > span {
+    position: absolute; top: 3px; left: 6px;
+    font-size: 8pt; color: var(--muted); font-style: italic;
+  }
+
+  /* ------------------------------------------------------ writing lines */
+  /* Primary rule: solid top, dashed midline, heavy baseline. Capitals reach
+     the top line, lowercase bodies sit under the dashed one. */
+  .write {
+    position: relative; height: 0.375in;
+    margin: 6px 0 0 .3in;
+    border-top: 1px solid var(--rule); border-bottom: 2px solid var(--ink);
+  }
+  .write.flush { margin-left: 0; }
+  .write + .write { margin-top: .17in; }
+  .write::after {
+    content: ""; position: absolute; left: 0; right: 0; top: 50%;
+    border-top: 1px dashed var(--guide);
+  }
+
+  /* ------------------------------------------------------- question list */
+  ol.qs { margin: 0; padding: 0 0 0 .34in; }
+  ol.qs li { margin-bottom: 13px; page-break-inside: avoid; }
+  ol.qs li::marker { font-weight: bold; font-size: 11pt; color: var(--accent); }
+  .qt { display: block; }
+
+  .mcq { display: grid; gap: 3px 14px; margin: 5px 0 2px .12in; font-size: 11pt; }
+  .opt { white-space: nowrap; }
+
+  /* -------------------------------------------------------------- tables */
+  .tbl { border-collapse: collapse; margin: 8px 0; font-size: 11pt; width: 100%; }
+  .tbl th, .tbl td { border: 1.4px solid var(--ink); padding: 5px 8px; text-align: left; }
+  .tbl th { color: var(--slate); }
+  .tbl th { background: var(--tint); font-size: 10pt; letter-spacing: .02em; }
+  .tbl td.blank { height: .34in; }
+  .tbl.narrow { width: auto; }
+  .tbl.center td, .tbl.center th { text-align: center; }
+
+  /* ------------------------------------------------------------ passages */
+  .passage {
+    border: 1.5px solid var(--slate); border-radius: 4px;
+    padding: 11px 14px; margin-bottom: 12px;
+    font-size: 11.5pt; line-height: 1.55;
+  }
+  .passage h2 { font-size: 13pt; margin: 0 0 6px; color: var(--deep); }
+  .passage p { margin: 0 0 8px; }
+  .passage p:last-child { margin-bottom: 0; }
+  .passage .byline { font-size: 9.5pt; font-style: italic; color: var(--muted); margin-bottom: 8px; }
+  /* Numbered paragraphs, so a question can say "in paragraph 2". */
+  .passage p.np { position: relative; padding-left: .3in; }
+  .passage p.np::before {
+    content: attr(data-p); position: absolute; left: 0; top: 0;
+    font-size: 9pt; color: var(--accent); font-weight: bold;
+  }
+
+  .wordbank {
+    border: 1.5px dashed var(--slate); border-radius: 4px;
+    padding: 8px 12px; margin: 10px 0 12px;
+    font-size: 11.5pt; text-align: center;
+  }
+  .wordbank b { display: block; font-size: 9.5pt; letter-spacing: .06em;
+    text-transform: uppercase; margin-bottom: 4px; color: var(--accent); }
+  .wordbank span { display: inline-block; margin: 2px 11px; }
+
+  .note {
+    border-left: 4px solid var(--deep); background: var(--tintdeep);
+    padding: 7px 11px; margin: 10px 0; font-size: 10.5pt;
+  }
+  .note b { letter-spacing: .02em; }
+
+  /* -------------------------------------------------------------- footer */
+  /* THE WORDMARK SITS IN THE FOOTER THAT WAS ALREADY THERE, so it costs no
+     height at all — a sheet that fitted before fits now. Upright where the rest
+     of the line is italic, and a size down: it is a signature, not a message,
+     and it must never compete with "Score: ___ / 10". */
+  .brand { font-style: normal; font-size: 7.5pt; letter-spacing: .04em;
+    color: var(--accent); align-self: center; }
+
+  footer {
+    margin-top: 14px; padding-top: 6px; border-top: 1px solid var(--rule);
+    font-size: 9pt; font-style: italic; color: var(--muted);
+    display: flex; justify-content: space-between;
+  }
+
+  /* ---------------------------------------------------------- answer key */
+  .keybadge {
+    display: inline-block; border: 2px solid var(--deep); color: var(--deep); padding: 2px 9px;
+    font-size: 9.5pt; font-weight: bold; letter-spacing: .08em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .key .why {
+    display: block; font-size: 9pt; font-style: italic; color: var(--muted); margin-top: 1px;
+  }
+  /* Highlight rather than underline: <u> in a key marks WHAT CHANGED, and an
+     underline under a comma is invisible. */
+  .key u { text-decoration: none; background: var(--tint); padding: 0 2px; font-weight: bold; }
+  .keygrid .pbody { font-family: "Trebuchet MS", "Segoe UI", Tahoma, Verdana, sans-serif; font-size: 12pt; }
+  /* A key's pictures scale to their column: at 1fr a wide drawing pushed a
+     three-column key 92px off the paper (art-04-drawing 10, 2026-09-24). */
+  .keygrid svg { max-width: 100%; height: auto; }
+  .keylist .qt { font-weight: normal; }
+
+  /*
+   * The guide page. Four lines per question, and the ASK line is the one that
+   * gets used at the table, so it is the one with a rule beside it — a parent
+   * scanning this page in ten seconds should land on the follow-up question
+   * and nothing else.
+   */
+  .guide { padding-left: .3in; }
+  .guide li { margin-bottom: 11px; page-break-inside: avoid; }
+  .guide .gq { font-weight: bold; font-size: 11pt; margin-bottom: 3px; }
+  /* 9pt, matching the key's own why line, because the guide page is the
+     binding constraint on every open sheet: four lines per question against a
+     key's one, and at 10pt a sheet with seven questions ran onto a second
+     side. Found by measuring, not chosen. (No backticks in here — this CSS
+     lives inside a template literal and one would close it.) */
+  .guide .glook, .guide .gthin, .guide .gstrong {
+    font-size: 9pt; line-height: 1.3; margin-top: 1px;
+  }
+  .guide .gthin { color: var(--muted); }
+  .guide .gstrong { color: var(--muted); font-style: italic; }
+  .guide .gask {
+    font-size: 9.5pt; line-height: 1.3; margin-top: 3px;
+    border-left: 3px solid var(--slate); padding-left: 7px;
+  }
+  .key .qs li { margin-bottom: 9px; }
+
+  /*
+   * INLINE-BLOCK, NOT BLOCK, AND THIS WAS WRONG FOR A LONG TIME. A block-level
+   * svg ignores text-align: center on its parent and sits flush left — so 117
+   * sheets across 35 packs said "centre this diagram" and got a left-aligned
+   * one. Twenty-five of them were origami and paper-plane fold sequences, where
+   * the whole page is diagrams.
+   *
+   * Nobody spotted it because a left-flush diagram looks deliberate; it only
+   * reads as wrong next to a centered one, and no sheet has both.
+   *
+   * inline-block makes text-align do what every one of those authors meant,
+   * and leaves a diagram in a left-aligned container exactly where it was.
+   * vertical-align: top kills the baseline gap that inline elements otherwise
+   * leave underneath them, which would have pushed long pages over.
+   */
+  svg { display: inline-block; vertical-align: top; }
+  svg.inline { vertical-align: middle; }
+
+  .tasknum { font-size: 11pt; margin: 14px 0 2px; }
+  .tasknum b { font-size: 12.5pt; }
+  .strip { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin: 12px 0 8px; }
+  .strip .ch { border: 2px solid var(--ink); border-radius: 7px; padding: 5px 2px 3px;
+    width: .82in; text-align: center; }
+  .strip .ch .n { display: block; font-size: 11pt; color: var(--muted); margin-top: 1px; }
+  .sortcols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 10px 0; }
+  .sortcols .col { border: 2.2px solid var(--ink); border-radius: 9px; padding: 8px 9px; }
+  .sortcols .col h4 { margin: 0 0 3px; font-size: 12pt; }
+  .sortcols .col .hint { font-size: 10pt; color: var(--muted); display: block; margin-bottom: 6px; }
+  .sortcols .col .slot { border-bottom: 1.6px solid var(--rule); height: .42in; margin-top: 7px; }
+  .jobs { display: grid; grid-template-columns: .8in 1fr; gap: 10px 13px; align-items: center;
+    border: 2.2px solid var(--ink); border-radius: 9px; padding: 10px 13px; margin: 9px 0; }
+  .jobs .s { text-align: center; }
+  /* the dakuten rows read ACROSS — a narrow column wraps them into a stack and
+   * the whole point (this sign, plus dots, becomes that sign) disappears */
+  .jobs.dots { grid-template-columns: 2.5in 1fr; }
+  .jobs.dots .s { white-space: nowrap; }
+  .jobs .t { font-size: 12pt; }
+  .deriv { display: grid; grid-template-columns: .95in 22px 1fr 1fr; gap: 8px; align-items: center;
+    border: 2.2px solid var(--ink); border-radius: 9px; padding: 9px 12px; margin: 9px 0; }
+  .deriv .arrow { font-size: 15pt; color: var(--muted); text-align: center; }
+  .deriv .kid { text-align: center; }
+  .deriv .kid .how { display: block; font-size: 10pt; color: var(--muted); margin-top: 2px; line-height: 1.25; }
+  .deriv .blank { border: 2.2px dashed var(--rule); border-radius: 8px; height: .9in; }
+  .ktable { border-collapse: collapse; width: 100%; margin: 6px 0; }
+  .ktable td, .ktable th { border: 1.4px solid var(--rule); text-align: center; padding: 3px 1px; }
+  .ktable th { font-size: 9pt; color: var(--muted); font-weight: normal; }
+  .ktable td .r { display: block; font-size: 8pt; color: var(--muted); margin-top: -2px; }
+  .ktable td.hole { background: repeating-linear-gradient(45deg, transparent, transparent 4px, var(--rule) 4px, var(--rule) 5px); }
+  .beats { display: grid; grid-template-columns: 1.5in 1fr .7in; gap: 12px; align-items: center;
+    border: 2.2px solid var(--ink); border-radius: 9px; padding: 9px 12px; margin: 8px 0; }
+  .beats .box { border: 2.2px solid var(--ink); border-radius: 7px; height: .38in; }
+  .decode { border: 2.2px solid var(--ink); border-radius: 9px; padding: 10px 12px; margin: 10px 0; }
+  .decode .signs { display: flex; gap: 6px; align-items: flex-end; }
+  .decode .sign { text-align: center; }
+  .decode .sign .slot { border-bottom: 1.6px solid var(--ink); height: .34in; width: .7in; margin-top: 4px; }
+  .decode .guess { margin-top: 9px; font-size: 10.5pt; }
+  .decode .guess .lines { border-bottom: 1.6px solid var(--ink); height: .34in; margin-top: 5px; }
+  .label { border: 3px solid var(--ink); border-radius: 11px; padding: 14px 18px; margin: 12px auto;
+    max-width: 4.4in; }
+  .label .top { text-align: center; border-bottom: 2.2px solid var(--ink); padding-bottom: 8px; margin-bottom: 9px; }
+  .label .row { display: flex; align-items: flex-end; justify-content: space-between; gap: 10px;
+    padding: 6px 0; border-bottom: 1.4px dotted var(--rule); }
+  .label .row .price { font-size: 12pt; white-space: nowrap; }
+  .telegram { border: 2.6px solid var(--ink); border-radius: 9px; padding: 12px 14px; margin: 11px 0;
+    text-align: center; }
+  .telegram .gapmark { display: inline-block; width: .5in; border-bottom: 2.2px dashed var(--rule);
+    margin: 0 3px 6px; vertical-align: bottom; }
+
+</style>
+</head>
+<body>
+
+<div class="page ">
+  <header>
+    
+    <h1>Why There Are Three</h1>
+    <p class="sub">Japanese &middot; Page 1 of 4</p>
+  </header>
+  <div class="nameline">
+    <span>Name</span>
+    <span class="short">Date</span>
+  </div>
+  <div class="directions">
+    <b>DIRECTIONS:</b> Read how the three systems began. The work starts on page 2.
+  </div>
+
+<div class="plan" style="display:flex;align-items:stretch;gap:.08in;margin:.02in 0 .1in"><div style="flex:1;display:flex;align-items:center;gap:.07in;border:1.8px solid var(--ink);border-radius:5px;padding:.05in .08in"><span style="flex:0 0 auto;display:inline-block;width:.26in;height:.26in;line-height:.26in;border-radius:50%;background:var(--ink);color:#fff;text-align:center;font-weight:700;font-size:11pt">1</span><span style="font-size:10.5pt;font-weight:700;line-height:1.2">Read how the three began</span></div><div style="align-self:center;font-size:16pt;font-weight:700;color:var(--ink)">&rarr;</div><div style="flex:1;display:flex;align-items:center;gap:.07in;border:1.8px solid var(--ink);border-radius:5px;padding:.05in .08in"><span style="flex:0 0 auto;display:inline-block;width:.26in;height:.26in;line-height:.26in;border-radius:50%;background:var(--ink);color:#fff;text-align:center;font-weight:700;font-size:11pt">2</span><span style="font-size:10.5pt;font-weight:700;line-height:1.2">Page 2: draw two signs</span></div><div style="align-self:center;font-size:16pt;font-weight:700;color:var(--ink)">&rarr;</div><div style="flex:1;display:flex;align-items:center;gap:.07in;border:1.8px solid var(--ink);border-radius:5px;padding:.05in .08in"><span style="flex:0 0 auto;display:inline-block;width:.26in;height:.26in;line-height:.26in;border-radius:50%;background:var(--ink);color:#fff;text-align:center;font-weight:700;font-size:11pt">3</span><span style="font-size:10.5pt;font-weight:700;line-height:1.2">Pages 3–4: four questions</span></div></div>
+  <div class="note"><b>About 1,500 years ago Japan borrowed China&rsquo;s characters.</b> They didn&rsquo;t fit:
+  Japanese words change their endings (like <i>walk, walked, walking</i>, only far more), and a character
+  cannot write an ending. So two more systems were built out of the characters themselves.</div>
+
+  <div class="note" style="margin-top:10px;font-size:12.5pt"><span style="display:inline-flex;align-items:flex-end;vertical-align:-0.16em" aria-label="加"><svg viewBox="0 0 100 100" width="32" height="32" role="img" aria-label="加"><path d="M57.2 16.4L57.2 94.5L64.4 94.5L64.4 87.1L83.8 87.1L83.8 93.7L91.3 93.7L91.3 16.4M64.4 79.9L64.4 23.7L83.8 23.7L83.8 79.9M19.5 5.3L19.4 23L5.3 23L5.3 30.3L19.2 30.3C18.5 55.5 15.4 77.7 2.8 90.9C4.7 92.1 7.4 94.4 8.6 96.1C22.1 81.4 25.6 57.4 26.5 30.3L41.7 30.3C40.9 68.8 40 82.5 37.9 85.4C37 86.7 36 87.1 34.5 87C32.7 87 28.4 87 23.7 86.6C25 88.7 25.7 91.9 25.9 94.1C30.4 94.4 35 94.5 37.8 94.1C40.7 93.7 42.6 92.8 44.4 90.2C47.5 85.9 48.2 71.3 49 26.8C49 25.7 49 23 49 23L26.7 23L26.9 5.3" fill="#16130F"/></svg></span> means &ldquo;add&rdquo; and was used for its sound, <i>ka</i>:</div>
+
+    <div class="deriv">
+    <div class="kid"><svg viewBox="0 0 100 100" width="76" height="76" role="img" aria-label="加"><path d="M57.2 16.4L57.2 94.5L64.4 94.5L64.4 87.1L83.8 87.1L83.8 93.7L91.3 93.7L91.3 16.4M64.4 79.9L64.4 23.7L83.8 23.7L83.8 79.9M19.5 5.3L19.4 23L5.3 23L5.3 30.3L19.2 30.3C18.5 55.5 15.4 77.7 2.8 90.9C4.7 92.1 7.4 94.4 8.6 96.1C22.1 81.4 25.6 57.4 26.5 30.3L41.7 30.3C40.9 68.8 40 82.5 37.9 85.4C37 86.7 36 87.1 34.5 87C32.7 87 28.4 87 23.7 86.6C25 88.7 25.7 91.9 25.9 94.1C30.4 94.4 35 94.5 37.8 94.1C40.7 93.7 42.6 92.8 44.4 90.2C47.5 85.9 48.2 71.3 49 26.8C49 25.7 49 23 49 23L26.7 23L26.9 5.3" fill="#16130F"/></svg><span class="how">add</span></div>
+    <div class="arrow">&rarr;</div>
+    <div class="kid"><svg viewBox="0 0 100 100" width="66" height="66" role="img" aria-label="か"><path d="M78.2 20.6L70.9 23.9C78 32.2 85.8 49.8 88.7 60.1L96.5 56.4C93.1 47.1 84.4 28.7 78.2 20.6M7.8 31.9L8.6 40.6C11.2 40.2 15.3 39.7 17.6 39.4L30.3 38C26.9 51.4 19.4 74.2 9.2 87.9L17.4 91.1C27.9 74.2 34.7 51.6 38.4 37.2C42.8 36.8 46.8 36.5 49.2 36.5C55.5 36.5 59.8 38.2 59.8 47.4C59.8 58.2 58.2 71.2 55 78C53 82.3 50 83.1 46.3 83.1C43.5 83.1 38.2 82.4 34 81.1L35.3 89.4C38.5 90.2 43.3 90.9 47.1 90.9C53.6 90.9 58.5 89.2 61.7 82.5C65.9 74.2 67.5 58.3 67.5 46.4C67.5 32.9 60.2 29.5 51.3 29.5C48.9 29.5 44.7 29.8 40 30.2L42.6 15.9C43 14 43.4 11.8 43.8 10L34.5 9C34.5 15.8 33.5 23.6 31.9 30.8C25.9 31.3 20 31.8 16.7 31.9C13.5 32 10.9 32.1 7.8 31.9" fill="#16130F"/></svg><span class="how">the whole character, written fast until it went round</span></div>
+    <div class="kid"><svg viewBox="0 0 100 100" width="66" height="66" role="img" aria-label="カ"><path d="M85.5 30.1L79.9 27.3C78.2 27.6 76.2 27.8 73.5 27.8L49.7 27.8C49.9 24.5 50.1 21.1 50.2 17.5C50.3 15.1 50.5 11.6 50.8 9.3L41.4 9.3C41.8 11.7 42.1 15.4 42.1 17.6C42.1 21.2 41.9 24.6 41.7 27.8L24.1 27.8C20.3 27.8 16.2 27.6 12.7 27.2L12.7 35.7C16.2 35.3 20.3 35.3 24.2 35.3L41 35.3C38.3 55.9 31.1 68.4 21.2 77.4C18.2 80.3 14.1 83.1 10.9 84.8L18.2 90.7C34.9 79.2 45.3 64 48.9 35.3L76.9 35.3C76.9 46 75.6 70.6 71.8 78.2C70.7 80.7 68.9 81.5 66 81.5C61.8 81.5 56.5 81.1 51.1 80.4L52.1 88.7C57.3 89 63.1 89.4 68.2 89.4C73.7 89.4 76.9 87.5 78.9 83.3C83.4 73.7 84.6 44.6 85 35C85 33.7 85.2 31.8 85.5 30.1" fill="#16130F"/></svg><span class="how">the left-hand piece <span style="display:inline-block;vertical-align:-0.18em"><svg viewBox="0 0 100 100" width="14" height="14" role="img" aria-label="力"><path d="M41 4.2L41 21.5L41 25.8L8.3 25.8L8.3 33.5L40.6 33.5C39.1 52.3 32.5 74.3 5.3 90.5C7.2 91.8 9.9 94.6 11.1 96.4C40.2 78.7 47 54.3 48.4 33.5L82.7 33.5C80.7 68.8 78.5 83 74.9 86.4C73.7 87.7 72.4 88 70.3 88C67.8 88 61.4 87.9 54.5 87.3C56 89.5 56.9 92.8 57.1 95C63.3 95.3 69.7 95.5 73.1 95.2C77 94.8 79.3 94.1 81.7 91.1C86.2 86.2 88.2 71.2 90.5 29.8C90.6 28.7 90.7 25.8 90.7 25.8L48.8 25.8L48.8 21.5L48.8 4.2" fill="#16130F"/></svg></span>, snapped off and kept</span></div>
+  </div>
+
+  <div class="note"><b>Hiragana:</b> written fast for centuries until the corners rounded off. That is why it is loopy.</div>
+
+  <div class="note" style="margin-top:10px"><b>Katakana:</b> one piece snapped off and the rest thrown away. That is why it is sharp.</div>
+
+  <footer>
+    <span>Two syllabaries out of one set of characters</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Why there are three</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>Same Parent, Two Children</h1>
+    <p class="sub">Japanese &middot; Page 2 of 4</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Each kanji made two signs. Study the first three rows, then draw the missing sign in each empty box.
+    <div class="tip">Loopy: the whole kanji written fast. Sharp: one piece of it.</div>
+  </div>
+
+  <div class="deriv">
+    <div class="kid"><svg viewBox="0 0 100 100" width="76" height="76" role="img" aria-label="宇"><path d="M7.2 56.1L7.2 63.3L45.8 63.3L45.8 86.4C45.8 88.1 45.2 88.6 43.2 88.7C41.2 88.8 34.2 88.8 26.9 88.6C28.1 90.6 29.6 93.9 30.1 96C39.2 96 45.1 95.9 48.7 94.7C52.4 93.5 53.7 91.4 53.7 86.5L53.7 63.3L93.1 63.3L93.1 56.1L53.7 56.1L53.7 40.7L78.4 40.7L78.4 33.6L21.4 33.6L21.4 40.7L45.8 40.7L45.8 56.1M7.5 14.6L7.5 37.5L14.9 37.5L14.9 21.7L84.9 21.7L84.9 37.5L92.6 37.5L92.6 14.6L53.7 14.6L53.7 4L45.8 4L45.8 14.6" fill="#16130F"/></svg><span class="how">roof, heaven</span></div>
+    <div class="arrow">&rarr;</div>
+    <div class="kid"><svg viewBox="0 0 100 100" width="66" height="66" role="img" aria-label="う"><path d="M72 54.7C72 72.6 54.9 82.2 30.6 85.2L35.1 92.8C61 88.9 80.5 76.7 80.5 55C80.5 40.7 69.9 32.8 55.7 32.8C44.2 32.8 32.8 36 25.8 37.6C22.8 38.3 19.4 38.9 16.6 39.1L19.2 48.4C21.6 47.4 24.5 46.3 27.6 45.3C33.5 43.6 43.3 40.3 54.9 40.3C65.2 40.3 72 46.3 72 54.7M30 9.7L28.7 17.3C40 19.3 60.2 21.3 71.3 22L72.5 14.3C62.7 14.2 41 12.2 30 9.7" fill="#16130F"/></svg><span class="how">the whole character, worn down to a curve</span></div>
+    <div class="kid"><svg viewBox="0 0 100 100" width="66" height="66" role="img" aria-label="ウ"><path d="M88.2 27.3L82.8 23.9C81.5 24.4 79.6 24.7 75.9 24.7L53.5 24.7L53.5 15.4C53.5 13.3 53.6 11 54.1 7.9L44.5 7.9C44.9 11 45 13.3 45 15.4L45 24.7L22.9 24.7C19.4 24.7 16.5 24.6 13.6 24.3C13.9 26.5 13.9 29.9 13.9 32C13.9 35.5 13.9 46.4 13.9 49.6C13.9 51.5 13.8 54.2 13.6 56L22.3 56C22 54.4 21.9 51.8 21.9 50C21.9 47 21.9 36.3 21.9 32.1L77.8 32.1C76.9 40.7 73.7 52.8 68.3 61.3C62.2 70.8 51.2 78.2 41.2 81.4C38 82.6 34.2 83.7 30.8 84.2L37.3 91.7C55.6 86.7 69.4 76.5 76.9 63.4C82.5 53.8 85.4 41.3 86.7 33.3C87.1 31.4 87.7 28.8 88.2 27.3" fill="#16130F"/></svg><span class="how">only the lid on top</span></div>
+  </div>
+  <div class="deriv">
+    <div class="kid"><svg viewBox="0 0 100 100" width="76" height="76" role="img" aria-label="天"><path d="M6 11.7L6 19.4L45.3 19.4L45.3 37.2L45.2 42.8L9.1 42.8L9.1 50.5L44.3 50.5C41.6 65.1 32.7 79.9 4.1 89.7C5.6 91.2 7.9 94.3 8.7 96.2C35.5 87 46.4 73.2 50.7 58.7C58.3 77.8 70.9 90.3 91.4 96.2C92.6 94 94.8 90.8 96.5 89.2C74.9 83.8 62 70.3 55.5 50.5L91.4 50.5L91.4 42.8L53.2 42.8L53.3 37.2L53.3 19.4L93.9 19.4L93.9 11.7" fill="#16130F"/></svg><span class="how">heaven</span></div>
+    <div class="arrow">&rarr;</div>
+    <div class="kid"><svg viewBox="0 0 100 100" width="66" height="66" role="img" aria-label="て"><path d="M8.5 21.6L9.4 30.3C20.2 28 45.7 25.6 56.4 24.4C47.2 29.9 37.7 42.6 37.7 58.2C37.7 80.5 58.8 90.4 77.3 91.1L80.2 82.8C63.9 82.2 45.7 76 45.7 56.4C45.7 44.6 54.4 29.4 68.6 24.8C73.7 23.3 82.5 23.2 88.2 23.2L88.2 15.2C81.5 15.5 72.1 16 61.2 17C42.8 18.5 23.9 20.4 17.4 21.1C15.5 21.3 12.3 21.5 8.5 21.6" fill="#16130F"/></svg><span class="how">the whole character in one running stroke</span></div>
+    <div class="kid"><svg viewBox="0 0 100 100" width="66" height="66" role="img" aria-label="テ"><path d="M21.5 14L21.5 22.3C24 22.1 27.3 22 30.6 22C36.3 22 65.5 22 71 22C73.9 22 77.4 22.1 80.3 22.3L80.3 14C77.4 14.4 73.8 14.6 71 14.6C65.5 14.6 36.3 14.6 30.5 14.6C27.3 14.6 24.3 14.3 21.5 14M9.5 39.1L9.5 47.4C12.3 47.2 15.2 47.2 18.2 47.2L48.2 47.2C47.9 56.6 46.8 65 42.4 72C38.5 78.3 31.3 84.1 23.5 87.3L30.9 92.8C39.4 88.4 47 81.2 50.6 74.5C54.6 67.1 56.2 58 56.5 47.2L83.7 47.2C86.1 47.2 89.3 47.3 91.5 47.4L91.5 39.1C89.1 39.5 85.8 39.6 83.7 39.6C78.4 39.6 24 39.6 18.2 39.6C15.1 39.6 12.3 39.4 9.5 39.1" fill="#16130F"/></svg><span class="how">the top of it, cut off and kept</span></div>
+  </div>
+  <div class="deriv">
+    <div class="kid"><svg viewBox="0 0 100 100" width="76" height="76" role="img" aria-label="保"><path d="M45.2 15.4L82.4 15.4L82.4 33.8L45.2 33.8M38 8.7L38 40.6L59.8 40.6L59.8 53L30.6 53L30.6 59.9L55.4 59.9C48.6 70.5 38 80.6 27.7 85.7C29.4 87.1 31.7 89.8 32.9 91.6C42.7 85.9 52.8 75.9 59.8 64.8L59.8 96L67.3 96L67.3 64.5C74 75.5 83.6 86 92.8 91.8C94.1 89.9 96.4 87.3 98.1 85.8C88.4 80.6 78.2 70.5 71.8 59.9L95.4 59.9L95.4 53L67.3 53L67.3 40.6L89.9 40.6L89.9 8.7M27.7 4.3C21.9 19.4 12.3 34.3 2.3 43.9C3.6 45.6 5.8 49.6 6.5 51.3C10.2 47.6 13.8 43.2 17.3 38.4L17.3 95.7L24.5 95.7L24.5 27.3C28.4 20.7 31.9 13.6 34.7 6.5" fill="#16130F"/></svg><span class="how">keep</span></div>
+    <div class="arrow">&rarr;</div>
+    <div class="kid"><svg viewBox="0 0 100 100" width="66" height="66" role="img" aria-label="ほ"><path d="M25.5 12.2L16.6 11.4C16.6 13.5 16.3 16.2 16 18.5C14.7 26.7 11.5 45.4 11.5 60.1C11.5 73.6 13.2 84.6 15.3 91.7L22.4 91.2C22.3 90.1 22.2 88.7 22.1 87.7C22.1 86.5 22.3 84.6 22.6 83.2C23.6 78.3 27.2 68 29.7 61.1L25.6 57.8C23.9 61.9 21.4 68.2 19.8 72.8C19.2 67.9 18.9 63.5 18.9 58.7C18.9 47.5 21.7 28.1 23.7 18.8C24.1 17 24.9 13.8 25.5 12.2M66.3 70L66.4 74.2C66.4 79.5 64.5 83.5 56.6 83.5C49.6 83.5 45.2 81 45.2 76C45.2 71.7 49.9 68.7 57 68.7C60.1 68.7 63.2 69.2 66.3 70M42.6 16.3L42.6 23.3C50 23.7 57.8 23.7 65.2 23.4L65.2 40C57.4 40.2 49.2 40.1 41.1 39.5L41.1 46.8C49.1 47.2 57.4 47.3 65.2 47C65.4 52.3 65.7 58.3 66 63.4C63.2 63 60.3 62.7 57.2 62.7C44 62.7 38.1 69.4 38.1 76.4C38.1 85.8 46.3 90.4 57.3 90.4C68.1 90.4 73.7 85.7 73.7 77.6L73.6 72.8C79.6 75.7 85.3 79.9 90.3 85.1L94.6 78.1C89.6 73.7 82.6 68.3 73.2 65.3C72.9 59.5 72.5 53.1 72.4 46.8C79.4 46.4 85.8 45.9 91.1 45.3L91.1 38C85.5 38.7 79.2 39.3 72.4 39.6L72.4 23.1C78.6 22.8 84.2 22.4 88.8 21.9L88.8 14.9C77.1 16.5 58.7 17.5 42.6 16.3" fill="#16130F"/></svg><span class="how">the whole character, collapsed</span></div>
+    <div class="kid"><svg viewBox="0 0 100 100" width="66" height="66" role="img" aria-label="ホ"><path d="M34.2 50L27.2 46.6C23.3 54.7 14.8 66.6 8.1 72.7L15 77.4C20.7 71.3 30 58.5 34.2 50M76 46.6L69.2 50.3C74.5 56.6 82 69 85.9 76.9L93.3 72.8C89.3 65.6 81.4 53 76 46.6M11.2 26.4L11.2 34.9C13.9 34.6 16.7 34.5 19.8 34.5L47.5 34.5L47.5 35.3C47.5 40 47.5 74.2 47.5 79.6C47.5 82.3 46.3 83.4 43.6 83.4C41 83.4 36.5 83.1 32.1 82.3L32.8 90.2C36.9 90.7 42.8 90.9 47 90.9C53.1 90.9 55.6 88.2 55.6 83C55.6 75.8 55.6 43.4 55.6 35.3L55.6 34.5L82.1 34.5C84.5 34.5 87.5 34.6 90.2 34.8L90.2 26.5C87.7 26.8 84.4 27 82 27L55.6 27L55.6 16.7C55.6 14.6 56 11 56.2 9.6L46.8 9.6C47.2 11.1 47.5 14.6 47.5 16.7L47.5 27L19.7 27C16.5 27 14 26.8 11.2 26.4" fill="#16130F"/></svg><span class="how">the <span style="display:inline-block;vertical-align:-0.18em"><svg viewBox="0 0 100 100" width="14" height="14" role="img" aria-label="木"><path d="M46 4.1L46 28.6L6.7 28.6L6.7 36.1L42.5 36.1C33.5 53.5 18.2 70.6 2.8 79C4.6 80.5 7.1 83.4 8.4 85.3C22.6 76.7 36.4 61.3 46 44.2L46 96L53.9 96L53.9 44.1C63.7 60.7 77.5 76.4 91.3 85.1C92.6 83 95.2 80.1 97 78.6C81.9 70.2 66.3 53.1 57.2 36.1L93.5 36.1L93.5 28.6L53.9 28.6L53.9 4.1" fill="#16130F"/></svg></span> hiding in the bottom right</span></div>
+  </div>
+
+  <div class="tasknum"><b>1.</b> One sign is missing from each of these two rows. Draw it in the empty box.</div>
+    <div class="deriv">
+    <div class="kid"><svg viewBox="0 0 100 100" width="76" height="76" role="img" aria-label="世"><path d="M72.5 5.7L72.5 29L53.6 29L53.6 4.5L46.1 4.5L46.1 29L27.4 29L27.4 6.7L19.8 6.7L19.8 29L4.7 29L4.7 36.3L19.8 36.3L19.8 96L27.4 96L27.4 88.6L92.2 88.6L92.2 81.4L27.4 81.4L27.4 36.3L46.1 36.3L46.1 69.2L53.6 69.2L53.6 64.3L72.5 64.3L72.5 68.7L80 68.7L80 36.3L95.6 36.3L95.6 29L80 29L80 5.7M53.6 36.3L72.5 36.3L72.5 57.3L53.6 57.3" fill="#16130F"/></svg><span class="how">world</span></div>
+    <div class="arrow">&rarr;</div>
+    <div class="kid"><svg viewBox="0 0 100 100" width="66" height="66" role="img" aria-label="せ"><path d="M4.5 38L5.4 46.2C8.1 45.8 12.4 45.2 15.5 44.8L26.2 43.6C26.2 53.6 26.2 64.2 26.3 68.5C26.8 84.4 29 89.7 52.1 89.7C62.2 89.7 74.4 88.8 81.1 88.1L81.4 79.6C74.9 80.8 62.5 82 51.7 82C34.4 82 34.2 78.2 33.9 67.4C33.8 63.5 33.8 53.1 33.9 42.8C43.9 41.8 55.6 40.6 65.9 39.8C65.7 46.1 65.3 52.9 64.8 56.2C64.5 58.5 63.4 58.9 61 58.9C58.7 58.9 54.4 58.4 51 57.6L50.8 64.5C53.5 65 60.4 65.9 64 65.9C68.6 65.9 70.8 64.6 71.7 60.2C72.7 55.5 72.9 46.6 73.1 39.3C77.5 39 81.3 38.8 84.3 38.7C86.8 38.7 90.6 38.6 92.2 38.7L92.2 30.9C89.8 31 87 31.2 84.4 31.4L73.3 32.1L73.5 18.1C73.6 16 73.7 12.6 74 10.9L65.5 10.9C65.8 12.6 66 16.2 66 18.4L66 32.7C55.3 33.6 43.7 34.7 33.9 35.6L34 22.1C34 19 34.2 16.3 34.4 14L25.7 14C26.1 17.1 26.3 19.4 26.3 22.5L26.2 36.4L14.9 37.4C11.3 37.8 7.6 38 4.5 38" fill="#16130F"/></svg><span class="how">the whole character, rounded off</span></div>
+    <div class="blank"></div>
+  </div>
+    <div class="deriv">
+    <div class="kid"><svg viewBox="0 0 100 100" width="76" height="76" role="img" aria-label="之"><path d="M10.4 95.9C14.7 89.5 18.8 82.1 22.3 75.2C32.1 90.8 47.9 94.3 70.1 94.3L93.5 94.3C93.8 92.1 95.1 88.6 96.3 86.8C91.6 86.9 73.9 86.9 70.5 86.9C57.6 86.9 46.4 85.7 38.1 80.9C57.7 67.6 78.8 45.9 90.5 27L84.9 23.4L83.3 23.8L53.6 23.8L53.6 4.1L46 4.1L46 23.8L9.8 23.8L9.8 31.2L78.1 31.2C67.5 46.6 49 65.1 32 76.2C29.6 73.8 27.6 71 26 67.5L29.1 60.5L21.8 57.6C17.8 68.3 10.3 82.7 3.1 91.6" fill="#16130F"/></svg><span class="how">of (an old word)</span></div>
+    <div class="arrow">&rarr;</div>
+    <div class="blank"></div>
+    <div class="kid"><svg viewBox="0 0 100 100" width="66" height="66" role="img" aria-label="シ"><path d="M30.1 11.2L25.6 17.9C31.5 21.3 42.3 28.5 47.1 32.1L51.8 25.3C47.5 22.1 36 14.5 30.1 11.2M15.1 82.7L19.7 90.8C29 88.9 42.8 84.2 52.9 78.4C68.8 69 82.7 56.1 91.3 42.6L86.5 34.4C78.4 48.5 65.2 61.5 48.6 71C38.5 76.8 26.1 80.8 15.1 82.7M15 33.7L10.6 40.5C16.6 43.6 27.5 50.6 32.4 54.2L37 47.2C32.6 44 20.9 36.9 15 33.7" fill="#16130F"/></svg><span class="how">the three marks at the top</span></div>
+  </div>
+
+  <footer>
+    <span>One complication on page 3 &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Why there are three</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>Not Always the Same Parent</h1>
+    <p class="sub">Japanese &middot; Page 3 of 4</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Read this, then answer.
+  </div>
+
+
+  <div class="note"><b>Not always the same parent.</b> Both of these say <i>a</i>, from different kanji:</div>
+    <div class="deriv">
+    <div class="kid"><svg viewBox="0 0 100 100" width="50" height="50" role="img" aria-label="安"><path d="M8.5 14.6L8.5 36.1L16.1 36.1L16.1 21.6L84.1 21.6L84.1 36.1L92 36.1L92 14.6L53.7 14.6L53.7 3.9L45.8 3.9L45.8 14.6M5.7 42.3L5.7 49.4L30.3 49.4C25.6 58.3 20.8 67 16.9 73.3L24.7 75.4L27.2 71C33.6 73 40.3 75.4 46.9 78C37 84 24.1 87.4 8 89.4C9.5 91.1 11.8 94.4 12.5 96.2C30 93.4 44.2 89 55 81.3C66.5 86.2 77.1 91.5 84.1 96.2L89.7 90C82.6 85.5 72.4 80.5 61.3 76C68.1 69.3 73.1 60.7 76.2 49.4L94.5 49.4L94.5 42.3L42.4 42.3L49.6 27.8L41.9 26.1C39.6 31 36.8 36.6 33.9 42.3M38.8 49.4L67.7 49.4C64.9 59.5 60.3 67.2 53.7 73C45.8 70 37.8 67.3 30.4 65.1" fill="#16130F"/></svg><span class="how">calm, cheap</span></div>
+    <div class="arrow">&rarr;</div>
+    <div class="kid"><svg viewBox="0 0 100 100" width="44" height="44" role="img" aria-label="あ"><path d="M61.3 43.9C57.1 55.1 51 63.2 44.4 69.5C43.3 63.7 42.6 57.6 42.6 51.2L42.7 47.1C47.3 45.4 53.1 43.9 59.6 43.9M72.7 32.9L64.8 30.9C64.7 32.6 64.2 35.2 63.7 36.7L63.4 37.7L59.7 37.6C54.6 37.6 48.5 38.5 42.9 40.1C43.2 35.9 43.5 31.7 43.9 27.8C56.2 27.2 69.5 25.8 80 24L79.9 16.6C69.7 19 57.5 20.3 44.8 20.9L46 13.3C46.3 11.9 46.7 10.1 47.2 8.8L38.8 8.6C38.9 9.8 38.7 11.6 38.6 13.4L37.8 21.1L31 21.2C26.7 21.2 18 20.5 14.5 19.9L14.7 27.4C18.8 27.7 26.6 28.1 30.9 28.1L37 28C36.6 32.7 36.1 37.7 35.9 42.7C22.1 49.1 10.9 62.2 10.9 75.1C10.9 83.6 16.1 87.7 22.7 87.7C28.2 87.7 34.2 85.5 39.7 82.2L41.3 87.8L48.5 85.6C47.7 83.1 46.9 80.4 46.1 77.5C54.6 70.3 62.7 59.2 68.4 45C77.7 47.7 82.8 54.5 82.8 62.1C82.8 75.1 71.6 84.4 53.5 86.3L57.8 93C81 89.3 90.5 76.9 90.5 62.5C90.5 51.5 83.1 42.3 70.6 39L70.7 38.6C71.2 37 72.1 34.3 72.7 32.9M35.6 50.2L35.6 52C35.6 59.5 36.6 67.6 38 74.7C32.9 78.3 28.1 80 24.2 80C20.4 80 18.5 77.9 18.5 73.8C18.5 65.6 25.9 55.7 35.6 50.2" fill="#16130F"/></svg><span class="how">the whole character, written fast until it went round</span></div>
+    <div class="kid" style="font-size:9.5pt;color:var(--muted);text-align:left">hiragana, the sound <b>a</b> (roughly)</div>
+  </div>
+  <div class="deriv">
+    <div class="kid"><svg viewBox="0 0 100 100" width="50" height="50" role="img" aria-label="阿"><path d="M38.1 10.8L38.1 17.9L80.5 17.9L80.5 86.6C80.5 88.6 79.8 89.2 77.6 89.2C75.5 89.4 68.1 89.4 60.2 89.1C61.2 91.1 62.3 94.1 62.7 95.9C73 96 79.1 96 82.7 94.8C86.2 93.8 87.7 91.7 87.7 86.6L87.7 17.9L96.3 17.9L96.3 10.8M41.5 32L41.5 75.9L48 75.9L48 68.3L69.8 68.3L69.8 32M48 38.6L63.1 38.6L63.1 61.8L48 61.8M8.1 8.3L8.1 96L14.8 96L14.8 15.1L28.1 15.1C25.9 21.8 23 30.6 20.1 37.7C27.3 45.7 29.1 52.6 29.1 58.1C29.1 61.1 28.6 64 27 65.1C26.2 65.6 25.1 65.9 23.9 66C22.3 66.1 20.3 66 18.1 65.8C19.2 67.8 19.9 70.7 19.9 72.5C22.2 72.6 24.7 72.6 26.7 72.3C28.7 72.1 30.5 71.5 31.9 70.5C34.7 68.4 35.8 64.2 35.8 58.8C35.8 52.5 34.2 45.3 26.9 36.9C30.3 28.9 33.9 19.1 36.8 10.9L32 8L30.8 8.3" fill="#16130F"/></svg><span class="how">used for its sound only</span></div>
+    <div class="arrow">&rarr;</div>
+    <div class="kid"><svg viewBox="0 0 100 100" width="44" height="44" role="img" aria-label="ア"><path d="M93.1 20.4L88.2 15.7C86.7 16 83.1 16.3 81.2 16.3C75.2 16.3 28.6 16.3 23.8 16.3C20.1 16.3 15.9 15.9 12.4 15.4L12.4 24.5C16.3 24.1 20.1 23.9 23.8 23.9C28.5 23.9 73.8 23.9 80.8 23.9C77.5 30.1 68.1 41 58.9 46.3L65.5 51.6C76.9 43.7 86.4 30.8 90.4 24C91.1 22.9 92.4 21.4 93.1 20.4M53.2 33.6L44.2 33.6C44.5 36.2 44.6 38.4 44.6 40.8C44.6 57.5 42.4 71.8 26.9 81.2C24.1 83.2 20.7 84.8 17.9 85.7L25.3 91.7C50.8 79 53.2 60.7 53.2 33.6" fill="#16130F"/></svg><span class="how">the ear-shaped piece on the left</span></div>
+    <div class="kid" style="font-size:9.5pt;color:var(--muted);text-align:left">katakana, the sound <b>a</b> (roughly)</div>
+  </div>
+
+
+  <div class="note" style="margin-top:10px"><b>Nobody was in charge:</b> different people, places and centuries. So the two mostly line up, not always.</div>
+
+
+  <ol class="qs" start="2"><li><span class="qt">Japanese borrowed Chinese characters and they did not fit. What exactly could the characters <b>not</b> do?</span><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Hiragana is loopy and katakana is sharp. Say why, in one sentence each.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Turn over for the last two &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Why there are three</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>What It Was For</h1>
+    <p class="sub">Japanese &middot; Page 4 of 4</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Answer in your own words.
+  </div>
+
+<ol class="qs" start="4"><li><span class="qt">Look back at <span style="display:inline-flex;align-items:flex-end;vertical-align:-0.16em" aria-label="加"><svg viewBox="0 0 100 100" width="18" height="18" role="img" aria-label="加"><path d="M57.2 16.4L57.2 94.5L64.4 94.5L64.4 87.1L83.8 87.1L83.8 93.7L91.3 93.7L91.3 16.4M64.4 79.9L64.4 23.7L83.8 23.7L83.8 79.9M19.5 5.3L19.4 23L5.3 23L5.3 30.3L19.2 30.3C18.5 55.5 15.4 77.7 2.8 90.9C4.7 92.1 7.4 94.4 8.6 96.1C22.1 81.4 25.6 57.4 26.5 30.3L41.7 30.3C40.9 68.8 40 82.5 37.9 85.4C37 86.7 36 87.1 34.5 87C32.7 87 28.4 87 23.7 86.6C25 88.7 25.7 91.9 25.9 94.1C30.4 94.4 35 94.5 37.8 94.1C40.7 93.7 42.6 92.8 44.4 90.2C47.5 85.9 48.2 71.3 49 26.8C49 25.7 49 23 49 23L26.7 23L26.9 5.3" fill="#16130F"/></svg></span> on page 1. Which of its two children is easier to write quickly, and why?</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">English has one alphabet and does fine. What did Japanese get out of having three systems that English does not have?</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Borrowed, then repaired twice</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Why there are three</span>
+  </footer>
+</div>
+
+</body>
+</html>

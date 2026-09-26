@@ -1,0 +1,759 @@
+<!DOCTYPE html><html><head>
+<meta charset="utf-8">
+<meta name="sheet-kind" content="worksheet">
+<title>When an r Bosses the Vowel</title>
+<style>
+  @page { size: letter portrait; margin: 0.4in 0.45in; }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  :root {
+    --ink:    #16130F;
+    --muted:  #6B635A;
+    --rule:   #CFC3B2;
+    --guide:  #BCAE9C;
+    --accent: #C0511D;
+    --tint:   #F7EDE4;
+    --slate:  #2E5A78;
+    --tintslate: #E9EFF4;
+    --deep:   #2C4A45;
+    --tintdeep: #ECF1EF;
+  }
+
+  body {
+    font-family: Quicksand, 'URW Gothic', 'Century Gothic', sans-serif;
+    color: #000; background: #fff;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+
+  /* ORDER MATTERS. This generic rule must come BEFORE the @media screen block:
+   * both selectors have the same specificity, so whichever is declared last
+   * wins. With it after, it overrode the screen width and the preview stretched
+   * to the viewport — rows scaled up and pages measured 16in tall. Print was
+   * always fine (@media screen doesn't apply), but the on-screen proof lied. */
+  .page { width: 100%; }
+  .page + .page { page-break-before: always; }
+
+  @media screen {
+    body { padding: 0.4in; background: #ddd; }
+    .page {
+      background: #fff; padding: 0.4in 0.45in;
+      width: 8.5in; min-height: 11in;
+      margin: 0 auto 22px; box-shadow: 0 2px 10px rgba(0,0,0,.3);
+    }
+  }
+
+  header {
+    display: flex; align-items: center; gap: 16px;
+    border-bottom: 3px solid var(--slate); padding-bottom: 7px; margin-bottom: 2px;
+  }
+  .bigletter { font-size: 38pt; font-weight: 700; line-height: 1; letter-spacing: .02em; }
+  .htext { flex: 1; }
+  h1 { font-size: 14pt; font-weight: 700; margin: 0 0 2px; }
+  .sub { font-size: 10pt; color: var(--muted); margin: 0; }
+  .nameline {
+    font-size: 9.5pt; color: var(--muted);
+    border-bottom: 1px solid var(--ink); width: 2in;
+    padding-bottom: 1px; align-self: flex-end;
+  }
+
+  .label { font-size: 11.5pt; font-weight: 700; margin: 9px 0 1px; }
+  .label span { font-weight: 400; font-size: 10pt; color: var(--muted); }
+
+  .row { display: block; width: 100%; height: auto; margin-bottom: .06in; }
+  /* Rows that follow the header directly would otherwise jam against its rule. */
+  header + .row { margin-top: .12in; }
+
+  .words {
+    margin-top: 10px; padding-top: 7px; border-top: 1px solid var(--rule);
+    font-size: 12.5pt;
+    display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap;
+  }
+  .words b { font-size: 14pt; }
+  .words em { font-style: normal; color: var(--muted); }
+
+  /* The wordmark rides in the footer line that was already there — see the note
+     in lib/sheet.js. No height, upright, a size down, and never louder than the
+     two slots it sits between. */
+  .brand { font-style: normal; font-size: 7pt; letter-spacing: .04em;
+    color: var(--accent); align-self: center; }
+
+  footer {
+    margin-top: 7px; font-size: 8.5pt; color: var(--muted);
+    display: flex; justify-content: space-between;
+  }
+
+  .chart { display: grid; grid-template-columns: repeat(6, 1fr); gap: 7px; margin-top: 14px; }
+  .cell {
+    border: 2px solid var(--slate); border-radius: 8px; height: 1.35in;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .page.key { background: #fcfcfa; }
+  .page.key header { border-bottom-style: double; border-bottom-width: 3px; }
+  .keylist { font-size: 11pt; line-height: 1.7; }
+  .keylist p { margin: .02in 0; }
+  .keynote { border: 1.5px solid var(--deep); border-radius: 8px; padding: .07in .12in;
+    margin: .1in 0 0; font-size: 10pt; line-height: 1.5; }
+
+  .note { border: 1.5px solid var(--deep); border-radius: 8px; padding: .07in .12in;
+    margin: .06in 0 .1in; font-size: 10pt; color: var(--ink); }
+  .tasknote { border: 1.5px solid var(--deep); border-radius: 8px; padding: .07in .12in;
+    margin-top: .1in; font-size: 10.5pt; }
+  svg { display: block; }
+
+  .wqs { margin-top: .08in; }
+  .wq { margin-bottom: .03in; }
+  .wqt { font-size: 10.5pt; font-weight: 700; margin-bottom: .01in; }
+
+  .pick { display: flex; align-items: center; gap: .05in; font-size: 10pt; }
+  .pick i { width: .22in; height: .22in; border: 2px solid var(--slate); border-radius: 4px;
+    display: inline-block; flex: 0 0 auto; }
+
+  .rrow { display: flex; align-items: center; gap: .14in;
+    border-bottom: 1px solid var(--rule); padding: .14in 0; }
+  .rpair { flex: 0 0 1.2in; }
+  .rsound { flex: 0 0 1.2in; font-size: 11pt; color: var(--ink); }
+  .rwords { display: flex; gap: .14in; flex-wrap: wrap; align-items: center; }
+
+  .samelist { display: grid; grid-template-columns: repeat(4, 1fr); gap: .05in .1in;
+    margin-bottom: .12in; }
+  .samecell { border: 1.5px solid var(--ink); border-radius: 6px; padding: .04in;
+    display: flex; justify-content: center; }
+  .copytask { border-top: 2px solid var(--slate); padding-top: .06in; }
+  .ctitle { font-size: 10.5pt; font-weight: 700; margin-bottom: .04in; }
+  .crow { display: flex; align-items: center; gap: .12in; margin-bottom: .02in; }
+  .cword { flex: 0 0 1.3in; }
+  .crow > :last-child { flex: 1; }
+
+  .jobrow { display: flex; align-items: center; gap: .16in;
+    border-bottom: 1px solid var(--rule); padding: .07in 0; }
+  .jteam { flex: 0 0 1.3in; }
+  .jcols { display: flex; gap: .3in; flex: 1; }
+  .jcol { flex: 1; }
+  .jlab { font-size: 10.5pt; color: var(--muted); margin-bottom: .02in; }
+  /* Fill pass, 2026-09-24: the words stand in a column, drawn big, instead of
+   * a small run across — the page ended halfway down. */
+  .jcol svg { display: block; margin-bottom: .04in; }
+
+  .oigrid { display: flex; gap: .3in; margin-bottom: .1in; }
+  .oicol { flex: 1; border: 2px solid var(--ink); border-radius: 9px; padding: .07in .1in; }
+  .oihead { font-size: 15pt; font-weight: 700; margin-bottom: .03in; }
+  .oiw { margin-bottom: .02in; }
+
+  .sortlist { display: grid; grid-template-columns: 1fr 1fr; gap: 0 .3in;
+    margin-top: .1in; }
+  .sortrow { display: flex; align-items: center; gap: .1in;
+    border-bottom: 1px solid var(--rule); padding: .04in 0; }
+  .sortname { flex: 1; }
+  .gaptitle { font-size: 10.5pt; font-weight: 700; margin: .12in 0 .02in;
+    border-top: 2px solid var(--slate); padding-top: .06in; }
+  .gapword { font-size: 17pt; letter-spacing: .02em; }
+  .gapword i { display: inline-block; width: .42in; border-bottom: 2.2px solid var(--slate);
+    margin: 0 .02in; }
+
+  .claplist { display: grid; grid-template-columns: 1fr 1fr; gap: 0 .34in; }
+  .claprow { display: flex; align-items: center; gap: .1in;
+    border-bottom: 1px solid var(--rule); padding: .27in 0; }
+  .clapword { flex: 1; }
+  .clapbox { width: .85in; height: .85in; border: 2px solid var(--slate); border-radius: 5px; }
+  .clapunit { font-size: 11pt; color: var(--muted); }
+
+  .splitrow { display: flex; align-items: center; gap: .16in;
+    border-bottom: 1px solid var(--rule); padding: .16in 0; }
+  .splitword { flex: 0 0 1.7in; }
+  .splitparts { flex: 1; }
+
+  .afrow { display: flex; align-items: center; gap: .12in;
+    border-bottom: 1px solid var(--rule); padding: .1in 0; }
+  .afbit { flex: 0 0 1.2in; }
+  .afmean { flex: 0 0 1.45in; font-size: 11pt; }
+  .afwords { display: flex; gap: .12in; flex-wrap: wrap; align-items: center; }
+
+  .buildtask { border-top: 2px solid var(--slate); padding-top: .06in; margin-top: .08in; }
+  .btitle { font-size: 10.5pt; font-weight: 700; margin-bottom: .04in; }
+  .brow { display: flex; align-items: center; gap: .12in; margin-bottom: .02in; }
+  .bword { flex: 0 0 1.3in; }
+  .brow > :last-child { flex: 1; }
+</style>
+</head><body>
+
+<div class="page">
+  <header>
+    <div class="bigletter">ar</div>
+    <div class="htext">
+      <h1>When an r Bosses the Vowel</h1>
+      <p class="sub">An r after a vowel changes its sound. Read each row out loud.</p>
+    </div>
+    <div class="nameline">Name</div>
+  </header>
+
+  <div class="rrow">
+    <div class="rpair"><svg viewBox="0 0 80.64 99.12" height="99.12" role="img" aria-label="ar"><g transform="translate(6 6) scale(66)"><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.46 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(49.56 6) scale(66)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.17 .22 0 0 1 .33 .56" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <div class="rsound">says &ldquo;ar, like in car&rdquo;</div>
+    <div class="rwords"><svg viewBox="0 0 72.48 59.52" height="59.52" role="img" aria-label="car"><g transform="translate(6 6) scale(36)"><path d="M.39 .57 A.21 .25 0 1 0 .39 .93" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(29.04 6) scale(36)"><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.46 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(52.8 6) scale(36)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.17 .22 0 0 1 .33 .56" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg><svg viewBox="0 0 89.76 59.52" height="59.52" role="img" aria-label="star"><g transform="translate(6 6) scale(36)"><path d="M.38 .6 C.32 .48 .04 .48 .04 .66 C.04 .82 .36 .78 .36 .92 C.36 1.06 .08 1.04 .02 .94" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(26.88 6) scale(36)"><path d="M.14 .25 V.88 C.14 1.02 .3 1.02 .36 .96" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.02 .5 H.32" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(46.32 6) scale(36)"><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.46 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(70.08 6) scale(36)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.17 .22 0 0 1 .33 .56" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg><svg viewBox="0 0 96.96 59.52" height="59.52" role="img" aria-label="hard"><g transform="translate(6 6) scale(36)"><path d="M.04 0 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.21 .22 0 0 1 .46 .72 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(29.76 6) scale(36)"><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.46 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(53.52 6) scale(36)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.17 .22 0 0 1 .33 .56" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(72.96 6) scale(36)"><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.46 0 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg><svg viewBox="0 0 102 59.52" height="59.52" role="img" aria-label="farm"><g transform="translate(6 6) scale(36)"><path d="M.36 .14 A.12 .12 0 0 0 .12 .14 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M0 .5 H.34" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(26.16 6) scale(36)"><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.46 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(49.92 6) scale(36)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.17 .22 0 0 1 .33 .56" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(69.36 6) scale(36)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.16 .22 0 0 1 .36 .72 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.36 .72 A.16 .22 0 0 1 .68 .72 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg><svg viewBox="0 0 117.84 59.52" height="59.52" role="img" aria-label="sharp"><g transform="translate(6 6) scale(36)"><path d="M.38 .6 C.32 .48 .04 .48 .04 .66 C.04 .82 .36 .78 .36 .92 C.36 1.06 .08 1.04 .02 .94" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(26.88 6) scale(36)"><path d="M.04 0 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.21 .22 0 0 1 .46 .72 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(50.64 6) scale(36)"><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.46 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(74.4 6) scale(36)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.17 .22 0 0 1 .33 .56" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(93.84 6) scale(36)"><path d="M.04 .5 V1.3" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+  </div>
+  <div class="rrow">
+    <div class="rpair"><svg viewBox="0 0 80.64 99.12" height="99.12" role="img" aria-label="or"><g transform="translate(6 6) scale(66)"><path d="M.25 .5 A.22 .25 0 0 0 .25 1 A.22 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(49.56 6) scale(66)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.17 .22 0 0 1 .33 .56" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <div class="rsound">says &ldquo;or, like in fork&rdquo;</div>
+    <div class="rwords"><svg viewBox="0 0 92.64 59.52" height="59.52" role="img" aria-label="fork"><g transform="translate(6 6) scale(36)"><path d="M.36 .14 A.12 .12 0 0 0 .12 .14 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M0 .5 H.34" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(26.16 6) scale(36)"><path d="M.25 .5 A.22 .25 0 0 0 .25 1 A.22 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(49.92 6) scale(36)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.17 .22 0 0 1 .33 .56" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(69.36 6) scale(36)"><path d="M.04 0 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.42 .5 L.08 .78" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.2 .68 L.46 1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg><svg viewBox="0 0 96.24 59.52" height="59.52" role="img" aria-label="corn"><g transform="translate(6 6) scale(36)"><path d="M.39 .57 A.21 .25 0 1 0 .39 .93" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(29.04 6) scale(36)"><path d="M.25 .5 A.22 .25 0 0 0 .25 1 A.22 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(52.8 6) scale(36)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.17 .22 0 0 1 .33 .56" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(72.24 6) scale(36)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.21 .22 0 0 1 .46 .72 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg><svg viewBox="0 0 122.16 59.52" height="59.52" role="img" aria-label="storm"><g transform="translate(6 6) scale(36)"><path d="M.38 .6 C.32 .48 .04 .48 .04 .66 C.04 .82 .36 .78 .36 .92 C.36 1.06 .08 1.04 .02 .94" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(26.88 6) scale(36)"><path d="M.14 .25 V.88 C.14 1.02 .3 1.02 .36 .96" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.02 .5 H.32" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(46.32 6) scale(36)"><path d="M.25 .5 A.22 .25 0 0 0 .25 1 A.22 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(70.08 6) scale(36)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.17 .22 0 0 1 .33 .56" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(89.52 6) scale(36)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.16 .22 0 0 1 .36 .72 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.36 .72 A.16 .22 0 0 1 .68 .72 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg><svg viewBox="0 0 113.52 59.52" height="59.52" role="img" aria-label="short"><g transform="translate(6 6) scale(36)"><path d="M.38 .6 C.32 .48 .04 .48 .04 .66 C.04 .82 .36 .78 .36 .92 C.36 1.06 .08 1.04 .02 .94" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(26.88 6) scale(36)"><path d="M.04 0 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.21 .22 0 0 1 .46 .72 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(50.64 6) scale(36)"><path d="M.25 .5 A.22 .25 0 0 0 .25 1 A.22 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(74.4 6) scale(36)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.17 .22 0 0 1 .33 .56" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(93.84 6) scale(36)"><path d="M.14 .25 V.88 C.14 1.02 .3 1.02 .36 .96" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.02 .5 H.32" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg><svg viewBox="0 0 116.4 59.52" height="59.52" role="img" aria-label="north"><g transform="translate(6 6) scale(36)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.21 .22 0 0 1 .46 .72 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(29.76 6) scale(36)"><path d="M.25 .5 A.22 .25 0 0 0 .25 1 A.22 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(53.52 6) scale(36)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.17 .22 0 0 1 .33 .56" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(72.96 6) scale(36)"><path d="M.14 .25 V.88 C.14 1.02 .3 1.02 .36 .96" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.02 .5 H.32" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(92.4 6) scale(36)"><path d="M.04 0 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.21 .22 0 0 1 .46 .72 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+  </div>
+  <div class="rrow">
+    <div class="rpair"><svg viewBox="0 0 79.32 99.12" height="99.12" role="img" aria-label="er"><g transform="translate(6 6) scale(66)"><path d="M.04 .75 H.45 A.21 .25 0 1 0 .38 .93" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(48.24 6) scale(66)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.17 .22 0 0 1 .33 .56" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <div class="rsound">says &ldquo;er&rdquo;</div>
+    <div class="rwords"><svg viewBox="0 0 72.48 59.52" height="59.52" role="img" aria-label="her"><g transform="translate(6 6) scale(36)"><path d="M.04 0 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.21 .22 0 0 1 .46 .72 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(29.76 6) scale(36)"><path d="M.04 .75 H.45 A.21 .25 0 1 0 .38 .93" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(52.8 6) scale(36)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.17 .22 0 0 1 .33 .56" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg><svg viewBox="0 0 92.64 59.52" height="59.52" role="img" aria-label="fern"><g transform="translate(6 6) scale(36)"><path d="M.36 .14 A.12 .12 0 0 0 .12 .14 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M0 .5 H.34" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(26.16 6) scale(36)"><path d="M.04 .75 H.45 A.21 .25 0 1 0 .38 .93" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(49.2 6) scale(36)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.17 .22 0 0 1 .33 .56" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(68.64 6) scale(36)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.21 .22 0 0 1 .46 .72 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg><svg viewBox="0 0 96.24 59.52" height="59.52" role="img" aria-label="herd"><g transform="translate(6 6) scale(36)"><path d="M.04 0 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.21 .22 0 0 1 .46 .72 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(29.76 6) scale(36)"><path d="M.04 .75 H.45 A.21 .25 0 1 0 .38 .93" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(52.8 6) scale(36)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.17 .22 0 0 1 .33 .56" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(72.24 6) scale(36)"><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.46 0 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg><svg viewBox="0 0 125.04 59.52" height="59.52" role="img" aria-label="sister"><g transform="translate(6 6) scale(36)"><path d="M.38 .6 C.32 .48 .04 .48 .04 .66 C.04 .82 .36 .78 .36 .92 C.36 1.06 .08 1.04 .02 .94" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(26.88 6) scale(36)"><path d="M.13 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.13" cy="0.34" r="0.05" fill="#C0511D"/></g><g transform="translate(42 6) scale(36)"><path d="M.38 .6 C.32 .48 .04 .48 .04 .66 C.04 .82 .36 .78 .36 .92 C.36 1.06 .08 1.04 .02 .94" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(62.88 6) scale(36)"><path d="M.14 .25 V.88 C.14 1.02 .3 1.02 .36 .96" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.02 .5 H.32" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(82.32 6) scale(36)"><path d="M.04 .75 H.45 A.21 .25 0 1 0 .38 .93" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(105.36 6) scale(36)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.17 .22 0 0 1 .33 .56" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg><svg viewBox="0 0 136.56 59.52" height="59.52" role="img" aria-label="winter"><g transform="translate(6 6) scale(36)"><path d="M.02 .5 L.16 1 L.33 .62 L.5 1 L.64 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(35.52 6) scale(36)"><path d="M.13 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.13" cy="0.34" r="0.05" fill="#C0511D"/></g><g transform="translate(50.64 6) scale(36)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.21 .22 0 0 1 .46 .72 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(74.4 6) scale(36)"><path d="M.14 .25 V.88 C.14 1.02 .3 1.02 .36 .96" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.02 .5 H.32" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(93.84 6) scale(36)"><path d="M.04 .75 H.45 A.21 .25 0 1 0 .38 .93" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(116.88 6) scale(36)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.17 .22 0 0 1 .33 .56" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+  </div>
+  <div class="rrow">
+    <div class="rpair"><svg viewBox="0 0 64.8 99.12" height="99.12" role="img" aria-label="ir"><g transform="translate(6 6) scale(66)"><path d="M.13 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.13" cy="0.34" r="0.04" fill="#C0511D"/></g><g transform="translate(33.72 6) scale(66)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.17 .22 0 0 1 .33 .56" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <div class="rsound">says &ldquo;er&rdquo;</div>
+    <div class="rwords"><svg viewBox="0 0 88.32 59.52" height="59.52" role="img" aria-label="bird"><g transform="translate(6 6) scale(36)"><path d="M.04 0 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(29.76 6) scale(36)"><path d="M.13 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.13" cy="0.34" r="0.05" fill="#C0511D"/></g><g transform="translate(44.88 6) scale(36)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.17 .22 0 0 1 .33 .56" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(64.32 6) scale(36)"><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.46 0 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg><svg viewBox="0 0 78.96 59.52" height="59.52" role="img" aria-label="girl"><g transform="translate(6 6) scale(36)"><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.46 .5 V1.1 C.46 1.32 .12 1.32 .06 1.2" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(29.76 6) scale(36)"><path d="M.13 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.13" cy="0.34" r="0.05" fill="#C0511D"/></g><g transform="translate(44.88 6) scale(36)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.17 .22 0 0 1 .33 .56" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(64.32 6) scale(36)"><path d="M.12 0 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg><svg viewBox="0 0 107.76 59.52" height="59.52" role="img" aria-label="third"><g transform="translate(6 6) scale(36)"><path d="M.14 .25 V.88 C.14 1.02 .3 1.02 .36 .96" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.02 .5 H.32" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(25.44 6) scale(36)"><path d="M.04 0 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.21 .22 0 0 1 .46 .72 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(49.2 6) scale(36)"><path d="M.13 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.13" cy="0.34" r="0.05" fill="#C0511D"/></g><g transform="translate(64.32 6) scale(36)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.17 .22 0 0 1 .33 .56" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(83.76 6) scale(36)"><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.46 0 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg><svg viewBox="0 0 104.88 59.52" height="59.52" role="img" aria-label="shirt"><g transform="translate(6 6) scale(36)"><path d="M.38 .6 C.32 .48 .04 .48 .04 .66 C.04 .82 .36 .78 .36 .92 C.36 1.06 .08 1.04 .02 .94" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(26.88 6) scale(36)"><path d="M.04 0 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.21 .22 0 0 1 .46 .72 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(50.64 6) scale(36)"><path d="M.13 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.13" cy="0.34" r="0.05" fill="#C0511D"/></g><g transform="translate(65.76 6) scale(36)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.17 .22 0 0 1 .33 .56" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(85.2 6) scale(36)"><path d="M.14 .25 V.88 C.14 1.02 .3 1.02 .36 .96" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.02 .5 H.32" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg><svg viewBox="0 0 101.28 59.52" height="59.52" role="img" aria-label="first"><g transform="translate(6 6) scale(36)"><path d="M.36 .14 A.12 .12 0 0 0 .12 .14 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M0 .5 H.34" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(26.16 6) scale(36)"><path d="M.13 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.13" cy="0.34" r="0.05" fill="#C0511D"/></g><g transform="translate(41.28 6) scale(36)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.17 .22 0 0 1 .33 .56" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(60.72 6) scale(36)"><path d="M.38 .6 C.32 .48 .04 .48 .04 .66 C.04 .82 .36 .78 .36 .92 C.36 1.06 .08 1.04 .02 .94" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(81.6 6) scale(36)"><path d="M.14 .25 V.88 C.14 1.02 .3 1.02 .36 .96" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.02 .5 H.32" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+  </div>
+  <div class="rrow">
+    <div class="rpair"><svg viewBox="0 0 80.64 99.12" height="99.12" role="img" aria-label="ur"><g transform="translate(6 6) scale(66)"><path d="M.04 .5 V.75 A.21 .25 0 0 0 .46 .75" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.46 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(49.56 6) scale(66)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.17 .22 0 0 1 .33 .56" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <div class="rsound">says &ldquo;er&rdquo;</div>
+    <div class="rwords"><svg viewBox="0 0 92.64 59.52" height="59.52" role="img" aria-label="turn"><g transform="translate(6 6) scale(36)"><path d="M.14 .25 V.88 C.14 1.02 .3 1.02 .36 .96" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.02 .5 H.32" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(25.44 6) scale(36)"><path d="M.04 .5 V.75 A.21 .25 0 0 0 .46 .75" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.46 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(49.2 6) scale(36)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.17 .22 0 0 1 .33 .56" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(68.64 6) scale(36)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.21 .22 0 0 1 .46 .72 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg><svg viewBox="0 0 96.96 59.52" height="59.52" role="img" aria-label="burn"><g transform="translate(6 6) scale(36)"><path d="M.04 0 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(29.76 6) scale(36)"><path d="M.04 .5 V.75 A.21 .25 0 0 0 .46 .75" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.46 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(53.52 6) scale(36)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.17 .22 0 0 1 .33 .56" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(72.96 6) scale(36)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.21 .22 0 0 1 .46 .72 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg><svg viewBox="0 0 92.64 59.52" height="59.52" role="img" aria-label="hurt"><g transform="translate(6 6) scale(36)"><path d="M.04 0 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.21 .22 0 0 1 .46 .72 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(29.76 6) scale(36)"><path d="M.04 .5 V.75 A.21 .25 0 0 0 .46 .75" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.46 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(53.52 6) scale(36)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.17 .22 0 0 1 .33 .56" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(72.96 6) scale(36)"><path d="M.14 .25 V.88 C.14 1.02 .3 1.02 .36 .96" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.02 .5 H.32" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg><svg viewBox="0 0 86.88 59.52" height="59.52" role="img" aria-label="curl"><g transform="translate(6 6) scale(36)"><path d="M.39 .57 A.21 .25 0 1 0 .39 .93" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(29.04 6) scale(36)"><path d="M.04 .5 V.75 A.21 .25 0 0 0 .46 .75" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.46 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(52.8 6) scale(36)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.17 .22 0 0 1 .33 .56" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(72.24 6) scale(36)"><path d="M.12 0 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg><svg viewBox="0 0 117.12 59.52" height="59.52" role="img" aria-label="nurse"><g transform="translate(6 6) scale(36)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.21 .22 0 0 1 .46 .72 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(29.76 6) scale(36)"><path d="M.04 .5 V.75 A.21 .25 0 0 0 .46 .75" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.46 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(53.52 6) scale(36)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.17 .22 0 0 1 .33 .56" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(72.96 6) scale(36)"><path d="M.38 .6 C.32 .48 .04 .48 .04 .66 C.04 .82 .36 .78 .36 .92 C.36 1.06 .08 1.04 .02 .94" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(93.84 6) scale(36)"><path d="M.04 .75 H.45 A.21 .25 0 1 0 .38 .93" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+  </div>
+
+  <footer>
+    <span>5 pairs</span>
+    <span class="brand">Kitchen Table</span>
+    <span>r-controlled</span>
+  </footer>
+</div>
+
+<div class="page">
+  <header>
+    <div class="bigletter">er</div>
+    <div class="htext">
+      <h1>Three Ways to Spell One Sound</h1>
+      <p class="sub">er, ir and ur sound the same. No rule says which &mdash; look closely.</p>
+    </div>
+    <div class="nameline">Name</div>
+  </header>
+
+  <div class="samelist">
+    <div class="samecell"><svg viewBox="0 0 97.12 62.16" height="62.16" role="img" aria-label="turn"><g transform="translate(6 6) scale(38)"><path d="M.14 .25 V.88 C.14 1.02 .3 1.02 .36 .96" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.02 .5 H.32" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(26.52 6) scale(38)"><path d="M.04 .5 V.75 A.21 .25 0 0 0 .46 .75" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.46 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(51.6 6) scale(38)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.17 .22 0 0 1 .33 .56" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(72.12 6) scale(38)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.21 .22 0 0 1 .46 .72 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <div class="samecell"><svg viewBox="0 0 97.12 62.16" height="62.16" role="img" aria-label="fern"><g transform="translate(6 6) scale(38)"><path d="M.36 .14 A.12 .12 0 0 0 .12 .14 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M0 .5 H.34" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(27.28 6) scale(38)"><path d="M.04 .75 H.45 A.21 .25 0 1 0 .38 .93" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(51.6 6) scale(38)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.17 .22 0 0 1 .33 .56" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(72.12 6) scale(38)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.21 .22 0 0 1 .46 .72 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <div class="samecell"><svg viewBox="0 0 131.32 62.16" height="62.16" role="img" aria-label="sister"><g transform="translate(6 6) scale(38)"><path d="M.38 .6 C.32 .48 .04 .48 .04 .66 C.04 .82 .36 .78 .36 .92 C.36 1.06 .08 1.04 .02 .94" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(28.04 6) scale(38)"><path d="M.13 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.13" cy="0.34" r="0.04" fill="#C0511D"/></g><g transform="translate(44 6) scale(38)"><path d="M.38 .6 C.32 .48 .04 .48 .04 .66 C.04 .82 .36 .78 .36 .92 C.36 1.06 .08 1.04 .02 .94" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(66.04 6) scale(38)"><path d="M.14 .25 V.88 C.14 1.02 .3 1.02 .36 .96" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.02 .5 H.32" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(86.56 6) scale(38)"><path d="M.04 .75 H.45 A.21 .25 0 1 0 .38 .93" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(110.88 6) scale(38)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.17 .22 0 0 1 .33 .56" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <div class="samecell"><svg viewBox="0 0 97.12 62.16" height="62.16" role="img" aria-label="hurt"><g transform="translate(6 6) scale(38)"><path d="M.04 0 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.21 .22 0 0 1 .46 .72 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(31.08 6) scale(38)"><path d="M.04 .5 V.75 A.21 .25 0 0 0 .46 .75" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.46 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(56.16 6) scale(38)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.17 .22 0 0 1 .33 .56" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(76.68 6) scale(38)"><path d="M.14 .25 V.88 C.14 1.02 .3 1.02 .36 .96" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.02 .5 H.32" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <div class="samecell"><svg viewBox="0 0 110.04 62.16" height="62.16" role="img" aria-label="shirt"><g transform="translate(6 6) scale(38)"><path d="M.38 .6 C.32 .48 .04 .48 .04 .66 C.04 .82 .36 .78 .36 .92 C.36 1.06 .08 1.04 .02 .94" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(28.04 6) scale(38)"><path d="M.04 0 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.21 .22 0 0 1 .46 .72 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(53.12 6) scale(38)"><path d="M.13 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.13" cy="0.34" r="0.04" fill="#C0511D"/></g><g transform="translate(69.08 6) scale(38)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.17 .22 0 0 1 .33 .56" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(89.6 6) scale(38)"><path d="M.14 .25 V.88 C.14 1.02 .3 1.02 .36 .96" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.02 .5 H.32" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <div class="samecell"><svg viewBox="0 0 113.08 62.16" height="62.16" role="img" aria-label="third"><g transform="translate(6 6) scale(38)"><path d="M.14 .25 V.88 C.14 1.02 .3 1.02 .36 .96" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.02 .5 H.32" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(26.52 6) scale(38)"><path d="M.04 0 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.21 .22 0 0 1 .46 .72 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(51.6 6) scale(38)"><path d="M.13 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.13" cy="0.34" r="0.04" fill="#C0511D"/></g><g transform="translate(67.56 6) scale(38)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.17 .22 0 0 1 .33 .56" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(88.08 6) scale(38)"><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.46 0 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <div class="samecell"><svg viewBox="0 0 82.68 62.16" height="62.16" role="img" aria-label="girl"><g transform="translate(6 6) scale(38)"><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.46 .5 V1.1 C.46 1.32 .12 1.32 .06 1.2" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(31.08 6) scale(38)"><path d="M.13 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.13" cy="0.34" r="0.04" fill="#C0511D"/></g><g transform="translate(47.04 6) scale(38)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.17 .22 0 0 1 .33 .56" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(67.56 6) scale(38)"><path d="M.12 0 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <div class="samecell"><svg viewBox="0 0 101.68 62.16" height="62.16" role="img" aria-label="burn"><g transform="translate(6 6) scale(38)"><path d="M.04 0 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(31.08 6) scale(38)"><path d="M.04 .5 V.75 A.21 .25 0 0 0 .46 .75" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.46 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(56.16 6) scale(38)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.17 .22 0 0 1 .33 .56" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(76.68 6) scale(38)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.21 .22 0 0 1 .46 .72 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <div class="samecell"><svg viewBox="0 0 91.04 62.16" height="62.16" role="img" aria-label="curl"><g transform="translate(6 6) scale(38)"><path d="M.39 .57 A.21 .25 0 1 0 .39 .93" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(30.32 6) scale(38)"><path d="M.04 .5 V.75 A.21 .25 0 0 0 .46 .75" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.46 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(55.4 6) scale(38)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.17 .22 0 0 1 .33 .56" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(75.92 6) scale(38)"><path d="M.12 0 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <div class="samecell"><svg viewBox="0 0 75.84 62.16" height="62.16" role="img" aria-label="her"><g transform="translate(6 6) scale(38)"><path d="M.04 0 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.21 .22 0 0 1 .46 .72 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(31.08 6) scale(38)"><path d="M.04 .75 H.45 A.21 .25 0 1 0 .38 .93" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(55.4 6) scale(38)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.17 .22 0 0 1 .33 .56" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <div class="samecell"><svg viewBox="0 0 92.56 62.16" height="62.16" role="img" aria-label="bird"><g transform="translate(6 6) scale(38)"><path d="M.04 0 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(31.08 6) scale(38)"><path d="M.13 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.13" cy="0.34" r="0.04" fill="#C0511D"/></g><g transform="translate(47.04 6) scale(38)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.17 .22 0 0 1 .33 .56" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(67.56 6) scale(38)"><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.46 0 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <div class="samecell"><svg viewBox="0 0 100.92 62.16" height="62.16" role="img" aria-label="herd"><g transform="translate(6 6) scale(38)"><path d="M.04 0 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.21 .22 0 0 1 .46 .72 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(31.08 6) scale(38)"><path d="M.04 .75 H.45 A.21 .25 0 1 0 .38 .93" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(55.4 6) scale(38)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.17 .22 0 0 1 .33 .56" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(75.92 6) scale(38)"><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.46 0 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+  </div>
+
+  <div class="copytask">
+    <div class="ctitle">Copy each one, then cover it and write it again from memory.</div>
+    <div class="crow"><div class="cword"><svg viewBox="0 0 83.68 54.24" height="54.24" role="img" aria-label="turn"><g transform="translate(6 6) scale(32)"><path d="M.14 .25 V.88 C.14 1.02 .3 1.02 .36 .96" fill="none" stroke="#C0511D" stroke-width="0.06" stroke-linecap="round" stroke-linejoin="round"/><path d="M.02 .5 H.32" fill="none" stroke="#C0511D" stroke-width="0.06" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(23.28 6) scale(32)"><path d="M.04 .5 V.75 A.21 .25 0 0 0 .46 .75" fill="none" stroke="#C0511D" stroke-width="0.06" stroke-linecap="round" stroke-linejoin="round"/><path d="M.46 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.06" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(44.4 6) scale(32)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.06" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.17 .22 0 0 1 .33 .56" fill="none" stroke="#C0511D" stroke-width="0.06" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(61.68 6) scale(32)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.06" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.21 .22 0 0 1 .46 .72 V1" fill="none" stroke="#C0511D" stroke-width="0.06" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>      <svg class="row" viewBox="0 0 729.6 84.6" width="100%" role="img" aria-label="copy turn, then write it again">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="33.8" x2="729.6" y2="33.8" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="62.6" x2="729.6" y2="62.6" stroke="#16130F" stroke-width="2.6"/>
+      </svg></div>
+    <div class="crow"><div class="cword"><svg viewBox="0 0 83.68 54.24" height="54.24" role="img" aria-label="fern"><g transform="translate(6 6) scale(32)"><path d="M.36 .14 A.12 .12 0 0 0 .12 .14 V1" fill="none" stroke="#C0511D" stroke-width="0.06" stroke-linecap="round" stroke-linejoin="round"/><path d="M0 .5 H.34" fill="none" stroke="#C0511D" stroke-width="0.06" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(23.92 6) scale(32)"><path d="M.04 .75 H.45 A.21 .25 0 1 0 .38 .93" fill="none" stroke="#C0511D" stroke-width="0.06" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(44.4 6) scale(32)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.06" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.17 .22 0 0 1 .33 .56" fill="none" stroke="#C0511D" stroke-width="0.06" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(61.68 6) scale(32)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.06" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.21 .22 0 0 1 .46 .72 V1" fill="none" stroke="#C0511D" stroke-width="0.06" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>      <svg class="row" viewBox="0 0 729.6 84.6" width="100%" role="img" aria-label="copy fern, then write it again">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="33.8" x2="729.6" y2="33.8" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="62.6" x2="729.6" y2="62.6" stroke="#16130F" stroke-width="2.6"/>
+      </svg></div>
+    <div class="crow"><div class="cword"><svg viewBox="0 0 112.48 54.24" height="54.24" role="img" aria-label="sister"><g transform="translate(6 6) scale(32)"><path d="M.38 .6 C.32 .48 .04 .48 .04 .66 C.04 .82 .36 .78 .36 .92 C.36 1.06 .08 1.04 .02 .94" fill="none" stroke="#C0511D" stroke-width="0.06" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(24.56 6) scale(32)"><path d="M.13 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.06" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.13" cy="0.34" r="0.05" fill="#C0511D"/></g><g transform="translate(38 6) scale(32)"><path d="M.38 .6 C.32 .48 .04 .48 .04 .66 C.04 .82 .36 .78 .36 .92 C.36 1.06 .08 1.04 .02 .94" fill="none" stroke="#C0511D" stroke-width="0.06" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(56.56 6) scale(32)"><path d="M.14 .25 V.88 C.14 1.02 .3 1.02 .36 .96" fill="none" stroke="#C0511D" stroke-width="0.06" stroke-linecap="round" stroke-linejoin="round"/><path d="M.02 .5 H.32" fill="none" stroke="#C0511D" stroke-width="0.06" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(73.84 6) scale(32)"><path d="M.04 .75 H.45 A.21 .25 0 1 0 .38 .93" fill="none" stroke="#C0511D" stroke-width="0.06" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(94.32 6) scale(32)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.06" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.17 .22 0 0 1 .33 .56" fill="none" stroke="#C0511D" stroke-width="0.06" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>      <svg class="row" viewBox="0 0 729.6 84.6" width="100%" role="img" aria-label="copy sister, then write it again">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="33.8" x2="729.6" y2="33.8" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="62.6" x2="729.6" y2="62.6" stroke="#16130F" stroke-width="2.6"/>
+      </svg></div>
+    <div class="crow"><div class="cword"><svg viewBox="0 0 83.68 54.24" height="54.24" role="img" aria-label="hurt"><g transform="translate(6 6) scale(32)"><path d="M.04 0 V1" fill="none" stroke="#C0511D" stroke-width="0.06" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.21 .22 0 0 1 .46 .72 V1" fill="none" stroke="#C0511D" stroke-width="0.06" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(27.12 6) scale(32)"><path d="M.04 .5 V.75 A.21 .25 0 0 0 .46 .75" fill="none" stroke="#C0511D" stroke-width="0.06" stroke-linecap="round" stroke-linejoin="round"/><path d="M.46 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.06" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(48.24 6) scale(32)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.06" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.17 .22 0 0 1 .33 .56" fill="none" stroke="#C0511D" stroke-width="0.06" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(65.52 6) scale(32)"><path d="M.14 .25 V.88 C.14 1.02 .3 1.02 .36 .96" fill="none" stroke="#C0511D" stroke-width="0.06" stroke-linecap="round" stroke-linejoin="round"/><path d="M.02 .5 H.32" fill="none" stroke="#C0511D" stroke-width="0.06" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>      <svg class="row" viewBox="0 0 729.6 84.6" width="100%" role="img" aria-label="copy hurt, then write it again">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="33.8" x2="729.6" y2="33.8" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="62.6" x2="729.6" y2="62.6" stroke="#16130F" stroke-width="2.6"/>
+      </svg></div>
+    <div class="crow"><div class="cword"><svg viewBox="0 0 94.56 54.24" height="54.24" role="img" aria-label="shirt"><g transform="translate(6 6) scale(32)"><path d="M.38 .6 C.32 .48 .04 .48 .04 .66 C.04 .82 .36 .78 .36 .92 C.36 1.06 .08 1.04 .02 .94" fill="none" stroke="#C0511D" stroke-width="0.06" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(24.56 6) scale(32)"><path d="M.04 0 V1" fill="none" stroke="#C0511D" stroke-width="0.06" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.21 .22 0 0 1 .46 .72 V1" fill="none" stroke="#C0511D" stroke-width="0.06" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(45.68 6) scale(32)"><path d="M.13 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.06" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.13" cy="0.34" r="0.05" fill="#C0511D"/></g><g transform="translate(59.12 6) scale(32)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.06" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.17 .22 0 0 1 .33 .56" fill="none" stroke="#C0511D" stroke-width="0.06" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(76.4 6) scale(32)"><path d="M.14 .25 V.88 C.14 1.02 .3 1.02 .36 .96" fill="none" stroke="#C0511D" stroke-width="0.06" stroke-linecap="round" stroke-linejoin="round"/><path d="M.02 .5 H.32" fill="none" stroke="#C0511D" stroke-width="0.06" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>      <svg class="row" viewBox="0 0 729.6 84.6" width="100%" role="img" aria-label="copy shirt, then write it again">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="33.8" x2="729.6" y2="33.8" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="62.6" x2="729.6" y2="62.6" stroke="#16130F" stroke-width="2.6"/>
+      </svg></div>
+    <div class="crow"><div class="cword"><svg viewBox="0 0 97.12 54.24" height="54.24" role="img" aria-label="third"><g transform="translate(6 6) scale(32)"><path d="M.14 .25 V.88 C.14 1.02 .3 1.02 .36 .96" fill="none" stroke="#C0511D" stroke-width="0.06" stroke-linecap="round" stroke-linejoin="round"/><path d="M.02 .5 H.32" fill="none" stroke="#C0511D" stroke-width="0.06" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(23.28 6) scale(32)"><path d="M.04 0 V1" fill="none" stroke="#C0511D" stroke-width="0.06" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.21 .22 0 0 1 .46 .72 V1" fill="none" stroke="#C0511D" stroke-width="0.06" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(44.4 6) scale(32)"><path d="M.13 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.06" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.13" cy="0.34" r="0.05" fill="#C0511D"/></g><g transform="translate(57.84 6) scale(32)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.06" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.17 .22 0 0 1 .33 .56" fill="none" stroke="#C0511D" stroke-width="0.06" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(75.12 6) scale(32)"><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.06" stroke-linecap="round" stroke-linejoin="round"/><path d="M.46 0 V1" fill="none" stroke="#C0511D" stroke-width="0.06" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>      <svg class="row" viewBox="0 0 729.6 84.6" width="100%" role="img" aria-label="copy third, then write it again">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="33.8" x2="729.6" y2="33.8" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="62.6" x2="729.6" y2="62.6" stroke="#16130F" stroke-width="2.6"/>
+      </svg></div>
+  </div>
+
+  <footer>
+    <span>12 words · 6 to copy</span>
+    <span class="brand">Kitchen Table</span>
+    <span>r-controlled</span>
+  </footer>
+</div>
+
+
+<div style="page-break-before:always"></div>
+
+
+<div class="page">
+  <header>
+    <div class="bigletter">&#9633;</div>
+    <div class="htext">
+      <h1>Solid, Liquid, Gas</h1>
+      <p class="sub">The test is not how it feels. It is what happens when you put it in a jar.</p>
+    </div>
+    <div class="nameline">Name</div>
+  </header>
+
+  <div class="note"><b>Do not go by touch</b> (sand is hard, a towel is wet). Ask: <b>poured into a new container, does it keep its shape or take the container's?</b></div>
+
+  <div class="strow">
+    <div class="spic"><svg class="" viewBox="0 0 158 172" width="158" height="172" role="img" aria-label="a jar holding a solid brick" xmlns="http://www.w3.org/2000/svg"><rect x="38" y="100" width="82" height="54" rx="0" fill="#F0DCC9" stroke="#16130F" stroke-width="2"/><line x1="14" y1="14" x2="14" y2="156" stroke="#16130F" stroke-width="2.4" stroke-linecap="round"/><line x1="144" y1="14" x2="144" y2="156" stroke="#16130F" stroke-width="2.4" stroke-linecap="round"/><line x1="14" y1="156" x2="144" y2="156" stroke="#16130F" stroke-width="2.4" stroke-linecap="round"/></svg></div>
+    <div class="sinfo">
+      <div class="sname">Solid</div>
+      <div class="sfact"><b>Shape:</b> keeps its own shape</div>
+      <div class="sfact"><b>Space:</b> takes up the same space wherever you put it</div>
+      <div class="segs">for example: a brick, a spoon, an ice cube, you</div>
+    </div>
+  </div>
+  <div class="strow">
+    <div class="spic"><svg class="" viewBox="0 0 158 172" width="158" height="172" role="img" aria-label="a jar holding a liquid" xmlns="http://www.w3.org/2000/svg"><rect x="14" y="80.1" width="130" height="75.9" rx="0" fill="#F0DCC9" stroke="#16130F" stroke-width="0"/><line x1="14" y1="80.1" x2="144" y2="80.1" stroke="#16130F" stroke-width="2" stroke-linecap="round"/><line x1="14" y1="14" x2="14" y2="156" stroke="#16130F" stroke-width="2.4" stroke-linecap="round"/><line x1="144" y1="14" x2="144" y2="156" stroke="#16130F" stroke-width="2.4" stroke-linecap="round"/><line x1="14" y1="156" x2="144" y2="156" stroke="#16130F" stroke-width="2.4" stroke-linecap="round"/></svg></div>
+    <div class="sinfo">
+      <div class="sname">Liquid</div>
+      <div class="sfact"><b>Shape:</b> takes the shape of whatever you pour it into</div>
+      <div class="sfact"><b>Space:</b> always takes up the same amount of space</div>
+      <div class="segs">for example: water, milk, honey, petrol</div>
+    </div>
+  </div>
+  <div class="strow">
+    <div class="spic"><svg class="" viewBox="0 0 158 172" width="158" height="172" role="img" aria-label="a jar holding a gas" xmlns="http://www.w3.org/2000/svg"><rect x="14" y="18" width="130" height="138" rx="0" fill="#F0DCC9" stroke="#16130F" stroke-width="0"/><circle cx="24" cy="30" r="3.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><circle cx="61" cy="83" r="3.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><circle cx="98" cy="136" r="3.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><circle cx="25" cy="75" r="3.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><circle cx="62" cy="128" r="3.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><circle cx="99" cy="67" r="3.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><circle cx="26" cy="120" r="3.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><circle cx="63" cy="59" r="3.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><circle cx="100" cy="112" r="3.4" fill="#16130F" stroke="#16130F" stroke-width="0"/><line x1="14" y1="14" x2="14" y2="156" stroke="#16130F" stroke-width="2.4" stroke-linecap="round"/><line x1="144" y1="14" x2="144" y2="156" stroke="#16130F" stroke-width="2.4" stroke-linecap="round"/><line x1="14" y1="156" x2="144" y2="156" stroke="#16130F" stroke-width="2.4" stroke-linecap="round"/></svg></div>
+    <div class="sinfo">
+      <div class="sname">Gas</div>
+      <div class="sfact"><b>Shape:</b> spreads out and fills the whole container</div>
+      <div class="sfact"><b>Space:</b> takes up as much space as it is given</div>
+      <div class="segs">for example: air, steam, the bubbles in a fizzy drink</div>
+    </div>
+  </div>
+  <div class="note"><b>Tick one for each.</b> <b>Honey is the one that argues back.</b> It pours so slowly that it looks like it is keeping its shape &mdash; but leave it long enough and it will spread out flat and take the shape of the plate. Slow is not the same as solid.</div>
+  <div class="sortlist">
+    <div class="sortrow">
+      <div class="sortname">a rock</div>
+      <label class="pick"><i></i>solid</label>
+      <label class="pick"><i></i>liquid</label>
+      <label class="pick"><i></i>gas</label>
+    </div>
+    <div class="sortrow">
+      <div class="sortname">milk</div>
+      <label class="pick"><i></i>solid</label>
+      <label class="pick"><i></i>liquid</label>
+      <label class="pick"><i></i>gas</label>
+    </div>
+    <div class="sortrow">
+      <div class="sortname">an ice cube</div>
+      <label class="pick"><i></i>solid</label>
+      <label class="pick"><i></i>liquid</label>
+      <label class="pick"><i></i>gas</label>
+    </div>
+    <div class="sortrow">
+      <div class="sortname">a wooden spoon</div>
+      <label class="pick"><i></i>solid</label>
+      <label class="pick"><i></i>liquid</label>
+      <label class="pick"><i></i>gas</label>
+    </div>
+    <div class="sortrow">
+      <div class="sortname">steam from a kettle</div>
+      <label class="pick"><i></i>solid</label>
+      <label class="pick"><i></i>liquid</label>
+      <label class="pick"><i></i>gas</label>
+    </div>
+    <div class="sortrow">
+      <div class="sortname">the bubbles in lemonade</div>
+      <label class="pick"><i></i>solid</label>
+      <label class="pick"><i></i>liquid</label>
+      <label class="pick"><i></i>gas</label>
+    </div>
+    <div class="sortrow">
+      <div class="sortname">orange juice</div>
+      <label class="pick"><i></i>solid</label>
+      <label class="pick"><i></i>liquid</label>
+      <label class="pick"><i></i>gas</label>
+    </div>
+    <div class="sortrow">
+      <div class="sortname">the air in a balloon</div>
+      <label class="pick"><i></i>solid</label>
+      <label class="pick"><i></i>liquid</label>
+      <label class="pick"><i></i>gas</label>
+    </div>
+    <div class="sortrow">
+      <div class="sortname">honey</div>
+      <label class="pick"><i></i>solid</label>
+      <label class="pick"><i></i>liquid</label>
+      <label class="pick"><i></i>gas</label>
+    </div>
+    <div class="sortrow">
+      <div class="sortname">a sweater</div>
+      <label class="pick"><i></i>solid</label>
+      <label class="pick"><i></i>liquid</label>
+      <label class="pick"><i></i>gas</label>
+    </div>
+  </div>
+
+  <footer>
+    <span>3 states · 10 to sort · sand overleaf</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Matter</span>
+  </footer>
+</div>
+
+<div class="page">
+  <header>
+    <div class="bigletter">&#9635;</div>
+    <div class="htext">
+      <h1>Which Is It? Sand</h1>
+      <p class="sub">The one the jar test gets wrong.</p>
+    </div>
+    <div class="nameline">Name</div>
+  </header>
+
+  <div class="oddbox">
+    <div class="otitle">And now the difficult one: <b>sand</b></div>
+    <div class="otext">Sand pours. It takes the shape of the bucket you tip it into, just like water does.
+    So is it a liquid? Look at ONE grain of sand very closely and answer these.</div>
+    <div class="wq"><div class="wqt">Does one single grain of sand keep its own shape?</div>      <svg class="row" viewBox="0 0 729.6 62.32" width="100%" role="img" aria-label="write here">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="25.16" x2="729.6" y2="25.16" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="45.32" x2="729.6" y2="45.32" stroke="#16130F" stroke-width="2.6"/>
+      </svg>      <svg class="row" viewBox="0 0 729.6 62.32" width="100%" role="img" aria-label="write here">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="25.16" x2="729.6" y2="25.16" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="45.32" x2="729.6" y2="45.32" stroke="#16130F" stroke-width="2.6"/>
+      </svg>      <svg class="row" viewBox="0 0 729.6 62.32" width="100%" role="img" aria-label="write here">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="25.16" x2="729.6" y2="25.16" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="45.32" x2="729.6" y2="45.32" stroke="#16130F" stroke-width="2.6"/>
+      </svg>      <svg class="row" viewBox="0 0 729.6 62.32" width="100%" role="img" aria-label="write here">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="25.16" x2="729.6" y2="25.16" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="45.32" x2="729.6" y2="45.32" stroke="#16130F" stroke-width="2.6"/>
+      </svg></div>
+    <div class="wq"><div class="wqt">So is sand a solid or a liquid? Say why.</div>      <svg class="row" viewBox="0 0 729.6 62.32" width="100%" role="img" aria-label="write here">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="25.16" x2="729.6" y2="25.16" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="45.32" x2="729.6" y2="45.32" stroke="#16130F" stroke-width="2.6"/>
+      </svg>      <svg class="row" viewBox="0 0 729.6 62.32" width="100%" role="img" aria-label="write here">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="25.16" x2="729.6" y2="25.16" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="45.32" x2="729.6" y2="45.32" stroke="#16130F" stroke-width="2.6"/>
+      </svg>      <svg class="row" viewBox="0 0 729.6 62.32" width="100%" role="img" aria-label="write here">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="25.16" x2="729.6" y2="25.16" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="45.32" x2="729.6" y2="45.32" stroke="#16130F" stroke-width="2.6"/>
+      </svg>      <svg class="row" viewBox="0 0 729.6 62.32" width="100%" role="img" aria-label="write here">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="25.16" x2="729.6" y2="25.16" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="45.32" x2="729.6" y2="45.32" stroke="#16130F" stroke-width="2.6"/>
+      </svg>      <svg class="row" viewBox="0 0 729.6 62.32" width="100%" role="img" aria-label="write here">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="25.16" x2="729.6" y2="25.16" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="45.32" x2="729.6" y2="45.32" stroke="#16130F" stroke-width="2.6"/>
+      </svg></div>
+  </div>
+
+  <footer>
+    <span>2 to write</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Matter</span>
+  </footer>
+</div>
+
+
+<div style="page-break-before:always"></div>
+
+
+<div class="page">
+  <header>
+    <div class="bigletter">&#9878;</div>
+    <div class="htext">
+      <h1>Who Actually Does It?</h1>
+      <p class="sub">Tick local or national for each job.</p>
+    </div>
+    <div class="nameline">Name</div>
+  </header>
+
+  <div class="twobox">
+    <div class="tb">
+      <div class="tbt">Local &mdash; your town or city</div>
+      <div class="tbd">A small group of people, usually voted for by the people who live there. They look
+      after the things you can see from your own street.</div>
+    </div>
+    <div class="tb">
+      <div class="tbt">National &mdash; the whole country</div>
+      <div class="tbd">A much bigger group, in the capital city. They make the laws that everybody in the
+      country has to follow, wherever they live.</div>
+    </div>
+  </div>
+
+  <div class="sortlist roomy">
+    <div class="sortrow">
+      <div class="sortname">fixing a pothole in your street</div>
+      <label class="pick"><i></i>local</label>
+      <label class="pick"><i></i>national</label>
+    </div>
+    <div class="sortrow">
+      <div class="sortname">printing the money</div>
+      <label class="pick"><i></i>local</label>
+      <label class="pick"><i></i>national</label>
+    </div>
+    <div class="sortrow">
+      <div class="sortname">deciding how much money the whole country spends on hospitals</div>
+      <label class="pick"><i></i>local</label>
+      <label class="pick"><i></i>national</label>
+    </div>
+    <div class="sortrow">
+      <div class="sortname">emptying the bins</div>
+      <label class="pick"><i></i>local</label>
+      <label class="pick"><i></i>national</label>
+    </div>
+    <div class="sortrow">
+      <div class="sortname">deciding the speed limit for the whole country</div>
+      <label class="pick"><i></i>local</label>
+      <label class="pick"><i></i>national</label>
+    </div>
+    <div class="sortrow">
+      <div class="sortname">putting up street lights</div>
+      <label class="pick"><i></i>local</label>
+      <label class="pick"><i></i>national</label>
+    </div>
+    <div class="sortrow">
+      <div class="sortname">making a new law about seatbelts</div>
+      <label class="pick"><i></i>local</label>
+      <label class="pick"><i></i>national</label>
+    </div>
+    <div class="sortrow">
+      <div class="sortname">running the libraries and the parks</div>
+      <label class="pick"><i></i>local</label>
+      <label class="pick"><i></i>national</label>
+    </div>
+  </div>
+
+  <footer>
+    <span>8 to sort</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Government</span>
+  </footer>
+</div>
+
+<div class="page">
+  <header>
+    <div class="bigletter">&#9993;</div>
+    <div class="htext">
+      <h1>Who Would You Tell?</h1>
+      <p class="sub">Tick who could fix it. Write what you would ask.</p>
+    </div>
+    <div class="nameline">Name</div>
+  </header>
+
+  <div class="problist">
+    <div class="prow">
+      <div class="pwhat">The swing in your local park is broken.</div>
+      <div class="ppick">
+        <label class="pick"><i></i>local</label>
+        <label class="pick"><i></i>national</label>
+      </div>
+            <svg class="row" viewBox="0 0 729.6 97.39" width="100%" role="img" aria-label="what exactly would you ask them to do?">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="38.7" x2="729.6" y2="38.7" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="72.39" x2="729.6" y2="72.39" stroke="#16130F" stroke-width="2.6"/>
+      </svg>
+    </div>
+    <div class="prow">
+      <div class="pwhat">You think the speed limit outside your school should be lower for everyone in the country.</div>
+      <div class="ppick">
+        <label class="pick"><i></i>local</label>
+        <label class="pick"><i></i>national</label>
+      </div>
+            <svg class="row" viewBox="0 0 729.6 97.39" width="100%" role="img" aria-label="what exactly would you ask them to do?">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="38.7" x2="729.6" y2="38.7" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="72.39" x2="729.6" y2="72.39" stroke="#16130F" stroke-width="2.6"/>
+      </svg>
+    </div>
+    <div class="prow">
+      <div class="pwhat">The bins have not been emptied for three weeks.</div>
+      <div class="ppick">
+        <label class="pick"><i></i>local</label>
+        <label class="pick"><i></i>national</label>
+      </div>
+            <svg class="row" viewBox="0 0 729.6 97.39" width="100%" role="img" aria-label="what exactly would you ask them to do?">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="38.7" x2="729.6" y2="38.7" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="72.39" x2="729.6" y2="72.39" stroke="#16130F" stroke-width="2.6"/>
+      </svg>
+    </div>
+    <div class="prow">
+      <div class="pwhat">You think the library should open on Sundays.</div>
+      <div class="ppick">
+        <label class="pick"><i></i>local</label>
+        <label class="pick"><i></i>national</label>
+      </div>
+            <svg class="row" viewBox="0 0 729.6 97.39" width="100%" role="img" aria-label="what exactly would you ask them to do?">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="38.7" x2="729.6" y2="38.7" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="72.39" x2="729.6" y2="72.39" stroke="#16130F" stroke-width="2.6"/>
+      </svg>
+    </div>
+  </div>
+
+  <footer>
+    <span>4 problems</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Government</span>
+  </footer>
+</div>
+
+
+<div style="page-break-before:always"></div>
+
+
+<div class="page ">
+  <header>
+    
+    <h1>Only Two at a Time</h1>
+    <p class="sub">Computing &middot; Page 1 of 2</p>
+  </header>
+  <div class="nameline">
+    <span>Name</span>
+    <span class="short">Date</span>
+  </div>
+  <div class="directions">
+    <b>DIRECTIONS:</b> Look at two cards at a time. Write the one that comes first.
+  </div>
+
+
+  <div class="pair"><div class="c">7</div><div>and</div><div class="c">3</div><div>&nbsp; &rarr; &nbsp; which comes first?</div><div class="c"></div></div>
+  <div class="pair"><div class="c">4</div><div>and</div><div class="c">9</div><div>&nbsp; &rarr; &nbsp; which comes first?</div><div class="c"></div></div>
+  <div class="pair"><div class="c">6</div><div>and</div><div class="c">6</div><div>&nbsp; &rarr; &nbsp; which comes first?</div><div class="c"></div></div>
+  <div class="box"><b>The same?</b> Either one can go first.</div>
+  <div class="note"><b>Now six cards.</b> Put them in order, smallest first. Still only two at a time.</div>
+  <div class="cards"><div>5</div><div>2</div><div>8</div><div>1</div><div>9</div><div>3</div></div>
+  <div class="cards"><div class="blank"></div><div class="blank"></div><div class="blank"></div><div class="blank"></div><div class="blank"></div><div class="blank"></div></div>
+  <div class="box"><b>How did you do it?</b> Write it so someone else could follow it.
+  <div class="write flush"></div><div class="write flush"></div><div class="write flush"></div></div>
+
+  <footer>
+    <span>Keep going on page 2 &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Two at a time</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>Everybody Does It Differently</h1>
+    <p class="sub">Computing &middot; Page 2 of 2</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Watch two other people put the same six in order.
+  </div>
+
+
+  <div class="box"><b>Person 1: what did they do?</b>
+  <div class="write flush"></div><div class="write flush"></div><div class="write flush"></div><div class="write flush"></div><div class="write flush"></div><div class="write flush"></div>
+  <b>Same as yours?</b> &nbsp; ____________</div>
+<div class="box"><b>Person 2: what did they do?</b>
+  <div class="write flush"></div><div class="write flush"></div><div class="write flush"></div><div class="write flush"></div><div class="write flush"></div><div class="write flush"></div>
+  <b>Same as yours?</b> &nbsp; ____________</div>
+  <div class="note">Everyone got it right, different ways. A machine can't "do what seems sensible". It needs exact steps: the next sheet.</div>
+
+  <footer>
+    <span>One question, over and over</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Two at a time</span>
+  </footer>
+</div>
+
+
+<div style="page-break-before:always"></div>
+
+
+<div class="page ">
+  <header>
+    
+    <h1>Mark This One</h1>
+    <p class="sub">Grades 2&ndash;5 · Doing the Work · Page 1 of 2</p>
+  </header>
+  <div class="nameline">
+    <span>Name</span>
+    <span class="short">Date</span>
+  </div>
+  <div class="directions">
+    <b>DIRECTIONS:</b> Robin marked this sheet. <b>Mark it again, properly:</b> tick or cross. Not everything odd is wrong.
+  </div>
+
+
+  <table class="tbl marking">
+    <thead><tr><th></th><th>The question</th><th>What Robin wrote</th><th>Tick or cross</th></tr></thead>
+    <tbody><tr><td><span class="pn">1.</span></td><td>72 &minus; 66</td><td>66 &rarr; 69 is 3, 69 &rarr; 72 is 3, so 6</td><td><span class="abox" style="width:0.42in;height:0.3in"></span></td></tr><tr><td><span class="pn">2.</span></td><td>47 + 39</td><td>76</td><td><span class="abox" style="width:0.42in;height:0.3in"></span></td></tr><tr><td><span class="pn">3.</span></td><td>61 &minus; 19</td><td>61 &minus; 20 = 41, then + 1 = 42</td><td><span class="abox" style="width:0.42in;height:0.3in"></span></td></tr><tr><td><span class="pn">4.</span></td><td>Add 9 and 7, then take away 3.</td><td>16</td><td><span class="abox" style="width:0.42in;height:0.3in"></span></td></tr><tr><td><span class="pn">5.</span></td><td>32 &minus; 27</td><td>15</td><td><span class="abox" style="width:0.42in;height:0.3in"></span></td></tr><tr><td><span class="pn">6.</span></td><td>32 + 27</td><td>59</td><td><span class="abox" style="width:0.42in;height:0.3in"></span></td></tr><tr><td><span class="pn">7.</span></td><td>There were 16 stickers in a box. 5 were given away. How many are left?</td><td>21</td><td><span class="abox" style="width:0.42in;height:0.3in"></span></td></tr><tr><td><span class="pn">8.</span></td><td>48 &minus; 22</td><td>26</td><td><span class="abox" style="width:0.42in;height:0.3in"></span></td></tr><tr><td><span class="pn">9.</span></td><td>42 + 20</td><td>24 + 20 = 44</td><td><span class="abox" style="width:0.42in;height:0.3in"></span></td></tr></tbody>
+  </table>
+
+  <div class="note"><b>At the bottom of Robin&rsquo;s sheet, in Robin&rsquo;s writing:</b>
+  &ldquo;I marked it myself. <b>8 out of 9.</b>&rdquo;</div>
+
+  <ol class="qs" start="10">
+    <li><span class="qt" style="font-size:12pt">What is Robin&rsquo;s real score, out of 9? &nbsp;<span class="abox" style="width:0.8in;height:0.32in"></span></span></li>
+  </ol>
+  
+
+  <footer>
+    <span>Score: ______ / 10 (the 9 marks, and the real total)</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Mark this one</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>Mark This One &mdash; What Robin Did</h1>
+    <p class="sub">Grades 2&ndash;5 · Doing the Work · Page 2 of 2</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Say what Robin <b>did</b>, not just that it is wrong.
+  </div>
+
+
+  <b>B. For each one you crossed, write its number and what Robin did.</b>
+  <div style="display:flex;align-items:center;gap:.12in;margin:.04in 0">
+       <span class="abox" style="width:0.34in;height:0.28in"></span>
+       <span style="flex:1;border-bottom:1px solid var(--rule);height:.22in"></span></div><div style="display:flex;align-items:center;gap:.12in;margin:.04in 0">
+       <span class="abox" style="width:0.34in;height:0.28in"></span>
+       <span style="flex:1;border-bottom:1px solid var(--rule);height:.22in"></span></div><div style="display:flex;align-items:center;gap:.12in;margin:.04in 0">
+       <span class="abox" style="width:0.34in;height:0.28in"></span>
+       <span style="flex:1;border-bottom:1px solid var(--rule);height:.22in"></span></div><div style="display:flex;align-items:center;gap:.12in;margin:.04in 0">
+       <span class="abox" style="width:0.34in;height:0.28in"></span>
+       <span style="flex:1;border-bottom:1px solid var(--rule);height:.22in"></span></div><div style="display:flex;align-items:center;gap:.12in;margin:.04in 0">
+       <span class="abox" style="width:0.34in;height:0.28in"></span>
+       <span style="flex:1;border-bottom:1px solid var(--rule);height:.22in"></span></div><div style="display:flex;align-items:center;gap:.12in;margin:.04in 0">
+       <span class="abox" style="width:0.34in;height:0.28in"></span>
+       <span style="flex:1;border-bottom:1px solid var(--rule);height:.22in"></span></div>
+
+  <ol class="qs" start="11">
+    <li><span class="qt">Two of Robin&rsquo;s right answers were worked out in a way you would not use.
+    Find one. Write its number, and say whether it is still right.</span><div class="write"></div><div class="write"></div><div class="write"></div></li>
+    <li><span class="qt">Robin gave themselves 8 out of 9. You gave them  fewer.
+    Robin was not cheating &mdash; so what makes your own work the hardest kind to mark?</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li>
+  </ol>
+
+  <b>C. Three of your own.</b> Do them, then mark them yourself against the key.
+
+  <ol class="qs" start="13"><li><span class="qt" style="font-size:12pt">Add 11 and 8, then take away 5. &nbsp;<span class="abox" style="width:0.9in;height:0.32in"></span></span></li><li><span class="qt" style="font-size:12pt">There were 14 stickers in a box. 7 were given away. How many are left? &nbsp;<span class="abox" style="width:0.9in;height:0.32in"></span></span></li><li><span class="qt" style="font-size:12pt">38 + 48 &nbsp;<span class="abox" style="width:0.9in;height:0.32in"></span></span></li></ol>
+  
+
+  <footer>
+    <span>Score: ______ / 2 (part B is marked with them, not counted)</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Mark this one</span>
+  </footer>
+</div>
+
+</body></html>

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="sheet-kind" content="worksheet">
+<title>Spelling practice</title>
+<style>
+  @page { size: letter portrait; margin: 0.4in 0.45in; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  :root {
+    --ink: #16130F; --muted: #6B635A; --rule: #CFC3B2; --guide: #BCAE9C;
+    --accent: #C0511D; --tint: #F7EDE4; --slate: #2E5A78;
+  }
+  body {
+    font-family: Quicksand, 'URW Gothic', 'Century Gothic', sans-serif;
+    color: #000; background: #fff;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  .page { width: 100%; }
+  .page + .page { page-break-before: always; }
+  /* A screen ignores @page margins, so the preview drew every made sheet edge
+     to edge while the paper has 0.4in / 0.45in of white round it. The shelf's
+     sheets carry the same screen padding; print is untouched. */
+  @media screen { .page { padding: 0.4in 0.45in; } }
+  header {
+    display: flex; align-items: center; gap: 16px;
+    border-bottom: 3px solid var(--slate); padding-bottom: 7px; margin-bottom: 2px;
+  }
+  .bigletter { font-size: 38pt; font-weight: 700; line-height: 1; letter-spacing: .02em; }
+  .htext { flex: 1; }
+  h1 { font-size: 14pt; font-weight: 700; margin: 0 0 2px; }
+  .sub { font-size: 10pt; color: var(--muted); margin: 0; }
+  .nameline {
+    font-size: 9.5pt; color: var(--muted);
+    border-bottom: 1px solid var(--ink); width: 2in;
+    padding-bottom: 1px; align-self: flex-end;
+  }
+  .dir { font-size: 11pt; margin: 12px 0 10px; }
+  footer {
+    margin-top: 10px; padding-top: 6px; border-top: 1px solid var(--rule);
+    font-size: 8.5pt; color: var(--muted);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .brand { font-size: 7pt; letter-spacing: .04em; color: var(--accent); }
+  table { border-collapse: collapse; }
+  /* The parent-copy badge, lifted from the shelf's key pages so the two match
+     on paper. Tinted rather than outlined, because it has to be recognisable
+     at a glance from across a table with the page upside down. */
+  .badgeline {
+    display: inline-block; font-size: 8.5pt; font-weight: 700;
+    letter-spacing: .06em; text-transform: uppercase;
+    color: var(--accent); background: var(--tint);
+    border: 1.5px solid var(--accent); padding: 2px 8px; margin-bottom: 8px;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <div class="bigletter">S</div>
+    <div class="htext">
+      <h1>Spelling practice</h1>
+      <p class="sub">8 words · write each 3 times</p>
+    </div>
+    <div class="nameline">Name</div>
+  </header>
+  <p class="dir">Look at the word. Fold the page along the dashed line so you cannot see it. Write it, then unfold and check.</p>
+  <style>
+      table.sp { width: 100%; }
+      table.sp th {
+        font-size: 8.5pt; color: var(--muted); text-transform: uppercase;
+        letter-spacing: .06em; font-weight: 700; text-align: left;
+        padding: 0 6px 4px; border-bottom: 1.5px solid var(--slate);
+      }
+      table.sp td { border-bottom: 1px solid var(--rule); padding: 0 6px; height: .42in; }
+      table.sp td.word { font-size: 13pt; font-weight: 700; white-space: nowrap; }
+      table.sp th.fold, table.sp td.fold { border-left: 2px dashed var(--guide); }
+      ol.test { font-size: 12pt; margin: 6px 0 0; padding-left: 26px; }
+      ol.test li { height: .46in; border-bottom: 1px solid var(--rule); }
+    </style><table class="sp"><tr><th>Look</th><th class="fold">Write it</th><th>Write it</th><th>Write it</th></tr><tr><td class="word">because</td><td class="fold"></td><td></td><td></td></tr><tr><td class="word">friend</td><td class="fold"></td><td></td><td></td></tr><tr><td class="word">school</td><td class="fold"></td><td></td><td></td></tr><tr><td class="word">people</td><td class="fold"></td><td></td><td></td></tr><tr><td class="word">would</td><td class="fold"></td><td></td><td></td></tr><tr><td class="word">there</td><td class="fold"></td><td></td><td></td></tr><tr><td class="word">their</td><td class="fold"></td><td></td><td></td></tr><tr><td class="word">were</td><td class="fold"></td><td></td><td></td></tr></table>
+  <footer>
+    <span>8 words</span>
+    <span class="brand">KITCHEN TABLE</span>
+    <span></span>
+  </footer>
+</div>
+<div class="page">
+  <header>
+    <div class="bigletter">S</div>
+    <div class="htext">
+      <h1>Spelling test</h1>
+      <p class="sub">8 words · not in the practice order</p>
+    </div>
+  </header>
+  
+  <p class="dir">Somebody reads the words out. Write each one on its line.</p>
+  <style>
+      table.sp { width: 100%; }
+      table.sp th {
+        font-size: 8.5pt; color: var(--muted); text-transform: uppercase;
+        letter-spacing: .06em; font-weight: 700; text-align: left;
+        padding: 0 6px 4px; border-bottom: 1.5px solid var(--slate);
+      }
+      table.sp td { border-bottom: 1px solid var(--rule); padding: 0 6px; height: .42in; }
+      table.sp td.word { font-size: 13pt; font-weight: 700; white-space: nowrap; }
+      table.sp th.fold, table.sp td.fold { border-left: 2px dashed var(--guide); }
+      ol.test { font-size: 12pt; margin: 6px 0 0; padding-left: 26px; }
+      ol.test li { height: .46in; border-bottom: 1px solid var(--rule); }
+    </style><ol class="test"><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li></ol>
+  <footer>
+    <span>8 words</span>
+    <span class="brand">KITCHEN TABLE</span>
+    <span></span>
+  </footer>
+</div>
+<div class="page">
+  <header>
+    <div class="bigletter">S</div>
+    <div class="htext">
+      <h1>Spelling test</h1>
+      <p class="sub">Read these out, in this order</p>
+    </div>
+  </header>
+  <div class="badgeline">Answer Key — Parent Copy</div>
+  
+  <style>
+      table.sp { width: 100%; }
+      table.sp th {
+        font-size: 8.5pt; color: var(--muted); text-transform: uppercase;
+        letter-spacing: .06em; font-weight: 700; text-align: left;
+        padding: 0 6px 4px; border-bottom: 1.5px solid var(--slate);
+      }
+      table.sp td { border-bottom: 1px solid var(--rule); padding: 0 6px; height: .42in; }
+      table.sp td.word { font-size: 13pt; font-weight: 700; white-space: nowrap; }
+      table.sp th.fold, table.sp td.fold { border-left: 2px dashed var(--guide); }
+      ol.test { font-size: 12pt; margin: 6px 0 0; padding-left: 26px; }
+      ol.test li { height: .46in; border-bottom: 1px solid var(--rule); }
+    </style><ol class="test" style="list-style-position:inside"><li style="height:auto;padding:3px 0"><b>were</b></li><li style="height:auto;padding:3px 0"><b>because</b></li><li style="height:auto;padding:3px 0"><b>school</b></li><li style="height:auto;padding:3px 0"><b>people</b></li><li style="height:auto;padding:3px 0"><b>there</b></li><li style="height:auto;padding:3px 0"><b>their</b></li><li style="height:auto;padding:3px 0"><b>would</b></li><li style="height:auto;padding:3px 0"><b>friend</b></li></ol>
+  <footer>
+    <span>8 words</span>
+    <span class="brand">KITCHEN TABLE</span>
+    <span></span>
+  </footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="sheet-kind" content="worksheet">
+<title>Two Directions — Music</title>
+<style>
+  :root { --font: Georgia, "Times New Roman", serif; }
+
+  /* Page margins live HERE only — body padding stays 0 for print so the two
+     don't stack and eat the sheet. */
+  @page { size: letter portrait; margin: 0.45in 0.5in; }
+
+  /*
+   * THE PALETTE. The same one the shop wears (kitchen-table/BRAND.md): warm
+   * near-black ink, one accent, pine kept back for the answer key.
+   *
+   * WHY A SHEET HAS COLOR AT ALL. Every sheet was pure grayscale — #000 rules,
+   * #333 subtitles, #f0f0f0 boxes — which is what you get by never deciding.
+   * The paper is the product and it looked like a fax. A printer set to
+   * grayscale, or one that has no color to give, renders all of this as the
+   * greys it already had, so nothing below costs a parent anything they were
+   * not already spending.
+   *
+   * WHAT STAYS BLACK, ON PURPOSE:
+   *   - anything drawn to be written on (rules, name lines, answer boxes)
+   *   - anything drawn to be traced or colored in (line art, letter guides)
+   *   - the confidence rings, which have to survive a mono laser
+   * Color marks the sheet's own furniture — its rule, its numbering, its
+   * boxes — and never the part a child puts a pencil through.
+   */
+  :root {
+    --ink:    #16130F;
+    --muted:  #6B635A;
+    --rule:   #CFC3B2;
+    --guide:  #BCAE9C;
+    --accent: #C0511D;
+    --tint:   #F7EDE4;
+    --slate:  #2E5A78;
+    --tintslate: #E9EFF4;
+    --deep:   #2C4A45;
+    --tintdeep: #ECF1EF;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font);
+    color: #000; background: #fff;
+    font-size: 12pt; line-height: 1.3;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+
+  /* ORDER MATTERS. This generic rule must come BEFORE the @media screen block:
+     same specificity, so whichever is declared last wins. With it after, the
+     on-screen preview stretches to the viewport instead of 8.5in — print is
+     unaffected, but the proof you check before printing is wrong. */
+  .page { width: 100%; }
+  .page + .page { page-break-before: always; }
+
+  @media screen {
+    body { padding: 0.5in; background: #ddd; }
+    .page {
+      background: #fff; padding: 0.45in 0.5in;
+      width: 8.5in; min-height: 11in;
+      margin: 0 auto 24px; box-shadow: 0 2px 10px rgba(0,0,0,.3);
+    }
+  }
+
+  /* ------------------------------------------------------------- header */
+  header { border-bottom: 3px double var(--accent); padding-bottom: 6px; }
+  header.cont { border-bottom: 1px solid var(--rule); }
+  h1 { font-size: 16pt; margin: 0 0 1px; letter-spacing: .01em; }
+  .sub { font-size: 10pt; font-style: italic; color: var(--muted); margin: 0; }
+
+  .nameline { display: flex; gap: 26px; font-size: 10.5pt; margin: 11px 0 12px; }
+  .nameline span { flex: 1; border-bottom: 1px solid var(--ink); padding-bottom: 1px; }
+  .nameline span.short { flex: 0 0 1.9in; }
+
+  .directions {
+    font-size: 10.5pt; line-height: 1.35;
+    background: var(--tint); border-left: 4px solid var(--accent);
+    padding: 7px 10px; margin: 12px 0 14px;
+  }
+  .directions b { letter-spacing: .03em; }
+  .tip { font-style: italic; margin-top: 3px; }
+
+  /* ------------------------------------------------- problems and grids */
+  .grid { display: grid; gap: 13px 16px; margin-top: 4px; }
+  .prob { page-break-inside: avoid; display: flex; gap: 5px; align-items: flex-start; }
+  .pn { font-weight: bold; font-size: 11pt; min-width: .28in; flex: 0 0 auto; color: var(--accent); }
+  .pbody { flex: 1; min-width: 0; }
+
+  /* Digits need lining figures and even widths whatever the body font is. */
+  .num, .vert, .horiz { font-family: "Trebuchet MS", "Segoe UI", Tahoma, Verdana, sans-serif; font-variant-numeric: lining-nums tabular-nums; }
+
+  /* A stacked column algorithm.
+     Two grid columns — operator, then digits — because a floated or absolutely
+     positioned operator overlaps the digits as soon as the numbers get wide,
+     and "324" with a + sitting on the 3 is unreadable. The grid also lets the
+     rule under the last operand span BOTH columns, which is how it is written
+     by hand. The rule is heavy: it is the line you write the answer beneath. */
+  .vert {
+    display: inline-grid; grid-template-columns: auto auto;
+    font-size: 15pt; line-height: 1.3; text-align: right;
+  }
+  .vert > span { padding: 0 0 1px 0; }
+  .vert .op { text-align: left; padding-right: .16in; }
+  .vert .last { border-bottom: 2.5px solid var(--ink); padding-bottom: 3px; }
+  .vert .ans { height: .4in; }
+  /* Partial-products working, for 2-digit x 1-digit before the short method. */
+  .vert .part { font-size: 11pt; color: var(--muted); }
+  /* A row of worked examples that fade — see lib/formats.js faded(). The
+     caption is what makes the fade legible: without it the third one looks like
+     a question somebody forgot to number. */
+  .egrow { display: flex; gap: .34in; align-items: flex-start; margin: 0 0 4px; }
+  .eg { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; }
+  .eglab { font-size: 8.5pt; color: var(--slate); letter-spacing: .02em; }
+
+  /* The carried digits. Small and grey so the sum still reads as the sum, and
+     tight to the row below it so a carry sits ON the column it goes into. */
+  .vert .carry { font-size: 9pt; color: var(--slate); line-height: 1; padding: 0 0 1px 0; }
+
+  .horiz { font-size: 14pt; white-space: nowrap; }
+
+  /* Row numbers in a word list. Gray and small: they are there so a list can be
+     dictated ("number seven") and marked without counting down the page, and
+     they must not compete with the word itself. */
+  .wn { color: var(--muted); font-size: 9pt; }
+
+  /* The box an answer goes in. inline-block so it can sit mid-sentence. */
+  .abox {
+    display: inline-block; border: 1.6px solid var(--slate); border-radius: 3px;
+    vertical-align: middle; margin: 0 3px; position: relative; background: #fff;
+  }
+  /* Scoped to the box: as a bare ".alab" it pinned any generator's own .alab
+     to the bottom of the page (life-07-signs-and-forms 40, 2026-09-24). */
+  .abox > .alab {
+    position: absolute; bottom: 1px; left: 0; right: 0;
+    text-align: center; font-size: 7pt; color: var(--muted); font-style: italic;
+  }
+
+  /* Confidence marks. The rings are drawn with a border and a gradient rather
+     than an SVG so they stay inline with the question text at any font size,
+     and print black on a mono laser without relying on a background image. */
+  .conf { float: right; margin: 2px 0 0 8px; white-space: nowrap; }
+  .cring {
+    display: inline-block; width: 11px; height: 11px; margin-left: 4px;
+    border: 1.4px solid var(--slate); border-radius: 50%; vertical-align: middle;
+  }
+  .cring-full { background: var(--accent); }
+  .cring-half { background: linear-gradient(90deg, var(--accent) 50%, #fff 50%); }
+  .cring-none { background: #fff; }
+  ol.qs.hasconf li { overflow: hidden; }
+
+  .conflegend {
+    border: 1.2px solid var(--rule); border-radius: 4px;
+    padding: 3px 8px; margin: 0 0 7px;
+    font-size: 8.5pt; color: var(--muted); display: flex; gap: 14px; align-items: center;
+  }
+  .conftitle { font-weight: 700; color: var(--ink); }
+  .confitem { white-space: nowrap; }
+
+  .work {
+    border: 1.4px dashed var(--rule); border-radius: 4px;
+    margin: 6px 0 2px; position: relative;
+  }
+  /* The label S.work() puts in the box: a DIRECT child only. As ".work span"
+     it also caught every span inside any generator's own .work content and
+     stacked them all at the top-left corner (math-11-grade6 47, 2026-09-23). */
+  .work > span {
+    position: absolute; top: 3px; left: 6px;
+    font-size: 8pt; color: var(--muted); font-style: italic;
+  }
+
+  /* ------------------------------------------------------ writing lines */
+  /* Primary rule: solid top, dashed midline, heavy baseline. Capitals reach
+     the top line, lowercase bodies sit under the dashed one. */
+  .write {
+    position: relative; height: 0.375in;
+    margin: 6px 0 0 .3in;
+    border-top: 1px solid var(--rule); border-bottom: 2px solid var(--ink);
+  }
+  .write.flush { margin-left: 0; }
+  .write + .write { margin-top: .17in; }
+  .write::after {
+    content: ""; position: absolute; left: 0; right: 0; top: 50%;
+    border-top: 1px dashed var(--guide);
+  }
+
+  /* ------------------------------------------------------- question list */
+  ol.qs { margin: 0; padding: 0 0 0 .34in; }
+  ol.qs li { margin-bottom: 13px; page-break-inside: avoid; }
+  ol.qs li::marker { font-weight: bold; font-size: 11pt; color: var(--accent); }
+  .qt { display: block; }
+
+  .mcq { display: grid; gap: 3px 14px; margin: 5px 0 2px .12in; font-size: 11pt; }
+  .opt { white-space: nowrap; }
+
+  /* -------------------------------------------------------------- tables */
+  .tbl { border-collapse: collapse; margin: 8px 0; font-size: 11pt; width: 100%; }
+  .tbl th, .tbl td { border: 1.4px solid var(--ink); padding: 5px 8px; text-align: left; }
+  .tbl th { color: var(--slate); }
+  .tbl th { background: var(--tint); font-size: 10pt; letter-spacing: .02em; }
+  .tbl td.blank { height: .34in; }
+  .tbl.narrow { width: auto; }
+  .tbl.center td, .tbl.center th { text-align: center; }
+
+  /* ------------------------------------------------------------ passages */
+  .passage {
+    border: 1.5px solid var(--slate); border-radius: 4px;
+    padding: 11px 14px; margin-bottom: 12px;
+    font-size: 11.5pt; line-height: 1.55;
+  }
+  .passage h2 { font-size: 13pt; margin: 0 0 6px; color: var(--deep); }
+  .passage p { margin: 0 0 8px; }
+  .passage p:last-child { margin-bottom: 0; }
+  .passage .byline { font-size: 9.5pt; font-style: italic; color: var(--muted); margin-bottom: 8px; }
+  /* Numbered paragraphs, so a question can say "in paragraph 2". */
+  .passage p.np { position: relative; padding-left: .3in; }
+  .passage p.np::before {
+    content: attr(data-p); position: absolute; left: 0; top: 0;
+    font-size: 9pt; color: var(--accent); font-weight: bold;
+  }
+
+  .wordbank {
+    border: 1.5px dashed var(--slate); border-radius: 4px;
+    padding: 8px 12px; margin: 10px 0 12px;
+    font-size: 11.5pt; text-align: center;
+  }
+  .wordbank b { display: block; font-size: 9.5pt; letter-spacing: .06em;
+    text-transform: uppercase; margin-bottom: 4px; color: var(--accent); }
+  .wordbank span { display: inline-block; margin: 2px 11px; }
+
+  .note {
+    border-left: 4px solid var(--deep); background: var(--tintdeep);
+    padding: 7px 11px; margin: 10px 0; font-size: 10.5pt;
+  }
+  .note b { letter-spacing: .02em; }
+
+  /* -------------------------------------------------------------- footer */
+  /* THE WORDMARK SITS IN THE FOOTER THAT WAS ALREADY THERE, so it costs no
+     height at all — a sheet that fitted before fits now. Upright where the rest
+     of the line is italic, and a size down: it is a signature, not a message,
+     and it must never compete with "Score: ___ / 10". */
+  .brand { font-style: normal; font-size: 7.5pt; letter-spacing: .04em;
+    color: var(--accent); align-self: center; }
+
+  footer {
+    margin-top: 14px; padding-top: 6px; border-top: 1px solid var(--rule);
+    font-size: 9pt; font-style: italic; color: var(--muted);
+    display: flex; justify-content: space-between;
+  }
+
+  /* ---------------------------------------------------------- answer key */
+  .keybadge {
+    display: inline-block; border: 2px solid var(--deep); color: var(--deep); padding: 2px 9px;
+    font-size: 9.5pt; font-weight: bold; letter-spacing: .08em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .key .why {
+    display: block; font-size: 9pt; font-style: italic; color: var(--muted); margin-top: 1px;
+  }
+  /* Highlight rather than underline: <u> in a key marks WHAT CHANGED, and an
+     underline under a comma is invisible. */
+  .key u { text-decoration: none; background: var(--tint); padding: 0 2px; font-weight: bold; }
+  .keygrid .pbody { font-family: "Trebuchet MS", "Segoe UI", Tahoma, Verdana, sans-serif; font-size: 12pt; }
+  /* A key's pictures scale to their column: at 1fr a wide drawing pushed a
+     three-column key 92px off the paper (art-04-drawing 10, 2026-09-24). */
+  .keygrid svg { max-width: 100%; height: auto; }
+  .keylist .qt { font-weight: normal; }
+
+  /*
+   * The guide page. Four lines per question, and the ASK line is the one that
+   * gets used at the table, so it is the one with a rule beside it — a parent
+   * scanning this page in ten seconds should land on the follow-up question
+   * and nothing else.
+   */
+  .guide { padding-left: .3in; }
+  .guide li { margin-bottom: 11px; page-break-inside: avoid; }
+  .guide .gq { font-weight: bold; font-size: 11pt; margin-bottom: 3px; }
+  /* 9pt, matching the key's own why line, because the guide page is the
+     binding constraint on every open sheet: four lines per question against a
+     key's one, and at 10pt a sheet with seven questions ran onto a second
+     side. Found by measuring, not chosen. (No backticks in here — this CSS
+     lives inside a template literal and one would close it.) */
+  .guide .glook, .guide .gthin, .guide .gstrong {
+    font-size: 9pt; line-height: 1.3; margin-top: 1px;
+  }
+  .guide .gthin { color: var(--muted); }
+  .guide .gstrong { color: var(--muted); font-style: italic; }
+  .guide .gask {
+    font-size: 9.5pt; line-height: 1.3; margin-top: 3px;
+    border-left: 3px solid var(--slate); padding-left: 7px;
+  }
+  .key .qs li { margin-bottom: 9px; }
+
+  /*
+   * INLINE-BLOCK, NOT BLOCK, AND THIS WAS WRONG FOR A LONG TIME. A block-level
+   * svg ignores text-align: center on its parent and sits flush left — so 117
+   * sheets across 35 packs said "centre this diagram" and got a left-aligned
+   * one. Twenty-five of them were origami and paper-plane fold sequences, where
+   * the whole page is diagrams.
+   *
+   * Nobody spotted it because a left-flush diagram looks deliberate; it only
+   * reads as wrong next to a centered one, and no sheet has both.
+   *
+   * inline-block makes text-align do what every one of those authors meant,
+   * and leaves a diagram in a left-aligned container exactly where it was.
+   * vertical-align: top kills the baseline gap that inline elements otherwise
+   * leave underneath them, which would have pushed long pages over.
+   */
+  svg { display: inline-block; vertical-align: top; }
+  svg.inline { vertical-align: middle; }
+
+  .stave { text-align: center; margin: 10px 0; }
+  .card { border: 2.3px solid var(--ink); border-radius: 10px; padding: 11px 14px; margin: 10px 0; }
+  .card h4 { margin: 0 0 4px; font-size: 11pt; }
+  .note { margin: 9px 0; }
+  ol.qs li { margin-bottom: 8px; }
+  .places { display: grid; grid-template-columns: repeat(9, 1fr); gap: 5px; margin: 9px 0; }
+  .places div { border: 2px solid var(--ink); border-radius: 6px; text-align: center;
+    padding: 8px 2px; font-size: 11.5pt; }
+  .places div b { display: block; font-size: 17pt; }
+  .places div.gap { border-style: dashed; }
+  .ladder { border-collapse: collapse; margin: 9px auto; }
+  .ladder td { border: 1.5px solid var(--rule); padding: 8px 16px; font-size: 16pt;
+    text-align: center; }
+  .ladder td.n { color: var(--muted); font-size: 9.5pt; }
+  .ladder tr.wrap td { border-top: 2.6px solid var(--accent); }
+  .keys { display: flex; gap: 0; margin: 12px auto; width: 5.8in; height: 2.1in;
+    border: 2.4px solid var(--ink); border-radius: 0 0 5px 5px; position: relative; }
+  .keys.big { width: 6.9in; height: 2.9in; }
+  .keys.big .w span { font-size: 17pt; bottom: 8px; }
+  .keys.big .b { width: .56in; height: 1.8in; }
+  .keys .w { flex: 1; border-right: 1.8px solid var(--ink); position: relative; }
+  .keys .w:last-child { border-right: none; }
+  .keys .w span { position: absolute; bottom: 4px; left: 0; right: 0; text-align: center;
+    font-size: 13pt; font-weight: 700; }
+  .keys .b { position: absolute; top: 0; width: .42in; height: 1.3in; background: var(--ink);
+    border-radius: 0 0 3px 3px; }
+  .tally { border-collapse: collapse; width: 100%; margin: 9px 0; }
+  .tally th { border: 1.8px solid var(--ink); background: var(--tint); padding: 6px 9px;
+    font-size: 10pt; text-align: left; }
+  .tally td { border: 1.5px solid var(--rule); padding: 8px 10px; }
+  .tally td.b { height: .55in; }
+  .sym { vertical-align: -3px; }
+
+</style>
+</head>
+<body>
+
+<div class="page ">
+  <header>
+    
+    <h1>Two Directions</h1>
+    <p class="sub">Music &middot; Page 1 of 2</p>
+  </header>
+  <div class="nameline">
+    <span>Name</span>
+    <span class="short">Date</span>
+  </div>
+  <div class="directions">
+    <b>DIRECTIONS:</b> Compare the two pictures. What changed?
+  </div>
+
+
+  <div class="plan" style="display:flex;align-items:stretch;gap:.08in;margin:.02in 0 .1in"><div style="flex:1;display:flex;align-items:center;gap:.07in;border:1.8px solid var(--ink);border-radius:5px;padding:.05in .08in"><span style="flex:0 0 auto;display:inline-block;width:.26in;height:.26in;line-height:.26in;border-radius:50%;background:var(--ink);color:#fff;text-align:center;font-weight:700;font-size:11pt">1</span><span style="font-size:10.5pt;font-weight:700;line-height:1.2">Compare the two pictures</span></div><div style="align-self:center;font-size:16pt;font-weight:700;color:var(--ink)">&rarr;</div><div style="flex:1;display:flex;align-items:center;gap:.07in;border:1.8px solid var(--ink);border-radius:5px;padding:.05in .08in"><span style="flex:0 0 auto;display:inline-block;width:.26in;height:.26in;line-height:.26in;border-radius:50%;background:var(--ink);color:#fff;text-align:center;font-weight:700;font-size:11pt">2</span><span style="font-size:10.5pt;font-weight:700;line-height:1.2">Read why they differ</span></div><div style="align-self:center;font-size:16pt;font-weight:700;color:var(--ink)">&rarr;</div><div style="flex:1;display:flex;align-items:center;gap:.07in;border:1.8px solid var(--ink);border-radius:5px;padding:.05in .08in"><span style="flex:0 0 auto;display:inline-block;width:.26in;height:.26in;line-height:.26in;border-radius:50%;background:var(--ink);color:#fff;text-align:center;font-weight:700;font-size:11pt">3</span><span style="font-size:10.5pt;font-weight:700;line-height:1.2">Turn over: 5 questions</span></div></div>
+  <div class="card"><h4>What you can already read</h4>
+  <svg class="" viewBox="0 0 420 100" width="609" height="145" role="img" aria-label="1 bar of rhythm" xmlns="http://www.w3.org/2000/svg"><line x1="10" y1="54" x2="410" y2="54" stroke="#CFC3B2" stroke-width="1.2" stroke-linecap="round"/><ellipse cx="16" cy="54" rx="7.5" ry="5.4" fill="#111" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 16 54)"/><line x1="23" y1="53" x2="23" y2="20" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/><ellipse cx="54" cy="54" rx="7.5" ry="5.4" fill="#111" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 54 54)"/><line x1="61" y1="53" x2="61" y2="20" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/><ellipse cx="92" cy="54" rx="7.5" ry="5.4" fill="#111" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 92 54)"/><line x1="99" y1="53" x2="99" y2="20" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/><ellipse cx="130" cy="54" rx="7.5" ry="5.4" fill="none" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 130 54)"/><line x1="137" y1="53" x2="137" y2="20" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/></svg>
+  <div style="font-size:10.5pt;color:var(--muted);margin-top:2px">Three quarter notes and a half note, all at one height, like a drum part.</div></div>
+
+  <div class="card"><h4>The same four notes, moved up and down</h4>
+  <div class="stave"><svg class="" viewBox="0 0 400 114" width="600" height="171" role="img" aria-label="a treble stave with 4 note(s) on it" xmlns="http://www.w3.org/2000/svg"><line x1="10" y1="30" x2="390" y2="30" stroke="#8A8178" stroke-width="1.3" stroke-linecap="round"/><line x1="10" y1="42" x2="390" y2="42" stroke="#8A8178" stroke-width="1.3" stroke-linecap="round"/><line x1="10" y1="54" x2="390" y2="54" stroke="#8A8178" stroke-width="1.3" stroke-linecap="round"/><line x1="10" y1="66" x2="390" y2="66" stroke="#8A8178" stroke-width="1.3" stroke-linecap="round"/><line x1="10" y1="78" x2="390" y2="78" stroke="#8A8178" stroke-width="1.3" stroke-linecap="round"/><g transform="translate(22 78)"><path d="M15.07 -38.45L15.07 -38.45Q14.4 -40.99 13.97 -43.49Q13.54 -45.98 13.54 -48.58L13.54 -48.58Q13.54 -50.83 13.85 -52.82Q14.16 -54.82 14.74 -56.5L14.74 -56.5Q15.36 -58.42 16.37 -60.12Q17.38 -61.82 18.5 -62.93Q19.63 -64.03 20.5 -64.03L20.5 -64.03Q21.65 -64.03 23.66 -59.95L23.66 -59.95Q24.67 -57.89 25.15 -55.49Q25.63 -53.09 25.63 -50.35L25.63 -50.35Q25.63 -46.94 24.72 -43.56Q23.81 -40.18 22.06 -37.2Q20.3 -34.22 17.86 -31.97L17.86 -31.97L19.54 -23.9Q20.26 -24 20.74 -24.05Q21.22 -24.1 21.46 -24.1L21.46 -24.1Q24.38 -24.1 26.69 -22.44Q28.99 -20.78 30.36 -18.1Q31.73 -15.41 31.73 -12.19L31.73 -12.19Q31.73 -8.5 29.83 -5.54Q27.94 -2.59 24.14 -1.2L24.14 -1.2Q24.38 -0.38 25.54 5.62L25.54 5.62Q25.82 7.06 25.97 7.9Q26.11 8.74 26.16 9.36Q26.21 9.98 26.21 10.8L26.21 10.8Q26.21 13.2 25.03 15.1Q23.86 16.99 21.86 18.05Q19.87 19.1 17.42 19.1L17.42 19.1Q14.93 19.1 13.01 18.17Q11.09 17.23 9.98 15.58Q8.88 13.92 8.88 11.76L8.88 11.76Q8.88 9.46 10.15 7.92Q11.42 6.38 13.78 6.38L13.78 6.38Q15.79 6.38 17.06 7.85Q18.34 9.31 18.34 11.33L18.34 11.33Q18.34 13.06 17.14 14.35Q15.94 15.65 14.02 15.65L14.02 15.65L13.54 15.65Q14.78 17.52 17.47 17.52L17.47 17.52Q20.78 17.52 22.66 15.36Q24.53 13.2 24.53 9.84L24.53 9.84Q24.53 9.02 24.34 7.66Q24.14 6.29 23.66 4.37L23.66 4.37Q23.18 2.45 22.92 1.2Q22.66 -0.05 22.56 -0.58L22.56 -0.58Q20.93 -0.1 18.72 -0.1L18.72 -0.1Q14.59 -0.1 10.66 -2.5L10.66 -2.5Q6.82 -4.9 4.61 -8.83Q2.4 -12.77 2.4 -17.33L2.4 -17.33Q2.4 -21.65 4.37 -25.44L4.37 -25.44Q6.34 -29.23 9.24 -32.4Q12.14 -35.57 15.07 -38.45M16.37 -39.65L16.37 -39.65Q17.47 -40.22 18.72 -41.78Q19.97 -43.34 21.12 -45.36Q22.27 -47.38 22.99 -49.42Q23.71 -51.46 23.71 -53.09L23.71 -53.09Q23.71 -54.82 23.18 -55.82Q22.66 -56.83 21.36 -56.83L21.36 -56.83Q20.21 -56.83 19.13 -55.78Q18.05 -54.72 17.21 -52.97Q16.37 -51.22 15.89 -49.06Q15.41 -46.9 15.41 -44.64L15.41 -44.64Q15.41 -43.1 15.72 -41.86Q16.03 -40.61 16.37 -39.65M22.27 -2.16L19.1 -18.19Q17.81 -17.9 16.66 -16.97Q15.5 -16.03 14.81 -14.71Q14.11 -13.39 14.11 -11.9L14.11 -11.9Q14.11 -10.7 14.74 -9.43Q15.36 -8.16 16.27 -7.39L16.27 -7.39Q16.9 -6.82 17.52 -6.53L17.52 -6.53Q18.24 -6.19 18.24 -5.9L18.24 -5.9Q18.24 -5.76 17.76 -5.62L17.76 -5.62Q15.94 -6.05 14.47 -7.25Q13.01 -8.45 12.17 -10.15Q11.33 -11.86 11.33 -13.78L11.33 -13.78Q11.33 -15.84 12.17 -17.76Q13.01 -19.68 14.52 -21.22Q16.03 -22.75 17.95 -23.52L17.95 -23.52L16.56 -30.77Q10.99 -26.26 8.38 -21.91Q5.76 -17.57 5.76 -13.3L5.76 -13.3Q5.76 -10.18 7.39 -7.49Q9.02 -4.8 11.86 -3.14Q14.69 -1.49 18.24 -1.49L18.24 -1.49Q19.2 -1.49 20.18 -1.68Q21.17 -1.87 22.27 -2.16L22.27 -2.16M20.59 -18.38L23.76 -2.64Q28.46 -4.66 28.46 -10.9L28.46 -10.9Q28.46 -12.96 27.41 -14.66Q26.35 -16.37 24.58 -17.38Q22.8 -18.38 20.59 -18.38L20.59 -18.38" fill="#C0511D"/></g><ellipse cx="71.73" cy="54" rx="7.5" ry="5.4" fill="#111" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 71.73 54)"/><line x1="78.73" y1="53" x2="78.73" y2="20" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/><ellipse cx="113.73" cy="42" rx="7.5" ry="5.4" fill="#111" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 113.73 42)"/><line x1="120.73" y1="41" x2="120.73" y2="8" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/><ellipse cx="155.73000000000002" cy="66" rx="7.5" ry="5.4" fill="#111" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 155.73000000000002 66)"/><line x1="162.73" y1="65" x2="162.73" y2="32" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/><ellipse cx="197.73000000000002" cy="54" rx="7.5" ry="5.4" fill="none" stroke="#C0511D" stroke-width="1.8" transform="rotate(-18 197.73000000000002 54)"/><line x1="204.73" y1="53" x2="204.73" y2="20" stroke="#16130F" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+  <div style="font-size:10.5pt;color:var(--muted);margin-top:2px">Same four lengths, same order. Now it is a tune.</div></div>
+
+  <div class="note"><b class="big">A note's position tells you two things.</b><br>
+  <b>How far across</b> it is &mdash; that is <b>when</b> it happens.<br>
+  <b>How far up</b> it is &mdash; that is <b>how high</b> it sounds.</div>
+
+  <div class="note">So written music is a graph: time along the bottom, pitch up the side.</div>
+
+  <footer>
+    <span>Questions on page 2 &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Two directions</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>Two Directions — Reading It Back</h1>
+    <p class="sub">Music &middot; Page 2 of 2</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Look at the two pictures on page 1.
+  </div>
+
+<ol class="qs" start="1"><li><span class="qt">What is the same about the two pictures, and what is different? Say it in one sentence each.</span><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">On the second picture, which note is the highest? Is it also the longest?</span><div class="write"></div><div class="write"></div></li><li><span class="qt">A graph in math has two axes. Say what each axis is on a piece of written music.</span><div class="write"></div><div class="write"></div></li><li><span class="qt">Why does a drum part get written on one line instead of five? Answer with what a drum cannot do.</span><div class="write"></div><div class="write"></div></li><li><span class="qt">A note is moved further to the right but stays at the same height. What changed about the sound, and what did not?</span><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Score: ______ / 5</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Two directions</span>
+  </footer>
+</div>
+
+</body>
+</html>

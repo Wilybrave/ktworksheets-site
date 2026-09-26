@@ -1,0 +1,518 @@
+<!DOCTYPE html><html><head>
+<meta charset="utf-8">
+<!-- Declared, because everything else on the shelf declares it and the app now
+     reads it. These sets are worksheets in the strict sense the tag means: ten
+     questions with a settled right answer and a key on the second page. They
+     had no tag only because this file writes its own head instead of going
+     through lib/sheet.js doc(), which is where the tag is normally emitted. -->
+<meta name="sheet-kind" content="worksheet">
+<title>Daily Language Review — Grade 7, Set 1</title>
+<style>
+  /* Page margins live HERE only — body padding stays 0 for print
+     so the two don't stack and eat the sheet. */
+  @page { size: letter portrait; margin: 0.45in 0.5in; }
+
+  :root {
+    --ink:    #16130F;
+    --muted:  #6B635A;
+    --rule:   #CFC3B2;
+    --guide:  #BCAE9C;
+    --accent: #C0511D;
+    --tint:   #F7EDE4;
+    --slate:  #2E5A78;
+    --tintslate: #E9EFF4;
+    --deep:   #2C4A45;
+    --tintdeep: #ECF1EF;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body { margin: 0; padding: 0; }
+
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    color: var(--ink);
+    background: #ddd;
+    font-size: 12pt;
+    line-height: 1.3;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Screen-only breathing room. Print uses @page margins instead. */
+  /* ORDER MATTERS. This generic rule must come BEFORE the @media screen block:
+   * same specificity, so whichever is declared last wins. With it after, the
+   * on-screen preview stretched to the viewport instead of 8.5in. Print was
+   * unaffected, but the proof you check before printing was wrong. */
+  .page { width: 100%; }
+  .page + .page { page-break-before: always; }
+
+  @media screen {
+    body { padding: 0.5in; background: #ddd; }
+    .page {
+      background: #fff;
+      padding: 0.45in 0.5in;
+      width: 8.5in;
+      min-height: 11in;
+      margin: 0 auto 24px;
+      box-shadow: 0 2px 10px rgba(0,0,0,.3);
+    }
+  }
+
+  header { border-bottom: 3px double var(--accent); padding-bottom: 6px; margin-bottom: 0; }
+  header.cont { border-bottom-width: 1px; border-bottom-style: solid; }
+
+  h1 { font-size: 16pt; margin: 0 0 1px; letter-spacing: .01em; }
+  .sub { font-size: 10pt; font-style: italic; color: var(--muted); margin: 0; }
+
+  .nameline {
+    display: flex;
+    gap: 26px;
+    font-size: 10.5pt;
+    margin: 11px 0 12px;
+  }
+  .nameline span { flex: 1; border-bottom: 1px solid var(--ink); padding-bottom: 1px; }
+  .nameline span.short { flex: 0 0 2in; }
+
+  .directions {
+    font-size: 10.5pt;
+    line-height: 1.35;
+    background: var(--tint);
+    border-left: 4px solid var(--slate);
+    padding: 7px 10px;
+    margin-bottom: 14px;
+  }
+  .directions b { letter-spacing: .03em; }
+  .cups { font-style: italic; margin-top: 3px; }
+
+  ol { margin: 0; padding: 0; list-style: none; }
+
+  li {
+    margin-bottom: 12px;
+    page-break-inside: avoid;
+  }
+  li::before {
+    content: attr(data-n) ".";
+    font-weight: bold;
+    display: inline-block;
+    width: .3in;
+  }
+
+  .bad {
+    font-family: "Courier New", Courier, monospace;
+    font-size: 11.5pt;
+  }
+
+  /* Primary handwriting lines: solid top rule, dashed midline,
+     heavy baseline — capitals reach the top, lowercase sits
+     in the bottom half. Two strips per sentence. */
+  .write {
+    position: relative;
+    height: .45in;
+    margin: 6px 0 0 .3in;
+    border-top: 1px solid var(--rule);
+    border-bottom: 2px solid var(--slate);
+  }
+  .write + .write { margin-top: .17in; }
+  .write::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    border-top: 1px dashed #9a9a9a;
+  }
+
+  /* ---------- number 1, done for you (2026-09-23) ----------
+   * THE OWNER PRINTED THESE AND SAID THE SHEETS WERE NOT INTUITIVE, and a blind
+   * re-score with the directions hidden agreed: "faulty sentences over blank
+   * lines read as 'copy it'; that the errors must be fixed is not shown", and
+   * at grade 7 "copy, correct or improve are all plausible". So number 1 is
+   * now shown FIXED, written on its line, with every correction lit the way
+   * the key lights it — a child who never reads the directions can see that
+   * the job is to change things, and which kinds of thing. It is a different
+   * class from the key's .fixed on purpose: check.js pairs every .bad with
+   * one .fixed, and the example is not a second answer. */
+  li.done { background: var(--tint); border-left: 4px solid var(--accent);
+    padding: 5px 8px 8px 0; }
+  .donetag { display: inline-block; font-family: Georgia, serif; font-size: 8pt;
+    font-weight: bold; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--accent); border: 1.5px solid var(--accent); padding: 0 5px;
+    margin-left: 8px; vertical-align: 1px; }
+  .write.filled { display: flex; align-items: flex-end; padding: 0 0 1px 6px; }
+  .write.filled::after { z-index: 0; }
+  .fixedlabel { font-size: 8.5pt; font-weight: bold; letter-spacing: .05em;
+    text-transform: uppercase; color: var(--accent); margin-right: 8px;
+    position: relative; z-index: 1; white-space: nowrap; }
+  .donefix { position: relative; z-index: 1; font-style: italic;
+    color: var(--deep); white-space: nowrap; line-height: 1; }
+  .donefix u { text-decoration: none; background: #fff; font-weight: bold;
+    padding: 0 1px; border-bottom: 2px solid var(--accent); }
+
+  .brand { font-style: normal; font-size: 7.5pt; letter-spacing: .04em;
+    color: var(--accent); align-self: center; }
+
+  footer {
+    margin-top: 14px;
+    padding-top: 6px;
+    border-top: 1px solid var(--rule);
+    font-size: 9pt;
+    font-style: italic;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+  }
+
+  /* ---------- answer key ---------- */
+  .key li { margin-bottom: 12px; }
+  .key .fixed u {
+    text-decoration: none;
+    background: var(--tint);
+    padding: 0 2px;
+    font-weight: bold;
+  }
+  .key .why {
+    display: block;
+    margin-left: .3in;
+    font-size: 9.5pt;
+    font-style: italic;
+    color: var(--muted);
+    margin-top: 1px;
+  }
+  .keybadge {
+    display: inline-block;
+    border: 2px solid var(--deep);
+    padding: 2px 9px;
+    font-size: 9.5pt;
+    font-weight: bold;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+</style>
+</head><body>
+
+<!-- ============ PAGE 1 — STUDENT, 1–5 ============ -->
+<div class="page">
+  <header>
+    <h1>Daily Language Review — Set 1</h1>
+    <p class="sub">Grade 7 &nbsp;·&nbsp; Mixed Review &nbsp;·&nbsp; Page 1 of 2</p>
+  </header>
+
+  <div class="nameline">
+    <span>Name</span>
+    <span class="short">Date</span>
+  </div>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Fix every mistake and write the sentence right on the lines. Number 1 is done.
+    <div class="cups"><b>Remember CUPS:</b> Capital letters &nbsp;·&nbsp; Usage (right word) &nbsp;·&nbsp; Punctuation &nbsp;·&nbsp; Spelling</div>
+  </div>
+
+  <ol>
+    <li data-n="1" class="done"><span class="bad">Due to the fact that my bike had a flat tire. I walked all the way to practice.</span><span class="donetag">Done for you</span><div class="write filled"><span class="fixedlabel">Fixed:</span><span class="donefix" style="font-size:12.5pt"><u>Because</u> my bike had a flat tire<u>,</u> I walked all the way to practice<u>.</u></span></div></li>
+    <li data-n="2"><span class="bad">The bus was late again, everybody in my class were standing outside in the rain.</span><div class="write"></div><div class="write"></div></li>
+    <li data-n="3"><span class="bad">My little brother only eats cereal for breakfast, he wont touch anything else.</span><div class="write"></div><div class="write"></div></li>
+    <li data-n="4"><span class="bad">Running late for school, my backpack was left on the kitchen table and I had no calculater all day.</span><div class="write"></div><div class="write"></div></li>
+    <li data-n="5"><span class="bad">It was a cold wet morning and the big red bus, was twenty minutes late.</span><div class="write"></div><div class="write"></div></li>
+  </ol>
+
+  <footer>
+    <span>Keep going on page 2 &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Set 1</span>
+  </footer>
+</div>
+
+<!-- ============ PAGE 2 — STUDENT, 6–10 ============ -->
+<div class="page">
+  <header class="cont">
+    <h1>Set 1, continued</h1>
+    <p class="sub">Grade 7 &nbsp;·&nbsp; Mixed Review &nbsp;·&nbsp; Page 2 of 2</p>
+  </header>
+
+  <ol style="margin-top:16px">
+    <li data-n="6"><span class="bad">We won the game. We was down by ten at halftime. Nobody thought we could do it.</span><div class="write"></div><div class="write"></div></li>
+    <li data-n="7"><span class="bad">In my personal opinion I think that the new lunch menu is worse then last year.</span><div class="write"></div><div class="write"></div></li>
+    <li data-n="8"><span class="bad">My uncle sold his truck to a guy from work with a broken tailgate, the guy fixed it in one weekend.</span><div class="write"></div><div class="write"></div></li>
+    <li data-n="9"><span class="bad">My mom signed me up for the early bus. Which means getting up at six on a school day, even fridays.</span><div class="write"></div><div class="write"></div></li>
+    <li data-n="10"><span class="bad">The reason why I was late is because there was a really long line at the office, I got to class at 8:15.</span><div class="write"></div><div class="write"></div></li>
+  </ol>
+
+  <footer>
+    <!-- / 9, not / 10: number 1 is the worked example (2026-09-23). -->
+    <span>Score: ______ / 9</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Set 1</span>
+  </footer>
+</div>
+
+<!-- ============ PAGE 3 — ANSWER KEY ============ -->
+
+<div style="page-break-before:always"></div>
+
+
+<div class="page ">
+  <header>
+    
+    <h1>Why Anything Bigger Needs Plumbing</h1>
+    <p class="sub">Grade 7 · Building a body · Page 1 of 3</p>
+  </header>
+  <div class="nameline">
+    <span>Name</span>
+    <span class="short">Date</span>
+  </div>
+  <div class="directions">
+    <b>DIRECTIONS:</b> As a living thing grows, its surface cannot keep up with its insides. Read, then answer.
+  </div>
+
+
+  <div class="note" style="margin-top:2px">Diffusion is quick across a hundredth of an inch and hopeless across an
+  inch. So a living thing can stay tiny, stay thin, or build something to carry supplies to the middle.</div>
+
+  <table class="tbl h60">
+    <thead><tr><th>#</th><th>Living thing</th><th>Stay tiny, stay thin, or build plumbing? And how?</th></tr></thead>
+    <tbody><tr><td><span class="wktag">Done for you</span></td><td>an amoeba, one cell across</td><td><span class="wk">Stay tiny. Every part of it is already at the surface, so diffusion is enough on its own.</span></td></tr><tr><td><span class="pn">1.</span></td><td>a flatworm, wide but paper-thin</td><td class="blank"></td></tr><tr><td><span class="pn">2.</span></td><td>a jellyfish, big but mostly water with thin walls</td><td class="blank"></td></tr><tr><td><span class="pn">3.</span></td><td>an insect, with air tubes running to every part inside</td><td class="blank"></td></tr><tr><td><span class="pn">4.</span></td><td>you</td><td class="blank"></td></tr></tbody>
+  </table>
+
+  <ol class="qs" start="5"><li><span class="qt">A flatworm can be an inch wide and is never thick. Say why being flat solves the same problem that your blood solves.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Keep going on page 2 →</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Building a body</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>Five Words, In Order</h1>
+    <p class="sub">Grade 7 · Building a body · Page 2 of 3</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Put the five words in order. Each step can do something the one below cannot.
+  </div>
+
+
+  <div style="text-align:center;margin:4px 0 2px"><svg class="inline" viewBox="0 0 400 120" width="400" height="120" role="img" aria-label="cell, tissue, organ, system, organism" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="24" width="62" height="56" rx="4" fill="#f4f4f4" stroke="#16130F" stroke-width="1.6"/><text x="41" y="18" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="9.5" font-weight="bold" text-anchor="middle" fill="#16130F">cell</text><circle cx="24" cy="40" r="6" fill="#d4d4d4" stroke="#16130F" stroke-width="1.2"/><line x1="74" y1="52" x2="88" y2="52" stroke="#16130F" stroke-width="1.6" stroke-linecap="round"/><line x1="82" y1="48" x2="88" y2="52" stroke="#16130F" stroke-width="1.6" stroke-linecap="round"/><line x1="82" y1="56" x2="88" y2="52" stroke="#16130F" stroke-width="1.6" stroke-linecap="round"/><rect x="92" y="24" width="62" height="56" rx="4" fill="#f4f4f4" stroke="#16130F" stroke-width="1.6"/><text x="123" y="18" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="9.5" font-weight="bold" text-anchor="middle" fill="#16130F">tissue</text><circle cx="106" cy="40" r="6" fill="#d4d4d4" stroke="#16130F" stroke-width="1.2"/><circle cx="122" cy="40" r="6" fill="#d4d4d4" stroke="#16130F" stroke-width="1.2"/><circle cx="106" cy="56" r="6" fill="#d4d4d4" stroke="#16130F" stroke-width="1.2"/><circle cx="122" cy="56" r="6" fill="#d4d4d4" stroke="#16130F" stroke-width="1.2"/><line x1="156" y1="52" x2="170" y2="52" stroke="#16130F" stroke-width="1.6" stroke-linecap="round"/><line x1="164" y1="48" x2="170" y2="52" stroke="#16130F" stroke-width="1.6" stroke-linecap="round"/><line x1="164" y1="56" x2="170" y2="52" stroke="#16130F" stroke-width="1.6" stroke-linecap="round"/><rect x="174" y="24" width="62" height="56" rx="4" fill="#f4f4f4" stroke="#16130F" stroke-width="1.6"/><text x="205" y="18" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="9.5" font-weight="bold" text-anchor="middle" fill="#16130F">organ</text><circle cx="188" cy="40" r="6" fill="#d4d4d4" stroke="#16130F" stroke-width="1.2"/><circle cx="204" cy="40" r="6" fill="#d4d4d4" stroke="#16130F" stroke-width="1.2"/><circle cx="188" cy="56" r="6" fill="#d4d4d4" stroke="#16130F" stroke-width="1.2"/><circle cx="204" cy="56" r="6" fill="#d4d4d4" stroke="#16130F" stroke-width="1.2"/><circle cx="188" cy="72" r="6" fill="#d4d4d4" stroke="#16130F" stroke-width="1.2"/><circle cx="204" cy="72" r="6" fill="#d4d4d4" stroke="#16130F" stroke-width="1.2"/><text x="205" y="74" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="11" font-weight="normal" text-anchor="middle" fill="#16130F">…</text><line x1="238" y1="52" x2="252" y2="52" stroke="#16130F" stroke-width="1.6" stroke-linecap="round"/><line x1="246" y1="48" x2="252" y2="52" stroke="#16130F" stroke-width="1.6" stroke-linecap="round"/><line x1="246" y1="56" x2="252" y2="52" stroke="#16130F" stroke-width="1.6" stroke-linecap="round"/><rect x="256" y="24" width="62" height="56" rx="4" fill="#efefef" stroke="#16130F" stroke-width="1.6"/><text x="287" y="18" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="9.5" font-weight="bold" text-anchor="middle" fill="#16130F">system</text><text x="287" y="56" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="8.5" font-weight="normal" text-anchor="middle" fill="#16130F">organs</text><line x1="320" y1="52" x2="334" y2="52" stroke="#16130F" stroke-width="1.6" stroke-linecap="round"/><line x1="328" y1="48" x2="334" y2="52" stroke="#16130F" stroke-width="1.6" stroke-linecap="round"/><line x1="328" y1="56" x2="334" y2="52" stroke="#16130F" stroke-width="1.6" stroke-linecap="round"/><rect x="338" y="24" width="54" height="56" rx="4" fill="#e8e8e8" stroke="#16130F" stroke-width="1.6"/><text x="365" y="18" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="9.5" font-weight="bold" text-anchor="middle" fill="#16130F">organism</text><text x="365" y="56" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="9" font-weight="normal" text-anchor="middle" fill="#16130F">you</text><text x="200" y="112" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="9" font-weight="normal" text-anchor="middle" fill="#6B635A">each box is made of the one before it, and does something none of them could</text></svg></div>
+
+  <table class="tbl h55">
+    <thead><tr><th>#</th><th>This thing</th><th>Which level is it?</th></tr></thead>
+    <tbody><tr><td><span class="pn">6.</span></td><td>one muscle cell</td><td class="blank"></td></tr><tr><td><span class="pn">7.</span></td><td>a sheet of muscle cells all pulling the same way</td><td class="blank"></td></tr><tr><td><span class="pn">8.</span></td><td>the heart</td><td class="blank"></td></tr><tr><td><span class="pn">9.</span></td><td>the heart, the blood and every vessel, working together</td><td class="blank"></td></tr><tr><td><span class="pn">10.</span></td><td>you</td><td class="blank"></td></tr></tbody>
+  </table>
+
+  <ol class="qs" start="11"><li><span class="qt">A heart is made of muscle tissue, which is made of muscle cells. Say what the heart can do that a bag of loose muscle cells could not — and what that says about the word "organ".</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Keep going on page 3 →</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Building a body</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>Four Problems, Four Systems</h1>
+    <p class="sub">Grade 7 · Building a body · Page 3 of 3</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Being big creates problems a single cell never had. Name the system that solves each.
+  </div>
+
+
+  <table class="tbl h75">
+    <thead><tr><th>#</th><th>The problem a big body has</th><th>Which system solves it, and roughly how</th></tr></thead>
+    <tbody><tr><td><span class="pn">12.</span></td><td>food arrives in lumps far too big to cross any membrane</td><td class="blank"></td></tr><tr><td><span class="pn">13.</span></td><td>the cells in the middle are nowhere near the outside world</td><td class="blank"></td></tr><tr><td><span class="pn">14.</span></td><td>oxygen has to come in and carbon dioxide has to go out, constantly</td><td class="blank"></td></tr><tr><td><span class="pn">15.</span></td><td>waste builds up everywhere at once</td><td class="blank"></td></tr></tbody>
+  </table>
+
+  <ol class="qs" start="16"><li><span class="qt">Every one of those systems ends by bringing something <b>close</b> to a cell and letting go. Say why "close" is the word that matters, and what happens in the last fraction of an inch.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Score: ______ / 16</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Building a body</span>
+  </footer>
+</div>
+
+
+<div style="page-break-before:always"></div>
+
+
+<div class="page ">
+  <header>
+    
+    <h1>Younger Than America</h1>
+    <p class="sub">The map is younger than you think · Page 1 of 2</p>
+  </header>
+  <div class="nameline">
+    <span>Name</span>
+    <span class="short">Date</span>
+  </div>
+  <div class="directions">
+    <b>DIRECTIONS:</b> How old is each country? Take the year from 2026. Then read the box.
+  </div>
+
+
+  <table class="band">
+    <tr><th style="width:32%">The country</th><th style="width:10%">Since</th><th style="width:36%">What happened that year</th><th>How old</th></tr>
+    <tr><td><span class="pn">1.</span> The United States</td><td class="num">1776</td><td style="font-size:9.8pt">independence declared</td><td class="b"></td></tr>
+    <tr><td><span class="pn">2.</span> Italy</td><td class="num">1861</td><td style="font-size:9.8pt">the separate states joined into one kingdom</td><td class="b"></td></tr>
+    <tr><td><span class="pn">3.</span> Germany</td><td class="num">1871</td><td style="font-size:9.8pt">the same, twenty-odd states into one — and see page 2</td><td class="b"></td></tr>
+    <tr><td><span class="pn">4.</span> India and Pakistan</td><td class="num">1947</td><td style="font-size:9.8pt">one colony became two countries in a night</td><td class="b"></td></tr>
+    <tr><td><span class="pn">5.</span> Ghana</td><td class="num">1957</td><td style="font-size:9.8pt">the first colony in sub-Saharan Africa to become independent</td><td class="b"></td></tr>
+    <tr><td><span class="pn">6.</span> Nigeria</td><td class="num">1960</td><td style="font-size:9.8pt">one of seventeen African countries independent in that year alone</td><td class="b"></td></tr>
+    <tr><td><span class="pn">7.</span> Bangladesh</td><td class="num">1971</td><td style="font-size:9.8pt">split from Pakistan after a war</td><td class="b"></td></tr>
+    <tr><td><span class="pn">8.</span> Kazakhstan, Ukraine and 13 others</td><td class="num">1991</td><td style="font-size:9.8pt">the Soviet Union ended and fifteen countries existed</td><td class="b"></td></tr>
+    <tr><td><span class="pn">9.</span> South Sudan</td><td class="num">2011</td><td style="font-size:9.8pt">the newest member of the United Nations</td><td class="b"></td></tr>
+  </table>
+  <div class="test"><b>Now compare the top three.</b> Italy is 165 and Germany is 155. The United States is 250.
+  <br><br><b>Two of the oldest-feeling countries in Europe are younger than America by the better part of a century</b>, and Germany is younger than the American Civil War. That is not a trick of wording. Before those dates the places existed and the countries did not: what was there was dozens of separate states that happened to share a language.</div>
+
+  <footer>
+    <span>Keep going on page 2 →</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Younger than America</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>Younger Than America — The Date Argues Back</h1>
+    <p class="sub">The map is younger than you think · Page 2 of 2</p>
+  </header>
+
+
+
+
+  <div class="test"><b>Ask how old Germany is and you get at least three answers.</b>
+  <br><br><b>1871</b> — the states joined into one country.
+  <br><b>1949</b> — after the Second World War it was divided, and two separate German countries were founded.
+  <br><b>1990</b> — those two joined again, which is when the Germany on today's map began.
+  <br><br>All three are defensible. Which one you pick depends on what you think a country <i>is</i> — a people, a government, or a shape on a map — and there is no way to settle that by looking anything up.</div>
+  <ol class="qs" start="10"><li><span class="qt">Which of the three dates would you use, and why? There is no right answer and there is a right kind of reason.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Say why "how old is this country" is a harder question than "how old is this mountain range".</span><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Somebody says a country is ancient because people have lived there for thousands of years. Say what is right about that and what is wrong with it.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Score: ______ / 12</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Younger than America</span>
+  </footer>
+</div>
+
+
+<div style="page-break-before:always"></div>
+
+
+<div class="page ">
+  <header>
+    
+    <h1>Seven Guesses</h1>
+    <p class="sub">How long does it take? · Page 1 of 2</p>
+  </header>
+  <div class="nameline">
+    <span>Name</span>
+    <span class="short">Date</span>
+  </div>
+  <div class="directions">
+    <b>DIRECTIONS:</b> Play higher-or-lower, 1 to 100, with someone. Write down your guesses.
+    <div class="tip">Always guess the middle of what is left.</div>
+  </div>
+
+
+  <table class="band">
+    <tr><th style="width:16%">Game</th><th>The guesses I made, in order</th><th style="width:16%">How many</th></tr>
+    <tr><td><span class="wktag">Done for you</span><br><span class="wk">they picked 61</span></td><td class="wk">50 <small>(higher)</small> &rarr; 75 <small>(lower)</small> &rarr; 62 <small>(lower)</small> &rarr; 56 <small>(higher)</small> &rarr; 59 <small>(higher)</small> &rarr; 60 <small>(higher)</small> &rarr; 61 <small>(got it!)</small></td><td class="wk">7</td></tr>
+    <tr><td>1</td><td class="b"></td><td class="b"></td></tr><tr><td>2</td><td class="b"></td><td class="b"></td></tr><tr><td>3</td><td class="b"></td><td class="b"></td></tr><tr><td>4</td><td class="b"></td><td class="b"></td></tr>
+  </table>
+  <div class="test"><b>Every guess halves what is left:</b> 100, 50, 25, 13, 7, 4, 2, 1. That is
+  <b>7 guesses</b>, whatever they picked. One at a time could take 100.</div>
+  <div class="note"><b>Fill in:</b> how many halvings to get down to one?</div>
+  <table class="band">
+    <tr><th style="width:44%">Numbers to search</th><th>Guesses, one at a time (worst case)</th><th>Guesses, halving</th></tr>
+    <tr><td><span class="pn">1.</span> 1 to 10</td><td class="num">10</td><td class="b"></td></tr><tr><td><span class="pn">2.</span> 1 to 100</td><td class="num">100</td><td class="b"></td></tr><tr><td><span class="pn">3.</span> 1 to 1,000</td><td class="num">1,000</td><td class="b"></td></tr><tr><td><span class="pn">4.</span> 1 to 10,000</td><td class="num">10,000</td><td class="b"></td></tr><tr><td><span class="pn">5.</span> 1 to 1,000,000</td><td class="num">1,000,000</td><td class="b"></td></tr>
+  </table>
+
+  <footer>
+    <span>Keep going on page 2 →</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Seven guesses</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>Seven Guesses — What the Column Does</h1>
+    <p class="sub">How long does it take? · Page 2 of 2</p>
+  </header>
+
+
+
+
+  <div class="test"><b>Look down your last column.</b> The first column grows ten times each row. Yours grows by about three.</div>
+  <ol class="qs" start="6"><li><span class="qt">A hundred takes 7 guesses and a million takes 20. Say how a task ten thousand times bigger costs only 13 more guesses.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Halving only works if the numbers are in order. Say what "higher or lower" is doing for you that a shuffled pile could not.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">You have 20 guesses and want the biggest range you could still win on. Work out roughly what it is, and say how you got there.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Score: ______ / 8</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Seven guesses</span>
+  </footer>
+</div>
+
+
+<div style="page-break-before:always"></div>
+
+
+<div class="page ">
+  <header>
+    
+    <h1>The Sign Maze</h1>
+    <p class="sub">Grade 7 · Games · Page 1 of 2</p>
+  </header>
+  <div class="nameline">
+    <span>Name</span>
+    <span class="short">Date</span>
+  </div>
+  <div class="directions">
+    <b>DIRECTIONS:</b> Step only on squares whose answer is <b>positive</b>. Go across or down.
+    <div class="tip">Don&rsquo;t work it out. Count the minus signs.</div>
+  </div>
+
+
+  <table class="rmaze p1" style="--c:118px;--h:0.97;--f:13.5pt"><tbody><tr><td class="mend done"><span class="mlab">START</span>(−5) × (−6)<span class="rm-arr rm-r">&rarr;</span></td><td class="done">10 × 5</td><td>3 × (−3)</td><td>(−3) × 8</td><td>63 ÷ (−9)</td><td>3 × (−2)</td></tr><tr><td class="nope">(−13) × 10<span class="rm-x">&#x2717;</span></td><td>8 × 12</td><td>(−72) ÷ 8</td><td>130 ÷ (−10)</td><td>(−3) × 2</td><td>12 × (−3)</td></tr><tr><td>(−12) × 13</td><td>(−3) × (−8)</td><td>(−44) ÷ 11</td><td>10 × (−5)</td><td>(−6) × 2</td><td>20 ÷ (−2)</td></tr><tr><td>91 ÷ (−13)</td><td>(−49) ÷ (−7)</td><td>4 × (−4)</td><td>11 × (−8)</td><td>108 ÷ (−12)</td><td>(−55) ÷ 11</td></tr><tr><td>13 × (−3)</td><td>(−78) ÷ (−13)</td><td>8 × (−9)</td><td>(−12) × 10</td><td>(−32) ÷ 4</td><td>(−8) ÷ 2</td></tr><tr><td>(−27) ÷ 9</td><td>(−110) ÷ (−11)</td><td>100 ÷ 10</td><td>80 ÷ 8</td><td>(−11) × (−12)</td><td class="mend"><span class="mlab">FINISH</span>65 ÷ 5</td></tr></tbody></table>
+  <div class="rm-note"><span class="rm-tag">Done for you</span> <b>(−5) × (−6)</b> = 30 <b class="rm-ok">&#x2713;</b> &rarr; <b>10 × 5</b> = 50 <b class="rm-ok">&#x2713;</b>. &nbsp;<b>(−13) × 10</b> = −130 <b class="rm-no">&#x2717;</b> not that way. Carry on from there.</div>
+
+  <footer>
+    <span>Keep going on page 2 &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>The Sign Maze</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>The Sign Maze — Questions</h1>
+    <p class="sub">Grade 7 · Games · Page 2 of 2</p>
+  </header>
+
+
+
+
+  <div class="tasknote" style="margin-top:4px"><b>Write the squares you stepped on.</b></div>
+  <div class="write rm-first"><span class="rm-hand">(−5) × (−6) &rarr; 10 × 5 &rarr;</span></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div>
+
+  <ol class="qs" start="1"><li><span class="qt">How many of the squares on your route had two minus signs in them?</span><div class="write"></div></li><li><span class="qt">Did you have to work out any of the answers to cross the grid? If not, what did you use instead?</span><div class="write"></div><div class="write"></div></li><li><span class="qt">The rule is the same for &times; and &divide;. Write one multiplication and one division that both give a negative answer, and say what they have in common.</span><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Then check it against the answer page</span>
+    <span class="brand">Kitchen Table</span>
+    <span>The Sign Maze</span>
+  </footer>
+</div>
+
+</body></html>

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="sheet-kind" content="worksheet">
+<title>Fill-in crossword</title>
+<style>
+  @page { size: letter portrait; margin: 0.4in 0.45in; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  :root {
+    --ink: #16130F; --muted: #6B635A; --rule: #CFC3B2; --guide: #BCAE9C;
+    --accent: #C0511D; --tint: #F7EDE4; --slate: #2E5A78;
+  }
+  body {
+    font-family: Quicksand, 'URW Gothic', 'Century Gothic', sans-serif;
+    color: #000; background: #fff;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  .page { width: 100%; }
+  .page + .page { page-break-before: always; }
+  /* A screen ignores @page margins, so the preview drew every made sheet edge
+     to edge while the paper has 0.4in / 0.45in of white round it. The shelf's
+     sheets carry the same screen padding; print is untouched. */
+  @media screen { .page { padding: 0.4in 0.45in; } }
+  header {
+    display: flex; align-items: center; gap: 16px;
+    border-bottom: 3px solid var(--slate); padding-bottom: 7px; margin-bottom: 2px;
+  }
+  .bigletter { font-size: 38pt; font-weight: 700; line-height: 1; letter-spacing: .02em; }
+  .htext { flex: 1; }
+  h1 { font-size: 14pt; font-weight: 700; margin: 0 0 2px; }
+  .sub { font-size: 10pt; color: var(--muted); margin: 0; }
+  .nameline {
+    font-size: 9.5pt; color: var(--muted);
+    border-bottom: 1px solid var(--ink); width: 2in;
+    padding-bottom: 1px; align-self: flex-end;
+  }
+  .dir { font-size: 11pt; margin: 12px 0 10px; }
+  footer {
+    margin-top: 10px; padding-top: 6px; border-top: 1px solid var(--rule);
+    font-size: 8.5pt; color: var(--muted);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .brand { font-size: 7pt; letter-spacing: .04em; color: var(--accent); }
+  table { border-collapse: collapse; }
+  /* The parent-copy badge, lifted from the shelf's key pages so the two match
+     on paper. Tinted rather than outlined, because it has to be recognisable
+     at a glance from across a table with the page upside down. */
+  .badgeline {
+    display: inline-block; font-size: 8.5pt; font-weight: 700;
+    letter-spacing: .06em; text-transform: uppercase;
+    color: var(--accent); background: var(--tint);
+    border: 1.5px solid var(--accent); padding: 2px 8px; margin-bottom: 8px;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <div class="bigletter">▦</div>
+    <div class="htext">
+      <h1>Fill-in crossword</h1>
+      <p class="sub">6 words · 9 × 7</p>
+    </div>
+    <div class="nameline">Name</div>
+  </header>
+  <p class="dir">Every word below goes in once. Work out which one fits where.</p>
+  <style>
+      .xw { text-align:center; margin-top: 10px; }
+      ul.bank { columns: 4; list-style: none; padding: 0; margin: 16px 0 0; font-size: 14pt; letter-spacing: .06em; }
+      ul.bank li { padding: 2px 0; }
+      .banktitle { font-size: 9.5pt; color: var(--muted); letter-spacing: .06em; text-transform: uppercase; margin: 14px 0 0; }
+    </style>
+      <div class="xw"><svg viewBox="0 0 272 212" width="709.6" height="553.1" role="img" aria-label="crossword grid, 9 by 7"><g transform="translate(1,1)"><rect x="30" y="0" width="30" height="30" fill="#F7EDE4" stroke="#C0511D" stroke-width="1.4"/><text x="32.5" y="9" font-size="9" fill="#16130F">1</text><rect x="240" y="0" width="30" height="30" fill="#F7EDE4" stroke="#C0511D" stroke-width="1.4"/><text x="242.5" y="9" font-size="9" fill="#16130F">2</text><rect x="0" y="30" width="30" height="30" fill="#F7EDE4" stroke="#C0511D" stroke-width="1.4"/><text x="2.5" y="39" font-size="9" fill="#16130F">3</text><rect x="30" y="30" width="30" height="30" fill="#F7EDE4" stroke="#C0511D" stroke-width="1.4"/><rect x="60" y="30" width="30" height="30" fill="#F7EDE4" stroke="#C0511D" stroke-width="1.4"/><rect x="90" y="30" width="30" height="30" fill="#F7EDE4" stroke="#C0511D" stroke-width="1.4"/><rect x="120" y="30" width="30" height="30" fill="#F7EDE4" stroke="#C0511D" stroke-width="1.4"/><rect x="150" y="30" width="30" height="30" fill="#F7EDE4" stroke="#C0511D" stroke-width="1.4"/><text x="152.5" y="39" font-size="9" fill="#16130F">4</text><rect x="180" y="30" width="30" height="30" fill="#F7EDE4" stroke="#C0511D" stroke-width="1.4"/><rect x="240" y="30" width="30" height="30" fill="#F7EDE4" stroke="#C0511D" stroke-width="1.4"/><rect x="30" y="60" width="30" height="30" fill="#F7EDE4" stroke="#C0511D" stroke-width="1.4"/><rect x="150" y="60" width="30" height="30" fill="#F7EDE4" stroke="#C0511D" stroke-width="1.4"/><rect x="240" y="60" width="30" height="30" fill="#F7EDE4" stroke="#C0511D" stroke-width="1.4"/><rect x="30" y="90" width="30" height="30" fill="#F7EDE4" stroke="#C0511D" stroke-width="1.4"/><rect x="120" y="90" width="30" height="30" fill="#F7EDE4" stroke="#C0511D" stroke-width="1.4"/><text x="122.5" y="99" font-size="9" fill="#16130F">5</text><rect x="150" y="90" width="30" height="30" fill="#F7EDE4" stroke="#C0511D" stroke-width="1.4"/><rect x="180" y="90" width="30" height="30" fill="#F7EDE4" stroke="#C0511D" stroke-width="1.4"/><rect x="210" y="90" width="30" height="30" fill="#F7EDE4" stroke="#C0511D" stroke-width="1.4"/><rect x="240" y="90" width="30" height="30" fill="#F7EDE4" stroke="#C0511D" stroke-width="1.4"/><rect x="30" y="120" width="30" height="30" fill="#F7EDE4" stroke="#C0511D" stroke-width="1.4"/><rect x="150" y="120" width="30" height="30" fill="#F7EDE4" stroke="#C0511D" stroke-width="1.4"/><rect x="240" y="120" width="30" height="30" fill="#F7EDE4" stroke="#C0511D" stroke-width="1.4"/><rect x="30" y="150" width="30" height="30" fill="#F7EDE4" stroke="#C0511D" stroke-width="1.4"/><rect x="120" y="150" width="30" height="30" fill="#F7EDE4" stroke="#C0511D" stroke-width="1.4"/><text x="122.5" y="159" font-size="9" fill="#16130F">6</text><rect x="150" y="150" width="30" height="30" fill="#F7EDE4" stroke="#C0511D" stroke-width="1.4"/><rect x="180" y="150" width="30" height="30" fill="#F7EDE4" stroke="#C0511D" stroke-width="1.4"/><rect x="210" y="150" width="30" height="30" fill="#F7EDE4" stroke="#C0511D" stroke-width="1.4"/><rect x="240" y="150" width="30" height="30" fill="#F7EDE4" stroke="#C0511D" stroke-width="1.4"/><rect x="150" y="180" width="30" height="30" fill="#F7EDE4" stroke="#C0511D" stroke-width="1.4"/></g></svg></div>
+      <p class="banktitle">The words</p>
+      <ul class="bank"><li>THERE</li><li>WOULD</li><li>FRIEND</li><li>PEOPLE</li><li>SCHOOL</li><li>BECAUSE</li></ul>
+  <footer>
+    <span>6 words</span>
+    <span class="brand">KITCHEN TABLE</span>
+    <span></span>
+  </footer>
+</div>
+<div class="page">
+  <header>
+    <div class="bigletter">▦</div>
+    <div class="htext">
+      <h1>Fill-in crossword</h1>
+      <p class="sub">6 words · 9 × 7</p>
+    </div>
+  </header>
+  <div class="badgeline">Answer Key — Parent Copy</div>
+  
+  <style>
+      .xw { text-align:center; margin-top: 10px; }
+      ul.bank { columns: 4; list-style: none; padding: 0; margin: 16px 0 0; font-size: 14pt; letter-spacing: .06em; }
+      ul.bank li { padding: 2px 0; }
+      .banktitle { font-size: 9.5pt; color: var(--muted); letter-spacing: .06em; text-transform: uppercase; margin: 14px 0 0; }
+    </style><div class="xw"><svg viewBox="0 0 272 212" width="709.6" height="553.1" role="img" aria-label="crossword grid, 9 by 7"><g transform="translate(1,1)"><rect x="30" y="0" width="30" height="30" fill="#F7EDE4" stroke="#C0511D" stroke-width="1.4"/><text x="32.5" y="9" font-size="9" fill="#16130F">1</text><text x="45" y="22.8" font-size="17.4" text-anchor="middle" font-weight="600">P</text><rect x="240" y="0" width="30" height="30" fill="#F7EDE4" stroke="#C0511D" stroke-width="1.4"/><text x="242.5" y="9" font-size="9" fill="#16130F">2</text><text x="255" y="22.8" font-size="17.4" text-anchor="middle" font-weight="600">F</text><rect x="0" y="30" width="30" height="30" fill="#F7EDE4" stroke="#C0511D" stroke-width="1.4"/><text x="2.5" y="39" font-size="9" fill="#16130F">3</text><text x="15" y="52.8" font-size="17.4" text-anchor="middle" font-weight="600">B</text><rect x="30" y="30" width="30" height="30" fill="#F7EDE4" stroke="#C0511D" stroke-width="1.4"/><text x="45" y="52.8" font-size="17.4" text-anchor="middle" font-weight="600">E</text><rect x="60" y="30" width="30" height="30" fill="#F7EDE4" stroke="#C0511D" stroke-width="1.4"/><text x="75" y="52.8" font-size="17.4" text-anchor="middle" font-weight="600">C</text><rect x="90" y="30" width="30" height="30" fill="#F7EDE4" stroke="#C0511D" stroke-width="1.4"/><text x="105" y="52.8" font-size="17.4" text-anchor="middle" font-weight="600">A</text><rect x="120" y="30" width="30" height="30" fill="#F7EDE4" stroke="#C0511D" stroke-width="1.4"/><text x="135" y="52.8" font-size="17.4" text-anchor="middle" font-weight="600">U</text><rect x="150" y="30" width="30" height="30" fill="#F7EDE4" stroke="#C0511D" stroke-width="1.4"/><text x="152.5" y="39" font-size="9" fill="#16130F">4</text><text x="165" y="52.8" font-size="17.4" text-anchor="middle" font-weight="600">S</text><rect x="180" y="30" width="30" height="30" fill="#F7EDE4" stroke="#C0511D" stroke-width="1.4"/><text x="195" y="52.8" font-size="17.4" text-anchor="middle" font-weight="600">E</text><rect x="240" y="30" width="30" height="30" fill="#F7EDE4" stroke="#C0511D" stroke-width="1.4"/><text x="255" y="52.8" font-size="17.4" text-anchor="middle" font-weight="600">R</text><rect x="30" y="60" width="30" height="30" fill="#F7EDE4" stroke="#C0511D" stroke-width="1.4"/><text x="45" y="82.8" font-size="17.4" text-anchor="middle" font-weight="600">O</text><rect x="150" y="60" width="30" height="30" fill="#F7EDE4" stroke="#C0511D" stroke-width="1.4"/><text x="165" y="82.8" font-size="17.4" text-anchor="middle" font-weight="600">C</text><rect x="240" y="60" width="30" height="30" fill="#F7EDE4" stroke="#C0511D" stroke-width="1.4"/><text x="255" y="82.8" font-size="17.4" text-anchor="middle" font-weight="600">I</text><rect x="30" y="90" width="30" height="30" fill="#F7EDE4" stroke="#C0511D" stroke-width="1.4"/><text x="45" y="112.8" font-size="17.4" text-anchor="middle" font-weight="600">P</text><rect x="120" y="90" width="30" height="30" fill="#F7EDE4" stroke="#C0511D" stroke-width="1.4"/><text x="122.5" y="99" font-size="9" fill="#16130F">5</text><text x="135" y="112.8" font-size="17.4" text-anchor="middle" font-weight="600">T</text><rect x="150" y="90" width="30" height="30" fill="#F7EDE4" stroke="#C0511D" stroke-width="1.4"/><text x="165" y="112.8" font-size="17.4" text-anchor="middle" font-weight="600">H</text><rect x="180" y="90" width="30" height="30" fill="#F7EDE4" stroke="#C0511D" stroke-width="1.4"/><text x="195" y="112.8" font-size="17.4" text-anchor="middle" font-weight="600">E</text><rect x="210" y="90" width="30" height="30" fill="#F7EDE4" stroke="#C0511D" stroke-width="1.4"/><text x="225" y="112.8" font-size="17.4" text-anchor="middle" font-weight="600">R</text><rect x="240" y="90" width="30" height="30" fill="#F7EDE4" stroke="#C0511D" stroke-width="1.4"/><text x="255" y="112.8" font-size="17.4" text-anchor="middle" font-weight="600">E</text><rect x="30" y="120" width="30" height="30" fill="#F7EDE4" stroke="#C0511D" stroke-width="1.4"/><text x="45" y="142.8" font-size="17.4" text-anchor="middle" font-weight="600">L</text><rect x="150" y="120" width="30" height="30" fill="#F7EDE4" stroke="#C0511D" stroke-width="1.4"/><text x="165" y="142.8" font-size="17.4" text-anchor="middle" font-weight="600">O</text><rect x="240" y="120" width="30" height="30" fill="#F7EDE4" stroke="#C0511D" stroke-width="1.4"/><text x="255" y="142.8" font-size="17.4" text-anchor="middle" font-weight="600">N</text><rect x="30" y="150" width="30" height="30" fill="#F7EDE4" stroke="#C0511D" stroke-width="1.4"/><text x="45" y="172.8" font-size="17.4" text-anchor="middle" font-weight="600">E</text><rect x="120" y="150" width="30" height="30" fill="#F7EDE4" stroke="#C0511D" stroke-width="1.4"/><text x="122.5" y="159" font-size="9" fill="#16130F">6</text><text x="135" y="172.8" font-size="17.4" text-anchor="middle" font-weight="600">W</text><rect x="150" y="150" width="30" height="30" fill="#F7EDE4" stroke="#C0511D" stroke-width="1.4"/><text x="165" y="172.8" font-size="17.4" text-anchor="middle" font-weight="600">O</text><rect x="180" y="150" width="30" height="30" fill="#F7EDE4" stroke="#C0511D" stroke-width="1.4"/><text x="195" y="172.8" font-size="17.4" text-anchor="middle" font-weight="600">U</text><rect x="210" y="150" width="30" height="30" fill="#F7EDE4" stroke="#C0511D" stroke-width="1.4"/><text x="225" y="172.8" font-size="17.4" text-anchor="middle" font-weight="600">L</text><rect x="240" y="150" width="30" height="30" fill="#F7EDE4" stroke="#C0511D" stroke-width="1.4"/><text x="255" y="172.8" font-size="17.4" text-anchor="middle" font-weight="600">D</text><rect x="150" y="180" width="30" height="30" fill="#F7EDE4" stroke="#C0511D" stroke-width="1.4"/><text x="165" y="202.8" font-size="17.4" text-anchor="middle" font-weight="600">L</text></g></svg></div>
+  <footer>
+    <span>Answers</span>
+    <span class="brand">KITCHEN TABLE</span>
+    <span></span>
+  </footer>
+</div>
+</body>
+</html>

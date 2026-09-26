@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<!-- Declared, because everything else on the shelf declares it and the app now
+     reads it. These sets are worksheets in the strict sense the tag means: ten
+     questions with a settled right answer and a key on the second page. They
+     had no tag only because this file writes its own head instead of going
+     through lib/sheet.js doc(), which is where the tag is normally emitted. -->
+<meta name="sheet-kind" content="worksheet">
+<title>Daily Language Review — Grade 5, Set 1</title>
+<style>
+  /* Page margins live HERE only — body padding stays 0 for print
+     so the two don't stack and eat the sheet. */
+  @page { size: letter portrait; margin: 0.45in 0.5in; }
+
+  :root {
+    --ink:    #16130F;
+    --muted:  #6B635A;
+    --rule:   #CFC3B2;
+    --guide:  #BCAE9C;
+    --accent: #C0511D;
+    --tint:   #F7EDE4;
+    --slate:  #2E5A78;
+    --tintslate: #E9EFF4;
+    --deep:   #2C4A45;
+    --tintdeep: #ECF1EF;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body { margin: 0; padding: 0; }
+
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    color: var(--ink);
+    background: #ddd;
+    font-size: 12pt;
+    line-height: 1.3;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Screen-only breathing room. Print uses @page margins instead. */
+  /* ORDER MATTERS. This generic rule must come BEFORE the @media screen block:
+   * same specificity, so whichever is declared last wins. With it after, the
+   * on-screen preview stretched to the viewport instead of 8.5in. Print was
+   * unaffected, but the proof you check before printing was wrong. */
+  .page { width: 100%; }
+  .page + .page { page-break-before: always; }
+
+  @media screen {
+    body { padding: 0.5in; background: #ddd; }
+    .page {
+      background: #fff;
+      padding: 0.45in 0.5in;
+      width: 8.5in;
+      min-height: 11in;
+      margin: 0 auto 24px;
+      box-shadow: 0 2px 10px rgba(0,0,0,.3);
+    }
+  }
+
+  header { border-bottom: 3px double var(--accent); padding-bottom: 6px; margin-bottom: 0; }
+  header.cont { border-bottom-width: 1px; border-bottom-style: solid; }
+
+  h1 { font-size: 16pt; margin: 0 0 1px; letter-spacing: .01em; }
+  .sub { font-size: 10pt; font-style: italic; color: var(--muted); margin: 0; }
+
+  .nameline {
+    display: flex;
+    gap: 26px;
+    font-size: 10.5pt;
+    margin: 11px 0 12px;
+  }
+  .nameline span { flex: 1; border-bottom: 1px solid var(--ink); padding-bottom: 1px; }
+  .nameline span.short { flex: 0 0 2in; }
+
+  .directions {
+    font-size: 10.5pt;
+    line-height: 1.35;
+    background: var(--tint);
+    border-left: 4px solid var(--slate);
+    padding: 7px 10px;
+    margin-bottom: 14px;
+  }
+  .directions b { letter-spacing: .03em; }
+  .cups { font-style: italic; margin-top: 3px; }
+
+  ol { margin: 0; padding: 0; list-style: none; }
+
+  li {
+    margin-bottom: 12px;
+    page-break-inside: avoid;
+  }
+  li::before {
+    content: attr(data-n) ".";
+    font-weight: bold;
+    display: inline-block;
+    width: .3in;
+  }
+
+  .bad {
+    font-family: "Courier New", Courier, monospace;
+    font-size: 11.5pt;
+  }
+
+  /* Primary handwriting lines: solid top rule, dashed midline,
+     heavy baseline — capitals reach the top, lowercase sits
+     in the bottom half. Two strips per sentence. */
+  .write {
+    position: relative;
+    height: .45in;
+    margin: 6px 0 0 .3in;
+    border-top: 1px solid var(--rule);
+    border-bottom: 2px solid var(--slate);
+  }
+  .write + .write { margin-top: .17in; }
+  .write::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    border-top: 1px dashed #9a9a9a;
+  }
+
+  /* ---------- number 1, done for you (2026-09-23) ----------
+   * THE OWNER PRINTED THESE AND SAID THE SHEETS WERE NOT INTUITIVE, and a blind
+   * re-score with the directions hidden agreed: "faulty sentences over blank
+   * lines read as 'copy it'; that the errors must be fixed is not shown", and
+   * at grade 7 "copy, correct or improve are all plausible". So number 1 is
+   * now shown FIXED, written on its line, with every correction lit the way
+   * the key lights it — a child who never reads the directions can see that
+   * the job is to change things, and which kinds of thing. It is a different
+   * class from the key's .fixed on purpose: check.js pairs every .bad with
+   * one .fixed, and the example is not a second answer. */
+  li.done { background: var(--tint); border-left: 4px solid var(--accent);
+    padding: 5px 8px 8px 0; }
+  .donetag { display: inline-block; font-family: Georgia, serif; font-size: 8pt;
+    font-weight: bold; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--accent); border: 1.5px solid var(--accent); padding: 0 5px;
+    margin-left: 8px; vertical-align: 1px; }
+  .write.filled { display: flex; align-items: flex-end; padding: 0 0 1px 6px; }
+  .write.filled::after { z-index: 0; }
+  .fixedlabel { font-size: 8.5pt; font-weight: bold; letter-spacing: .05em;
+    text-transform: uppercase; color: var(--accent); margin-right: 8px;
+    position: relative; z-index: 1; white-space: nowrap; }
+  .donefix { position: relative; z-index: 1; font-style: italic;
+    color: var(--deep); white-space: nowrap; line-height: 1; }
+  .donefix u { text-decoration: none; background: #fff; font-weight: bold;
+    padding: 0 1px; border-bottom: 2px solid var(--accent); }
+
+  .brand { font-style: normal; font-size: 7.5pt; letter-spacing: .04em;
+    color: var(--accent); align-self: center; }
+
+  footer {
+    margin-top: 14px;
+    padding-top: 6px;
+    border-top: 1px solid var(--rule);
+    font-size: 9pt;
+    font-style: italic;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+  }
+
+  /* ---------- answer key ---------- */
+  .key li { margin-bottom: 12px; }
+  .key .fixed u {
+    text-decoration: none;
+    background: var(--tint);
+    padding: 0 2px;
+    font-weight: bold;
+  }
+  .key .why {
+    display: block;
+    margin-left: .3in;
+    font-size: 9.5pt;
+    font-style: italic;
+    color: var(--muted);
+    margin-top: 1px;
+  }
+  .keybadge {
+    display: inline-block;
+    border: 2px solid var(--deep);
+    padding: 2px 9px;
+    font-size: 9.5pt;
+    font-weight: bold;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ PAGE 1 — STUDENT, 1–5 ============ -->
+<div class="page">
+  <header>
+    <h1>Daily Language Review — Set 1</h1>
+    <p class="sub">Grade 5 &nbsp;·&nbsp; Mixed Review &nbsp;·&nbsp; Page 1 of 2</p>
+  </header>
+
+  <div class="nameline">
+    <span>Name</span>
+    <span class="short">Date</span>
+  </div>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Fix every mistake and write the sentence right on the lines. Number 1 is done.
+    <div class="cups"><b>Remember CUPS:</b> Capital letters &nbsp;·&nbsp; Usage (right word) &nbsp;·&nbsp; Punctuation &nbsp;·&nbsp; Spelling</div>
+  </div>
+
+  <ol>
+    <li data-n="1" class="done"><span class="bad">by friday we have finished the whole model and we was proud of it</span><span class="donetag">Done for you</span><div class="write filled"><span class="fixedlabel">Fixed:</span><span class="donefix" style="font-size:12.5pt"><u>B</u>y <u>F</u>riday we <u>had</u> finished the whole model<u>,</u> and we <u>were</u> proud of it<u>.</u></span></div></li>
+    <li data-n="2"><span class="bad">the list of ingredients were on the counter but its missing now</span><div class="write"></div><div class="write"></div></li>
+    <li data-n="3"><span class="bad">we read a poem called the road not taken and a book called hatchet</span><div class="write"></div><div class="write"></div></li>
+    <li data-n="4"><span class="bad">i have never seen so many people neither has my sister</span><div class="write"></div><div class="write"></div></li>
+    <li data-n="5"><span class="bad">after we had ate lunch we walked down to the harbor</span><div class="write"></div><div class="write"></div></li>
+  </ol>
+
+  <footer>
+    <span>Keep going on page 2 &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Set 1</span>
+  </footer>
+</div>
+
+<!-- ============ PAGE 2 — STUDENT, 6–10 ============ -->
+<div class="page">
+  <header class="cont">
+    <h1>Set 1, continued</h1>
+    <p class="sub">Grade 5 &nbsp;·&nbsp; Mixed Review &nbsp;·&nbsp; Page 2 of 2</p>
+  </header>
+
+  <ol style="margin-top:16px">
+    <li data-n="6"><span class="bad">whose going to carry the tent asked marcus</span><div class="write"></div><div class="write"></div></li>
+    <li data-n="7"><span class="bad">the dog wagged its tail and than it ran off with my glove</span><div class="write"></div><div class="write"></div></li>
+    <li data-n="8"><span class="bad">my aunt who lives in denver has flew here twice this year</span><div class="write"></div><div class="write"></div></li>
+    <li data-n="9"><span class="bad">their were fewer chairs then people so we stood at the back</span><div class="write"></div><div class="write"></div></li>
+    <li data-n="10"><span class="bad">the team have practiced all season and they has won every game</span><div class="write"></div><div class="write"></div></li>
+  </ol>
+
+  <footer>
+    <!-- / 9, not / 10: number 1 is the worked example (2026-09-23). -->
+    <span>Score: ______ / 9</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Set 1</span>
+  </footer>
+</div>
+
+<!-- ============ PAGE 3 — ANSWER KEY ============ -->
+</body>
+</html>

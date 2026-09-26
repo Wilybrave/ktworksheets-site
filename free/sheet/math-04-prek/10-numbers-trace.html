@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="sheet-kind" content="form">
+<title>Numbers 0–9 — Trace and Write</title>
+<style>
+  @page { size: letter portrait; margin: 0.4in 0.45in; }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  :root {
+    --ink:    #16130F;
+    --muted:  #6B635A;
+    --rule:   #CFC3B2;
+    --guide:  #BCAE9C;
+    --accent: #C0511D;
+    --tint:   #F7EDE4;
+    --slate:  #2E5A78;
+    --tintslate: #E9EFF4;
+    --deep:   #2C4A45;
+    --tintdeep: #ECF1EF;
+  }
+
+  body {
+    font-family: Quicksand, 'URW Gothic', 'Century Gothic', sans-serif;
+    color: #000; background: #fff;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+
+  /* ORDER MATTERS. This generic rule must come BEFORE the @media screen block:
+   * both selectors have the same specificity, so whichever is declared last
+   * wins. With it after, it overrode the screen width and the preview stretched
+   * to the viewport — rows scaled up and pages measured 16in tall. Print was
+   * always fine (@media screen doesn't apply), but the on-screen proof lied. */
+  .page { width: 100%; }
+  .page + .page { page-break-before: always; }
+
+  @media screen {
+    body { padding: 0.4in; background: #ddd; }
+    .page {
+      background: #fff; padding: 0.4in 0.45in;
+      width: 8.5in; min-height: 11in;
+      margin: 0 auto 22px; box-shadow: 0 2px 10px rgba(0,0,0,.3);
+    }
+  }
+
+  header {
+    display: flex; align-items: center; gap: 16px;
+    border-bottom: 3px solid var(--slate); padding-bottom: 7px; margin-bottom: 2px;
+  }
+  .bigletter { font-size: 38pt; font-weight: 700; line-height: 1; letter-spacing: .02em; }
+  .htext { flex: 1; }
+  h1 { font-size: 14pt; font-weight: 700; margin: 0 0 2px; }
+  .sub { font-size: 10pt; color: var(--muted); margin: 0; }
+  .nameline {
+    font-size: 9.5pt; color: var(--muted);
+    border-bottom: 1px solid var(--ink); width: 2in;
+    padding-bottom: 1px; align-self: flex-end;
+  }
+
+  .label { font-size: 11.5pt; font-weight: 700; margin: 9px 0 1px; }
+  .label span { font-weight: 400; font-size: 10pt; color: var(--muted); }
+
+  .row { display: block; width: 100%; height: auto; margin-bottom: .06in; }
+  /* Rows that follow the header directly would otherwise jam against its rule. */
+  header + .row { margin-top: .12in; }
+
+  .words {
+    margin-top: 10px; padding-top: 7px; border-top: 1px solid var(--rule);
+    font-size: 12.5pt;
+    display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap;
+  }
+  .words b { font-size: 14pt; }
+  .words em { font-style: normal; color: var(--muted); }
+
+  /* The wordmark rides in the footer line that was already there — see the note
+     in lib/sheet.js. No height, upright, a size down, and never louder than the
+     two slots it sits between. */
+  .brand { font-style: normal; font-size: 7pt; letter-spacing: .04em;
+    color: var(--accent); align-self: center; }
+
+  footer {
+    margin-top: 7px; font-size: 8.5pt; color: var(--muted);
+    display: flex; justify-content: space-between;
+  }
+
+  .chart { display: grid; grid-template-columns: repeat(6, 1fr); gap: 7px; margin-top: 14px; }
+  .cell {
+    border: 2px solid var(--slate); border-radius: 8px; height: 1.35in;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .page.key { background: #fcfcfa; }
+  .page.key header { border-bottom-style: double; border-bottom-width: 3px; }
+  .keylist { font-size: 11pt; line-height: 1.7; }
+  .keylist p { margin: .02in 0; }
+  .keynote { border: 1.5px solid var(--deep); border-radius: 8px; padding: .07in .12in;
+    margin: .1in 0 0; font-size: 10pt; line-height: 1.5; }
+
+  .crow, .frow, .cmprow, .teenrow {
+    display: flex; align-items: center; gap: .22in;
+    border-bottom: 1px solid var(--rule);
+    padding: .1in .02in;
+  }
+  /* The wrapper holds the fixed column position so the arrows and write boxes
+     stay in line while the dot boxes themselves vary in width. */
+  .objwrap { flex: 1; display: flex; }
+  .objbox, .cmpbox {
+    border: 2px solid var(--slate); border-radius: 10px;
+    display: grid; gap: .08in; padding: .1in;
+    place-items: center;
+  }
+  .objbox { width: fit-content; }
+  .cmpbox { flex: 1; justify-content: center; align-content: center; min-height: .82in; }
+  .dot {
+    width: .32in; height: .32in; border-radius: 50%;
+    background: var(--ink); display: block;
+  }
+  /* THE COUNTING ROW UNDER A NUMERAL. .dot is display:block, so it only ever
+   * lays out because something around it does — every other dot row in this
+   * pack sits inside .objbox for exactly that reason. This row had no rule at
+   * all, so once the spans were emitted correctly they stacked into a column
+   * down the page instead of a row to count along. */
+  .counter { display: flex; flex-wrap: wrap; gap: .1in; margin-top: .07in; }
+  .counter.big { gap: .18in; margin-top: .12in; }
+  .counter.big .dot { width: .5in; height: .5in; }
+  .counter.big .zero { font-size: 16pt; }
+  .arrow { font-size: 17pt; color: var(--muted); }
+  .writebox {
+    width: .86in; height: .86in; flex: 0 0 auto;
+    border: 2.5px solid var(--slate); border-radius: 8px;
+    background:
+      linear-gradient(#9a9a9a, #9a9a9a) left 50% / 100% 1px no-repeat;
+  }
+
+  .frame {
+    display: grid; grid-template-columns: repeat(5, .44in);
+    grid-template-rows: repeat(2, .44in);
+    flex: 0 0 auto;
+  }
+  .frame.small { grid-template-columns: repeat(5, .26in); grid-template-rows: repeat(2, .26in); }
+
+  /* Eleven teen rows have to share one sheet, so this row is compact: the
+   * write box is the tallest thing in it and drives the row height. */
+  .teenrow { padding: .055in .02in; gap: .16in; }
+  .teenrow .writebox { width: .62in; height: .62in; }
+  .tf { border: 1.5px solid var(--slate); display: flex; align-items: center; justify-content: center; }
+  .tf.on::after {
+    content: ""; width: 62%; height: 62%; border-radius: 50%; background: var(--ink);
+  }
+
+  .seqrow { display: flex; gap: .1in; margin: .13in 0; justify-content: center; }
+  .seqbox {
+    width: .66in; height: .84in;
+    border: 2px solid var(--slate); border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .seqbox.blank { border-style: dashed; border-color: var(--muted); }
+
+  .teennum { width: .9in; display: flex; justify-content: center; }
+  .teenlabel { flex: 1; font-size: 11.5pt; color: var(--ink); }
+
+  .d2d { margin-top: .1in; }
+  .d2d svg { display: block; width: 100%; height: auto; }
+
+  .mrow {
+    display: flex; align-items: center; gap: .1in;
+    border-bottom: 1px solid var(--rule);
+    padding: .09in .02in;
+  }
+  .mrow .objwrap { flex: 0 1 auto; }
+  .mrow .dot { width: .36in; height: .36in; }
+  .mrow .writebox { width: 1.05in; height: 1.05in; }
+  .sym { flex: 0 0 auto; display: flex; }
+  .sym svg { display: block; }
+  .gonecount {
+    flex: 0 0 auto; width: .5in;
+    display: flex; justify-content: center;
+  }
+  .gonecount svg { display: block; }
+  /* The gap belongs BEFORE the equals sign, so = and the answer box stay
+     together as one statement rather than drifting apart. */
+  .mspace { flex: 1; }
+
+  /*
+   * A crossed-out dot has to be quieter than an intact one. The task is "count
+   * what is LEFT", so the remaining dots must be what the eye lands on — a
+   * heavy dark cross makes the page about what has gone instead.
+   */
+  .dot.gone {
+    background: var(--tint); position: relative;
+  }
+  .dot.gone::after {
+    content: ""; position: absolute; inset: -2px;
+    background:
+      linear-gradient(45deg, transparent 46%, #a0a0a0 46%, #a0a0a0 54%, transparent 54%),
+      linear-gradient(-45deg, transparent 46%, #a0a0a0 46%, #a0a0a0 54%, transparent 54%);
+  }
+
+  /* The glyph engine's default ink is mid-gray, which is right for a letter to
+     be traced and too faint for a numeral that has to be read. */
+  .gonecount path { stroke: #222; }
+  .sym path { stroke: #333; }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <header>
+    <div class="bigletter">0&#8202;9</div>
+    <div class="htext">
+      <h1>Numbers 0 to 9</h1>
+      <p class="sub">Trace the numbers, then write them on the empty line underneath.</p>
+    </div>
+    <div class="nameline">Name</div>
+  </header>
+
+      <svg class="row" viewBox="0 0 729.6 89.44" width="100%" role="img" aria-label="trace 0 to 9">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="35.72" x2="729.6" y2="35.72" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="66.44" x2="729.6" y2="66.44" stroke="#16130F" stroke-width="2.6"/>
+        <g transform="translate(32.18 5) scale(61.44)"><path d="M.275 .03 A.225 .47 0 0 0 .275 .97 A.225 .47 0 0 0 .275 .03" fill="none" stroke="#B09A88" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.09 0.07"/><circle cx="0.275" cy="0.03" r="0.05" fill="#C0511D"/></g>
+        <g transform="translate(108.18 5) scale(61.44)"><path d="M.05 .26 L.25 .04 V.97" fill="none" stroke="#B09A88" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.09 0.07"/><circle cx="0.05" cy="0.26" r="0.05" fill="#C0511D"/></g>
+        <g transform="translate(172.5 5) scale(61.44)"><path d="M.06 .26 C.08 .04 .52 .02 .52 .32 C.52 .6 .1 .74 .06 .97 H.54" fill="none" stroke="#B09A88" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.09 0.07"/><circle cx="0.06" cy="0.26" r="0.05" fill="#C0511D"/></g>
+        <g transform="translate(242.66 5) scale(61.44)"><path d="M.07 .18 C.14 0 .5 .02 .5 .26 C.5 .45 .3 .5 .22 .5 C.32 .5 .54 .55 .54 .76 C.54 1 .14 1.03 .06 .86" fill="none" stroke="#B09A88" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.09 0.07"/><circle cx="0.07" cy="0.18" r="0.05" fill="#C0511D"/></g>
+        <g transform="translate(311.9 5) scale(61.44)"><path d="M.38 .03 L.04 .68 H.56" fill="none" stroke="#B09A88" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.09 0.07"/><path d="M.38 .03 V.97" fill="none" stroke="#B09A88" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.09 0.07"/><circle cx="0.38" cy="0.03" r="0.05" fill="#C0511D"/></g>
+        <g transform="translate(382.98 5) scale(61.44)"><path d="M.5 .05 H.16 L.11 .44 C.22 .34 .54 .4 .54 .7 C.54 .97 .16 1.04 .06 .89" fill="none" stroke="#B09A88" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.09 0.07"/><circle cx="0.5" cy="0.05" r="0.05" fill="#C0511D"/></g>
+        <g transform="translate(453.14 5) scale(61.44)"><path d="M.45 .06 C.22 .14 .07 .38 .07 .735" fill="none" stroke="#B09A88" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.09 0.07"/><path d="M.07 .735 A.22 .235 0 0 0 .51 .735 A.22 .235 0 0 0 .07 .735" fill="none" stroke="#B09A88" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.09 0.07"/><circle cx="0.45" cy="0.06" r="0.05" fill="#C0511D"/></g>
+        <g transform="translate(524.23 5) scale(61.44)"><path d="M.04 .05 H.5 L.22 .97" fill="none" stroke="#B09A88" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.09 0.07"/><circle cx="0.04" cy="0.05" r="0.05" fill="#C0511D"/></g>
+        <g transform="translate(593.46 5) scale(61.44)"><path d="M.275 .04 A.195 .23 0 0 0 .275 .5 A.195 .23 0 0 0 .275 .04" fill="none" stroke="#B09A88" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.09 0.07"/><path d="M.275 .5 A.225 .235 0 0 0 .275 .97 A.225 .235 0 0 0 .275 .5" fill="none" stroke="#B09A88" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.09 0.07"/><circle cx="0.275" cy="0.04" r="0.05" fill="#C0511D"/></g>
+        <g transform="translate(662.7 5) scale(61.44)"><path d="M.3 .04 A.24 .27 0 0 0 .3 .58 A.24 .27 0 0 0 .3 .04" fill="none" stroke="#B09A88" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.09 0.07"/><path d="M.54 .31 V.97" fill="none" stroke="#B09A88" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.09 0.07"/><circle cx="0.3" cy="0.04" r="0.05" fill="#C0511D"/></g>
+      </svg>
+      <svg class="row" viewBox="0 0 729.6 89.44" width="100%" role="img" aria-label="write 0 to 9">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="35.72" x2="729.6" y2="35.72" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="66.44" x2="729.6" y2="66.44" stroke="#16130F" stroke-width="2.6"/>
+      </svg>
+      <svg class="row" viewBox="0 0 729.6 89.44" width="100%" role="img" aria-label="trace 0 to 9">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="35.72" x2="729.6" y2="35.72" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="66.44" x2="729.6" y2="66.44" stroke="#16130F" stroke-width="2.6"/>
+        <g transform="translate(32.18 5) scale(61.44)"><path d="M.275 .03 A.225 .47 0 0 0 .275 .97 A.225 .47 0 0 0 .275 .03" fill="none" stroke="#B09A88" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.09 0.07"/><circle cx="0.275" cy="0.03" r="0.05" fill="#C0511D"/></g>
+        <g transform="translate(108.18 5) scale(61.44)"><path d="M.05 .26 L.25 .04 V.97" fill="none" stroke="#B09A88" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.09 0.07"/><circle cx="0.05" cy="0.26" r="0.05" fill="#C0511D"/></g>
+        <g transform="translate(172.5 5) scale(61.44)"><path d="M.06 .26 C.08 .04 .52 .02 .52 .32 C.52 .6 .1 .74 .06 .97 H.54" fill="none" stroke="#B09A88" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.09 0.07"/><circle cx="0.06" cy="0.26" r="0.05" fill="#C0511D"/></g>
+        <g transform="translate(242.66 5) scale(61.44)"><path d="M.07 .18 C.14 0 .5 .02 .5 .26 C.5 .45 .3 .5 .22 .5 C.32 .5 .54 .55 .54 .76 C.54 1 .14 1.03 .06 .86" fill="none" stroke="#B09A88" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.09 0.07"/><circle cx="0.07" cy="0.18" r="0.05" fill="#C0511D"/></g>
+        <g transform="translate(311.9 5) scale(61.44)"><path d="M.38 .03 L.04 .68 H.56" fill="none" stroke="#B09A88" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.09 0.07"/><path d="M.38 .03 V.97" fill="none" stroke="#B09A88" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.09 0.07"/><circle cx="0.38" cy="0.03" r="0.05" fill="#C0511D"/></g>
+        <g transform="translate(382.98 5) scale(61.44)"><path d="M.5 .05 H.16 L.11 .44 C.22 .34 .54 .4 .54 .7 C.54 .97 .16 1.04 .06 .89" fill="none" stroke="#B09A88" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.09 0.07"/><circle cx="0.5" cy="0.05" r="0.05" fill="#C0511D"/></g>
+        <g transform="translate(453.14 5) scale(61.44)"><path d="M.45 .06 C.22 .14 .07 .38 .07 .735" fill="none" stroke="#B09A88" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.09 0.07"/><path d="M.07 .735 A.22 .235 0 0 0 .51 .735 A.22 .235 0 0 0 .07 .735" fill="none" stroke="#B09A88" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.09 0.07"/><circle cx="0.45" cy="0.06" r="0.05" fill="#C0511D"/></g>
+        <g transform="translate(524.23 5) scale(61.44)"><path d="M.04 .05 H.5 L.22 .97" fill="none" stroke="#B09A88" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.09 0.07"/><circle cx="0.04" cy="0.05" r="0.05" fill="#C0511D"/></g>
+        <g transform="translate(593.46 5) scale(61.44)"><path d="M.275 .04 A.195 .23 0 0 0 .275 .5 A.195 .23 0 0 0 .275 .04" fill="none" stroke="#B09A88" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.09 0.07"/><path d="M.275 .5 A.225 .235 0 0 0 .275 .97 A.225 .235 0 0 0 .275 .5" fill="none" stroke="#B09A88" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.09 0.07"/><circle cx="0.275" cy="0.04" r="0.05" fill="#C0511D"/></g>
+        <g transform="translate(662.7 5) scale(61.44)"><path d="M.3 .04 A.24 .27 0 0 0 .3 .58 A.24 .27 0 0 0 .3 .04" fill="none" stroke="#B09A88" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.09 0.07"/><path d="M.54 .31 V.97" fill="none" stroke="#B09A88" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.09 0.07"/><circle cx="0.3" cy="0.04" r="0.05" fill="#C0511D"/></g>
+      </svg>
+      <svg class="row" viewBox="0 0 729.6 89.44" width="100%" role="img" aria-label="write 0 to 9">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="35.72" x2="729.6" y2="35.72" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="66.44" x2="729.6" y2="66.44" stroke="#16130F" stroke-width="2.6"/>
+      </svg>
+      <svg class="row" viewBox="0 0 729.6 89.44" width="100%" role="img" aria-label="trace 0 to 9">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="35.72" x2="729.6" y2="35.72" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="66.44" x2="729.6" y2="66.44" stroke="#16130F" stroke-width="2.6"/>
+        <g transform="translate(32.18 5) scale(61.44)"><path d="M.275 .03 A.225 .47 0 0 0 .275 .97 A.225 .47 0 0 0 .275 .03" fill="none" stroke="#B09A88" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.09 0.07"/><circle cx="0.275" cy="0.03" r="0.05" fill="#C0511D"/></g>
+        <g transform="translate(108.18 5) scale(61.44)"><path d="M.05 .26 L.25 .04 V.97" fill="none" stroke="#B09A88" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.09 0.07"/><circle cx="0.05" cy="0.26" r="0.05" fill="#C0511D"/></g>
+        <g transform="translate(172.5 5) scale(61.44)"><path d="M.06 .26 C.08 .04 .52 .02 .52 .32 C.52 .6 .1 .74 .06 .97 H.54" fill="none" stroke="#B09A88" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.09 0.07"/><circle cx="0.06" cy="0.26" r="0.05" fill="#C0511D"/></g>
+        <g transform="translate(242.66 5) scale(61.44)"><path d="M.07 .18 C.14 0 .5 .02 .5 .26 C.5 .45 .3 .5 .22 .5 C.32 .5 .54 .55 .54 .76 C.54 1 .14 1.03 .06 .86" fill="none" stroke="#B09A88" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.09 0.07"/><circle cx="0.07" cy="0.18" r="0.05" fill="#C0511D"/></g>
+        <g transform="translate(311.9 5) scale(61.44)"><path d="M.38 .03 L.04 .68 H.56" fill="none" stroke="#B09A88" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.09 0.07"/><path d="M.38 .03 V.97" fill="none" stroke="#B09A88" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.09 0.07"/><circle cx="0.38" cy="0.03" r="0.05" fill="#C0511D"/></g>
+        <g transform="translate(382.98 5) scale(61.44)"><path d="M.5 .05 H.16 L.11 .44 C.22 .34 .54 .4 .54 .7 C.54 .97 .16 1.04 .06 .89" fill="none" stroke="#B09A88" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.09 0.07"/><circle cx="0.5" cy="0.05" r="0.05" fill="#C0511D"/></g>
+        <g transform="translate(453.14 5) scale(61.44)"><path d="M.45 .06 C.22 .14 .07 .38 .07 .735" fill="none" stroke="#B09A88" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.09 0.07"/><path d="M.07 .735 A.22 .235 0 0 0 .51 .735 A.22 .235 0 0 0 .07 .735" fill="none" stroke="#B09A88" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.09 0.07"/><circle cx="0.45" cy="0.06" r="0.05" fill="#C0511D"/></g>
+        <g transform="translate(524.23 5) scale(61.44)"><path d="M.04 .05 H.5 L.22 .97" fill="none" stroke="#B09A88" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.09 0.07"/><circle cx="0.04" cy="0.05" r="0.05" fill="#C0511D"/></g>
+        <g transform="translate(593.46 5) scale(61.44)"><path d="M.275 .04 A.195 .23 0 0 0 .275 .5 A.195 .23 0 0 0 .275 .04" fill="none" stroke="#B09A88" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.09 0.07"/><path d="M.275 .5 A.225 .235 0 0 0 .275 .97 A.225 .235 0 0 0 .275 .5" fill="none" stroke="#B09A88" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.09 0.07"/><circle cx="0.275" cy="0.04" r="0.05" fill="#C0511D"/></g>
+        <g transform="translate(662.7 5) scale(61.44)"><path d="M.3 .04 A.24 .27 0 0 0 .3 .58 A.24 .27 0 0 0 .3 .04" fill="none" stroke="#B09A88" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.09 0.07"/><path d="M.54 .31 V.97" fill="none" stroke="#B09A88" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.09 0.07"/><circle cx="0.3" cy="0.04" r="0.05" fill="#C0511D"/></g>
+      </svg>
+      <svg class="row" viewBox="0 0 729.6 89.44" width="100%" role="img" aria-label="write 0 to 9">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="35.72" x2="729.6" y2="35.72" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="66.44" x2="729.6" y2="66.44" stroke="#16130F" stroke-width="2.6"/>
+      </svg>
+      <svg class="row" viewBox="0 0 729.6 89.44" width="100%" role="img" aria-label="trace 0 to 9">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="35.72" x2="729.6" y2="35.72" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="66.44" x2="729.6" y2="66.44" stroke="#16130F" stroke-width="2.6"/>
+        <g transform="translate(32.18 5) scale(61.44)"><path d="M.275 .03 A.225 .47 0 0 0 .275 .97 A.225 .47 0 0 0 .275 .03" fill="none" stroke="#B09A88" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.09 0.07"/><circle cx="0.275" cy="0.03" r="0.05" fill="#C0511D"/></g>
+        <g transform="translate(108.18 5) scale(61.44)"><path d="M.05 .26 L.25 .04 V.97" fill="none" stroke="#B09A88" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.09 0.07"/><circle cx="0.05" cy="0.26" r="0.05" fill="#C0511D"/></g>
+        <g transform="translate(172.5 5) scale(61.44)"><path d="M.06 .26 C.08 .04 .52 .02 .52 .32 C.52 .6 .1 .74 .06 .97 H.54" fill="none" stroke="#B09A88" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.09 0.07"/><circle cx="0.06" cy="0.26" r="0.05" fill="#C0511D"/></g>
+        <g transform="translate(242.66 5) scale(61.44)"><path d="M.07 .18 C.14 0 .5 .02 .5 .26 C.5 .45 .3 .5 .22 .5 C.32 .5 .54 .55 .54 .76 C.54 1 .14 1.03 .06 .86" fill="none" stroke="#B09A88" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.09 0.07"/><circle cx="0.07" cy="0.18" r="0.05" fill="#C0511D"/></g>
+        <g transform="translate(311.9 5) scale(61.44)"><path d="M.38 .03 L.04 .68 H.56" fill="none" stroke="#B09A88" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.09 0.07"/><path d="M.38 .03 V.97" fill="none" stroke="#B09A88" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.09 0.07"/><circle cx="0.38" cy="0.03" r="0.05" fill="#C0511D"/></g>
+        <g transform="translate(382.98 5) scale(61.44)"><path d="M.5 .05 H.16 L.11 .44 C.22 .34 .54 .4 .54 .7 C.54 .97 .16 1.04 .06 .89" fill="none" stroke="#B09A88" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.09 0.07"/><circle cx="0.5" cy="0.05" r="0.05" fill="#C0511D"/></g>
+        <g transform="translate(453.14 5) scale(61.44)"><path d="M.45 .06 C.22 .14 .07 .38 .07 .735" fill="none" stroke="#B09A88" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.09 0.07"/><path d="M.07 .735 A.22 .235 0 0 0 .51 .735 A.22 .235 0 0 0 .07 .735" fill="none" stroke="#B09A88" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.09 0.07"/><circle cx="0.45" cy="0.06" r="0.05" fill="#C0511D"/></g>
+        <g transform="translate(524.23 5) scale(61.44)"><path d="M.04 .05 H.5 L.22 .97" fill="none" stroke="#B09A88" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.09 0.07"/><circle cx="0.04" cy="0.05" r="0.05" fill="#C0511D"/></g>
+        <g transform="translate(593.46 5) scale(61.44)"><path d="M.275 .04 A.195 .23 0 0 0 .275 .5 A.195 .23 0 0 0 .275 .04" fill="none" stroke="#B09A88" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.09 0.07"/><path d="M.275 .5 A.225 .235 0 0 0 .275 .97 A.225 .235 0 0 0 .275 .5" fill="none" stroke="#B09A88" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.09 0.07"/><circle cx="0.275" cy="0.04" r="0.05" fill="#C0511D"/></g>
+        <g transform="translate(662.7 5) scale(61.44)"><path d="M.3 .04 A.24 .27 0 0 0 .3 .58 A.24 .27 0 0 0 .3 .04" fill="none" stroke="#B09A88" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.09 0.07"/><path d="M.54 .31 V.97" fill="none" stroke="#B09A88" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.09 0.07"/><circle cx="0.3" cy="0.04" r="0.05" fill="#C0511D"/></g>
+      </svg>
+      <svg class="row" viewBox="0 0 729.6 89.44" width="100%" role="img" aria-label="write 0 to 9">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="35.72" x2="729.6" y2="35.72" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="66.44" x2="729.6" y2="66.44" stroke="#16130F" stroke-width="2.6"/>
+      </svg>
+
+  <footer>
+    <span>0&ndash;9 &middot; trace and write</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Numbers</span>
+  </footer>
+</div>
+
+<div class="page">
+  <header>
+    <div class="bigletter">0</div>
+    <div class="htext">
+      <h1>Trace and Write &mdash; Number 0</h1>
+      <p class="sub">Put your pencil on the dot and follow the dashes. Then write your own.</p>
+    </div>
+    <div class="nameline">Name</div>
+  </header>
+
+  <div class="label">Number 0</div>
+      <svg class="row" viewBox="0 0 729.6 165" width="100%" role="img" aria-label="writing line for 0">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="65" x2="729.6" y2="65" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="125" x2="729.6" y2="125" stroke="#16130F" stroke-width="2.6"/>
+        <g transform="translate(51.16 5) scale(120)"><path d="M.275 .03 A.225 .47 0 0 0 .275 .97 A.225 .47 0 0 0 .275 .03" fill="none" stroke="#C0511D" stroke-width="0.03" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.275" cy="0.03" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(191.48 5) scale(120)"><path d="M.275 .03 A.225 .47 0 0 0 .275 .97 A.225 .47 0 0 0 .275 .03" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.275" cy="0.03" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(331.8 5) scale(120)"><path d="M.275 .03 A.225 .47 0 0 0 .275 .97 A.225 .47 0 0 0 .275 .03" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.275" cy="0.03" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(472.12 5) scale(120)"><path d="M.275 .03 A.225 .47 0 0 0 .275 .97 A.225 .47 0 0 0 .275 .03" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.275" cy="0.03" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(612.44 5) scale(120)"><path d="M.275 .03 A.225 .47 0 0 0 .275 .97 A.225 .47 0 0 0 .275 .03" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.275" cy="0.03" r="0.03" fill="#C0511D"/></g>
+      </svg>
+      <svg class="row" viewBox="0 0 729.6 165" width="100%" role="img" aria-label="writing line for 0">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="65" x2="729.6" y2="65" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="125" x2="729.6" y2="125" stroke="#16130F" stroke-width="2.6"/>
+        <g transform="translate(51.16 5) scale(120)"><path d="M.275 .03 A.225 .47 0 0 0 .275 .97 A.225 .47 0 0 0 .275 .03" fill="none" stroke="#C0511D" stroke-width="0.03" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.275" cy="0.03" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(191.48 5) scale(120)"><path d="M.275 .03 A.225 .47 0 0 0 .275 .97 A.225 .47 0 0 0 .275 .03" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.275" cy="0.03" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(331.8 5) scale(120)"><path d="M.275 .03 A.225 .47 0 0 0 .275 .97 A.225 .47 0 0 0 .275 .03" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.275" cy="0.03" r="0.03" fill="#C0511D"/></g>
+      </svg>
+      <svg class="row" viewBox="0 0 729.6 165" width="100%" role="img" aria-label="writing line for 0">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="65" x2="729.6" y2="65" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="125" x2="729.6" y2="125" stroke="#16130F" stroke-width="2.6"/>
+        <g transform="translate(51.16 5) scale(120)"><path d="M.275 .03 A.225 .47 0 0 0 .275 .97 A.225 .47 0 0 0 .275 .03" fill="none" stroke="#C0511D" stroke-width="0.03" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.275" cy="0.03" r="0.03" fill="#C0511D"/></g>
+      </svg>
+      <svg class="row" viewBox="0 0 729.6 165" width="100%" role="img" aria-label="write 0">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="65" x2="729.6" y2="65" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="125" x2="729.6" y2="125" stroke="#16130F" stroke-width="2.6"/>
+      </svg>
+
+  <div class="label">Count them <span>&mdash; touch each one and say the number</span></div>
+  <div class="counter big"><span class="zero">nothing to count!</span></div>
+
+  <footer>
+    <span>Number 1 of 10</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Numbers &mdash; 0</span>
+  </footer>
+</div>
+
+<div class="page">
+  <header>
+    <div class="bigletter">1</div>
+    <div class="htext">
+      <h1>Trace and Write &mdash; Number 1</h1>
+      <p class="sub">Put your pencil on the dot and follow the dashes. Then write your own.</p>
+    </div>
+    <div class="nameline">Name</div>
+  </header>
+
+  <div class="label">Number 1</div>
+      <svg class="row" viewBox="0 0 729.6 165" width="100%" role="img" aria-label="writing line for 1">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="65" x2="729.6" y2="65" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="125" x2="729.6" y2="125" stroke="#16130F" stroke-width="2.6"/>
+        <g transform="translate(62.56 5) scale(120)"><path d="M.05 .26 L.25 .04 V.97" fill="none" stroke="#C0511D" stroke-width="0.03" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.05" cy="0.26" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(202.88 5) scale(120)"><path d="M.05 .26 L.25 .04 V.97" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.05" cy="0.26" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(343.2 5) scale(120)"><path d="M.05 .26 L.25 .04 V.97" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.05" cy="0.26" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(483.52 5) scale(120)"><path d="M.05 .26 L.25 .04 V.97" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.05" cy="0.26" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(623.84 5) scale(120)"><path d="M.05 .26 L.25 .04 V.97" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.05" cy="0.26" r="0.03" fill="#C0511D"/></g>
+      </svg>
+      <svg class="row" viewBox="0 0 729.6 165" width="100%" role="img" aria-label="writing line for 1">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="65" x2="729.6" y2="65" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="125" x2="729.6" y2="125" stroke="#16130F" stroke-width="2.6"/>
+        <g transform="translate(62.56 5) scale(120)"><path d="M.05 .26 L.25 .04 V.97" fill="none" stroke="#C0511D" stroke-width="0.03" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.05" cy="0.26" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(202.88 5) scale(120)"><path d="M.05 .26 L.25 .04 V.97" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.05" cy="0.26" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(343.2 5) scale(120)"><path d="M.05 .26 L.25 .04 V.97" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.05" cy="0.26" r="0.03" fill="#C0511D"/></g>
+      </svg>
+      <svg class="row" viewBox="0 0 729.6 165" width="100%" role="img" aria-label="writing line for 1">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="65" x2="729.6" y2="65" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="125" x2="729.6" y2="125" stroke="#16130F" stroke-width="2.6"/>
+        <g transform="translate(62.56 5) scale(120)"><path d="M.05 .26 L.25 .04 V.97" fill="none" stroke="#C0511D" stroke-width="0.03" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.05" cy="0.26" r="0.03" fill="#C0511D"/></g>
+      </svg>
+      <svg class="row" viewBox="0 0 729.6 165" width="100%" role="img" aria-label="write 1">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="65" x2="729.6" y2="65" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="125" x2="729.6" y2="125" stroke="#16130F" stroke-width="2.6"/>
+      </svg>
+
+  <div class="label">Count them <span>&mdash; touch each one and say the number</span></div>
+  <div class="counter big"><span class="dot"></span></div>
+
+  <footer>
+    <span>Number 2 of 10</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Numbers &mdash; 1</span>
+  </footer>
+</div>
+
+<div class="page">
+  <header>
+    <div class="bigletter">2</div>
+    <div class="htext">
+      <h1>Trace and Write &mdash; Number 2</h1>
+      <p class="sub">Put your pencil on the dot and follow the dashes. Then write your own.</p>
+    </div>
+    <div class="nameline">Name</div>
+  </header>
+
+  <div class="label">Number 2</div>
+      <svg class="row" viewBox="0 0 729.6 165" width="100%" role="img" aria-label="writing line for 2">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="65" x2="729.6" y2="65" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="125" x2="729.6" y2="125" stroke="#16130F" stroke-width="2.6"/>
+        <g transform="translate(51.16 5) scale(120)"><path d="M.06 .26 C.08 .04 .52 .02 .52 .32 C.52 .6 .1 .74 .06 .97 H.54" fill="none" stroke="#C0511D" stroke-width="0.03" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.06" cy="0.26" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(191.48 5) scale(120)"><path d="M.06 .26 C.08 .04 .52 .02 .52 .32 C.52 .6 .1 .74 .06 .97 H.54" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.06" cy="0.26" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(331.8 5) scale(120)"><path d="M.06 .26 C.08 .04 .52 .02 .52 .32 C.52 .6 .1 .74 .06 .97 H.54" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.06" cy="0.26" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(472.12 5) scale(120)"><path d="M.06 .26 C.08 .04 .52 .02 .52 .32 C.52 .6 .1 .74 .06 .97 H.54" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.06" cy="0.26" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(612.44 5) scale(120)"><path d="M.06 .26 C.08 .04 .52 .02 .52 .32 C.52 .6 .1 .74 .06 .97 H.54" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.06" cy="0.26" r="0.03" fill="#C0511D"/></g>
+      </svg>
+      <svg class="row" viewBox="0 0 729.6 165" width="100%" role="img" aria-label="writing line for 2">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="65" x2="729.6" y2="65" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="125" x2="729.6" y2="125" stroke="#16130F" stroke-width="2.6"/>
+        <g transform="translate(51.16 5) scale(120)"><path d="M.06 .26 C.08 .04 .52 .02 .52 .32 C.52 .6 .1 .74 .06 .97 H.54" fill="none" stroke="#C0511D" stroke-width="0.03" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.06" cy="0.26" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(191.48 5) scale(120)"><path d="M.06 .26 C.08 .04 .52 .02 .52 .32 C.52 .6 .1 .74 .06 .97 H.54" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.06" cy="0.26" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(331.8 5) scale(120)"><path d="M.06 .26 C.08 .04 .52 .02 .52 .32 C.52 .6 .1 .74 .06 .97 H.54" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.06" cy="0.26" r="0.03" fill="#C0511D"/></g>
+      </svg>
+      <svg class="row" viewBox="0 0 729.6 165" width="100%" role="img" aria-label="writing line for 2">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="65" x2="729.6" y2="65" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="125" x2="729.6" y2="125" stroke="#16130F" stroke-width="2.6"/>
+        <g transform="translate(51.16 5) scale(120)"><path d="M.06 .26 C.08 .04 .52 .02 .52 .32 C.52 .6 .1 .74 .06 .97 H.54" fill="none" stroke="#C0511D" stroke-width="0.03" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.06" cy="0.26" r="0.03" fill="#C0511D"/></g>
+      </svg>
+      <svg class="row" viewBox="0 0 729.6 165" width="100%" role="img" aria-label="write 2">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="65" x2="729.6" y2="65" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="125" x2="729.6" y2="125" stroke="#16130F" stroke-width="2.6"/>
+      </svg>
+
+  <div class="label">Count them <span>&mdash; touch each one and say the number</span></div>
+  <div class="counter big"><span class="dot"></span><span class="dot"></span></div>
+
+  <footer>
+    <span>Number 3 of 10</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Numbers &mdash; 2</span>
+  </footer>
+</div>
+
+<div class="page">
+  <header>
+    <div class="bigletter">3</div>
+    <div class="htext">
+      <h1>Trace and Write &mdash; Number 3</h1>
+      <p class="sub">Put your pencil on the dot and follow the dashes. Then write your own.</p>
+    </div>
+    <div class="nameline">Name</div>
+  </header>
+
+  <div class="label">Number 3</div>
+      <svg class="row" viewBox="0 0 729.6 165" width="100%" role="img" aria-label="writing line for 3">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="65" x2="729.6" y2="65" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="125" x2="729.6" y2="125" stroke="#16130F" stroke-width="2.6"/>
+        <g transform="translate(51.16 5) scale(120)"><path d="M.07 .18 C.14 0 .5 .02 .5 .26 C.5 .45 .3 .5 .22 .5 C.32 .5 .54 .55 .54 .76 C.54 1 .14 1.03 .06 .86" fill="none" stroke="#C0511D" stroke-width="0.03" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.07" cy="0.18" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(191.48 5) scale(120)"><path d="M.07 .18 C.14 0 .5 .02 .5 .26 C.5 .45 .3 .5 .22 .5 C.32 .5 .54 .55 .54 .76 C.54 1 .14 1.03 .06 .86" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.07" cy="0.18" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(331.8 5) scale(120)"><path d="M.07 .18 C.14 0 .5 .02 .5 .26 C.5 .45 .3 .5 .22 .5 C.32 .5 .54 .55 .54 .76 C.54 1 .14 1.03 .06 .86" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.07" cy="0.18" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(472.12 5) scale(120)"><path d="M.07 .18 C.14 0 .5 .02 .5 .26 C.5 .45 .3 .5 .22 .5 C.32 .5 .54 .55 .54 .76 C.54 1 .14 1.03 .06 .86" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.07" cy="0.18" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(612.44 5) scale(120)"><path d="M.07 .18 C.14 0 .5 .02 .5 .26 C.5 .45 .3 .5 .22 .5 C.32 .5 .54 .55 .54 .76 C.54 1 .14 1.03 .06 .86" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.07" cy="0.18" r="0.03" fill="#C0511D"/></g>
+      </svg>
+      <svg class="row" viewBox="0 0 729.6 165" width="100%" role="img" aria-label="writing line for 3">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="65" x2="729.6" y2="65" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="125" x2="729.6" y2="125" stroke="#16130F" stroke-width="2.6"/>
+        <g transform="translate(51.16 5) scale(120)"><path d="M.07 .18 C.14 0 .5 .02 .5 .26 C.5 .45 .3 .5 .22 .5 C.32 .5 .54 .55 .54 .76 C.54 1 .14 1.03 .06 .86" fill="none" stroke="#C0511D" stroke-width="0.03" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.07" cy="0.18" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(191.48 5) scale(120)"><path d="M.07 .18 C.14 0 .5 .02 .5 .26 C.5 .45 .3 .5 .22 .5 C.32 .5 .54 .55 .54 .76 C.54 1 .14 1.03 .06 .86" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.07" cy="0.18" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(331.8 5) scale(120)"><path d="M.07 .18 C.14 0 .5 .02 .5 .26 C.5 .45 .3 .5 .22 .5 C.32 .5 .54 .55 .54 .76 C.54 1 .14 1.03 .06 .86" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.07" cy="0.18" r="0.03" fill="#C0511D"/></g>
+      </svg>
+      <svg class="row" viewBox="0 0 729.6 165" width="100%" role="img" aria-label="writing line for 3">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="65" x2="729.6" y2="65" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="125" x2="729.6" y2="125" stroke="#16130F" stroke-width="2.6"/>
+        <g transform="translate(51.16 5) scale(120)"><path d="M.07 .18 C.14 0 .5 .02 .5 .26 C.5 .45 .3 .5 .22 .5 C.32 .5 .54 .55 .54 .76 C.54 1 .14 1.03 .06 .86" fill="none" stroke="#C0511D" stroke-width="0.03" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.07" cy="0.18" r="0.03" fill="#C0511D"/></g>
+      </svg>
+      <svg class="row" viewBox="0 0 729.6 165" width="100%" role="img" aria-label="write 3">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="65" x2="729.6" y2="65" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="125" x2="729.6" y2="125" stroke="#16130F" stroke-width="2.6"/>
+      </svg>
+
+  <div class="label">Count them <span>&mdash; touch each one and say the number</span></div>
+  <div class="counter big"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+
+  <footer>
+    <span>Number 4 of 10</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Numbers &mdash; 3</span>
+  </footer>
+</div>
+
+<div class="page">
+  <header>
+    <div class="bigletter">4</div>
+    <div class="htext">
+      <h1>Trace and Write &mdash; Number 4</h1>
+      <p class="sub">Put your pencil on the dot and follow the dashes. Then write your own.</p>
+    </div>
+    <div class="nameline">Name</div>
+  </header>
+
+  <div class="label">Number 4</div>
+      <svg class="row" viewBox="0 0 729.6 165" width="100%" role="img" aria-label="writing line for 4">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="65" x2="729.6" y2="65" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="125" x2="729.6" y2="125" stroke="#16130F" stroke-width="2.6"/>
+        <g transform="translate(49.36 5) scale(120)"><path d="M.38 .03 L.04 .68 H.56" fill="none" stroke="#C0511D" stroke-width="0.03" stroke-linecap="round" stroke-linejoin="round"/><path d="M.38 .03 V.97" fill="none" stroke="#C0511D" stroke-width="0.03" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.38" cy="0.03" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(189.68 5) scale(120)"><path d="M.38 .03 L.04 .68 H.56" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><path d="M.38 .03 V.97" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.38" cy="0.03" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(330 5) scale(120)"><path d="M.38 .03 L.04 .68 H.56" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><path d="M.38 .03 V.97" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.38" cy="0.03" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(470.32 5) scale(120)"><path d="M.38 .03 L.04 .68 H.56" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><path d="M.38 .03 V.97" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.38" cy="0.03" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(610.64 5) scale(120)"><path d="M.38 .03 L.04 .68 H.56" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><path d="M.38 .03 V.97" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.38" cy="0.03" r="0.03" fill="#C0511D"/></g>
+      </svg>
+      <svg class="row" viewBox="0 0 729.6 165" width="100%" role="img" aria-label="writing line for 4">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="65" x2="729.6" y2="65" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="125" x2="729.6" y2="125" stroke="#16130F" stroke-width="2.6"/>
+        <g transform="translate(49.36 5) scale(120)"><path d="M.38 .03 L.04 .68 H.56" fill="none" stroke="#C0511D" stroke-width="0.03" stroke-linecap="round" stroke-linejoin="round"/><path d="M.38 .03 V.97" fill="none" stroke="#C0511D" stroke-width="0.03" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.38" cy="0.03" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(189.68 5) scale(120)"><path d="M.38 .03 L.04 .68 H.56" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><path d="M.38 .03 V.97" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.38" cy="0.03" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(330 5) scale(120)"><path d="M.38 .03 L.04 .68 H.56" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><path d="M.38 .03 V.97" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.38" cy="0.03" r="0.03" fill="#C0511D"/></g>
+      </svg>
+      <svg class="row" viewBox="0 0 729.6 165" width="100%" role="img" aria-label="writing line for 4">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="65" x2="729.6" y2="65" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="125" x2="729.6" y2="125" stroke="#16130F" stroke-width="2.6"/>
+        <g transform="translate(49.36 5) scale(120)"><path d="M.38 .03 L.04 .68 H.56" fill="none" stroke="#C0511D" stroke-width="0.03" stroke-linecap="round" stroke-linejoin="round"/><path d="M.38 .03 V.97" fill="none" stroke="#C0511D" stroke-width="0.03" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.38" cy="0.03" r="0.03" fill="#C0511D"/></g>
+      </svg>
+      <svg class="row" viewBox="0 0 729.6 165" width="100%" role="img" aria-label="write 4">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="65" x2="729.6" y2="65" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="125" x2="729.6" y2="125" stroke="#16130F" stroke-width="2.6"/>
+      </svg>
+
+  <div class="label">Count them <span>&mdash; touch each one and say the number</span></div>
+  <div class="counter big"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+
+  <footer>
+    <span>Number 5 of 10</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Numbers &mdash; 4</span>
+  </footer>
+</div>
+
+<div class="page">
+  <header>
+    <div class="bigletter">5</div>
+    <div class="htext">
+      <h1>Trace and Write &mdash; Number 5</h1>
+      <p class="sub">Put your pencil on the dot and follow the dashes. Then write your own.</p>
+    </div>
+    <div class="nameline">Name</div>
+  </header>
+
+  <div class="label">Number 5</div>
+      <svg class="row" viewBox="0 0 729.6 165" width="100%" role="img" aria-label="writing line for 5">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="65" x2="729.6" y2="65" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="125" x2="729.6" y2="125" stroke="#16130F" stroke-width="2.6"/>
+        <g transform="translate(51.16 5) scale(120)"><path d="M.5 .05 H.16 L.11 .44 C.22 .34 .54 .4 .54 .7 C.54 .97 .16 1.04 .06 .89" fill="none" stroke="#C0511D" stroke-width="0.03" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.5" cy="0.05" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(191.48 5) scale(120)"><path d="M.5 .05 H.16 L.11 .44 C.22 .34 .54 .4 .54 .7 C.54 .97 .16 1.04 .06 .89" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.5" cy="0.05" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(331.8 5) scale(120)"><path d="M.5 .05 H.16 L.11 .44 C.22 .34 .54 .4 .54 .7 C.54 .97 .16 1.04 .06 .89" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.5" cy="0.05" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(472.12 5) scale(120)"><path d="M.5 .05 H.16 L.11 .44 C.22 .34 .54 .4 .54 .7 C.54 .97 .16 1.04 .06 .89" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.5" cy="0.05" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(612.44 5) scale(120)"><path d="M.5 .05 H.16 L.11 .44 C.22 .34 .54 .4 .54 .7 C.54 .97 .16 1.04 .06 .89" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.5" cy="0.05" r="0.03" fill="#C0511D"/></g>
+      </svg>
+      <svg class="row" viewBox="0 0 729.6 165" width="100%" role="img" aria-label="writing line for 5">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="65" x2="729.6" y2="65" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="125" x2="729.6" y2="125" stroke="#16130F" stroke-width="2.6"/>
+        <g transform="translate(51.16 5) scale(120)"><path d="M.5 .05 H.16 L.11 .44 C.22 .34 .54 .4 .54 .7 C.54 .97 .16 1.04 .06 .89" fill="none" stroke="#C0511D" stroke-width="0.03" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.5" cy="0.05" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(191.48 5) scale(120)"><path d="M.5 .05 H.16 L.11 .44 C.22 .34 .54 .4 .54 .7 C.54 .97 .16 1.04 .06 .89" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.5" cy="0.05" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(331.8 5) scale(120)"><path d="M.5 .05 H.16 L.11 .44 C.22 .34 .54 .4 .54 .7 C.54 .97 .16 1.04 .06 .89" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.5" cy="0.05" r="0.03" fill="#C0511D"/></g>
+      </svg>
+      <svg class="row" viewBox="0 0 729.6 165" width="100%" role="img" aria-label="writing line for 5">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="65" x2="729.6" y2="65" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="125" x2="729.6" y2="125" stroke="#16130F" stroke-width="2.6"/>
+        <g transform="translate(51.16 5) scale(120)"><path d="M.5 .05 H.16 L.11 .44 C.22 .34 .54 .4 .54 .7 C.54 .97 .16 1.04 .06 .89" fill="none" stroke="#C0511D" stroke-width="0.03" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.5" cy="0.05" r="0.03" fill="#C0511D"/></g>
+      </svg>
+      <svg class="row" viewBox="0 0 729.6 165" width="100%" role="img" aria-label="write 5">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="65" x2="729.6" y2="65" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="125" x2="729.6" y2="125" stroke="#16130F" stroke-width="2.6"/>
+      </svg>
+
+  <div class="label">Count them <span>&mdash; touch each one and say the number</span></div>
+  <div class="counter big"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+
+  <footer>
+    <span>Number 6 of 10</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Numbers &mdash; 5</span>
+  </footer>
+</div>
+
+<div class="page">
+  <header>
+    <div class="bigletter">6</div>
+    <div class="htext">
+      <h1>Trace and Write &mdash; Number 6</h1>
+      <p class="sub">Put your pencil on the dot and follow the dashes. Then write your own.</p>
+    </div>
+    <div class="nameline">Name</div>
+  </header>
+
+  <div class="label">Number 6</div>
+      <svg class="row" viewBox="0 0 729.6 165" width="100%" role="img" aria-label="writing line for 6">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="65" x2="729.6" y2="65" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="125" x2="729.6" y2="125" stroke="#16130F" stroke-width="2.6"/>
+        <g transform="translate(51.16 5) scale(120)"><path d="M.45 .06 C.22 .14 .07 .38 .07 .735" fill="none" stroke="#C0511D" stroke-width="0.03" stroke-linecap="round" stroke-linejoin="round"/><path d="M.07 .735 A.22 .235 0 0 0 .51 .735 A.22 .235 0 0 0 .07 .735" fill="none" stroke="#C0511D" stroke-width="0.03" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.45" cy="0.06" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(191.48 5) scale(120)"><path d="M.45 .06 C.22 .14 .07 .38 .07 .735" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><path d="M.07 .735 A.22 .235 0 0 0 .51 .735 A.22 .235 0 0 0 .07 .735" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.45" cy="0.06" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(331.8 5) scale(120)"><path d="M.45 .06 C.22 .14 .07 .38 .07 .735" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><path d="M.07 .735 A.22 .235 0 0 0 .51 .735 A.22 .235 0 0 0 .07 .735" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.45" cy="0.06" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(472.12 5) scale(120)"><path d="M.45 .06 C.22 .14 .07 .38 .07 .735" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><path d="M.07 .735 A.22 .235 0 0 0 .51 .735 A.22 .235 0 0 0 .07 .735" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.45" cy="0.06" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(612.44 5) scale(120)"><path d="M.45 .06 C.22 .14 .07 .38 .07 .735" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><path d="M.07 .735 A.22 .235 0 0 0 .51 .735 A.22 .235 0 0 0 .07 .735" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.45" cy="0.06" r="0.03" fill="#C0511D"/></g>
+      </svg>
+      <svg class="row" viewBox="0 0 729.6 165" width="100%" role="img" aria-label="writing line for 6">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="65" x2="729.6" y2="65" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="125" x2="729.6" y2="125" stroke="#16130F" stroke-width="2.6"/>
+        <g transform="translate(51.16 5) scale(120)"><path d="M.45 .06 C.22 .14 .07 .38 .07 .735" fill="none" stroke="#C0511D" stroke-width="0.03" stroke-linecap="round" stroke-linejoin="round"/><path d="M.07 .735 A.22 .235 0 0 0 .51 .735 A.22 .235 0 0 0 .07 .735" fill="none" stroke="#C0511D" stroke-width="0.03" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.45" cy="0.06" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(191.48 5) scale(120)"><path d="M.45 .06 C.22 .14 .07 .38 .07 .735" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><path d="M.07 .735 A.22 .235 0 0 0 .51 .735 A.22 .235 0 0 0 .07 .735" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.45" cy="0.06" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(331.8 5) scale(120)"><path d="M.45 .06 C.22 .14 .07 .38 .07 .735" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><path d="M.07 .735 A.22 .235 0 0 0 .51 .735 A.22 .235 0 0 0 .07 .735" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.45" cy="0.06" r="0.03" fill="#C0511D"/></g>
+      </svg>
+      <svg class="row" viewBox="0 0 729.6 165" width="100%" role="img" aria-label="writing line for 6">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="65" x2="729.6" y2="65" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="125" x2="729.6" y2="125" stroke="#16130F" stroke-width="2.6"/>
+        <g transform="translate(51.16 5) scale(120)"><path d="M.45 .06 C.22 .14 .07 .38 .07 .735" fill="none" stroke="#C0511D" stroke-width="0.03" stroke-linecap="round" stroke-linejoin="round"/><path d="M.07 .735 A.22 .235 0 0 0 .51 .735 A.22 .235 0 0 0 .07 .735" fill="none" stroke="#C0511D" stroke-width="0.03" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.45" cy="0.06" r="0.03" fill="#C0511D"/></g>
+      </svg>
+      <svg class="row" viewBox="0 0 729.6 165" width="100%" role="img" aria-label="write 6">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="65" x2="729.6" y2="65" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="125" x2="729.6" y2="125" stroke="#16130F" stroke-width="2.6"/>
+      </svg>
+
+  <div class="label">Count them <span>&mdash; touch each one and say the number</span></div>
+  <div class="counter big"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+
+  <footer>
+    <span>Number 7 of 10</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Numbers &mdash; 6</span>
+  </footer>
+</div>
+
+<div class="page">
+  <header>
+    <div class="bigletter">7</div>
+    <div class="htext">
+      <h1>Trace and Write &mdash; Number 7</h1>
+      <p class="sub">Put your pencil on the dot and follow the dashes. Then write your own.</p>
+    </div>
+    <div class="nameline">Name</div>
+  </header>
+
+  <div class="label">Number 7</div>
+      <svg class="row" viewBox="0 0 729.6 165" width="100%" role="img" aria-label="writing line for 7">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="65" x2="729.6" y2="65" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="125" x2="729.6" y2="125" stroke="#16130F" stroke-width="2.6"/>
+        <g transform="translate(52.96 5) scale(120)"><path d="M.04 .05 H.5 L.22 .97" fill="none" stroke="#C0511D" stroke-width="0.03" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.04" cy="0.05" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(193.28 5) scale(120)"><path d="M.04 .05 H.5 L.22 .97" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.04" cy="0.05" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(333.6 5) scale(120)"><path d="M.04 .05 H.5 L.22 .97" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.04" cy="0.05" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(473.92 5) scale(120)"><path d="M.04 .05 H.5 L.22 .97" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.04" cy="0.05" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(614.24 5) scale(120)"><path d="M.04 .05 H.5 L.22 .97" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.04" cy="0.05" r="0.03" fill="#C0511D"/></g>
+      </svg>
+      <svg class="row" viewBox="0 0 729.6 165" width="100%" role="img" aria-label="writing line for 7">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="65" x2="729.6" y2="65" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="125" x2="729.6" y2="125" stroke="#16130F" stroke-width="2.6"/>
+        <g transform="translate(52.96 5) scale(120)"><path d="M.04 .05 H.5 L.22 .97" fill="none" stroke="#C0511D" stroke-width="0.03" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.04" cy="0.05" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(193.28 5) scale(120)"><path d="M.04 .05 H.5 L.22 .97" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.04" cy="0.05" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(333.6 5) scale(120)"><path d="M.04 .05 H.5 L.22 .97" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.04" cy="0.05" r="0.03" fill="#C0511D"/></g>
+      </svg>
+      <svg class="row" viewBox="0 0 729.6 165" width="100%" role="img" aria-label="writing line for 7">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="65" x2="729.6" y2="65" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="125" x2="729.6" y2="125" stroke="#16130F" stroke-width="2.6"/>
+        <g transform="translate(52.96 5) scale(120)"><path d="M.04 .05 H.5 L.22 .97" fill="none" stroke="#C0511D" stroke-width="0.03" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.04" cy="0.05" r="0.03" fill="#C0511D"/></g>
+      </svg>
+      <svg class="row" viewBox="0 0 729.6 165" width="100%" role="img" aria-label="write 7">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="65" x2="729.6" y2="65" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="125" x2="729.6" y2="125" stroke="#16130F" stroke-width="2.6"/>
+      </svg>
+
+  <div class="label">Count them <span>&mdash; touch each one and say the number</span></div>
+  <div class="counter big"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+
+  <footer>
+    <span>Number 8 of 10</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Numbers &mdash; 7</span>
+  </footer>
+</div>
+
+<div class="page">
+  <header>
+    <div class="bigletter">8</div>
+    <div class="htext">
+      <h1>Trace and Write &mdash; Number 8</h1>
+      <p class="sub">Put your pencil on the dot and follow the dashes. Then write your own.</p>
+    </div>
+    <div class="nameline">Name</div>
+  </header>
+
+  <div class="label">Number 8</div>
+      <svg class="row" viewBox="0 0 729.6 165" width="100%" role="img" aria-label="writing line for 8">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="65" x2="729.6" y2="65" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="125" x2="729.6" y2="125" stroke="#16130F" stroke-width="2.6"/>
+        <g transform="translate(51.16 5) scale(120)"><path d="M.275 .04 A.195 .23 0 0 0 .275 .5 A.195 .23 0 0 0 .275 .04" fill="none" stroke="#C0511D" stroke-width="0.03" stroke-linecap="round" stroke-linejoin="round"/><path d="M.275 .5 A.225 .235 0 0 0 .275 .97 A.225 .235 0 0 0 .275 .5" fill="none" stroke="#C0511D" stroke-width="0.03" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.275" cy="0.04" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(191.48 5) scale(120)"><path d="M.275 .04 A.195 .23 0 0 0 .275 .5 A.195 .23 0 0 0 .275 .04" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><path d="M.275 .5 A.225 .235 0 0 0 .275 .97 A.225 .235 0 0 0 .275 .5" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.275" cy="0.04" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(331.8 5) scale(120)"><path d="M.275 .04 A.195 .23 0 0 0 .275 .5 A.195 .23 0 0 0 .275 .04" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><path d="M.275 .5 A.225 .235 0 0 0 .275 .97 A.225 .235 0 0 0 .275 .5" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.275" cy="0.04" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(472.12 5) scale(120)"><path d="M.275 .04 A.195 .23 0 0 0 .275 .5 A.195 .23 0 0 0 .275 .04" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><path d="M.275 .5 A.225 .235 0 0 0 .275 .97 A.225 .235 0 0 0 .275 .5" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.275" cy="0.04" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(612.44 5) scale(120)"><path d="M.275 .04 A.195 .23 0 0 0 .275 .5 A.195 .23 0 0 0 .275 .04" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><path d="M.275 .5 A.225 .235 0 0 0 .275 .97 A.225 .235 0 0 0 .275 .5" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.275" cy="0.04" r="0.03" fill="#C0511D"/></g>
+      </svg>
+      <svg class="row" viewBox="0 0 729.6 165" width="100%" role="img" aria-label="writing line for 8">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="65" x2="729.6" y2="65" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="125" x2="729.6" y2="125" stroke="#16130F" stroke-width="2.6"/>
+        <g transform="translate(51.16 5) scale(120)"><path d="M.275 .04 A.195 .23 0 0 0 .275 .5 A.195 .23 0 0 0 .275 .04" fill="none" stroke="#C0511D" stroke-width="0.03" stroke-linecap="round" stroke-linejoin="round"/><path d="M.275 .5 A.225 .235 0 0 0 .275 .97 A.225 .235 0 0 0 .275 .5" fill="none" stroke="#C0511D" stroke-width="0.03" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.275" cy="0.04" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(191.48 5) scale(120)"><path d="M.275 .04 A.195 .23 0 0 0 .275 .5 A.195 .23 0 0 0 .275 .04" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><path d="M.275 .5 A.225 .235 0 0 0 .275 .97 A.225 .235 0 0 0 .275 .5" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.275" cy="0.04" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(331.8 5) scale(120)"><path d="M.275 .04 A.195 .23 0 0 0 .275 .5 A.195 .23 0 0 0 .275 .04" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><path d="M.275 .5 A.225 .235 0 0 0 .275 .97 A.225 .235 0 0 0 .275 .5" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.275" cy="0.04" r="0.03" fill="#C0511D"/></g>
+      </svg>
+      <svg class="row" viewBox="0 0 729.6 165" width="100%" role="img" aria-label="writing line for 8">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="65" x2="729.6" y2="65" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="125" x2="729.6" y2="125" stroke="#16130F" stroke-width="2.6"/>
+        <g transform="translate(51.16 5) scale(120)"><path d="M.275 .04 A.195 .23 0 0 0 .275 .5 A.195 .23 0 0 0 .275 .04" fill="none" stroke="#C0511D" stroke-width="0.03" stroke-linecap="round" stroke-linejoin="round"/><path d="M.275 .5 A.225 .235 0 0 0 .275 .97 A.225 .235 0 0 0 .275 .5" fill="none" stroke="#C0511D" stroke-width="0.03" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.275" cy="0.04" r="0.03" fill="#C0511D"/></g>
+      </svg>
+      <svg class="row" viewBox="0 0 729.6 165" width="100%" role="img" aria-label="write 8">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="65" x2="729.6" y2="65" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="125" x2="729.6" y2="125" stroke="#16130F" stroke-width="2.6"/>
+      </svg>
+
+  <div class="label">Count them <span>&mdash; touch each one and say the number</span></div>
+  <div class="counter big"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+
+  <footer>
+    <span>Number 9 of 10</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Numbers &mdash; 8</span>
+  </footer>
+</div>
+
+<div class="page">
+  <header>
+    <div class="bigletter">9</div>
+    <div class="htext">
+      <h1>Trace and Write &mdash; Number 9</h1>
+      <p class="sub">Put your pencil on the dot and follow the dashes. Then write your own.</p>
+    </div>
+    <div class="nameline">Name</div>
+  </header>
+
+  <div class="label">Number 9</div>
+      <svg class="row" viewBox="0 0 729.6 165" width="100%" role="img" aria-label="writing line for 9">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="65" x2="729.6" y2="65" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="125" x2="729.6" y2="125" stroke="#16130F" stroke-width="2.6"/>
+        <g transform="translate(49.36 5) scale(120)"><path d="M.3 .04 A.24 .27 0 0 0 .3 .58 A.24 .27 0 0 0 .3 .04" fill="none" stroke="#C0511D" stroke-width="0.03" stroke-linecap="round" stroke-linejoin="round"/><path d="M.54 .31 V.97" fill="none" stroke="#C0511D" stroke-width="0.03" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.3" cy="0.04" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(189.68 5) scale(120)"><path d="M.3 .04 A.24 .27 0 0 0 .3 .58 A.24 .27 0 0 0 .3 .04" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><path d="M.54 .31 V.97" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.3" cy="0.04" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(330 5) scale(120)"><path d="M.3 .04 A.24 .27 0 0 0 .3 .58 A.24 .27 0 0 0 .3 .04" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><path d="M.54 .31 V.97" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.3" cy="0.04" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(470.32 5) scale(120)"><path d="M.3 .04 A.24 .27 0 0 0 .3 .58 A.24 .27 0 0 0 .3 .04" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><path d="M.54 .31 V.97" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.3" cy="0.04" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(610.64 5) scale(120)"><path d="M.3 .04 A.24 .27 0 0 0 .3 .58 A.24 .27 0 0 0 .3 .04" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><path d="M.54 .31 V.97" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.3" cy="0.04" r="0.03" fill="#C0511D"/></g>
+      </svg>
+      <svg class="row" viewBox="0 0 729.6 165" width="100%" role="img" aria-label="writing line for 9">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="65" x2="729.6" y2="65" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="125" x2="729.6" y2="125" stroke="#16130F" stroke-width="2.6"/>
+        <g transform="translate(49.36 5) scale(120)"><path d="M.3 .04 A.24 .27 0 0 0 .3 .58 A.24 .27 0 0 0 .3 .04" fill="none" stroke="#C0511D" stroke-width="0.03" stroke-linecap="round" stroke-linejoin="round"/><path d="M.54 .31 V.97" fill="none" stroke="#C0511D" stroke-width="0.03" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.3" cy="0.04" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(189.68 5) scale(120)"><path d="M.3 .04 A.24 .27 0 0 0 .3 .58 A.24 .27 0 0 0 .3 .04" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><path d="M.54 .31 V.97" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.3" cy="0.04" r="0.03" fill="#C0511D"/></g>
+        <g transform="translate(330 5) scale(120)"><path d="M.3 .04 A.24 .27 0 0 0 .3 .58 A.24 .27 0 0 0 .3 .04" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><path d="M.54 .31 V.97" fill="none" stroke="#B09A88" stroke-width="0.02" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.05 0.04"/><circle cx="0.3" cy="0.04" r="0.03" fill="#C0511D"/></g>
+      </svg>
+      <svg class="row" viewBox="0 0 729.6 165" width="100%" role="img" aria-label="writing line for 9">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="65" x2="729.6" y2="65" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="125" x2="729.6" y2="125" stroke="#16130F" stroke-width="2.6"/>
+        <g transform="translate(49.36 5) scale(120)"><path d="M.3 .04 A.24 .27 0 0 0 .3 .58 A.24 .27 0 0 0 .3 .04" fill="none" stroke="#C0511D" stroke-width="0.03" stroke-linecap="round" stroke-linejoin="round"/><path d="M.54 .31 V.97" fill="none" stroke="#C0511D" stroke-width="0.03" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.3" cy="0.04" r="0.03" fill="#C0511D"/></g>
+      </svg>
+      <svg class="row" viewBox="0 0 729.6 165" width="100%" role="img" aria-label="write 9">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="65" x2="729.6" y2="65" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="125" x2="729.6" y2="125" stroke="#16130F" stroke-width="2.6"/>
+      </svg>
+
+  <div class="label">Count them <span>&mdash; touch each one and say the number</span></div>
+  <div class="counter big"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+
+  <footer>
+    <span>Number 10 of 10</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Numbers &mdash; 9</span>
+  </footer>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="sheet-kind" content="worksheet">
+<title>Sudoku 9 × 9</title>
+<style>
+  @page { size: letter portrait; margin: 0.4in 0.45in; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  :root {
+    --ink: #16130F; --muted: #6B635A; --rule: #CFC3B2; --guide: #BCAE9C;
+    --accent: #C0511D; --tint: #F7EDE4; --slate: #2E5A78;
+  }
+  body {
+    font-family: Quicksand, 'URW Gothic', 'Century Gothic', sans-serif;
+    color: #000; background: #fff;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  .page { width: 100%; }
+  .page + .page { page-break-before: always; }
+  /* A screen ignores @page margins, so the preview drew every made sheet edge
+     to edge while the paper has 0.4in / 0.45in of white round it. The shelf's
+     sheets carry the same screen padding; print is untouched. */
+  @media screen { .page { padding: 0.4in 0.45in; } }
+  header {
+    display: flex; align-items: center; gap: 16px;
+    border-bottom: 3px solid var(--slate); padding-bottom: 7px; margin-bottom: 2px;
+  }
+  .bigletter { font-size: 38pt; font-weight: 700; line-height: 1; letter-spacing: .02em; }
+  .htext { flex: 1; }
+  h1 { font-size: 14pt; font-weight: 700; margin: 0 0 2px; }
+  .sub { font-size: 10pt; color: var(--muted); margin: 0; }
+  .nameline {
+    font-size: 9.5pt; color: var(--muted);
+    border-bottom: 1px solid var(--ink); width: 2in;
+    padding-bottom: 1px; align-self: flex-end;
+  }
+  .dir { font-size: 11pt; margin: 12px 0 10px; }
+  footer {
+    margin-top: 10px; padding-top: 6px; border-top: 1px solid var(--rule);
+    font-size: 8.5pt; color: var(--muted);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .brand { font-size: 7pt; letter-spacing: .04em; color: var(--accent); }
+  table { border-collapse: collapse; }
+  /* The parent-copy badge, lifted from the shelf's key pages so the two match
+     on paper. Tinted rather than outlined, because it has to be recognisable
+     at a glance from across a table with the page upside down. */
+  .badgeline {
+    display: inline-block; font-size: 8.5pt; font-weight: 700;
+    letter-spacing: .06em; text-transform: uppercase;
+    color: var(--accent); background: var(--tint);
+    border: 1.5px solid var(--accent); padding: 2px 8px; margin-bottom: 8px;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <div class="bigletter">9</div>
+    <div class="htext">
+      <h1>Sudoku 9 × 9</h1>
+      <p class="sub">Cross things off · 25 clues</p>
+    </div>
+    <div class="nameline">Name</div>
+  </header>
+  <p class="dir">Every row, every column and every box holds each symbol once.</p>
+  <div style="text-align:center;margin-top:10px"><svg viewBox="-2 -2 346 346" width="633.6" height="633.6" role="img" aria-label="a 9 by 9 sudoku"><rect x="0" y="0" width="38" height="38" fill="#F0EBE1"/><text x="19" y="27.36" font-size="20.900000000000002" text-anchor="middle" font-weight="700">7</text><rect x="190" y="38" width="38" height="38" fill="#F0EBE1"/><text x="209" y="65.36" font-size="20.900000000000002" text-anchor="middle" font-weight="700">1</text><rect x="266" y="38" width="38" height="38" fill="#F0EBE1"/><text x="285" y="65.36" font-size="20.900000000000002" text-anchor="middle" font-weight="700">6</text><rect x="114" y="76" width="38" height="38" fill="#F0EBE1"/><text x="133" y="103.36" font-size="20.900000000000002" text-anchor="middle" font-weight="700">2</text><rect x="304" y="76" width="38" height="38" fill="#F0EBE1"/><text x="323" y="103.36" font-size="20.900000000000002" text-anchor="middle" font-weight="700">9</text><rect x="0" y="114" width="38" height="38" fill="#F0EBE1"/><text x="19" y="141.36" font-size="20.900000000000002" text-anchor="middle" font-weight="700">5</text><rect x="190" y="114" width="38" height="38" fill="#F0EBE1"/><text x="209" y="141.36" font-size="20.900000000000002" text-anchor="middle" font-weight="700">7</text><rect x="266" y="114" width="38" height="38" fill="#F0EBE1"/><text x="285" y="141.36" font-size="20.900000000000002" text-anchor="middle" font-weight="700">3</text><rect x="38" y="152" width="38" height="38" fill="#F0EBE1"/><text x="57" y="179.36" font-size="20.900000000000002" text-anchor="middle" font-weight="700">6</text><rect x="190" y="152" width="38" height="38" fill="#F0EBE1"/><text x="209" y="179.36" font-size="20.900000000000002" text-anchor="middle" font-weight="700">4</text><rect x="304" y="152" width="38" height="38" fill="#F0EBE1"/><text x="323" y="179.36" font-size="20.900000000000002" text-anchor="middle" font-weight="700">1</text><rect x="0" y="190" width="38" height="38" fill="#F0EBE1"/><text x="19" y="217.36" font-size="20.900000000000002" text-anchor="middle" font-weight="700">2</text><rect x="228" y="190" width="38" height="38" fill="#F0EBE1"/><text x="247" y="217.36" font-size="20.900000000000002" text-anchor="middle" font-weight="700">8</text><rect x="0" y="228" width="38" height="38" fill="#F0EBE1"/><text x="19" y="255.36" font-size="20.900000000000002" text-anchor="middle" font-weight="700">6</text><rect x="152" y="228" width="38" height="38" fill="#F0EBE1"/><text x="171" y="255.36" font-size="20.900000000000002" text-anchor="middle" font-weight="700">7</text><rect x="190" y="228" width="38" height="38" fill="#F0EBE1"/><text x="209" y="255.36" font-size="20.900000000000002" text-anchor="middle" font-weight="700">3</text><rect x="266" y="228" width="38" height="38" fill="#F0EBE1"/><text x="285" y="255.36" font-size="20.900000000000002" text-anchor="middle" font-weight="700">4</text><rect x="38" y="266" width="38" height="38" fill="#F0EBE1"/><text x="57" y="293.36" font-size="20.900000000000002" text-anchor="middle" font-weight="700">3</text><rect x="190" y="266" width="38" height="38" fill="#F0EBE1"/><text x="209" y="293.36" font-size="20.900000000000002" text-anchor="middle" font-weight="700">9</text><rect x="228" y="266" width="38" height="38" fill="#F0EBE1"/><text x="247" y="293.36" font-size="20.900000000000002" text-anchor="middle" font-weight="700">1</text><rect x="266" y="266" width="38" height="38" fill="#F0EBE1"/><text x="285" y="293.36" font-size="20.900000000000002" text-anchor="middle" font-weight="700">7</text><rect x="0" y="304" width="38" height="38" fill="#F0EBE1"/><text x="19" y="331.36" font-size="20.900000000000002" text-anchor="middle" font-weight="700">9</text><rect x="76" y="304" width="38" height="38" fill="#F0EBE1"/><text x="95" y="331.36" font-size="20.900000000000002" text-anchor="middle" font-weight="700">4</text><rect x="266" y="304" width="38" height="38" fill="#F0EBE1"/><text x="285" y="331.36" font-size="20.900000000000002" text-anchor="middle" font-weight="700">5</text><rect x="304" y="304" width="38" height="38" fill="#F0EBE1"/><text x="323" y="331.36" font-size="20.900000000000002" text-anchor="middle" font-weight="700">3</text><line x1="0" y1="0" x2="0" y2="342" stroke="#C0511D" stroke-width="2.4"/><line x1="0" y1="0" x2="342" y2="0" stroke="#C0511D" stroke-width="2.4"/><line x1="38" y1="0" x2="38" y2="342" stroke="#C0511D" stroke-width="0.9"/><line x1="0" y1="38" x2="342" y2="38" stroke="#C0511D" stroke-width="0.9"/><line x1="76" y1="0" x2="76" y2="342" stroke="#C0511D" stroke-width="0.9"/><line x1="0" y1="76" x2="342" y2="76" stroke="#C0511D" stroke-width="0.9"/><line x1="114" y1="0" x2="114" y2="342" stroke="#C0511D" stroke-width="2.4"/><line x1="0" y1="114" x2="342" y2="114" stroke="#C0511D" stroke-width="2.4"/><line x1="152" y1="0" x2="152" y2="342" stroke="#C0511D" stroke-width="0.9"/><line x1="0" y1="152" x2="342" y2="152" stroke="#C0511D" stroke-width="0.9"/><line x1="190" y1="0" x2="190" y2="342" stroke="#C0511D" stroke-width="0.9"/><line x1="0" y1="190" x2="342" y2="190" stroke="#C0511D" stroke-width="0.9"/><line x1="228" y1="0" x2="228" y2="342" stroke="#C0511D" stroke-width="2.4"/><line x1="0" y1="228" x2="342" y2="228" stroke="#C0511D" stroke-width="2.4"/><line x1="266" y1="0" x2="266" y2="342" stroke="#C0511D" stroke-width="0.9"/><line x1="0" y1="266" x2="342" y2="266" stroke="#C0511D" stroke-width="0.9"/><line x1="304" y1="0" x2="304" y2="342" stroke="#C0511D" stroke-width="0.9"/><line x1="0" y1="304" x2="342" y2="304" stroke="#C0511D" stroke-width="0.9"/><line x1="342" y1="0" x2="342" y2="342" stroke="#C0511D" stroke-width="2.4"/><line x1="0" y1="342" x2="342" y2="342" stroke="#C0511D" stroke-width="2.4"/></svg></div>
+  <footer>
+    <span>one answer only</span>
+    <span class="brand">KITCHEN TABLE</span>
+    <span>25 clues</span>
+  </footer>
+</div>
+
+</body>
+</html>

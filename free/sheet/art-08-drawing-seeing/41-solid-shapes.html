@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="sheet-kind" content="worksheet">
+<title>Solid Shapes — Art</title>
+<style>
+  :root { --font: Georgia, "Times New Roman", serif; }
+
+  /* Page margins live HERE only — body padding stays 0 for print so the two
+     don't stack and eat the sheet. */
+  @page { size: letter portrait; margin: 0.45in 0.5in; }
+
+  /*
+   * THE PALETTE. The same one the shop wears (kitchen-table/BRAND.md): warm
+   * near-black ink, one accent, pine kept back for the answer key.
+   *
+   * WHY A SHEET HAS COLOR AT ALL. Every sheet was pure grayscale — #000 rules,
+   * #333 subtitles, #f0f0f0 boxes — which is what you get by never deciding.
+   * The paper is the product and it looked like a fax. A printer set to
+   * grayscale, or one that has no color to give, renders all of this as the
+   * greys it already had, so nothing below costs a parent anything they were
+   * not already spending.
+   *
+   * WHAT STAYS BLACK, ON PURPOSE:
+   *   - anything drawn to be written on (rules, name lines, answer boxes)
+   *   - anything drawn to be traced or colored in (line art, letter guides)
+   *   - the confidence rings, which have to survive a mono laser
+   * Color marks the sheet's own furniture — its rule, its numbering, its
+   * boxes — and never the part a child puts a pencil through.
+   */
+  :root {
+    --ink:    #16130F;
+    --muted:  #6B635A;
+    --rule:   #CFC3B2;
+    --guide:  #BCAE9C;
+    --accent: #C0511D;
+    --tint:   #F7EDE4;
+    --slate:  #2E5A78;
+    --tintslate: #E9EFF4;
+    --deep:   #2C4A45;
+    --tintdeep: #ECF1EF;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font);
+    color: #000; background: #fff;
+    font-size: 12pt; line-height: 1.3;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+
+  /* ORDER MATTERS. This generic rule must come BEFORE the @media screen block:
+     same specificity, so whichever is declared last wins. With it after, the
+     on-screen preview stretches to the viewport instead of 8.5in — print is
+     unaffected, but the proof you check before printing is wrong. */
+  .page { width: 100%; }
+  .page + .page { page-break-before: always; }
+
+  @media screen {
+    body { padding: 0.5in; background: #ddd; }
+    .page {
+      background: #fff; padding: 0.45in 0.5in;
+      width: 8.5in; min-height: 11in;
+      margin: 0 auto 24px; box-shadow: 0 2px 10px rgba(0,0,0,.3);
+    }
+  }
+
+  /* ------------------------------------------------------------- header */
+  header { border-bottom: 3px double var(--accent); padding-bottom: 6px; }
+  header.cont { border-bottom: 1px solid var(--rule); }
+  h1 { font-size: 16pt; margin: 0 0 1px; letter-spacing: .01em; }
+  .sub { font-size: 10pt; font-style: italic; color: var(--muted); margin: 0; }
+
+  .nameline { display: flex; gap: 26px; font-size: 10.5pt; margin: 11px 0 12px; }
+  .nameline span { flex: 1; border-bottom: 1px solid var(--ink); padding-bottom: 1px; }
+  .nameline span.short { flex: 0 0 1.9in; }
+
+  .directions {
+    font-size: 10.5pt; line-height: 1.35;
+    background: var(--tint); border-left: 4px solid var(--accent);
+    padding: 7px 10px; margin: 12px 0 14px;
+  }
+  .directions b { letter-spacing: .03em; }
+  .tip { font-style: italic; margin-top: 3px; }
+
+  /* ------------------------------------------------- problems and grids */
+  .grid { display: grid; gap: 13px 16px; margin-top: 4px; }
+  .prob { page-break-inside: avoid; display: flex; gap: 5px; align-items: flex-start; }
+  .pn { font-weight: bold; font-size: 11pt; min-width: .28in; flex: 0 0 auto; color: var(--accent); }
+  .pbody { flex: 1; min-width: 0; }
+
+  /* Digits need lining figures and even widths whatever the body font is. */
+  .num, .vert, .horiz { font-family: "Trebuchet MS", "Segoe UI", Tahoma, Verdana, sans-serif; font-variant-numeric: lining-nums tabular-nums; }
+
+  /* A stacked column algorithm.
+     Two grid columns — operator, then digits — because a floated or absolutely
+     positioned operator overlaps the digits as soon as the numbers get wide,
+     and "324" with a + sitting on the 3 is unreadable. The grid also lets the
+     rule under the last operand span BOTH columns, which is how it is written
+     by hand. The rule is heavy: it is the line you write the answer beneath. */
+  .vert {
+    display: inline-grid; grid-template-columns: auto auto;
+    font-size: 15pt; line-height: 1.3; text-align: right;
+  }
+  .vert > span { padding: 0 0 1px 0; }
+  .vert .op { text-align: left; padding-right: .16in; }
+  .vert .last { border-bottom: 2.5px solid var(--ink); padding-bottom: 3px; }
+  .vert .ans { height: .4in; }
+  /* Partial-products working, for 2-digit x 1-digit before the short method. */
+  .vert .part { font-size: 11pt; color: var(--muted); }
+  /* A row of worked examples that fade — see lib/formats.js faded(). The
+     caption is what makes the fade legible: without it the third one looks like
+     a question somebody forgot to number. */
+  .egrow { display: flex; gap: .34in; align-items: flex-start; margin: 0 0 4px; }
+  .eg { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; }
+  .eglab { font-size: 8.5pt; color: var(--slate); letter-spacing: .02em; }
+
+  /* The carried digits. Small and grey so the sum still reads as the sum, and
+     tight to the row below it so a carry sits ON the column it goes into. */
+  .vert .carry { font-size: 9pt; color: var(--slate); line-height: 1; padding: 0 0 1px 0; }
+
+  .horiz { font-size: 14pt; white-space: nowrap; }
+
+  /* Row numbers in a word list. Gray and small: they are there so a list can be
+     dictated ("number seven") and marked without counting down the page, and
+     they must not compete with the word itself. */
+  .wn { color: var(--muted); font-size: 9pt; }
+
+  /* The box an answer goes in. inline-block so it can sit mid-sentence. */
+  .abox {
+    display: inline-block; border: 1.6px solid var(--slate); border-radius: 3px;
+    vertical-align: middle; margin: 0 3px; position: relative; background: #fff;
+  }
+  /* Scoped to the box: as a bare ".alab" it pinned any generator's own .alab
+     to the bottom of the page (life-07-signs-and-forms 40, 2026-09-24). */
+  .abox > .alab {
+    position: absolute; bottom: 1px; left: 0; right: 0;
+    text-align: center; font-size: 7pt; color: var(--muted); font-style: italic;
+  }
+
+  /* Confidence marks. The rings are drawn with a border and a gradient rather
+     than an SVG so they stay inline with the question text at any font size,
+     and print black on a mono laser without relying on a background image. */
+  .conf { float: right; margin: 2px 0 0 8px; white-space: nowrap; }
+  .cring {
+    display: inline-block; width: 11px; height: 11px; margin-left: 4px;
+    border: 1.4px solid var(--slate); border-radius: 50%; vertical-align: middle;
+  }
+  .cring-full { background: var(--accent); }
+  .cring-half { background: linear-gradient(90deg, var(--accent) 50%, #fff 50%); }
+  .cring-none { background: #fff; }
+  ol.qs.hasconf li { overflow: hidden; }
+
+  .conflegend {
+    border: 1.2px solid var(--rule); border-radius: 4px;
+    padding: 3px 8px; margin: 0 0 7px;
+    font-size: 8.5pt; color: var(--muted); display: flex; gap: 14px; align-items: center;
+  }
+  .conftitle { font-weight: 700; color: var(--ink); }
+  .confitem { white-space: nowrap; }
+
+  .work {
+    border: 1.4px dashed var(--rule); border-radius: 4px;
+    margin: 6px 0 2px; position: relative;
+  }
+  /* The label S.work() puts in the box: a DIRECT child only. As ".work span"
+     it also caught every span inside any generator's own .work content and
+     stacked them all at the top-left corner (math-11-grade6 47, 2026-09-23). */
+  .work > span {
+    position: absolute; top: 3px; left: 6px;
+    font-size: 8pt; color: var(--muted); font-style: italic;
+  }
+
+  /* ------------------------------------------------------ writing lines */
+  /* Primary rule: solid top, dashed midline, heavy baseline. Capitals reach
+     the top line, lowercase bodies sit under the dashed one. */
+  .write {
+    position: relative; height: 0.375in;
+    margin: 6px 0 0 .3in;
+    border-top: 1px solid var(--rule); border-bottom: 2px solid var(--ink);
+  }
+  .write.flush { margin-left: 0; }
+  .write + .write { margin-top: .17in; }
+  .write::after {
+    content: ""; position: absolute; left: 0; right: 0; top: 50%;
+    border-top: 1px dashed var(--guide);
+  }
+
+  /* ------------------------------------------------------- question list */
+  ol.qs { margin: 0; padding: 0 0 0 .34in; }
+  ol.qs li { margin-bottom: 13px; page-break-inside: avoid; }
+  ol.qs li::marker { font-weight: bold; font-size: 11pt; color: var(--accent); }
+  .qt { display: block; }
+
+  .mcq { display: grid; gap: 3px 14px; margin: 5px 0 2px .12in; font-size: 11pt; }
+  .opt { white-space: nowrap; }
+
+  /* -------------------------------------------------------------- tables */
+  .tbl { border-collapse: collapse; margin: 8px 0; font-size: 11pt; width: 100%; }
+  .tbl th, .tbl td { border: 1.4px solid var(--ink); padding: 5px 8px; text-align: left; }
+  .tbl th { color: var(--slate); }
+  .tbl th { background: var(--tint); font-size: 10pt; letter-spacing: .02em; }
+  .tbl td.blank { height: .34in; }
+  .tbl.narrow { width: auto; }
+  .tbl.center td, .tbl.center th { text-align: center; }
+
+  /* ------------------------------------------------------------ passages */
+  .passage {
+    border: 1.5px solid var(--slate); border-radius: 4px;
+    padding: 11px 14px; margin-bottom: 12px;
+    font-size: 11.5pt; line-height: 1.55;
+  }
+  .passage h2 { font-size: 13pt; margin: 0 0 6px; color: var(--deep); }
+  .passage p { margin: 0 0 8px; }
+  .passage p:last-child { margin-bottom: 0; }
+  .passage .byline { font-size: 9.5pt; font-style: italic; color: var(--muted); margin-bottom: 8px; }
+  /* Numbered paragraphs, so a question can say "in paragraph 2". */
+  .passage p.np { position: relative; padding-left: .3in; }
+  .passage p.np::before {
+    content: attr(data-p); position: absolute; left: 0; top: 0;
+    font-size: 9pt; color: var(--accent); font-weight: bold;
+  }
+
+  .wordbank {
+    border: 1.5px dashed var(--slate); border-radius: 4px;
+    padding: 8px 12px; margin: 10px 0 12px;
+    font-size: 11.5pt; text-align: center;
+  }
+  .wordbank b { display: block; font-size: 9.5pt; letter-spacing: .06em;
+    text-transform: uppercase; margin-bottom: 4px; color: var(--accent); }
+  .wordbank span { display: inline-block; margin: 2px 11px; }
+
+  .note {
+    border-left: 4px solid var(--deep); background: var(--tintdeep);
+    padding: 7px 11px; margin: 10px 0; font-size: 10.5pt;
+  }
+  .note b { letter-spacing: .02em; }
+
+  /* -------------------------------------------------------------- footer */
+  /* THE WORDMARK SITS IN THE FOOTER THAT WAS ALREADY THERE, so it costs no
+     height at all — a sheet that fitted before fits now. Upright where the rest
+     of the line is italic, and a size down: it is a signature, not a message,
+     and it must never compete with "Score: ___ / 10". */
+  .brand { font-style: normal; font-size: 7.5pt; letter-spacing: .04em;
+    color: var(--accent); align-self: center; }
+
+  footer {
+    margin-top: 14px; padding-top: 6px; border-top: 1px solid var(--rule);
+    font-size: 9pt; font-style: italic; color: var(--muted);
+    display: flex; justify-content: space-between;
+  }
+
+  /* ---------------------------------------------------------- answer key */
+  .keybadge {
+    display: inline-block; border: 2px solid var(--deep); color: var(--deep); padding: 2px 9px;
+    font-size: 9.5pt; font-weight: bold; letter-spacing: .08em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .key .why {
+    display: block; font-size: 9pt; font-style: italic; color: var(--muted); margin-top: 1px;
+  }
+  /* Highlight rather than underline: <u> in a key marks WHAT CHANGED, and an
+     underline under a comma is invisible. */
+  .key u { text-decoration: none; background: var(--tint); padding: 0 2px; font-weight: bold; }
+  .keygrid .pbody { font-family: "Trebuchet MS", "Segoe UI", Tahoma, Verdana, sans-serif; font-size: 12pt; }
+  /* A key's pictures scale to their column: at 1fr a wide drawing pushed a
+     three-column key 92px off the paper (art-04-drawing 10, 2026-09-24). */
+  .keygrid svg { max-width: 100%; height: auto; }
+  .keylist .qt { font-weight: normal; }
+
+  /*
+   * The guide page. Four lines per question, and the ASK line is the one that
+   * gets used at the table, so it is the one with a rule beside it — a parent
+   * scanning this page in ten seconds should land on the follow-up question
+   * and nothing else.
+   */
+  .guide { padding-left: .3in; }
+  .guide li { margin-bottom: 11px; page-break-inside: avoid; }
+  .guide .gq { font-weight: bold; font-size: 11pt; margin-bottom: 3px; }
+  /* 9pt, matching the key's own why line, because the guide page is the
+     binding constraint on every open sheet: four lines per question against a
+     key's one, and at 10pt a sheet with seven questions ran onto a second
+     side. Found by measuring, not chosen. (No backticks in here — this CSS
+     lives inside a template literal and one would close it.) */
+  .guide .glook, .guide .gthin, .guide .gstrong {
+    font-size: 9pt; line-height: 1.3; margin-top: 1px;
+  }
+  .guide .gthin { color: var(--muted); }
+  .guide .gstrong { color: var(--muted); font-style: italic; }
+  .guide .gask {
+    font-size: 9.5pt; line-height: 1.3; margin-top: 3px;
+    border-left: 3px solid var(--slate); padding-left: 7px;
+  }
+  .key .qs li { margin-bottom: 9px; }
+
+  /*
+   * INLINE-BLOCK, NOT BLOCK, AND THIS WAS WRONG FOR A LONG TIME. A block-level
+   * svg ignores text-align: center on its parent and sits flush left — so 117
+   * sheets across 35 packs said "centre this diagram" and got a left-aligned
+   * one. Twenty-five of them were origami and paper-plane fold sequences, where
+   * the whole page is diagrams.
+   *
+   * Nobody spotted it because a left-flush diagram looks deliberate; it only
+   * reads as wrong next to a centered one, and no sheet has both.
+   *
+   * inline-block makes text-align do what every one of those authors meant,
+   * and leaves a diagram in a left-aligned container exactly where it was.
+   * vertical-align: top kills the baseline gap that inline elements otherwise
+   * leave underneath them, which would have pushed long pages over.
+   */
+  svg { display: inline-block; vertical-align: top; }
+  svg.inline { vertical-align: middle; }
+
+  .page.z1 svg { zoom: 1.12; max-width: 89.3%; }
+  .page.z2 svg { zoom: 1.24; max-width: 80.6%; }
+  .page.z3 svg { zoom: 1.36; max-width: 73.5%; }
+  .page.z4 svg { zoom: 1.48; max-width: 67.6%; }
+  .page.z5 svg { zoom: 1.60; max-width: 62.5%; }
+  .page.z6 svg { zoom: 1.72; max-width: 58.1%; }
+  .page.z7 svg { zoom: 1.84; max-width: 54.3%; }
+  .page.z8 svg { zoom: 1.96; max-width: 51.0%; }
+  .page.g1 .tbl td { font-size: 12pt; padding-top: 7px; padding-bottom: 7px; line-height: 1.38; }
+  .page.g1 .tbl th { font-size: 10.5pt; padding-top: 6px; padding-bottom: 6px; }
+  .page.g1 .tbl td.blank { height: 0.45999999999999996in; }
+  .page.g1 .write + .write { margin-top: 0.25in; }
+  .page.g1 ol.qs li { margin-bottom: 19px; }
+  .page.g1 ol.qs .qt { font-size: 12pt; }
+  .page.g2 .tbl td { font-size: 12.5pt; padding-top: 12px; padding-bottom: 12px; line-height: 1.38; }
+  .page.g2 .tbl th { font-size: 10.5pt; padding-top: 6px; padding-bottom: 6px; }
+  .page.g2 .tbl td.blank { height: 0.62in; }
+  .page.g2 .write + .write { margin-top: 0.33in; }
+  .page.g2 ol.qs li { margin-bottom: 25px; }
+  .page.g2 ol.qs .qt { font-size: 12.5pt; }
+  .page.g3 .tbl td { font-size: 13pt; padding-top: 17px; padding-bottom: 17px; line-height: 1.38; }
+  .page.g3 .tbl th { font-size: 10.5pt; padding-top: 6px; padding-bottom: 6px; }
+  .page.g3 .tbl td.blank { height: 0.78in; }
+  .page.g3 .write + .write { margin-top: 0.41in; }
+  .page.g3 ol.qs li { margin-bottom: 31px; }
+  .page.g3 ol.qs .qt { font-size: 13pt; }
+  .page.g4 .tbl td { font-size: 13.5pt; padding-top: 22px; padding-bottom: 22px; line-height: 1.38; }
+  .page.g4 .tbl th { font-size: 10.5pt; padding-top: 6px; padding-bottom: 6px; }
+  .page.g4 .tbl td.blank { height: 0.94in; }
+  .page.g4 .write + .write { margin-top: 0.45in; }
+  .page.g4 ol.qs li { margin-bottom: 37px; }
+  .page.g4 ol.qs .qt { font-size: 13.5pt; }
+  .page.g5 .tbl td { font-size: 14pt; padding-top: 27px; padding-bottom: 27px; line-height: 1.38; }
+  .page.g5 .tbl th { font-size: 10.5pt; padding-top: 6px; padding-bottom: 6px; }
+  .page.g5 .tbl td.blank { height: 1.1in; }
+  .page.g5 .write + .write { margin-top: 0.45in; }
+  .page.g5 ol.qs li { margin-bottom: 43px; }
+  .page.g5 ol.qs .qt { font-size: 14pt; }
+  .page.g6 .tbl td { font-size: 14.5pt; padding-top: 32px; padding-bottom: 32px; line-height: 1.38; }
+  .page.g6 .tbl th { font-size: 10.5pt; padding-top: 6px; padding-bottom: 6px; }
+  .page.g6 .tbl td.blank { height: 1.26in; }
+  .page.g6 .write + .write { margin-top: 0.45in; }
+  .page.g6 ol.qs li { margin-bottom: 49px; }
+  .page.g6 ol.qs .qt { font-size: 14.5pt; }
+  .pair { display: flex; gap: .18in; align-items: flex-start; justify-content: center;
+    margin: .06in 0; }
+  .pair figure { margin: 0; text-align: center; }
+  .pair figcaption { font-size: 9.5pt; color: var(--muted); margin-top: 2px; }
+  .cap { font-size: 9.5pt; color: var(--muted); text-align: center; margin-top: 2px; }
+  .rules { border: 1.5px solid var(--accent); border-radius: 8px; padding: .09in .13in;
+    margin: .08in 0; font-size: 10.5pt; line-height: 1.45; }
+  .steps { font-size: 10.5pt; line-height: 1.5; margin: .06in 0 .04in; padding-left: .22in; }
+  .steps li { margin: .03in 0; }
+  .look { font-size: 10.5pt; line-height: 1.45; margin: .08in 0 0; }
+
+</style>
+</head>
+<body>
+
+<div class="page g6 z6">
+  <header>
+    
+    <h1>Solid Shapes</h1>
+    <p class="sub">Art &middot; Drawing &middot; Page 1 of 2</p>
+  </header>
+  <div class="nameline">
+    <span>Name</span>
+    <span class="short">Date</span>
+  </div>
+  <div class="directions">
+    <b>DIRECTIONS:</b> Light from the upper left. Shade the empty solids like the finished ones, in lines that follow the surface.
+  </div>
+
+
+  <div class="rules"><b>Flat: the dark starts at a corner, all at once. Round: it arrives
+  <i>gradually</i>.</b></div>
+
+  <div class="pair">
+    <figure><svg class="inline" viewBox="0 0 190 160" width="190" height="160" role="img" aria-label="a shaded cube" xmlns="http://www.w3.org/2000/svg"><line x1="10" y1="22" x2="36" y2="40" stroke="#16130F" stroke-width="1.6" stroke-linecap="round"/><path d="M36,40 l-7,-2 l3,-5 z" fill="#16130F" stroke="none"/><text x="12" y="16" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="9.5" font-weight="normal" text-anchor="start" fill="#6B635A">light</text><line x1="130.75" y1="68" x2="130.75" y2="132" stroke="#16130F" stroke-width="0.9" stroke-linecap="round"/><line x1="133.5" y1="66" x2="133.5" y2="130" stroke="#16130F" stroke-width="0.9" stroke-linecap="round"/><line x1="136.25" y1="64" x2="136.25" y2="128" stroke="#16130F" stroke-width="0.9" stroke-linecap="round"/><line x1="139" y1="62" x2="139" y2="126" stroke="#16130F" stroke-width="0.9" stroke-linecap="round"/><line x1="141.75" y1="60" x2="141.75" y2="124" stroke="#16130F" stroke-width="0.9" stroke-linecap="round"/><line x1="144.5" y1="58" x2="144.5" y2="122" stroke="#16130F" stroke-width="0.9" stroke-linecap="round"/><line x1="147.25" y1="56" x2="147.25" y2="120" stroke="#16130F" stroke-width="0.9" stroke-linecap="round"/><line x1="65" y1="83" x2="77" y2="71" stroke="#C0511D" stroke-width="0.9" stroke-linecap="round"/><line x1="65" y1="95" x2="89" y2="71" stroke="#C0511D" stroke-width="0.9" stroke-linecap="round"/><line x1="65" y1="107" x2="101" y2="71" stroke="#C0511D" stroke-width="0.9" stroke-linecap="round"/><line x1="65" y1="119" x2="113" y2="71" stroke="#C0511D" stroke-width="0.9" stroke-linecap="round"/><line x1="65" y1="131" x2="125" y2="71" stroke="#C0511D" stroke-width="0.9" stroke-linecap="round"/><line x1="75" y1="133" x2="127" y2="81" stroke="#C0511D" stroke-width="0.9" stroke-linecap="round"/><line x1="87" y1="133" x2="127" y2="93" stroke="#C0511D" stroke-width="0.9" stroke-linecap="round"/><line x1="99" y1="133" x2="127" y2="105" stroke="#C0511D" stroke-width="0.9" stroke-linecap="round"/><line x1="111" y1="133" x2="127" y2="117" stroke="#C0511D" stroke-width="0.9" stroke-linecap="round"/><line x1="123" y1="133" x2="127" y2="129" stroke="#C0511D" stroke-width="0.9" stroke-linecap="round"/><path d="M64,70 L86,54 L150,54 L128,70 Z" fill="none" stroke="#C0511D" stroke-width="1.9"/><path d="M128,70 L150,54 L150,118 L128,134 Z" fill="none" stroke="#C0511D" stroke-width="1.9"/><rect x="64" y="70" width="64" height="64" rx="0" fill="none" stroke="#16130F" stroke-width="1.9"/></svg><figcaption>1. Done for you: the cube. Top lightest, front in the middle, side dark.</figcaption></figure>
+    <figure><svg class="inline" viewBox="0 0 190 160" width="190" height="160" role="img" aria-label="a shaded cylinder" xmlns="http://www.w3.org/2000/svg"><line x1="10" y1="22" x2="36" y2="40" stroke="#16130F" stroke-width="1.6" stroke-linecap="round"/><path d="M36,40 l-7,-2 l3,-5 z" fill="#16130F" stroke="none"/><text x="12" y="16" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="9.5" font-weight="normal" text-anchor="start" fill="#6B635A">light</text><ellipse cx="107" cy="40" rx="29" ry="10.545454545454545" fill="none" stroke="#C0511D" stroke-width="1.9"/><line x1="78" y1="40" x2="78" y2="124" stroke="#16130F" stroke-width="1.9" stroke-linecap="round"/><line x1="136" y1="40" x2="136" y2="124" stroke="#16130F" stroke-width="1.9" stroke-linecap="round"/><path d="M78.0,124.0 L78.2,125.4 L79.0,126.7 L80.2,128.0 L81.9,129.3 L84.0,130.4 L86.5,131.5 L89.3,132.4 L92.5,133.1 L95.9,133.7 L99.5,134.2 L103.2,134.5 L107.0,134.5 L110.8,134.5 L114.5,134.2 L118.1,133.7 L121.5,133.1 L124.7,132.4 L127.5,131.5 L130.0,130.4 L132.1,129.3 L133.8,128.0 L135.0,126.7 L135.8,125.4 L136.0,124.0" fill="none" stroke="#C0511D" stroke-width="1.9"/><line x1="117.15" y1="49.88" x2="117.15" y2="133.88" stroke="#16130F" stroke-width="0.9" stroke-linecap="round"/><line x1="122.95" y1="48.81" x2="122.95" y2="132.81" stroke="#16130F" stroke-width="0.9" stroke-linecap="round"/><line x1="127.3" y1="47.53" x2="127.3" y2="131.53" stroke="#16130F" stroke-width="0.9" stroke-linecap="round"/><line x1="130.49" y1="46.18" x2="130.49" y2="130.18" stroke="#16130F" stroke-width="0.9" stroke-linecap="round"/><line x1="133.1" y1="44.6" x2="133.1" y2="128.6" stroke="#16130F" stroke-width="0.9" stroke-linecap="round"/><line x1="134.84" y1="42.95" x2="134.84" y2="126.95" stroke="#16130F" stroke-width="0.9" stroke-linecap="round"/><line x1="81.48" y1="45.06" x2="81.48" y2="129.06" stroke="#16130F" stroke-width="0.7" stroke-linecap="round"/></svg><figcaption>2. Done for you: the cylinder. The dark slides in — no line where it starts.</figcaption></figure>
+  </div>
+
+  <div class="pair">
+    <figure><svg class="inline" viewBox="0 0 190 160" width="190" height="160" role="img" aria-label="an unshaded cube" xmlns="http://www.w3.org/2000/svg"><path d="M64,70 L86,54 L150,54 L128,70 Z" fill="none" stroke="#C0511D" stroke-width="1.9"/><path d="M128,70 L150,54 L150,118 L128,134 Z" fill="none" stroke="#C0511D" stroke-width="1.9"/><rect x="64" y="70" width="64" height="64" rx="0" fill="none" stroke="#16130F" stroke-width="1.9"/></svg><figcaption>3. Your turn. Same light &mdash; upper left.</figcaption></figure>
+    <figure><svg class="inline" viewBox="0 0 190 160" width="190" height="160" role="img" aria-label="an unshaded cone" xmlns="http://www.w3.org/2000/svg"><line x1="107" y1="34" x2="70" y2="126" stroke="#16130F" stroke-width="1.9" stroke-linecap="round"/><line x1="107" y1="34" x2="144" y2="126" stroke="#16130F" stroke-width="1.9" stroke-linecap="round"/><path d="M70.0,126.0 L70.3,127.5 L71.3,128.9 L72.8,130.4 L75.0,131.7 L77.6,132.9 L80.8,134.1 L84.5,135.0 L88.5,135.9 L92.8,136.5 L97.4,137.0 L102.2,137.3 L107.0,137.4 L111.8,137.3 L116.6,137.0 L121.2,136.5 L125.5,135.9 L129.5,135.0 L133.2,134.1 L136.4,132.9 L139.0,131.7 L141.2,130.4 L142.7,128.9 L143.7,127.5 L144.0,126.0" fill="none" stroke="#C0511D" stroke-width="1.9"/></svg><figcaption>4. The cone: its lines fan out from the point, because the surface does.</figcaption></figure>
+  </div>
+
+
+  <footer>
+    <span>More overleaf &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Solid Shapes</span>
+  </footer>
+</div>
+
+<div class="page g6 z5">
+  <header class="cont">
+    
+    <h1>Solid Shapes</h1>
+    <p class="sub">Art &middot; Drawing &middot; Page 2 of 2</p>
+  </header>
+
+
+
+
+  <p class="look"><b>Now stack them.</b> A lighthouse is a cylinder wearing a cone. Shade the whole
+  thing with the light still at the upper left &mdash; both parts must agree about where the dark side
+  is, or the tower looks broken in the middle.</p>
+
+  <div class="pair">
+    <figure><svg class="inline" viewBox="0 0 200 210" width="200" height="210" role="img" aria-label="a lighthouse to shade" xmlns="http://www.w3.org/2000/svg"><ellipse cx="98" cy="96" rx="28" ry="10.181818181818182" fill="none" stroke="#C0511D" stroke-width="1.9"/><line x1="70" y1="96" x2="70" y2="192" stroke="#16130F" stroke-width="1.9" stroke-linecap="round"/><line x1="126" y1="96" x2="126" y2="192" stroke="#16130F" stroke-width="1.9" stroke-linecap="round"/><path d="M70.0,192.0 L70.2,193.3 L71.0,194.6 L72.1,195.9 L73.8,197.1 L75.8,198.2 L78.2,199.2 L81.0,200.1 L84.0,200.8 L87.3,201.4 L90.8,201.8 L94.3,202.1 L98.0,202.2 L101.7,202.1 L105.2,201.8 L108.7,201.4 L112.0,200.8 L115.0,200.1 L117.8,199.2 L120.2,198.2 L122.2,197.1 L123.9,195.9 L125.0,194.6 L125.8,193.3 L126.0,192.0" fill="none" stroke="#C0511D" stroke-width="1.9"/><line x1="98" y1="40" x2="60" y2="92" stroke="#16130F" stroke-width="1.9" stroke-linecap="round"/><line x1="98" y1="40" x2="136" y2="92" stroke="#16130F" stroke-width="1.9" stroke-linecap="round"/><path d="M60.0,92.0 L60.3,93.5 L61.3,95.0 L62.9,96.5 L65.1,97.8 L67.9,99.1 L71.1,100.3 L74.9,101.3 L79.0,102.1 L83.5,102.8 L88.2,103.3 L93.0,103.6 L98.0,103.7 L103.0,103.6 L107.8,103.3 L112.5,102.8 L117.0,102.1 L121.1,101.3 L124.9,100.3 L128.1,99.1 L130.9,97.8 L133.1,96.5 L134.7,95.0 L135.7,93.5 L136.0,92.0" fill="none" stroke="#C0511D" stroke-width="1.9"/></svg><figcaption>5. One light, two surfaces. Make them agree.</figcaption></figure>
+    <figure><svg class="inline" viewBox="0 0 200 210" width="200" height="210" role="img" aria-label="a tower to shade" xmlns="http://www.w3.org/2000/svg"><path d="M56,120 L78,104 L134,104 L112,120 Z" fill="none" stroke="#C0511D" stroke-width="1.9"/><path d="M112,120 L134,104 L134,160 L112,176 Z" fill="none" stroke="#C0511D" stroke-width="1.9"/><rect x="56" y="120" width="56" height="56" rx="0" fill="none" stroke="#16130F" stroke-width="1.9"/><ellipse cx="84" cy="52" rx="22" ry="8" fill="none" stroke="#C0511D" stroke-width="1.9"/><line x1="62" y1="52" x2="62" y2="116" stroke="#16130F" stroke-width="1.9" stroke-linecap="round"/><line x1="106" y1="52" x2="106" y2="116" stroke="#16130F" stroke-width="1.9" stroke-linecap="round"/><path d="M62.0,116.0 L62.2,117.0 L62.7,118.1 L63.7,119.1 L64.9,120.0 L66.5,120.9 L68.4,121.7 L70.6,122.3 L73.0,122.9 L75.6,123.4 L78.3,123.7 L81.1,123.9 L84.0,124.0 L86.9,123.9 L89.7,123.7 L92.4,123.4 L95.0,122.9 L97.4,122.3 L99.6,121.7 L101.5,120.9 L103.1,120.0 L104.3,119.1 L105.3,118.1 L105.8,117.0 L106.0,116.0" fill="none" stroke="#C0511D" stroke-width="1.9"/></svg><figcaption>6. A round tower on a square base. Where does each dark side go?</figcaption></figure>
+  </div>
+
+  <ol class="qs" start="7"><li><span class="qt">Find something in the room that is a cylinder. Which side of it is darkest right now, and what does that tell you about where the light is?</span><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+
+  <footer>
+    <span>Answer key overleaf</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Solid Shapes</span>
+  </footer>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="sheet-kind" content="form">
+<title>Mandalas — Quiet Pages</title>
+<style>
+  :root { --font: Georgia, "Times New Roman", serif; }
+
+  /* Page margins live HERE only — body padding stays 0 for print so the two
+     don't stack and eat the sheet. */
+  @page { size: letter portrait; margin: 0.45in 0.5in; }
+
+  /*
+   * THE PALETTE. The same one the shop wears (kitchen-table/BRAND.md): warm
+   * near-black ink, one accent, pine kept back for the answer key.
+   *
+   * WHY A SHEET HAS COLOR AT ALL. Every sheet was pure grayscale — #000 rules,
+   * #333 subtitles, #f0f0f0 boxes — which is what you get by never deciding.
+   * The paper is the product and it looked like a fax. A printer set to
+   * grayscale, or one that has no color to give, renders all of this as the
+   * greys it already had, so nothing below costs a parent anything they were
+   * not already spending.
+   *
+   * WHAT STAYS BLACK, ON PURPOSE:
+   *   - anything drawn to be written on (rules, name lines, answer boxes)
+   *   - anything drawn to be traced or colored in (line art, letter guides)
+   *   - the confidence rings, which have to survive a mono laser
+   * Color marks the sheet's own furniture — its rule, its numbering, its
+   * boxes — and never the part a child puts a pencil through.
+   */
+  :root {
+    --ink:    #16130F;
+    --muted:  #6B635A;
+    --rule:   #CFC3B2;
+    --guide:  #BCAE9C;
+    --accent: #C0511D;
+    --tint:   #F7EDE4;
+    --slate:  #2E5A78;
+    --tintslate: #E9EFF4;
+    --deep:   #2C4A45;
+    --tintdeep: #ECF1EF;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font);
+    color: #000; background: #fff;
+    font-size: 12pt; line-height: 1.3;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+
+  /* ORDER MATTERS. This generic rule must come BEFORE the @media screen block:
+     same specificity, so whichever is declared last wins. With it after, the
+     on-screen preview stretches to the viewport instead of 8.5in — print is
+     unaffected, but the proof you check before printing is wrong. */
+  .page { width: 100%; }
+  .page + .page { page-break-before: always; }
+
+  @media screen {
+    body { padding: 0.5in; background: #ddd; }
+    .page {
+      background: #fff; padding: 0.45in 0.5in;
+      width: 8.5in; min-height: 11in;
+      margin: 0 auto 24px; box-shadow: 0 2px 10px rgba(0,0,0,.3);
+    }
+  }
+
+  /* ------------------------------------------------------------- header */
+  header { border-bottom: 3px double var(--accent); padding-bottom: 6px; }
+  header.cont { border-bottom: 1px solid var(--rule); }
+  h1 { font-size: 16pt; margin: 0 0 1px; letter-spacing: .01em; }
+  .sub { font-size: 10pt; font-style: italic; color: var(--muted); margin: 0; }
+
+  .nameline { display: flex; gap: 26px; font-size: 10.5pt; margin: 11px 0 12px; }
+  .nameline span { flex: 1; border-bottom: 1px solid var(--ink); padding-bottom: 1px; }
+  .nameline span.short { flex: 0 0 1.9in; }
+
+  .directions {
+    font-size: 10.5pt; line-height: 1.35;
+    background: var(--tint); border-left: 4px solid var(--accent);
+    padding: 7px 10px; margin: 12px 0 14px;
+  }
+  .directions b { letter-spacing: .03em; }
+  .tip { font-style: italic; margin-top: 3px; }
+
+  /* ------------------------------------------------- problems and grids */
+  .grid { display: grid; gap: 13px 16px; margin-top: 4px; }
+  .prob { page-break-inside: avoid; display: flex; gap: 5px; align-items: flex-start; }
+  .pn { font-weight: bold; font-size: 11pt; min-width: .28in; flex: 0 0 auto; color: var(--accent); }
+  .pbody { flex: 1; min-width: 0; }
+
+  /* Digits need lining figures and even widths whatever the body font is. */
+  .num, .vert, .horiz { font-family: "Trebuchet MS", "Segoe UI", Tahoma, Verdana, sans-serif; font-variant-numeric: lining-nums tabular-nums; }
+
+  /* A stacked column algorithm.
+     Two grid columns — operator, then digits — because a floated or absolutely
+     positioned operator overlaps the digits as soon as the numbers get wide,
+     and "324" with a + sitting on the 3 is unreadable. The grid also lets the
+     rule under the last operand span BOTH columns, which is how it is written
+     by hand. The rule is heavy: it is the line you write the answer beneath. */
+  .vert {
+    display: inline-grid; grid-template-columns: auto auto;
+    font-size: 15pt; line-height: 1.3; text-align: right;
+  }
+  .vert > span { padding: 0 0 1px 0; }
+  .vert .op { text-align: left; padding-right: .16in; }
+  .vert .last { border-bottom: 2.5px solid var(--ink); padding-bottom: 3px; }
+  .vert .ans { height: .4in; }
+  /* Partial-products working, for 2-digit x 1-digit before the short method. */
+  .vert .part { font-size: 11pt; color: var(--muted); }
+  /* A row of worked examples that fade — see lib/formats.js faded(). The
+     caption is what makes the fade legible: without it the third one looks like
+     a question somebody forgot to number. */
+  .egrow { display: flex; gap: .34in; align-items: flex-start; margin: 0 0 4px; }
+  .eg { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; }
+  .eglab { font-size: 8.5pt; color: var(--slate); letter-spacing: .02em; }
+
+  /* The carried digits. Small and grey so the sum still reads as the sum, and
+     tight to the row below it so a carry sits ON the column it goes into. */
+  .vert .carry { font-size: 9pt; color: var(--slate); line-height: 1; padding: 0 0 1px 0; }
+
+  .horiz { font-size: 14pt; white-space: nowrap; }
+
+  /* Row numbers in a word list. Gray and small: they are there so a list can be
+     dictated ("number seven") and marked without counting down the page, and
+     they must not compete with the word itself. */
+  .wn { color: var(--muted); font-size: 9pt; }
+
+  /* The box an answer goes in. inline-block so it can sit mid-sentence. */
+  .abox {
+    display: inline-block; border: 1.6px solid var(--slate); border-radius: 3px;
+    vertical-align: middle; margin: 0 3px; position: relative; background: #fff;
+  }
+  /* Scoped to the box: as a bare ".alab" it pinned any generator's own .alab
+     to the bottom of the page (life-07-signs-and-forms 40, 2026-09-24). */
+  .abox > .alab {
+    position: absolute; bottom: 1px; left: 0; right: 0;
+    text-align: center; font-size: 7pt; color: var(--muted); font-style: italic;
+  }
+
+  /* Confidence marks. The rings are drawn with a border and a gradient rather
+     than an SVG so they stay inline with the question text at any font size,
+     and print black on a mono laser without relying on a background image. */
+  .conf { float: right; margin: 2px 0 0 8px; white-space: nowrap; }
+  .cring {
+    display: inline-block; width: 11px; height: 11px; margin-left: 4px;
+    border: 1.4px solid var(--slate); border-radius: 50%; vertical-align: middle;
+  }
+  .cring-full { background: var(--accent); }
+  .cring-half { background: linear-gradient(90deg, var(--accent) 50%, #fff 50%); }
+  .cring-none { background: #fff; }
+  ol.qs.hasconf li { overflow: hidden; }
+
+  .conflegend {
+    border: 1.2px solid var(--rule); border-radius: 4px;
+    padding: 3px 8px; margin: 0 0 7px;
+    font-size: 8.5pt; color: var(--muted); display: flex; gap: 14px; align-items: center;
+  }
+  .conftitle { font-weight: 700; color: var(--ink); }
+  .confitem { white-space: nowrap; }
+
+  .work {
+    border: 1.4px dashed var(--rule); border-radius: 4px;
+    margin: 6px 0 2px; position: relative;
+  }
+  /* The label S.work() puts in the box: a DIRECT child only. As ".work span"
+     it also caught every span inside any generator's own .work content and
+     stacked them all at the top-left corner (math-11-grade6 47, 2026-09-23). */
+  .work > span {
+    position: absolute; top: 3px; left: 6px;
+    font-size: 8pt; color: var(--muted); font-style: italic;
+  }
+
+  /* ------------------------------------------------------ writing lines */
+  /* Primary rule: solid top, dashed midline, heavy baseline. Capitals reach
+     the top line, lowercase bodies sit under the dashed one. */
+  .write {
+    position: relative; height: 0.375in;
+    margin: 6px 0 0 .3in;
+    border-top: 1px solid var(--rule); border-bottom: 2px solid var(--ink);
+  }
+  .write.flush { margin-left: 0; }
+  .write + .write { margin-top: .17in; }
+  .write::after {
+    content: ""; position: absolute; left: 0; right: 0; top: 50%;
+    border-top: 1px dashed var(--guide);
+  }
+
+  /* ------------------------------------------------------- question list */
+  ol.qs { margin: 0; padding: 0 0 0 .34in; }
+  ol.qs li { margin-bottom: 13px; page-break-inside: avoid; }
+  ol.qs li::marker { font-weight: bold; font-size: 11pt; color: var(--accent); }
+  .qt { display: block; }
+
+  .mcq { display: grid; gap: 3px 14px; margin: 5px 0 2px .12in; font-size: 11pt; }
+  .opt { white-space: nowrap; }
+
+  /* -------------------------------------------------------------- tables */
+  .tbl { border-collapse: collapse; margin: 8px 0; font-size: 11pt; width: 100%; }
+  .tbl th, .tbl td { border: 1.4px solid var(--ink); padding: 5px 8px; text-align: left; }
+  .tbl th { color: var(--slate); }
+  .tbl th { background: var(--tint); font-size: 10pt; letter-spacing: .02em; }
+  .tbl td.blank { height: .34in; }
+  .tbl.narrow { width: auto; }
+  .tbl.center td, .tbl.center th { text-align: center; }
+
+  /* ------------------------------------------------------------ passages */
+  .passage {
+    border: 1.5px solid var(--slate); border-radius: 4px;
+    padding: 11px 14px; margin-bottom: 12px;
+    font-size: 11.5pt; line-height: 1.55;
+  }
+  .passage h2 { font-size: 13pt; margin: 0 0 6px; color: var(--deep); }
+  .passage p { margin: 0 0 8px; }
+  .passage p:last-child { margin-bottom: 0; }
+  .passage .byline { font-size: 9.5pt; font-style: italic; color: var(--muted); margin-bottom: 8px; }
+  /* Numbered paragraphs, so a question can say "in paragraph 2". */
+  .passage p.np { position: relative; padding-left: .3in; }
+  .passage p.np::before {
+    content: attr(data-p); position: absolute; left: 0; top: 0;
+    font-size: 9pt; color: var(--accent); font-weight: bold;
+  }
+
+  .wordbank {
+    border: 1.5px dashed var(--slate); border-radius: 4px;
+    padding: 8px 12px; margin: 10px 0 12px;
+    font-size: 11.5pt; text-align: center;
+  }
+  .wordbank b { display: block; font-size: 9.5pt; letter-spacing: .06em;
+    text-transform: uppercase; margin-bottom: 4px; color: var(--accent); }
+  .wordbank span { display: inline-block; margin: 2px 11px; }
+
+  .note {
+    border-left: 4px solid var(--deep); background: var(--tintdeep);
+    padding: 7px 11px; margin: 10px 0; font-size: 10.5pt;
+  }
+  .note b { letter-spacing: .02em; }
+
+  /* -------------------------------------------------------------- footer */
+  /* THE WORDMARK SITS IN THE FOOTER THAT WAS ALREADY THERE, so it costs no
+     height at all — a sheet that fitted before fits now. Upright where the rest
+     of the line is italic, and a size down: it is a signature, not a message,
+     and it must never compete with "Score: ___ / 10". */
+  .brand { font-style: normal; font-size: 7.5pt; letter-spacing: .04em;
+    color: var(--accent); align-self: center; }
+
+  footer {
+    margin-top: 14px; padding-top: 6px; border-top: 1px solid var(--rule);
+    font-size: 9pt; font-style: italic; color: var(--muted);
+    display: flex; justify-content: space-between;
+  }
+
+  /* ---------------------------------------------------------- answer key */
+  .keybadge {
+    display: inline-block; border: 2px solid var(--deep); color: var(--deep); padding: 2px 9px;
+    font-size: 9.5pt; font-weight: bold; letter-spacing: .08em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .key .why {
+    display: block; font-size: 9pt; font-style: italic; color: var(--muted); margin-top: 1px;
+  }
+  /* Highlight rather than underline: <u> in a key marks WHAT CHANGED, and an
+     underline under a comma is invisible. */
+  .key u { text-decoration: none; background: var(--tint); padding: 0 2px; font-weight: bold; }
+  .keygrid .pbody { font-family: "Trebuchet MS", "Segoe UI", Tahoma, Verdana, sans-serif; font-size: 12pt; }
+  /* A key's pictures scale to their column: at 1fr a wide drawing pushed a
+     three-column key 92px off the paper (art-04-drawing 10, 2026-09-24). */
+  .keygrid svg { max-width: 100%; height: auto; }
+  .keylist .qt { font-weight: normal; }
+
+  /*
+   * The guide page. Four lines per question, and the ASK line is the one that
+   * gets used at the table, so it is the one with a rule beside it — a parent
+   * scanning this page in ten seconds should land on the follow-up question
+   * and nothing else.
+   */
+  .guide { padding-left: .3in; }
+  .guide li { margin-bottom: 11px; page-break-inside: avoid; }
+  .guide .gq { font-weight: bold; font-size: 11pt; margin-bottom: 3px; }
+  /* 9pt, matching the key's own why line, because the guide page is the
+     binding constraint on every open sheet: four lines per question against a
+     key's one, and at 10pt a sheet with seven questions ran onto a second
+     side. Found by measuring, not chosen. (No backticks in here — this CSS
+     lives inside a template literal and one would close it.) */
+  .guide .glook, .guide .gthin, .guide .gstrong {
+    font-size: 9pt; line-height: 1.3; margin-top: 1px;
+  }
+  .guide .gthin { color: var(--muted); }
+  .guide .gstrong { color: var(--muted); font-style: italic; }
+  .guide .gask {
+    font-size: 9.5pt; line-height: 1.3; margin-top: 3px;
+    border-left: 3px solid var(--slate); padding-left: 7px;
+  }
+  .key .qs li { margin-bottom: 9px; }
+
+  /*
+   * INLINE-BLOCK, NOT BLOCK, AND THIS WAS WRONG FOR A LONG TIME. A block-level
+   * svg ignores text-align: center on its parent and sits flush left — so 117
+   * sheets across 35 packs said "centre this diagram" and got a left-aligned
+   * one. Twenty-five of them were origami and paper-plane fold sequences, where
+   * the whole page is diagrams.
+   *
+   * Nobody spotted it because a left-flush diagram looks deliberate; it only
+   * reads as wrong next to a centered one, and no sheet has both.
+   *
+   * inline-block makes text-align do what every one of those authors meant,
+   * and leaves a diagram in a left-aligned container exactly where it was.
+   * vertical-align: top kills the baseline gap that inline elements otherwise
+   * leave underneath them, which would have pushed long pages over.
+   */
+  svg { display: inline-block; vertical-align: top; }
+  svg.inline { vertical-align: middle; }
+
+  .quad { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 4px; }
+  .quad svg, .page svg { max-width: 100%; height: auto; }
+  /* Drawn at 250px and left there, the four sat in the top half of the page;
+     they take the width now, and the big one the whole of it (fill pass). */
+  .quad > div { width: 3.65in; }
+  .quad svg { width: 100%; }
+  .big svg { width: 7.3in; }
+
+</style>
+</head>
+<body>
+
+<div class="page ">
+  <header>
+    
+    <h1>Mandalas</h1>
+    <p class="sub">Quiet Pages &middot; Page 1 of 2</p>
+  </header>
+  <div class="nameline">
+    <span>Name</span>
+    <span class="short">Date</span>
+  </div>
+  <div class="directions">
+    <b>DIRECTIONS:</b> Color them in however you like.
+  </div>
+
+
+  <div class="quad">
+    <div><svg class="" viewBox="0 0 250 250" width="250" height="250" role="img" aria-label="a mandala with 14 arms" xmlns="http://www.w3.org/2000/svg"><circle cx="125" cy="125" r="34.41" fill="none" stroke="#16130F" stroke-width="1.4"/><circle cx="125" cy="125" r="68.82" fill="none" stroke="#16130F" stroke-width="1.4"/><circle cx="125" cy="125" r="103.24" fill="none" stroke="#16130F" stroke-width="1.4"/><circle cx="125" cy="125" r="117" fill="none" stroke="#16130F" stroke-width="2"/><line x1="125" y1="90.59" x2="125" y2="8" stroke="#16130F" stroke-width="1.2" stroke-linecap="round"/><path d="M 117.3 91.5 Q 119.2 73.7 125.0 56.2 Q 130.8 73.7 132.7 91.5" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 109.7 57.9 Q 114.0 27.5 125.0 21.8 Q 136.0 27.5 140.3 57.9" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 102.0 24.4 Q 112.7 15.6 125.0 8.0 Q 137.3 15.6 148.0 24.4" fill="none" stroke="#C0511D" stroke-width="1.3"/><circle cx="149.5" cy="17.64" r="3.44" fill="none" stroke="#16130F" stroke-width="1.2"/><line x1="139.93" y1="94" x2="175.76" y2="19.59" stroke="#16130F" stroke-width="1.2" stroke-linecap="round"/><path d="M 132.7 91.5 Q 142.0 76.3 154.9 63.0 Q 152.5 81.3 146.5 98.1" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 140.3 57.9 Q 157.4 32.4 169.8 32.0 Q 177.2 42.0 167.9 71.2" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 148.0 24.4 Q 161.4 21.1 175.8 19.6 Q 183.6 31.8 189.4 44.3" fill="none" stroke="#C0511D" stroke-width="1.3"/><circle cx="193.66" cy="38.91" r="3.44" fill="none" stroke="#16130F" stroke-width="1.2"/><line x1="151.9" y1="103.54" x2="216.47" y2="52.05" stroke="#16130F" stroke-width="1.2" stroke-linecap="round"/><path d="M 146.5 98.1 Q 161.5 88.5 178.8 82.1 Q 168.7 97.5 156.0 110.1" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 167.9 71.2 Q 194.3 55.7 205.7 60.6 Q 208.0 72.8 187.0 95.1" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 189.4 44.3 Q 202.9 47.1 216.5 52.1 Q 218.2 66.4 218.0 80.2" fill="none" stroke="#C0511D" stroke-width="1.3"/><circle cx="224.21" cy="77.22" r="3.44" fill="none" stroke="#16130F" stroke-width="1.2"/><line x1="158.55" y1="117.34" x2="239.07" y2="98.97" stroke="#16130F" stroke-width="1.2" stroke-linecap="round"/><path d="M 156.0 110.1 Q 173.7 108.0 192.1 109.7 Q 176.3 119.2 159.4 125.0" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 187.0 95.1 Q 217.6 92.6 225.6 102.0 Q 222.5 114.0 193.8 125.0" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 218.0 80.2 Q 228.9 88.6 239.1 99.0 Q 234.4 112.7 228.2 125.0" fill="none" stroke="#C0511D" stroke-width="1.3"/><circle cx="235.12" cy="125" r="3.44" fill="none" stroke="#16130F" stroke-width="1.2"/><line x1="158.55" y1="132.66" x2="239.07" y2="151.03" stroke="#16130F" stroke-width="1.2" stroke-linecap="round"/><path d="M 159.4 125.0 Q 176.3 130.8 192.1 140.3 Q 173.7 142.0 156.0 139.9" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 193.8 125.0 Q 222.5 136.0 225.6 148.0 Q 217.6 157.4 187.0 154.9" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 228.2 125.0 Q 234.4 137.3 239.1 151.0 Q 228.9 161.4 218.0 169.8" fill="none" stroke="#C0511D" stroke-width="1.3"/><circle cx="224.21" cy="172.78" r="3.44" fill="none" stroke="#16130F" stroke-width="1.2"/><line x1="151.9" y1="146.46" x2="216.47" y2="197.95" stroke="#16130F" stroke-width="1.2" stroke-linecap="round"/><path d="M 156.0 139.9 Q 168.7 152.5 178.8 167.9 Q 161.5 161.5 146.5 151.9" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 187.0 154.9 Q 208.0 177.2 205.7 189.4 Q 194.3 194.3 167.9 178.8" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 218.0 169.8 Q 218.2 183.6 216.5 197.9 Q 202.9 202.9 189.4 205.7" fill="none" stroke="#C0511D" stroke-width="1.3"/><circle cx="193.66" cy="211.09" r="3.44" fill="none" stroke="#16130F" stroke-width="1.2"/><line x1="139.93" y1="156" x2="175.76" y2="230.41" stroke="#16130F" stroke-width="1.2" stroke-linecap="round"/><path d="M 146.5 151.9 Q 152.5 168.7 154.9 187.0 Q 142.0 173.7 132.7 158.5" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 167.9 178.8 Q 177.2 208.0 169.8 218.0 Q 157.4 217.6 140.3 192.1" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 189.4 205.7 Q 183.6 218.2 175.8 230.4 Q 161.4 228.9 148.0 225.6" fill="none" stroke="#C0511D" stroke-width="1.3"/><circle cx="149.5" cy="232.36" r="3.44" fill="none" stroke="#16130F" stroke-width="1.2"/><line x1="125" y1="159.41" x2="125" y2="242" stroke="#16130F" stroke-width="1.2" stroke-linecap="round"/><path d="M 132.7 158.5 Q 130.8 176.3 125.0 193.8 Q 119.2 176.3 117.3 158.5" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 140.3 192.1 Q 136.0 222.5 125.0 228.2 Q 114.0 222.5 109.7 192.1" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 148.0 225.6 Q 137.3 234.4 125.0 242.0 Q 112.7 234.4 102.0 225.6" fill="none" stroke="#C0511D" stroke-width="1.3"/><circle cx="100.5" cy="232.36" r="3.44" fill="none" stroke="#16130F" stroke-width="1.2"/><line x1="110.07" y1="156" x2="74.24" y2="230.41" stroke="#16130F" stroke-width="1.2" stroke-linecap="round"/><path d="M 117.3 158.5 Q 108.0 173.7 95.1 187.0 Q 97.5 168.7 103.5 151.9" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 109.7 192.1 Q 92.6 217.6 80.2 218.0 Q 72.8 208.0 82.1 178.8" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 102.0 225.6 Q 88.6 228.9 74.2 230.4 Q 66.4 218.2 60.6 205.7" fill="none" stroke="#C0511D" stroke-width="1.3"/><circle cx="56.34" cy="211.09" r="3.44" fill="none" stroke="#16130F" stroke-width="1.2"/><line x1="98.1" y1="146.46" x2="33.53" y2="197.95" stroke="#16130F" stroke-width="1.2" stroke-linecap="round"/><path d="M 103.5 151.9 Q 88.5 161.5 71.2 167.9 Q 81.3 152.5 94.0 139.9" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 82.1 178.8 Q 55.7 194.3 44.3 189.4 Q 42.0 177.2 63.0 154.9" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 60.6 205.7 Q 47.1 202.9 33.5 197.9 Q 31.8 183.6 32.0 169.8" fill="none" stroke="#C0511D" stroke-width="1.3"/><circle cx="25.79" cy="172.78" r="3.44" fill="none" stroke="#16130F" stroke-width="1.2"/><line x1="91.45" y1="132.66" x2="10.93" y2="151.03" stroke="#16130F" stroke-width="1.2" stroke-linecap="round"/><path d="M 94.0 139.9 Q 76.3 142.0 57.9 140.3 Q 73.7 130.8 90.6 125.0" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 63.0 154.9 Q 32.4 157.4 24.4 148.0 Q 27.5 136.0 56.2 125.0" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 32.0 169.8 Q 21.1 161.4 10.9 151.0 Q 15.6 137.3 21.8 125.0" fill="none" stroke="#C0511D" stroke-width="1.3"/><circle cx="14.88" cy="125" r="3.44" fill="none" stroke="#16130F" stroke-width="1.2"/><line x1="91.45" y1="117.34" x2="10.93" y2="98.97" stroke="#16130F" stroke-width="1.2" stroke-linecap="round"/><path d="M 90.6 125.0 Q 73.7 119.2 57.9 109.7 Q 76.3 108.0 94.0 110.1" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 56.2 125.0 Q 27.5 114.0 24.4 102.0 Q 32.4 92.6 63.0 95.1" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 21.8 125.0 Q 15.6 112.7 10.9 99.0 Q 21.1 88.6 32.0 80.2" fill="none" stroke="#C0511D" stroke-width="1.3"/><circle cx="25.79" cy="77.22" r="3.44" fill="none" stroke="#16130F" stroke-width="1.2"/><line x1="98.1" y1="103.54" x2="33.53" y2="52.05" stroke="#16130F" stroke-width="1.2" stroke-linecap="round"/><path d="M 94.0 110.1 Q 81.3 97.5 71.2 82.1 Q 88.5 88.5 103.5 98.1" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 63.0 95.1 Q 42.0 72.8 44.3 60.6 Q 55.7 55.7 82.1 71.2" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 32.0 80.2 Q 31.8 66.4 33.5 52.1 Q 47.1 47.1 60.6 44.3" fill="none" stroke="#C0511D" stroke-width="1.3"/><circle cx="56.34" cy="38.91" r="3.44" fill="none" stroke="#16130F" stroke-width="1.2"/><line x1="110.07" y1="94" x2="74.24" y2="19.59" stroke="#16130F" stroke-width="1.2" stroke-linecap="round"/><path d="M 103.5 98.1 Q 97.5 81.3 95.1 63.0 Q 108.0 76.3 117.3 91.5" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 82.1 71.2 Q 72.8 42.0 80.2 32.0 Q 92.6 32.4 109.7 57.9" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 60.6 44.3 Q 66.4 31.8 74.2 19.6 Q 88.6 21.1 102.0 24.4" fill="none" stroke="#C0511D" stroke-width="1.3"/><circle cx="100.5" cy="17.64" r="3.44" fill="none" stroke="#16130F" stroke-width="1.2"/><circle cx="125" cy="125" r="18.93" fill="none" stroke="#16130F" stroke-width="1.6"/></svg></div>
+    <div><svg class="" viewBox="0 0 250 250" width="250" height="250" role="img" aria-label="a mandala with 12 arms" xmlns="http://www.w3.org/2000/svg"><circle cx="125" cy="125" r="26.59" fill="none" stroke="#16130F" stroke-width="1.4"/><circle cx="125" cy="125" r="53.18" fill="none" stroke="#16130F" stroke-width="1.4"/><circle cx="125" cy="125" r="79.77" fill="none" stroke="#16130F" stroke-width="1.4"/><circle cx="125" cy="125" r="106.36" fill="none" stroke="#16130F" stroke-width="1.4"/><circle cx="125" cy="125" r="117" fill="none" stroke="#16130F" stroke-width="2"/><line x1="125" y1="98.41" x2="125" y2="8" stroke="#16130F" stroke-width="1.2" stroke-linecap="round"/><path d="M 118.1 99.3 Q 119.8 85.5 125.0 71.8 Q 130.2 85.5 131.9 99.3" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 111.2 73.6 Q 115.1 49.9 125.0 45.2 Q 134.9 49.9 138.8 73.6" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 104.4 47.9 Q 112.9 32.7 125.0 18.6 Q 137.1 32.7 145.6 47.9" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 97.5 22.3 Q 109.9 10.6 125.0 8.0 Q 140.1 10.6 152.5 22.3" fill="none" stroke="#C0511D" stroke-width="1.3"/><circle cx="153.91" cy="17.12" r="3" fill="none" stroke="#16130F" stroke-width="1.2"/><line x1="138.3" y1="101.97" x2="183.5" y2="23.68" stroke="#16130F" stroke-width="1.2" stroke-linecap="round"/><path d="M 131.9 99.3 Q 140.3 88.1 151.6 78.9 Q 149.3 93.4 143.8 106.2" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 138.8 73.6 Q 154.0 55.0 164.9 55.9 Q 171.1 64.9 162.6 87.4" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 145.6 47.9 Q 160.6 39.0 178.2 32.9 Q 181.7 51.2 181.4 68.6" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 152.5 22.3 Q 169.2 18.4 183.5 23.7 Q 195.3 33.4 200.2 49.8" fill="none" stroke="#C0511D" stroke-width="1.3"/><circle cx="203.97" cy="46.03" r="3" fill="none" stroke="#16130F" stroke-width="1.2"/><line x1="148.03" y1="111.7" x2="226.32" y2="66.5" stroke="#16130F" stroke-width="1.2" stroke-linecap="round"/><path d="M 143.8 106.2 Q 156.6 100.7 171.1 98.4 Q 161.9 109.7 150.7 118.1" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 162.6 87.4 Q 185.1 78.9 194.1 85.1 Q 195.0 96.0 176.4 111.2" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 181.4 68.6 Q 198.8 68.3 217.1 71.8 Q 211.0 89.4 202.1 104.4" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 200.2 49.8 Q 216.6 54.7 226.3 66.5 Q 231.6 80.8 227.7 97.5" fill="none" stroke="#C0511D" stroke-width="1.3"/><circle cx="232.88" cy="96.09" r="3" fill="none" stroke="#16130F" stroke-width="1.2"/><line x1="151.59" y1="125" x2="242" y2="125" stroke="#16130F" stroke-width="1.2" stroke-linecap="round"/><path d="M 150.7 118.1 Q 164.5 119.8 178.2 125.0 Q 164.5 130.2 150.7 131.9" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 176.4 111.2 Q 200.1 115.1 204.8 125.0 Q 200.1 134.9 176.4 138.8" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 202.1 104.4 Q 217.3 112.9 231.4 125.0 Q 217.3 137.1 202.1 145.6" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 227.7 97.5 Q 239.4 109.9 242.0 125.0 Q 239.4 140.1 227.7 152.5" fill="none" stroke="#C0511D" stroke-width="1.3"/><circle cx="232.88" cy="153.91" r="3" fill="none" stroke="#16130F" stroke-width="1.2"/><line x1="148.03" y1="138.3" x2="226.32" y2="183.5" stroke="#16130F" stroke-width="1.2" stroke-linecap="round"/><path d="M 150.7 131.9 Q 161.9 140.3 171.1 151.6 Q 156.6 149.3 143.8 143.8" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 176.4 138.8 Q 195.0 154.0 194.1 164.9 Q 185.1 171.1 162.6 162.6" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 202.1 145.6 Q 211.0 160.6 217.1 178.2 Q 198.8 181.7 181.4 181.4" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 227.7 152.5 Q 231.6 169.2 226.3 183.5 Q 216.6 195.3 200.2 200.2" fill="none" stroke="#C0511D" stroke-width="1.3"/><circle cx="203.97" cy="203.97" r="3" fill="none" stroke="#16130F" stroke-width="1.2"/><line x1="138.3" y1="148.03" x2="183.5" y2="226.32" stroke="#16130F" stroke-width="1.2" stroke-linecap="round"/><path d="M 143.8 143.8 Q 149.3 156.6 151.6 171.1 Q 140.3 161.9 131.9 150.7" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 162.6 162.6 Q 171.1 185.1 164.9 194.1 Q 154.0 195.0 138.8 176.4" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 181.4 181.4 Q 181.7 198.8 178.2 217.1 Q 160.6 211.0 145.6 202.1" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 200.2 200.2 Q 195.3 216.6 183.5 226.3 Q 169.2 231.6 152.5 227.7" fill="none" stroke="#C0511D" stroke-width="1.3"/><circle cx="153.91" cy="232.88" r="3" fill="none" stroke="#16130F" stroke-width="1.2"/><line x1="125" y1="151.59" x2="125" y2="242" stroke="#16130F" stroke-width="1.2" stroke-linecap="round"/><path d="M 131.9 150.7 Q 130.2 164.5 125.0 178.2 Q 119.8 164.5 118.1 150.7" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 138.8 176.4 Q 134.9 200.1 125.0 204.8 Q 115.1 200.1 111.2 176.4" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 145.6 202.1 Q 137.1 217.3 125.0 231.4 Q 112.9 217.3 104.4 202.1" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 152.5 227.7 Q 140.1 239.4 125.0 242.0 Q 109.9 239.4 97.5 227.7" fill="none" stroke="#C0511D" stroke-width="1.3"/><circle cx="96.09" cy="232.88" r="3" fill="none" stroke="#16130F" stroke-width="1.2"/><line x1="111.7" y1="148.03" x2="66.5" y2="226.32" stroke="#16130F" stroke-width="1.2" stroke-linecap="round"/><path d="M 118.1 150.7 Q 109.7 161.9 98.4 171.1 Q 100.7 156.6 106.2 143.8" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 111.2 176.4 Q 96.0 195.0 85.1 194.1 Q 78.9 185.1 87.4 162.6" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 104.4 202.1 Q 89.4 211.0 71.8 217.1 Q 68.3 198.8 68.6 181.4" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 97.5 227.7 Q 80.8 231.6 66.5 226.3 Q 54.7 216.6 49.8 200.2" fill="none" stroke="#C0511D" stroke-width="1.3"/><circle cx="46.03" cy="203.97" r="3" fill="none" stroke="#16130F" stroke-width="1.2"/><line x1="101.97" y1="138.3" x2="23.68" y2="183.5" stroke="#16130F" stroke-width="1.2" stroke-linecap="round"/><path d="M 106.2 143.8 Q 93.4 149.3 78.9 151.6 Q 88.1 140.3 99.3 131.9" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 87.4 162.6 Q 64.9 171.1 55.9 164.9 Q 55.0 154.0 73.6 138.8" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 68.6 181.4 Q 51.2 181.7 32.9 178.2 Q 39.0 160.6 47.9 145.6" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 49.8 200.2 Q 33.4 195.3 23.7 183.5 Q 18.4 169.2 22.3 152.5" fill="none" stroke="#C0511D" stroke-width="1.3"/><circle cx="17.12" cy="153.91" r="3" fill="none" stroke="#16130F" stroke-width="1.2"/><line x1="98.41" y1="125" x2="8" y2="125" stroke="#16130F" stroke-width="1.2" stroke-linecap="round"/><path d="M 99.3 131.9 Q 85.5 130.2 71.8 125.0 Q 85.5 119.8 99.3 118.1" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 73.6 138.8 Q 49.9 134.9 45.2 125.0 Q 49.9 115.1 73.6 111.2" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 47.9 145.6 Q 32.7 137.1 18.6 125.0 Q 32.7 112.9 47.9 104.4" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 22.3 152.5 Q 10.6 140.1 8.0 125.0 Q 10.6 109.9 22.3 97.5" fill="none" stroke="#C0511D" stroke-width="1.3"/><circle cx="17.12" cy="96.09" r="3" fill="none" stroke="#16130F" stroke-width="1.2"/><line x1="101.97" y1="111.7" x2="23.68" y2="66.5" stroke="#16130F" stroke-width="1.2" stroke-linecap="round"/><path d="M 99.3 118.1 Q 88.1 109.7 78.9 98.4 Q 93.4 100.7 106.2 106.2" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 73.6 111.2 Q 55.0 96.0 55.9 85.1 Q 64.9 78.9 87.4 87.4" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 47.9 104.4 Q 39.0 89.4 32.9 71.8 Q 51.2 68.3 68.6 68.6" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 22.3 97.5 Q 18.4 80.8 23.7 66.5 Q 33.4 54.7 49.8 49.8" fill="none" stroke="#C0511D" stroke-width="1.3"/><circle cx="46.03" cy="46.03" r="3" fill="none" stroke="#16130F" stroke-width="1.2"/><line x1="111.7" y1="101.97" x2="66.5" y2="23.68" stroke="#16130F" stroke-width="1.2" stroke-linecap="round"/><path d="M 106.2 106.2 Q 100.7 93.4 98.4 78.9 Q 109.7 88.1 118.1 99.3" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 87.4 87.4 Q 78.9 64.9 85.1 55.9 Q 96.0 55.0 111.2 73.6" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 68.6 68.6 Q 68.3 51.2 71.8 32.9 Q 89.4 39.0 104.4 47.9" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 49.8 49.8 Q 54.7 33.4 66.5 23.7 Q 80.8 18.4 97.5 22.3" fill="none" stroke="#C0511D" stroke-width="1.3"/><circle cx="96.09" cy="17.12" r="3" fill="none" stroke="#16130F" stroke-width="1.2"/><circle cx="125" cy="125" r="14.63" fill="none" stroke="#16130F" stroke-width="1.6"/></svg></div>
+    <div><svg class="" viewBox="0 0 250 250" width="250" height="250" role="img" aria-label="a mandala with 14 arms" xmlns="http://www.w3.org/2000/svg"><circle cx="125" cy="125" r="34.41" fill="none" stroke="#16130F" stroke-width="1.4"/><circle cx="125" cy="125" r="68.82" fill="none" stroke="#16130F" stroke-width="1.4"/><circle cx="125" cy="125" r="103.24" fill="none" stroke="#16130F" stroke-width="1.4"/><circle cx="125" cy="125" r="117" fill="none" stroke="#16130F" stroke-width="2"/><line x1="125" y1="90.59" x2="125" y2="8" stroke="#16130F" stroke-width="1.2" stroke-linecap="round"/><path d="M 117.3 91.5 Q 119.2 73.7 125.0 56.2 Q 130.8 73.7 132.7 91.5" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 109.7 57.9 Q 114.0 27.5 125.0 21.8 Q 136.0 27.5 140.3 57.9" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 102.0 24.4 Q 112.7 15.6 125.0 8.0 Q 137.3 15.6 148.0 24.4" fill="none" stroke="#C0511D" stroke-width="1.3"/><circle cx="149.5" cy="17.64" r="3.44" fill="none" stroke="#16130F" stroke-width="1.2"/><line x1="139.93" y1="94" x2="175.76" y2="19.59" stroke="#16130F" stroke-width="1.2" stroke-linecap="round"/><path d="M 132.7 91.5 Q 142.0 76.3 154.9 63.0 Q 152.5 81.3 146.5 98.1" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 140.3 57.9 Q 157.4 32.4 169.8 32.0 Q 177.2 42.0 167.9 71.2" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 148.0 24.4 Q 161.4 21.1 175.8 19.6 Q 183.6 31.8 189.4 44.3" fill="none" stroke="#C0511D" stroke-width="1.3"/><circle cx="193.66" cy="38.91" r="3.44" fill="none" stroke="#16130F" stroke-width="1.2"/><line x1="151.9" y1="103.54" x2="216.47" y2="52.05" stroke="#16130F" stroke-width="1.2" stroke-linecap="round"/><path d="M 146.5 98.1 Q 161.5 88.5 178.8 82.1 Q 168.7 97.5 156.0 110.1" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 167.9 71.2 Q 194.3 55.7 205.7 60.6 Q 208.0 72.8 187.0 95.1" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 189.4 44.3 Q 202.9 47.1 216.5 52.1 Q 218.2 66.4 218.0 80.2" fill="none" stroke="#C0511D" stroke-width="1.3"/><circle cx="224.21" cy="77.22" r="3.44" fill="none" stroke="#16130F" stroke-width="1.2"/><line x1="158.55" y1="117.34" x2="239.07" y2="98.97" stroke="#16130F" stroke-width="1.2" stroke-linecap="round"/><path d="M 156.0 110.1 Q 173.7 108.0 192.1 109.7 Q 176.3 119.2 159.4 125.0" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 187.0 95.1 Q 217.6 92.6 225.6 102.0 Q 222.5 114.0 193.8 125.0" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 218.0 80.2 Q 228.9 88.6 239.1 99.0 Q 234.4 112.7 228.2 125.0" fill="none" stroke="#C0511D" stroke-width="1.3"/><circle cx="235.12" cy="125" r="3.44" fill="none" stroke="#16130F" stroke-width="1.2"/><line x1="158.55" y1="132.66" x2="239.07" y2="151.03" stroke="#16130F" stroke-width="1.2" stroke-linecap="round"/><path d="M 159.4 125.0 Q 176.3 130.8 192.1 140.3 Q 173.7 142.0 156.0 139.9" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 193.8 125.0 Q 222.5 136.0 225.6 148.0 Q 217.6 157.4 187.0 154.9" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 228.2 125.0 Q 234.4 137.3 239.1 151.0 Q 228.9 161.4 218.0 169.8" fill="none" stroke="#C0511D" stroke-width="1.3"/><circle cx="224.21" cy="172.78" r="3.44" fill="none" stroke="#16130F" stroke-width="1.2"/><line x1="151.9" y1="146.46" x2="216.47" y2="197.95" stroke="#16130F" stroke-width="1.2" stroke-linecap="round"/><path d="M 156.0 139.9 Q 168.7 152.5 178.8 167.9 Q 161.5 161.5 146.5 151.9" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 187.0 154.9 Q 208.0 177.2 205.7 189.4 Q 194.3 194.3 167.9 178.8" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 218.0 169.8 Q 218.2 183.6 216.5 197.9 Q 202.9 202.9 189.4 205.7" fill="none" stroke="#C0511D" stroke-width="1.3"/><circle cx="193.66" cy="211.09" r="3.44" fill="none" stroke="#16130F" stroke-width="1.2"/><line x1="139.93" y1="156" x2="175.76" y2="230.41" stroke="#16130F" stroke-width="1.2" stroke-linecap="round"/><path d="M 146.5 151.9 Q 152.5 168.7 154.9 187.0 Q 142.0 173.7 132.7 158.5" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 167.9 178.8 Q 177.2 208.0 169.8 218.0 Q 157.4 217.6 140.3 192.1" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 189.4 205.7 Q 183.6 218.2 175.8 230.4 Q 161.4 228.9 148.0 225.6" fill="none" stroke="#C0511D" stroke-width="1.3"/><circle cx="149.5" cy="232.36" r="3.44" fill="none" stroke="#16130F" stroke-width="1.2"/><line x1="125" y1="159.41" x2="125" y2="242" stroke="#16130F" stroke-width="1.2" stroke-linecap="round"/><path d="M 132.7 158.5 Q 130.8 176.3 125.0 193.8 Q 119.2 176.3 117.3 158.5" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 140.3 192.1 Q 136.0 222.5 125.0 228.2 Q 114.0 222.5 109.7 192.1" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 148.0 225.6 Q 137.3 234.4 125.0 242.0 Q 112.7 234.4 102.0 225.6" fill="none" stroke="#C0511D" stroke-width="1.3"/><circle cx="100.5" cy="232.36" r="3.44" fill="none" stroke="#16130F" stroke-width="1.2"/><line x1="110.07" y1="156" x2="74.24" y2="230.41" stroke="#16130F" stroke-width="1.2" stroke-linecap="round"/><path d="M 117.3 158.5 Q 108.0 173.7 95.1 187.0 Q 97.5 168.7 103.5 151.9" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 109.7 192.1 Q 92.6 217.6 80.2 218.0 Q 72.8 208.0 82.1 178.8" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 102.0 225.6 Q 88.6 228.9 74.2 230.4 Q 66.4 218.2 60.6 205.7" fill="none" stroke="#C0511D" stroke-width="1.3"/><circle cx="56.34" cy="211.09" r="3.44" fill="none" stroke="#16130F" stroke-width="1.2"/><line x1="98.1" y1="146.46" x2="33.53" y2="197.95" stroke="#16130F" stroke-width="1.2" stroke-linecap="round"/><path d="M 103.5 151.9 Q 88.5 161.5 71.2 167.9 Q 81.3 152.5 94.0 139.9" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 82.1 178.8 Q 55.7 194.3 44.3 189.4 Q 42.0 177.2 63.0 154.9" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 60.6 205.7 Q 47.1 202.9 33.5 197.9 Q 31.8 183.6 32.0 169.8" fill="none" stroke="#C0511D" stroke-width="1.3"/><circle cx="25.79" cy="172.78" r="3.44" fill="none" stroke="#16130F" stroke-width="1.2"/><line x1="91.45" y1="132.66" x2="10.93" y2="151.03" stroke="#16130F" stroke-width="1.2" stroke-linecap="round"/><path d="M 94.0 139.9 Q 76.3 142.0 57.9 140.3 Q 73.7 130.8 90.6 125.0" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 63.0 154.9 Q 32.4 157.4 24.4 148.0 Q 27.5 136.0 56.2 125.0" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 32.0 169.8 Q 21.1 161.4 10.9 151.0 Q 15.6 137.3 21.8 125.0" fill="none" stroke="#C0511D" stroke-width="1.3"/><circle cx="14.88" cy="125" r="3.44" fill="none" stroke="#16130F" stroke-width="1.2"/><line x1="91.45" y1="117.34" x2="10.93" y2="98.97" stroke="#16130F" stroke-width="1.2" stroke-linecap="round"/><path d="M 90.6 125.0 Q 73.7 119.2 57.9 109.7 Q 76.3 108.0 94.0 110.1" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 56.2 125.0 Q 27.5 114.0 24.4 102.0 Q 32.4 92.6 63.0 95.1" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 21.8 125.0 Q 15.6 112.7 10.9 99.0 Q 21.1 88.6 32.0 80.2" fill="none" stroke="#C0511D" stroke-width="1.3"/><circle cx="25.79" cy="77.22" r="3.44" fill="none" stroke="#16130F" stroke-width="1.2"/><line x1="98.1" y1="103.54" x2="33.53" y2="52.05" stroke="#16130F" stroke-width="1.2" stroke-linecap="round"/><path d="M 94.0 110.1 Q 81.3 97.5 71.2 82.1 Q 88.5 88.5 103.5 98.1" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 63.0 95.1 Q 42.0 72.8 44.3 60.6 Q 55.7 55.7 82.1 71.2" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 32.0 80.2 Q 31.8 66.4 33.5 52.1 Q 47.1 47.1 60.6 44.3" fill="none" stroke="#C0511D" stroke-width="1.3"/><circle cx="56.34" cy="38.91" r="3.44" fill="none" stroke="#16130F" stroke-width="1.2"/><line x1="110.07" y1="94" x2="74.24" y2="19.59" stroke="#16130F" stroke-width="1.2" stroke-linecap="round"/><path d="M 103.5 98.1 Q 97.5 81.3 95.1 63.0 Q 108.0 76.3 117.3 91.5" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 82.1 71.2 Q 72.8 42.0 80.2 32.0 Q 92.6 32.4 109.7 57.9" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 60.6 44.3 Q 66.4 31.8 74.2 19.6 Q 88.6 21.1 102.0 24.4" fill="none" stroke="#C0511D" stroke-width="1.3"/><circle cx="100.5" cy="17.64" r="3.44" fill="none" stroke="#16130F" stroke-width="1.2"/><circle cx="125" cy="125" r="18.93" fill="none" stroke="#16130F" stroke-width="1.6"/></svg></div>
+    <div><svg class="" viewBox="0 0 250 250" width="250" height="250" role="img" aria-label="a mandala with 8 arms" xmlns="http://www.w3.org/2000/svg"><circle cx="125" cy="125" r="34.41" fill="none" stroke="#16130F" stroke-width="1.4"/><circle cx="125" cy="125" r="68.82" fill="none" stroke="#16130F" stroke-width="1.4"/><circle cx="125" cy="125" r="103.24" fill="none" stroke="#16130F" stroke-width="1.4"/><circle cx="125" cy="125" r="117" fill="none" stroke="#16130F" stroke-width="2"/><line x1="125" y1="90.59" x2="125" y2="8" stroke="#16130F" stroke-width="1.2" stroke-linecap="round"/><path d="M 111.8 93.2 Q 114.9 74.4 125.0 56.2 Q 135.1 74.4 138.2 93.2" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 98.7 61.4 Q 105.9 28.8 125.0 21.8 Q 144.1 28.8 151.3 61.4" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 85.5 29.6 Q 103.5 17.0 125.0 8.0 Q 146.5 17.0 164.5 29.6" fill="none" stroke="#C0511D" stroke-width="1.3"/><circle cx="167.14" cy="23.26" r="3.44" fill="none" stroke="#16130F" stroke-width="1.2"/><line x1="149.33" y1="100.67" x2="207.73" y2="42.27" stroke="#16130F" stroke-width="1.2" stroke-linecap="round"/><path d="M 138.2 93.2 Q 153.7 82.1 173.7 76.3 Q 167.9 96.3 156.8 111.8" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 151.3 61.4 Q 179.5 43.5 198.0 52.0 Q 206.5 70.5 188.6 98.7" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 164.5 29.6 Q 186.2 33.4 207.7 42.3 Q 216.6 63.8 220.4 85.5" fill="none" stroke="#C0511D" stroke-width="1.3"/><circle cx="226.74" cy="82.86" r="3.44" fill="none" stroke="#16130F" stroke-width="1.2"/><line x1="159.41" y1="125" x2="242" y2="125" stroke="#16130F" stroke-width="1.2" stroke-linecap="round"/><path d="M 156.8 111.8 Q 175.6 114.9 193.8 125.0 Q 175.6 135.1 156.8 138.2" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 188.6 98.7 Q 221.2 105.9 228.2 125.0 Q 221.2 144.1 188.6 151.3" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 220.4 85.5 Q 233.0 103.5 242.0 125.0 Q 233.0 146.5 220.4 164.5" fill="none" stroke="#C0511D" stroke-width="1.3"/><circle cx="226.74" cy="167.14" r="3.44" fill="none" stroke="#16130F" stroke-width="1.2"/><line x1="149.33" y1="149.33" x2="207.73" y2="207.73" stroke="#16130F" stroke-width="1.2" stroke-linecap="round"/><path d="M 156.8 138.2 Q 167.9 153.7 173.7 173.7 Q 153.7 167.9 138.2 156.8" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 188.6 151.3 Q 206.5 179.5 198.0 198.0 Q 179.5 206.5 151.3 188.6" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 220.4 164.5 Q 216.6 186.2 207.7 207.7 Q 186.2 216.6 164.5 220.4" fill="none" stroke="#C0511D" stroke-width="1.3"/><circle cx="167.14" cy="226.74" r="3.44" fill="none" stroke="#16130F" stroke-width="1.2"/><line x1="125" y1="159.41" x2="125" y2="242" stroke="#16130F" stroke-width="1.2" stroke-linecap="round"/><path d="M 138.2 156.8 Q 135.1 175.6 125.0 193.8 Q 114.9 175.6 111.8 156.8" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 151.3 188.6 Q 144.1 221.2 125.0 228.2 Q 105.9 221.2 98.7 188.6" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 164.5 220.4 Q 146.5 233.0 125.0 242.0 Q 103.5 233.0 85.5 220.4" fill="none" stroke="#C0511D" stroke-width="1.3"/><circle cx="82.86" cy="226.74" r="3.44" fill="none" stroke="#16130F" stroke-width="1.2"/><line x1="100.67" y1="149.33" x2="42.27" y2="207.73" stroke="#16130F" stroke-width="1.2" stroke-linecap="round"/><path d="M 111.8 156.8 Q 96.3 167.9 76.3 173.7 Q 82.1 153.7 93.2 138.2" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 98.7 188.6 Q 70.5 206.5 52.0 198.0 Q 43.5 179.5 61.4 151.3" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 85.5 220.4 Q 63.8 216.6 42.3 207.7 Q 33.4 186.2 29.6 164.5" fill="none" stroke="#C0511D" stroke-width="1.3"/><circle cx="23.26" cy="167.14" r="3.44" fill="none" stroke="#16130F" stroke-width="1.2"/><line x1="90.59" y1="125" x2="8" y2="125" stroke="#16130F" stroke-width="1.2" stroke-linecap="round"/><path d="M 93.2 138.2 Q 74.4 135.1 56.2 125.0 Q 74.4 114.9 93.2 111.8" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 61.4 151.3 Q 28.8 144.1 21.8 125.0 Q 28.8 105.9 61.4 98.7" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 29.6 164.5 Q 17.0 146.5 8.0 125.0 Q 17.0 103.5 29.6 85.5" fill="none" stroke="#C0511D" stroke-width="1.3"/><circle cx="23.26" cy="82.86" r="3.44" fill="none" stroke="#16130F" stroke-width="1.2"/><line x1="100.67" y1="100.67" x2="42.27" y2="42.27" stroke="#16130F" stroke-width="1.2" stroke-linecap="round"/><path d="M 93.2 111.8 Q 82.1 96.3 76.3 76.3 Q 96.3 82.1 111.8 93.2" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 61.4 98.7 Q 43.5 70.5 52.0 52.0 Q 70.5 43.5 98.7 61.4" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 29.6 85.5 Q 33.4 63.8 42.3 42.3 Q 63.8 33.4 85.5 29.6" fill="none" stroke="#C0511D" stroke-width="1.3"/><circle cx="82.86" cy="23.26" r="3.44" fill="none" stroke="#16130F" stroke-width="1.2"/><circle cx="125" cy="125" r="18.93" fill="none" stroke="#16130F" stroke-width="1.6"/></svg></div>
+  </div>
+
+  <footer>
+    <span>14 &middot; 12 &middot; 14 &middot; 8 arms &middot; set 101</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Mandalas</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>One Big One</h1>
+    <p class="sub">Quiet Pages &middot; Page 2 of 2</p>
+  </header>
+
+
+
+
+  <div class="big" style="text-align:center;margin-top:6px"><svg class="" viewBox="0 0 620 620" width="620" height="620" role="img" aria-label="a mandala with 12 arms" xmlns="http://www.w3.org/2000/svg"><circle cx="310" cy="310" r="68.64" fill="none" stroke="#16130F" stroke-width="1.4"/><circle cx="310" cy="310" r="137.27" fill="none" stroke="#16130F" stroke-width="1.4"/><circle cx="310" cy="310" r="205.91" fill="none" stroke="#16130F" stroke-width="1.4"/><circle cx="310" cy="310" r="274.55" fill="none" stroke="#16130F" stroke-width="1.4"/><circle cx="310" cy="310" r="302" fill="none" stroke="#16130F" stroke-width="2"/><line x1="310" y1="241.36" x2="310" y2="8" stroke="#16130F" stroke-width="1.2" stroke-linecap="round"/><path d="M 292.2 243.7 Q 296.6 207.9 310.0 172.7 Q 323.4 207.9 327.8 243.7" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 274.5 177.4 Q 284.5 116.1 310.0 104.1 Q 335.5 116.1 345.5 177.4" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 256.7 111.1 Q 278.6 71.8 310.0 35.5 Q 341.4 71.8 363.3 111.1" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 238.9 44.8 Q 271.1 14.7 310.0 8.0 Q 348.9 14.7 381.1 44.8" fill="none" stroke="#C0511D" stroke-width="1.3"/><circle cx="384.61" cy="31.55" r="6.86" fill="none" stroke="#16130F" stroke-width="1.2"/><line x1="344.32" y1="250.56" x2="461" y2="48.46" stroke="#16130F" stroke-width="1.2" stroke-linecap="round"/><path d="M 327.8 243.7 Q 349.4 214.9 378.6 191.1 Q 372.7 228.3 358.5 261.5" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 345.5 177.4 Q 384.9 129.3 413.0 131.7 Q 429.1 154.8 407.1 212.9" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 363.3 111.1 Q 401.9 88.1 447.3 72.2 Q 456.2 119.4 455.6 164.4" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 381.1 44.8 Q 424.0 34.8 461.0 48.5 Q 491.3 73.7 504.1 115.9" fill="none" stroke="#C0511D" stroke-width="1.3"/><circle cx="513.84" cy="106.16" r="6.86" fill="none" stroke="#16130F" stroke-width="1.2"/><line x1="369.44" y1="275.68" x2="571.54" y2="159" stroke="#16130F" stroke-width="1.2" stroke-linecap="round"/><path d="M 358.5 261.5 Q 391.7 247.3 428.9 241.4 Q 405.1 270.6 376.3 292.2" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 407.1 212.9 Q 465.2 190.9 488.3 207.0 Q 490.7 235.1 442.6 274.5" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 455.6 164.4 Q 500.6 163.8 547.8 172.7 Q 531.9 218.1 508.9 256.7" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 504.1 115.9 Q 546.3 128.7 571.5 159.0 Q 585.2 196.0 575.2 238.9" fill="none" stroke="#C0511D" stroke-width="1.3"/><circle cx="588.45" cy="235.39" r="6.86" fill="none" stroke="#16130F" stroke-width="1.2"/><line x1="378.64" y1="310" x2="612" y2="310" stroke="#16130F" stroke-width="1.2" stroke-linecap="round"/><path d="M 376.3 292.2 Q 412.1 296.6 447.3 310.0 Q 412.1 323.4 376.3 327.8" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 442.6 274.5 Q 503.9 284.5 515.9 310.0 Q 503.9 335.5 442.6 345.5" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 508.9 256.7 Q 548.2 278.6 584.5 310.0 Q 548.2 341.4 508.9 363.3" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 575.2 238.9 Q 605.3 271.1 612.0 310.0 Q 605.3 348.9 575.2 381.1" fill="none" stroke="#C0511D" stroke-width="1.3"/><circle cx="588.45" cy="384.61" r="6.86" fill="none" stroke="#16130F" stroke-width="1.2"/><line x1="369.44" y1="344.32" x2="571.54" y2="461" stroke="#16130F" stroke-width="1.2" stroke-linecap="round"/><path d="M 376.3 327.8 Q 405.1 349.4 428.9 378.6 Q 391.7 372.7 358.5 358.5" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 442.6 345.5 Q 490.7 384.9 488.3 413.0 Q 465.2 429.1 407.1 407.1" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 508.9 363.3 Q 531.9 401.9 547.8 447.3 Q 500.6 456.2 455.6 455.6" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 575.2 381.1 Q 585.2 424.0 571.5 461.0 Q 546.3 491.3 504.1 504.1" fill="none" stroke="#C0511D" stroke-width="1.3"/><circle cx="513.84" cy="513.84" r="6.86" fill="none" stroke="#16130F" stroke-width="1.2"/><line x1="344.32" y1="369.44" x2="461" y2="571.54" stroke="#16130F" stroke-width="1.2" stroke-linecap="round"/><path d="M 358.5 358.5 Q 372.7 391.7 378.6 428.9 Q 349.4 405.1 327.8 376.3" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 407.1 407.1 Q 429.1 465.2 413.0 488.3 Q 384.9 490.7 345.5 442.6" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 455.6 455.6 Q 456.2 500.6 447.3 547.8 Q 401.9 531.9 363.3 508.9" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 504.1 504.1 Q 491.3 546.3 461.0 571.5 Q 424.0 585.2 381.1 575.2" fill="none" stroke="#C0511D" stroke-width="1.3"/><circle cx="384.61" cy="588.45" r="6.86" fill="none" stroke="#16130F" stroke-width="1.2"/><line x1="310" y1="378.64" x2="310" y2="612" stroke="#16130F" stroke-width="1.2" stroke-linecap="round"/><path d="M 327.8 376.3 Q 323.4 412.1 310.0 447.3 Q 296.6 412.1 292.2 376.3" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 345.5 442.6 Q 335.5 503.9 310.0 515.9 Q 284.5 503.9 274.5 442.6" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 363.3 508.9 Q 341.4 548.2 310.0 584.5 Q 278.6 548.2 256.7 508.9" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 381.1 575.2 Q 348.9 605.3 310.0 612.0 Q 271.1 605.3 238.9 575.2" fill="none" stroke="#C0511D" stroke-width="1.3"/><circle cx="235.39" cy="588.45" r="6.86" fill="none" stroke="#16130F" stroke-width="1.2"/><line x1="275.68" y1="369.44" x2="159" y2="571.54" stroke="#16130F" stroke-width="1.2" stroke-linecap="round"/><path d="M 292.2 376.3 Q 270.6 405.1 241.4 428.9 Q 247.3 391.7 261.5 358.5" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 274.5 442.6 Q 235.1 490.7 207.0 488.3 Q 190.9 465.2 212.9 407.1" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 256.7 508.9 Q 218.1 531.9 172.7 547.8 Q 163.8 500.6 164.4 455.6" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 238.9 575.2 Q 196.0 585.2 159.0 571.5 Q 128.7 546.3 115.9 504.1" fill="none" stroke="#C0511D" stroke-width="1.3"/><circle cx="106.16" cy="513.84" r="6.86" fill="none" stroke="#16130F" stroke-width="1.2"/><line x1="250.56" y1="344.32" x2="48.46" y2="461" stroke="#16130F" stroke-width="1.2" stroke-linecap="round"/><path d="M 261.5 358.5 Q 228.3 372.7 191.1 378.6 Q 214.9 349.4 243.7 327.8" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 212.9 407.1 Q 154.8 429.1 131.7 413.0 Q 129.3 384.9 177.4 345.5" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 164.4 455.6 Q 119.4 456.2 72.2 447.3 Q 88.1 401.9 111.1 363.3" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 115.9 504.1 Q 73.7 491.3 48.5 461.0 Q 34.8 424.0 44.8 381.1" fill="none" stroke="#C0511D" stroke-width="1.3"/><circle cx="31.55" cy="384.61" r="6.86" fill="none" stroke="#16130F" stroke-width="1.2"/><line x1="241.36" y1="310" x2="8" y2="310" stroke="#16130F" stroke-width="1.2" stroke-linecap="round"/><path d="M 243.7 327.8 Q 207.9 323.4 172.7 310.0 Q 207.9 296.6 243.7 292.2" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 177.4 345.5 Q 116.1 335.5 104.1 310.0 Q 116.1 284.5 177.4 274.5" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 111.1 363.3 Q 71.8 341.4 35.5 310.0 Q 71.8 278.6 111.1 256.7" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 44.8 381.1 Q 14.7 348.9 8.0 310.0 Q 14.7 271.1 44.8 238.9" fill="none" stroke="#C0511D" stroke-width="1.3"/><circle cx="31.55" cy="235.39" r="6.86" fill="none" stroke="#16130F" stroke-width="1.2"/><line x1="250.56" y1="275.68" x2="48.46" y2="159" stroke="#16130F" stroke-width="1.2" stroke-linecap="round"/><path d="M 243.7 292.2 Q 214.9 270.6 191.1 241.4 Q 228.3 247.3 261.5 261.5" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 177.4 274.5 Q 129.3 235.1 131.7 207.0 Q 154.8 190.9 212.9 212.9" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 111.1 256.7 Q 88.1 218.1 72.2 172.7 Q 119.4 163.8 164.4 164.4" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 44.8 238.9 Q 34.8 196.0 48.5 159.0 Q 73.7 128.7 115.9 115.9" fill="none" stroke="#C0511D" stroke-width="1.3"/><circle cx="106.16" cy="106.16" r="6.86" fill="none" stroke="#16130F" stroke-width="1.2"/><line x1="275.68" y1="250.56" x2="159" y2="48.46" stroke="#16130F" stroke-width="1.2" stroke-linecap="round"/><path d="M 261.5 261.5 Q 247.3 228.3 241.4 191.1 Q 270.6 214.9 292.2 243.7" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 212.9 212.9 Q 190.9 154.8 207.0 131.7 Q 235.1 129.3 274.5 177.4" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 164.4 164.4 Q 163.8 119.4 172.7 72.2 Q 218.1 88.1 256.7 111.1" fill="none" stroke="#C0511D" stroke-width="1.3"/><path d="M 115.9 115.9 Q 128.7 73.7 159.0 48.5 Q 196.0 34.8 238.9 44.8" fill="none" stroke="#C0511D" stroke-width="1.3"/><circle cx="235.39" cy="31.55" r="6.86" fill="none" stroke="#16130F" stroke-width="1.2"/><circle cx="310" cy="310" r="37.75" fill="none" stroke="#16130F" stroke-width="1.6"/></svg></div>
+
+  <footer>
+    <span>12 arms, 4 rings &middot; set 101</span>
+    <span class="brand">Kitchen Table</span>
+    <span>One big one</span>
+  </footer>
+</div>
+
+</body>
+</html>

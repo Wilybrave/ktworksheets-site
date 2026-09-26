@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="sheet-kind" content="form">
+<title>Not Every Home Is the Same</title>
+<style>
+  @page { size: letter portrait; margin: 0.4in 0.45in; }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  :root {
+    --ink:    #16130F;
+    --muted:  #6B635A;
+    --rule:   #CFC3B2;
+    --guide:  #BCAE9C;
+    --accent: #C0511D;
+    --tint:   #F7EDE4;
+    --slate:  #2E5A78;
+    --tintslate: #E9EFF4;
+    --deep:   #2C4A45;
+    --tintdeep: #ECF1EF;
+  }
+
+  body {
+    font-family: Quicksand, 'URW Gothic', 'Century Gothic', sans-serif;
+    color: #000; background: #fff;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+
+  /* ORDER MATTERS. This generic rule must come BEFORE the @media screen block:
+   * both selectors have the same specificity, so whichever is declared last
+   * wins. With it after, it overrode the screen width and the preview stretched
+   * to the viewport — rows scaled up and pages measured 16in tall. Print was
+   * always fine (@media screen doesn't apply), but the on-screen proof lied. */
+  .page { width: 100%; }
+  .page + .page { page-break-before: always; }
+
+  @media screen {
+    body { padding: 0.4in; background: #ddd; }
+    .page {
+      background: #fff; padding: 0.4in 0.45in;
+      width: 8.5in; min-height: 11in;
+      margin: 0 auto 22px; box-shadow: 0 2px 10px rgba(0,0,0,.3);
+    }
+  }
+
+  header {
+    display: flex; align-items: center; gap: 16px;
+    border-bottom: 3px solid var(--slate); padding-bottom: 7px; margin-bottom: 2px;
+  }
+  .bigletter { font-size: 38pt; font-weight: 700; line-height: 1; letter-spacing: .02em; }
+  .htext { flex: 1; }
+  h1 { font-size: 14pt; font-weight: 700; margin: 0 0 2px; }
+  .sub { font-size: 10pt; color: var(--muted); margin: 0; }
+  .nameline {
+    font-size: 9.5pt; color: var(--muted);
+    border-bottom: 1px solid var(--ink); width: 2in;
+    padding-bottom: 1px; align-self: flex-end;
+  }
+
+  .label { font-size: 11.5pt; font-weight: 700; margin: 9px 0 1px; }
+  .label span { font-weight: 400; font-size: 10pt; color: var(--muted); }
+
+  .row { display: block; width: 100%; height: auto; margin-bottom: .06in; }
+  /* Rows that follow the header directly would otherwise jam against its rule. */
+  header + .row { margin-top: .12in; }
+
+  .words {
+    margin-top: 10px; padding-top: 7px; border-top: 1px solid var(--rule);
+    font-size: 12.5pt;
+    display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap;
+  }
+  .words b { font-size: 14pt; }
+  .words em { font-style: normal; color: var(--muted); }
+
+  /* The wordmark rides in the footer line that was already there — see the note
+     in lib/sheet.js. No height, upright, a size down, and never louder than the
+     two slots it sits between. */
+  .brand { font-style: normal; font-size: 7pt; letter-spacing: .04em;
+    color: var(--accent); align-self: center; }
+
+  footer {
+    margin-top: 7px; font-size: 8.5pt; color: var(--muted);
+    display: flex; justify-content: space-between;
+  }
+
+  .chart { display: grid; grid-template-columns: repeat(6, 1fr); gap: 7px; margin-top: 14px; }
+  .cell {
+    border: 2px solid var(--slate); border-radius: 8px; height: 1.35in;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .page.key { background: #fcfcfa; }
+  .page.key header { border-bottom-style: double; border-bottom-width: 3px; }
+  .keylist { font-size: 11pt; line-height: 1.7; }
+  .keylist p { margin: .02in 0; }
+  .keynote { border: 1.5px solid var(--deep); border-radius: 8px; padding: .07in .12in;
+    margin: .1in 0 0; font-size: 10pt; line-height: 1.5; }
+
+  .note { border: 1.5px solid var(--deep); border-radius: 8px; padding: .07in .12in;
+    margin: .06in 0 .1in; font-size: 10pt; color: var(--ink); }
+  svg { display: block; }
+
+  .picks { display: flex; gap: .2in; }
+  .pick { display: flex; align-items: center; gap: .07in; font-size: 11pt; }
+  .pick i { width: .28in; height: .28in; border: 2.2px solid var(--slate); border-radius: 5px;
+    display: block; flex: 0 0 auto; }
+
+  .task { border-top: 2.4px solid var(--slate); margin-top: .14in; padding-top: .07in; }
+  .tasktitle { font-size: 11.5pt; margin-bottom: .04in; }
+  .qlab { font-size: 10.5pt; color: var(--deep); margin: .05in 0 .02in; }
+
+  .frows { margin-top: .1in; }
+  .frow { display: flex; align-items: center; gap: .1in; font-size: 11.5pt; margin-bottom: .07in; }
+  .frow span { flex: 1; }
+  .fbox { width: .42in; height: .42in; border: 2.2px solid var(--slate); border-radius: 6px;
+    display: block; flex: 0 0 auto; }
+  .fline { width: 2.4in; border-bottom: 2.2px solid var(--slate); height: .3in; display: block;
+    flex: 0 0 auto; }
+
+  /* 11 — two homes */
+  .two { display: flex; gap: .16in; }
+  .col { flex: 1; border: 2.4px solid var(--slate); border-radius: 10px; padding: .08in .1in .1in; }
+  .colhead { font-weight: 700; font-size: 12pt; text-align: center; padding-bottom: .05in;
+    border-bottom: 2px solid var(--slate); margin-bottom: .06in; }
+  .drawbox { height: 2.4in; border: 2.2px dashed var(--slate); border-radius: 8px; }
+
+  /* 12 — rooms and cut-outs */
+  .rooms { display: grid; grid-template-columns: 1fr 1fr; gap: .14in; }
+  .room { border: 2.6px solid var(--slate); border-radius: 10px; height: 3.5in; position: relative; }
+  /* INSIDE the box, not notched into its top edge. The notch trick needs the
+   * label's background to match the paper exactly, and here it did not, so every
+   * room name printed with a line struck through it. */
+  .roomname { position: absolute; top: .07in; left: .14in; font-weight: 700; font-size: 12pt; }
+  .cuts { display: grid; grid-template-columns: repeat(4, 1fr); }
+  .cut { border: 1.6px dashed var(--slate); padding: .06in 0 .04in; text-align: center;
+    display: flex; flex-direction: column; align-items: center; gap: .02in; }
+  .cut span { font-size: 10pt; }
+
+  /* 20 — matching, and the asking sheet */
+  /*
+   * THE TWO COLUMNS GO TO THE EDGES. They were flex:1 with a .3in gap, which put
+   * both sets of dots within a centimeter of each other in the middle of the
+   * page — a matching sheet with nowhere to draw the match on. The pictures are
+   * pinned left and the words right, and the space between them is the part the
+   * child actually uses.
+   */
+  .match { display: flex; justify-content: space-between; margin-top: .1in; }
+  .mcol { width: 2.85in; display: flex; flex-direction: column; justify-content: space-between; }
+  .mcell { display: flex; align-items: center; gap: .12in; height: 1.85in; }
+  .mcell.text { font-size: 12.5pt; }
+  .mcol.right .mcell { justify-content: flex-start; }
+  .dot { width: .13in; height: .13in; border-radius: 50%; background: var(--ink); display: block;
+    flex: 0 0 auto; }
+  .mcol:not(.right) .mcell { justify-content: flex-start; }
+  .mcol:not(.right) .mcell span { font-size: 11pt; flex: 1; text-align: right; }
+
+  .ask { display: flex; gap: .1in; align-items: flex-start; border-top: 2px solid var(--slate);
+    padding: .09in 0; }
+  .asknum { width: .34in; height: .34in; border: 2.2px solid var(--slate); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; font-weight: 700;
+    flex: 0 0 auto; font-size: 11pt; }
+  .asklines { flex: 1; }
+  .askbox { width: 1.9in; height: 1.9in; border: 2.2px dashed var(--slate); border-radius: 8px;
+    flex: 0 0 auto; display: flex; align-items: flex-end; justify-content: center; padding-bottom: .04in; }
+  .askbox span { font-size: 9.5pt; color: var(--deep); }
+
+  /* 21 — the street */
+  /* Unit 133, not 140 (sideways pass 2026-09-24): the five fronts are 5.35 units
+     wide, so 140 made 764px with the gaps on a 730px page and both end houses
+     were cut off. Only the widths scale; the floors keep their height. */
+  .street { display: flex; align-items: flex-end; justify-content: center; gap: .04in; }
+  .bld svg rect, .bld svg path { fill: none; stroke: var(--ink); stroke-width: 3; }
+  .bld svg rect.sign { stroke-dasharray: 5 4; }
+  .ground { border-top: 3.4px solid var(--ink); margin: 0 0 .08in; }
+  .jobs { margin-bottom: .04in; }
+  .jrow { font-size: 11pt; padding-left: .18in; text-indent: -.18in; margin-bottom: .03in; }
+  .jrow::before { content: '\25A1'; margin-right: .06in; }
+
+  /* 31 — turns */
+  .trow { display: flex; gap: .1in; align-items: flex-start; border-top: 2px solid var(--slate);
+    padding: .08in 0; }
+  .tnum { width: .34in; height: .34in; border: 2.2px solid var(--slate); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; font-weight: 700;
+    flex: 0 0 auto; font-size: 11pt; }
+  .tbody { flex: 1; }
+  .ttext { font-size: 11.5pt; margin-bottom: .05in; }
+  .twhy { font-size: 10pt; color: var(--deep); margin: .04in 0 .01in; }
+
+  /* 41 — nesting */
+  .nest { display: flex; justify-content: center; margin: .04in 0 .1in; }
+  .nest svg rect { fill: none; stroke: var(--ink); stroke-width: 3; }
+  .nest svg text { font-family: inherit; font-size: 18px; fill: var(--ink); }
+  .nest svg circle.you { fill: var(--ink); }
+  .picksrow { display: flex; align-items: center; gap: .16in; font-size: 11.5pt; margin: .06in 0; }
+
+  /* 50 — three boxes, then the sort */
+  .three { display: flex; gap: .14in; }
+  .tcol { flex: 1; text-align: center; }
+  .thead { font-weight: 700; font-size: 13pt; margin-bottom: .05in; }
+  .tcol .tbox { height: 3.6in; border: 2.4px solid var(--slate); border-radius: 10px; }
+  .tsub { font-size: 9.5pt; color: var(--deep); margin-top: .04in; }
+
+  .wtable { margin-top: .06in; }
+  .whead { display: flex; align-items: flex-end; gap: .08in; padding-bottom: .05in;
+    border-bottom: 2.4px solid var(--slate); }
+  .whead span { flex: 1; }
+  .whead i { width: 1.05in; font-style: normal; font-size: 9.5pt; text-align: center;
+    flex: 0 0 auto; line-height: 1.15; }
+  .wrow { display: flex; align-items: center; gap: .08in; border-bottom: 1.6px solid var(--slate);
+    padding: .09in 0; font-size: 11.5pt; }
+  .wrow span { flex: 1; }
+  .wbox { width: 1.05in; display: block; flex: 0 0 auto; }
+  .wrow .wbox { height: .34in; border: 2.2px solid var(--slate); border-radius: 6px;
+    width: .34in; margin: 0 auto; }
+  .wrow > .wbox { margin-left: .355in; margin-right: .355in; }
+
+  .drawbox { height: 4.3in; }
+  .room { height: 3.9in; }
+  .cut { padding: .15in 0 .1in; }
+  .cut span { font-size: 12pt; }
+  .qlab { font-size: 12pt; }
+  .mcell { height: 2.05in; }
+  .mcell.text { font-size: 15pt; }
+  .mcol:not(.right) .mcell span { font-size: 13pt; }
+  .dot { width: .18in; height: .18in; }
+  .askbox { width: 2.5in; height: 2.5in; }
+  .askbox span { font-size: 11pt; }
+  .asknum { width: .44in; height: .44in; font-size: 14pt; }
+  .jrow { font-size: 13.5pt; margin-bottom: .1in; }
+  .frow { font-size: 13.5pt; margin-bottom: .16in; }
+  .fbox { width: .6in; height: .6in; }
+  .fline { height: .45in; }
+  .tasktitle { font-size: 13.5pt; }
+  .picksrow { font-size: 13.5pt; margin: .14in 0; }
+  .pick { font-size: 13pt; }
+  .pick i { width: .38in; height: .38in; }
+  .tcol .tbox { height: 4.6in; }
+  .thead { font-size: 15pt; }
+  .tsub { font-size: 11.5pt; }
+  .whead i { font-size: 11.5pt; }
+  .wrow { padding: .26in 0; font-size: 14pt; }
+  .wrow .wbox { height: .44in; width: .44in; }
+  .wrow > .wbox { margin-left: .305in; margin-right: .305in; }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <header>
+    <div class="bigletter">&#8962;&#8962;</div>
+    <div class="htext">
+      <h1>Not Every Home Is the Same</h1>
+      <p class="sub">Fill in both sides for a home you have been inside.</p>
+    </div>
+    <div class="nameline">Name</div>
+  </header>
+
+  <div class="two">
+    <div class="col">
+      <div class="colhead">My home</div>
+      <div class="qlab">Who lives here?</div>
+      <div class="drawbox"></div>
+      <div class="frow"><span>How many people?</span><i class="fbox"></i></div>
+      <div class="qlab">Who makes the food?</div>
+            <svg class="row" viewBox="0 0 729.6 81.68" width="100%" role="img" aria-label="write here">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="32.84" x2="729.6" y2="32.84" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="60.68" x2="729.6" y2="60.68" stroke="#16130F" stroke-width="2.6"/>
+      </svg>
+      <div class="qlab">Where does everybody eat?</div>
+            <svg class="row" viewBox="0 0 729.6 81.68" width="100%" role="img" aria-label="write here">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="32.84" x2="729.6" y2="32.84" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="60.68" x2="729.6" y2="60.68" stroke="#16130F" stroke-width="2.6"/>
+      </svg>
+    </div>
+    <div class="col">
+      <div class="colhead">Somebody else&rsquo;s home</div>
+      <div class="qlab">Who lives here?</div>
+      <div class="drawbox"></div>
+      <div class="frow"><span>How many people?</span><i class="fbox"></i></div>
+      <div class="qlab">Who makes the food?</div>
+            <svg class="row" viewBox="0 0 729.6 81.68" width="100%" role="img" aria-label="write here">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="32.84" x2="729.6" y2="32.84" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="60.68" x2="729.6" y2="60.68" stroke="#16130F" stroke-width="2.6"/>
+      </svg>
+      <div class="qlab">Where does everybody eat?</div>
+            <svg class="row" viewBox="0 0 729.6 81.68" width="100%" role="img" aria-label="write here">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="32.84" x2="729.6" y2="32.84" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="60.68" x2="729.6" y2="60.68" stroke="#16130F" stroke-width="2.6"/>
+      </svg>
+    </div>
+  </div>
+  <div class="task">
+    <div class="tasktitle">One thing that is the same in <b>both</b> homes:</div>
+          <svg class="row" viewBox="0 0 729.6 81.68" width="100%" role="img" aria-label="write here">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="32.84" x2="729.6" y2="32.84" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="60.68" x2="729.6" y2="60.68" stroke="#16130F" stroke-width="2.6"/>
+      </svg>
+  </div>
+
+
+  <footer>
+    <span>two homes, one thing the same</span>
+    <span class="brand">Kitchen Table</span>
+    <span>My home</span>
+  </footer>
+</div>
+
+</body>
+</html>

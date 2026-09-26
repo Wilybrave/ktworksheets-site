@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="sheet-kind" content="open">
+<title>The Marble Run — Making</title>
+<style>
+  :root { --font: Georgia, "Times New Roman", serif; }
+
+  /* Page margins live HERE only — body padding stays 0 for print so the two
+     don't stack and eat the sheet. */
+  @page { size: letter portrait; margin: 0.45in 0.5in; }
+
+  /*
+   * THE PALETTE. The same one the shop wears (kitchen-table/BRAND.md): warm
+   * near-black ink, one accent, pine kept back for the answer key.
+   *
+   * WHY A SHEET HAS COLOR AT ALL. Every sheet was pure grayscale — #000 rules,
+   * #333 subtitles, #f0f0f0 boxes — which is what you get by never deciding.
+   * The paper is the product and it looked like a fax. A printer set to
+   * grayscale, or one that has no color to give, renders all of this as the
+   * greys it already had, so nothing below costs a parent anything they were
+   * not already spending.
+   *
+   * WHAT STAYS BLACK, ON PURPOSE:
+   *   - anything drawn to be written on (rules, name lines, answer boxes)
+   *   - anything drawn to be traced or colored in (line art, letter guides)
+   *   - the confidence rings, which have to survive a mono laser
+   * Color marks the sheet's own furniture — its rule, its numbering, its
+   * boxes — and never the part a child puts a pencil through.
+   */
+  :root {
+    --ink:    #16130F;
+    --muted:  #6B635A;
+    --rule:   #CFC3B2;
+    --guide:  #BCAE9C;
+    --accent: #C0511D;
+    --tint:   #F7EDE4;
+    --slate:  #2E5A78;
+    --tintslate: #E9EFF4;
+    --deep:   #2C4A45;
+    --tintdeep: #ECF1EF;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font);
+    color: #000; background: #fff;
+    font-size: 12pt; line-height: 1.3;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+
+  /* ORDER MATTERS. This generic rule must come BEFORE the @media screen block:
+     same specificity, so whichever is declared last wins. With it after, the
+     on-screen preview stretches to the viewport instead of 8.5in — print is
+     unaffected, but the proof you check before printing is wrong. */
+  .page { width: 100%; }
+  .page + .page { page-break-before: always; }
+
+  @media screen {
+    body { padding: 0.5in; background: #ddd; }
+    .page {
+      background: #fff; padding: 0.45in 0.5in;
+      width: 8.5in; min-height: 11in;
+      margin: 0 auto 24px; box-shadow: 0 2px 10px rgba(0,0,0,.3);
+    }
+  }
+
+  /* ------------------------------------------------------------- header */
+  header { border-bottom: 3px double var(--accent); padding-bottom: 6px; }
+  header.cont { border-bottom: 1px solid var(--rule); }
+  h1 { font-size: 16pt; margin: 0 0 1px; letter-spacing: .01em; }
+  .sub { font-size: 10pt; font-style: italic; color: var(--muted); margin: 0; }
+
+  .nameline { display: flex; gap: 26px; font-size: 10.5pt; margin: 11px 0 12px; }
+  .nameline span { flex: 1; border-bottom: 1px solid var(--ink); padding-bottom: 1px; }
+  .nameline span.short { flex: 0 0 1.9in; }
+
+  .directions {
+    font-size: 10.5pt; line-height: 1.35;
+    background: var(--tint); border-left: 4px solid var(--accent);
+    padding: 7px 10px; margin: 12px 0 14px;
+  }
+  .directions b { letter-spacing: .03em; }
+  .tip { font-style: italic; margin-top: 3px; }
+
+  /* ------------------------------------------------- problems and grids */
+  .grid { display: grid; gap: 13px 16px; margin-top: 4px; }
+  .prob { page-break-inside: avoid; display: flex; gap: 5px; align-items: flex-start; }
+  .pn { font-weight: bold; font-size: 11pt; min-width: .28in; flex: 0 0 auto; color: var(--accent); }
+  .pbody { flex: 1; min-width: 0; }
+
+  /* Digits need lining figures and even widths whatever the body font is. */
+  .num, .vert, .horiz { font-family: "Trebuchet MS", "Segoe UI", Tahoma, Verdana, sans-serif; font-variant-numeric: lining-nums tabular-nums; }
+
+  /* A stacked column algorithm.
+     Two grid columns — operator, then digits — because a floated or absolutely
+     positioned operator overlaps the digits as soon as the numbers get wide,
+     and "324" with a + sitting on the 3 is unreadable. The grid also lets the
+     rule under the last operand span BOTH columns, which is how it is written
+     by hand. The rule is heavy: it is the line you write the answer beneath. */
+  .vert {
+    display: inline-grid; grid-template-columns: auto auto;
+    font-size: 15pt; line-height: 1.3; text-align: right;
+  }
+  .vert > span { padding: 0 0 1px 0; }
+  .vert .op { text-align: left; padding-right: .16in; }
+  .vert .last { border-bottom: 2.5px solid var(--ink); padding-bottom: 3px; }
+  .vert .ans { height: .4in; }
+  /* Partial-products working, for 2-digit x 1-digit before the short method. */
+  .vert .part { font-size: 11pt; color: var(--muted); }
+  /* A row of worked examples that fade — see lib/formats.js faded(). The
+     caption is what makes the fade legible: without it the third one looks like
+     a question somebody forgot to number. */
+  .egrow { display: flex; gap: .34in; align-items: flex-start; margin: 0 0 4px; }
+  .eg { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; }
+  .eglab { font-size: 8.5pt; color: var(--slate); letter-spacing: .02em; }
+
+  /* The carried digits. Small and grey so the sum still reads as the sum, and
+     tight to the row below it so a carry sits ON the column it goes into. */
+  .vert .carry { font-size: 9pt; color: var(--slate); line-height: 1; padding: 0 0 1px 0; }
+
+  .horiz { font-size: 14pt; white-space: nowrap; }
+
+  /* Row numbers in a word list. Gray and small: they are there so a list can be
+     dictated ("number seven") and marked without counting down the page, and
+     they must not compete with the word itself. */
+  .wn { color: var(--muted); font-size: 9pt; }
+
+  /* The box an answer goes in. inline-block so it can sit mid-sentence. */
+  .abox {
+    display: inline-block; border: 1.6px solid var(--slate); border-radius: 3px;
+    vertical-align: middle; margin: 0 3px; position: relative; background: #fff;
+  }
+  /* Scoped to the box: as a bare ".alab" it pinned any generator's own .alab
+     to the bottom of the page (life-07-signs-and-forms 40, 2026-09-24). */
+  .abox > .alab {
+    position: absolute; bottom: 1px; left: 0; right: 0;
+    text-align: center; font-size: 7pt; color: var(--muted); font-style: italic;
+  }
+
+  /* Confidence marks. The rings are drawn with a border and a gradient rather
+     than an SVG so they stay inline with the question text at any font size,
+     and print black on a mono laser without relying on a background image. */
+  .conf { float: right; margin: 2px 0 0 8px; white-space: nowrap; }
+  .cring {
+    display: inline-block; width: 11px; height: 11px; margin-left: 4px;
+    border: 1.4px solid var(--slate); border-radius: 50%; vertical-align: middle;
+  }
+  .cring-full { background: var(--accent); }
+  .cring-half { background: linear-gradient(90deg, var(--accent) 50%, #fff 50%); }
+  .cring-none { background: #fff; }
+  ol.qs.hasconf li { overflow: hidden; }
+
+  .conflegend {
+    border: 1.2px solid var(--rule); border-radius: 4px;
+    padding: 3px 8px; margin: 0 0 7px;
+    font-size: 8.5pt; color: var(--muted); display: flex; gap: 14px; align-items: center;
+  }
+  .conftitle { font-weight: 700; color: var(--ink); }
+  .confitem { white-space: nowrap; }
+
+  .work {
+    border: 1.4px dashed var(--rule); border-radius: 4px;
+    margin: 6px 0 2px; position: relative;
+  }
+  /* The label S.work() puts in the box: a DIRECT child only. As ".work span"
+     it also caught every span inside any generator's own .work content and
+     stacked them all at the top-left corner (math-11-grade6 47, 2026-09-23). */
+  .work > span {
+    position: absolute; top: 3px; left: 6px;
+    font-size: 8pt; color: var(--muted); font-style: italic;
+  }
+
+  /* ------------------------------------------------------ writing lines */
+  /* Primary rule: solid top, dashed midline, heavy baseline. Capitals reach
+     the top line, lowercase bodies sit under the dashed one. */
+  .write {
+    position: relative; height: 0.375in;
+    margin: 6px 0 0 .3in;
+    border-top: 1px solid var(--rule); border-bottom: 2px solid var(--ink);
+  }
+  .write.flush { margin-left: 0; }
+  .write + .write { margin-top: .17in; }
+  .write::after {
+    content: ""; position: absolute; left: 0; right: 0; top: 50%;
+    border-top: 1px dashed var(--guide);
+  }
+
+  /* ------------------------------------------------------- question list */
+  ol.qs { margin: 0; padding: 0 0 0 .34in; }
+  ol.qs li { margin-bottom: 13px; page-break-inside: avoid; }
+  ol.qs li::marker { font-weight: bold; font-size: 11pt; color: var(--accent); }
+  .qt { display: block; }
+
+  .mcq { display: grid; gap: 3px 14px; margin: 5px 0 2px .12in; font-size: 11pt; }
+  .opt { white-space: nowrap; }
+
+  /* -------------------------------------------------------------- tables */
+  .tbl { border-collapse: collapse; margin: 8px 0; font-size: 11pt; width: 100%; }
+  .tbl th, .tbl td { border: 1.4px solid var(--ink); padding: 5px 8px; text-align: left; }
+  .tbl th { color: var(--slate); }
+  .tbl th { background: var(--tint); font-size: 10pt; letter-spacing: .02em; }
+  .tbl td.blank { height: .34in; }
+  .tbl.narrow { width: auto; }
+  .tbl.center td, .tbl.center th { text-align: center; }
+
+  /* ------------------------------------------------------------ passages */
+  .passage {
+    border: 1.5px solid var(--slate); border-radius: 4px;
+    padding: 11px 14px; margin-bottom: 12px;
+    font-size: 11.5pt; line-height: 1.55;
+  }
+  .passage h2 { font-size: 13pt; margin: 0 0 6px; color: var(--deep); }
+  .passage p { margin: 0 0 8px; }
+  .passage p:last-child { margin-bottom: 0; }
+  .passage .byline { font-size: 9.5pt; font-style: italic; color: var(--muted); margin-bottom: 8px; }
+  /* Numbered paragraphs, so a question can say "in paragraph 2". */
+  .passage p.np { position: relative; padding-left: .3in; }
+  .passage p.np::before {
+    content: attr(data-p); position: absolute; left: 0; top: 0;
+    font-size: 9pt; color: var(--accent); font-weight: bold;
+  }
+
+  .wordbank {
+    border: 1.5px dashed var(--slate); border-radius: 4px;
+    padding: 8px 12px; margin: 10px 0 12px;
+    font-size: 11.5pt; text-align: center;
+  }
+  .wordbank b { display: block; font-size: 9.5pt; letter-spacing: .06em;
+    text-transform: uppercase; margin-bottom: 4px; color: var(--accent); }
+  .wordbank span { display: inline-block; margin: 2px 11px; }
+
+  .note {
+    border-left: 4px solid var(--deep); background: var(--tintdeep);
+    padding: 7px 11px; margin: 10px 0; font-size: 10.5pt;
+  }
+  .note b { letter-spacing: .02em; }
+
+  /* -------------------------------------------------------------- footer */
+  /* THE WORDMARK SITS IN THE FOOTER THAT WAS ALREADY THERE, so it costs no
+     height at all — a sheet that fitted before fits now. Upright where the rest
+     of the line is italic, and a size down: it is a signature, not a message,
+     and it must never compete with "Score: ___ / 10". */
+  .brand { font-style: normal; font-size: 7.5pt; letter-spacing: .04em;
+    color: var(--accent); align-self: center; }
+
+  footer {
+    margin-top: 14px; padding-top: 6px; border-top: 1px solid var(--rule);
+    font-size: 9pt; font-style: italic; color: var(--muted);
+    display: flex; justify-content: space-between;
+  }
+
+  /* ---------------------------------------------------------- answer key */
+  .keybadge {
+    display: inline-block; border: 2px solid var(--deep); color: var(--deep); padding: 2px 9px;
+    font-size: 9.5pt; font-weight: bold; letter-spacing: .08em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .key .why {
+    display: block; font-size: 9pt; font-style: italic; color: var(--muted); margin-top: 1px;
+  }
+  /* Highlight rather than underline: <u> in a key marks WHAT CHANGED, and an
+     underline under a comma is invisible. */
+  .key u { text-decoration: none; background: var(--tint); padding: 0 2px; font-weight: bold; }
+  .keygrid .pbody { font-family: "Trebuchet MS", "Segoe UI", Tahoma, Verdana, sans-serif; font-size: 12pt; }
+  /* A key's pictures scale to their column: at 1fr a wide drawing pushed a
+     three-column key 92px off the paper (art-04-drawing 10, 2026-09-24). */
+  .keygrid svg { max-width: 100%; height: auto; }
+  .keylist .qt { font-weight: normal; }
+
+  /*
+   * The guide page. Four lines per question, and the ASK line is the one that
+   * gets used at the table, so it is the one with a rule beside it — a parent
+   * scanning this page in ten seconds should land on the follow-up question
+   * and nothing else.
+   */
+  .guide { padding-left: .3in; }
+  .guide li { margin-bottom: 11px; page-break-inside: avoid; }
+  .guide .gq { font-weight: bold; font-size: 11pt; margin-bottom: 3px; }
+  /* 9pt, matching the key's own why line, because the guide page is the
+     binding constraint on every open sheet: four lines per question against a
+     key's one, and at 10pt a sheet with seven questions ran onto a second
+     side. Found by measuring, not chosen. (No backticks in here — this CSS
+     lives inside a template literal and one would close it.) */
+  .guide .glook, .guide .gthin, .guide .gstrong {
+    font-size: 9pt; line-height: 1.3; margin-top: 1px;
+  }
+  .guide .gthin { color: var(--muted); }
+  .guide .gstrong { color: var(--muted); font-style: italic; }
+  .guide .gask {
+    font-size: 9.5pt; line-height: 1.3; margin-top: 3px;
+    border-left: 3px solid var(--slate); padding-left: 7px;
+  }
+  .key .qs li { margin-bottom: 9px; }
+
+  /*
+   * INLINE-BLOCK, NOT BLOCK, AND THIS WAS WRONG FOR A LONG TIME. A block-level
+   * svg ignores text-align: center on its parent and sits flush left — so 117
+   * sheets across 35 packs said "centre this diagram" and got a left-aligned
+   * one. Twenty-five of them were origami and paper-plane fold sequences, where
+   * the whole page is diagrams.
+   *
+   * Nobody spotted it because a left-flush diagram looks deliberate; it only
+   * reads as wrong next to a centered one, and no sheet has both.
+   *
+   * inline-block makes text-align do what every one of those authors meant,
+   * and leaves a diagram in a left-aligned container exactly where it was.
+   * vertical-align: top kills the baseline gap that inline elements otherwise
+   * leave underneath them, which would have pushed long pages over.
+   */
+  svg { display: inline-block; vertical-align: top; }
+  svg.inline { vertical-align: middle; }
+
+  .page.g1 .tbl td { font-size: 12pt; padding-top: 7px; padding-bottom: 7px; line-height: 1.38; }
+  .page.g1 .tbl th { font-size: 10.5pt; padding-top: 6px; padding-bottom: 6px; }
+  .page.g1 .tbl td.blank { height: 0.45999999999999996in; }
+  .page.g1 .write + .write { margin-top: 0.25in; }
+  .page.g1 ol.qs li { margin-bottom: 19px; }
+  .page.g1 ol.qs .qt { font-size: 12pt; }
+  .page.g2 .tbl td { font-size: 12.5pt; padding-top: 12px; padding-bottom: 12px; line-height: 1.38; }
+  .page.g2 .tbl th { font-size: 10.5pt; padding-top: 6px; padding-bottom: 6px; }
+  .page.g2 .tbl td.blank { height: 0.62in; }
+  .page.g2 .write + .write { margin-top: 0.33in; }
+  .page.g2 ol.qs li { margin-bottom: 25px; }
+  .page.g2 ol.qs .qt { font-size: 12.5pt; }
+  .page.g3 .tbl td { font-size: 13pt; padding-top: 17px; padding-bottom: 17px; line-height: 1.38; }
+  .page.g3 .tbl th { font-size: 10.5pt; padding-top: 6px; padding-bottom: 6px; }
+  .page.g3 .tbl td.blank { height: 0.78in; }
+  .page.g3 .write + .write { margin-top: 0.41in; }
+  .page.g3 ol.qs li { margin-bottom: 31px; }
+  .page.g3 ol.qs .qt { font-size: 13pt; }
+  .page.g4 .tbl td { font-size: 13.5pt; padding-top: 22px; padding-bottom: 22px; line-height: 1.38; }
+  .page.g4 .tbl th { font-size: 10.5pt; padding-top: 6px; padding-bottom: 6px; }
+  .page.g4 .tbl td.blank { height: 0.94in; }
+  .page.g4 .write + .write { margin-top: 0.45in; }
+  .page.g4 ol.qs li { margin-bottom: 37px; }
+  .page.g4 ol.qs .qt { font-size: 13.5pt; }
+  .page.g5 .tbl td { font-size: 14pt; padding-top: 27px; padding-bottom: 27px; line-height: 1.38; }
+  .page.g5 .tbl th { font-size: 10.5pt; padding-top: 6px; padding-bottom: 6px; }
+  .page.g5 .tbl td.blank { height: 1.1in; }
+  .page.g5 .write + .write { margin-top: 0.45in; }
+  .page.g5 ol.qs li { margin-bottom: 43px; }
+  .page.g5 ol.qs .qt { font-size: 14pt; }
+  .page.g6 .tbl td { font-size: 14.5pt; padding-top: 32px; padding-bottom: 32px; line-height: 1.38; }
+  .page.g6 .tbl th { font-size: 10.5pt; padding-top: 6px; padding-bottom: 6px; }
+  .page.g6 .tbl td.blank { height: 1.26in; }
+  .page.g6 .write + .write { margin-top: 0.45in; }
+  .page.g6 ol.qs li { margin-bottom: 49px; }
+  .page.g6 ol.qs .qt { font-size: 14.5pt; }
+  .rules { font-size: 10pt; background: #FAF7F2; border: 1px solid var(--rule);
+           padding: 6px 9px; margin: 0 0 9px; }
+
+  .find { font-size: 10.5pt; line-height: 1.38; background: #FFFDF7;
+          border-left: 4px solid var(--accent); border-top: 1px solid var(--rule);
+          border-right: 1px solid var(--rule); border-bottom: 1px solid var(--rule);
+          padding: 8px 11px; margin: 10px 0; }
+
+  .cmp { margin: 8px 0 2px; }
+  .cmp svg { display: block; width: 100%; max-width: 4.3in; margin: 0 auto; }
+
+  .ramp { margin: 12px 0 0; }
+  .ramp svg { display: block; margin: 0 auto; }
+
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 8px 0 0; align-items: start; }
+  .fig svg { display: block; width: 100%; margin: 0 auto; }
+  /* the two hill runs one above the other, each the width of the page */
+  .two.hills { grid-template-columns: 1fr; gap: 18px; }
+  .two.hills .fig svg { max-width: 4.8in; }
+
+</style>
+</head>
+<body>
+
+<div class="page ">
+  <header>
+    
+    <h1>The Marble Run</h1>
+    <p class="sub">Making &middot; Projects &middot; Page 1 of 6</p>
+  </header>
+  <div class="nameline">
+    <span>Name</span>
+    <span class="short">Date</span>
+  </div>
+  <div class="directions">
+    <b>DIRECTIONS:</b> Answer question 1 in pen before you turn over.
+  </div>
+
+
+  <div class="rules"><b>Scissors only, with a grown-up in the room.</b> If a step seems to want a knife, snip or fold instead.</div>
+
+  <div class="note"><b>What you need:</b> card &middot; cardboard &middot; marbles &middot; masking tape &middot; a paper towel tube &middot; scissors &middot; a ruler &middot; a timer. Two marbles the same size.</div>
+
+  <div class="find"><b>The quickest way down is not the straight line.</b> The curved ramp is <b>longer</b>, yet <b>the curved marble wins</b>: it does its falling at the start, then goes flat out.</div>
+
+  <div class="cmp"><svg viewBox="0 0 626 438" width="100%"
+    role="img" aria-label="two ramps from the same high corner to the same low corner: a straight one and a curve that drops steeply then flattens">
+    <g transform="translate(30,34)">
+      <path d="M0,0 L565.7882705409073,360.19199999999995" fill="none" stroke="#8A8A8A" stroke-width="2.4"/>
+      <path d="M0.00,0.00 L0.00,0.10 L0.01,0.39 L0.03,0.87 L0.07,1.54 L0.13,2.41 L0.23,3.46 L0.36,4.70 L0.54,6.14 L0.76,7.75 L1.05,9.56 L1.39,11.54 L1.80,13.71 L2.29,16.05 L2.86,18.57 L3.51,21.27 L4.25,24.13 L5.09,27.16 L6.03,30.35 L7.08,33.71 L8.24,37.22 L9.51,40.88 L10.91,44.69 L12.44,48.65 L14.10,52.75 L15.90,56.98 L17.83,61.35 L19.91,65.84 L22.14,70.46 L24.52,75.19 L27.06,80.04 L29.76,84.99 L32.63,90.05 L35.66,95.20 L38.86,100.44 L42.23,105.77 L45.78,111.18 L49.51,116.66 L53.42,122.21 L57.51,127.82 L61.79,133.48 L66.25,139.20 L70.90,144.96 L75.74,150.76 L80.76,156.59 L85.98,162.44 L91.40,168.32 L97.00,174.20 L102.80,180.10 L108.79,185.99 L114.97,191.87 L121.35,197.75 L127.91,203.60 L134.67,209.43 L141.62,215.23 L148.76,220.99 L156.08,226.71 L163.60,232.38 L171.29,237.99 L179.17,243.53 L187.23,249.02 L195.47,254.42 L203.88,259.75 L212.47,264.99 L221.22,270.14 L230.15,275.20 L239.24,280.15 L248.48,285.00 L257.89,289.73 L267.44,294.35 L277.15,298.84 L287.00,303.21 L296.99,307.44 L307.12,311.54 L317.38,315.50 L327.77,319.31 L338.28,322.98 L348.91,326.49 L359.65,329.84 L370.49,333.03 L381.44,336.06 L392.49,338.93 L403.62,341.62 L414.84,344.14 L426.14,346.48 L437.52,348.65 L448.96,350.63 L460.47,352.44 L472.03,354.06 L483.64,355.49 L495.29,356.73 L506.98,357.79 L518.71,358.65 L530.45,359.32 L542.22,359.81 L554.00,360.10 L565.79,360.19" fill="none" stroke="#C0511D" stroke-width="2.8"/>
+      <circle cx="0" cy="0" r="7" fill="#3A3A3A"/>
+      <circle cx="565.7882705409073" cy="360.19199999999995" r="7" fill="#3A3A3A"/>
+      <circle cx="248.9468390379992" cy="158.48448" r="9" fill="#FFFFFF" stroke="#8A8A8A" stroke-width="2"/>
+      <circle cx="277.1506053016777" cy="298.84154391626197" r="9"
+              fill="#FFFFFF" stroke="#C0511D" stroke-width="2.4"/>
+      
+      <text x="0" y="-14" font-size="18" fill="#3A3A3A" text-anchor="start">same start</text>
+      <text x="565.7882705409073" y="386.19199999999995" font-size="18" fill="#3A3A3A" text-anchor="end">same finish</text>
+      <text x="407.36755478945327" y="233.33823999999993" font-size="17" fill="#8A8A8A" text-anchor="middle">straight</text>
+      <text x="6" y="352.19199999999995" font-size="17" fill="#C0511D" text-anchor="start">the curve &mdash; and it is winning</text>
+    </g>
+  </svg></div>
+
+  <ol class="qs" start="1"><li><span class="qt">Before you build anything: which do YOU think gets there first, and why? Then go and ask a grown-up the same question and write down what they said.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Cut the ramps &mdash; page 2 &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>The marble run</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>Two Ramps, Printed the Same</h1>
+    <p class="sub">Making &middot; Projects &middot; Page 2 of 6</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Glue this page onto cardboard. Cut TWO of each shape: four pieces.
+  </div>
+
+
+  <div class="note"><b>Both ramps start and end on the same two dots</b>, or the race proves nothing.</div>
+
+  <div class="ramp"><svg viewBox="-3 -3 428 328"
+    width="422" height="322"
+    role="img" aria-label="the curved ramp, at true size, to cut out twice">
+    <path d="M0.00,0.00 L0.00,0.07 L0.01,0.29 L0.02,0.65 L0.05,1.15 L0.10,1.80 L0.17,2.58 L0.27,3.51 L0.40,4.58 L0.57,5.79 L0.78,7.13 L1.04,8.61 L1.35,10.23 L1.71,11.98 L2.13,13.86 L2.62,15.87 L3.17,18.01 L3.80,20.27 L4.50,22.65 L5.28,25.15 L6.15,27.77 L7.10,30.51 L8.14,33.35 L9.28,36.31 L10.52,39.36 L11.86,42.53 L13.31,45.78 L14.86,49.14 L16.52,52.58 L18.30,56.11 L20.20,59.73 L22.21,63.43 L24.35,67.20 L26.61,71.04 L29.00,74.96 L31.52,78.93 L34.17,82.97 L36.95,87.06 L39.87,91.20 L42.92,95.39 L46.11,99.61 L49.44,103.88 L52.91,108.18 L56.52,112.51 L60.27,116.86 L64.17,121.23 L68.21,125.61 L72.39,130.00 L76.72,134.40 L81.19,138.80 L85.80,143.19 L90.56,147.57 L95.46,151.94 L100.50,156.29 L105.69,160.62 L111.01,164.92 L116.48,169.19 L122.09,173.41 L127.83,177.60 L133.71,181.74 L139.72,185.83 L145.87,189.87 L152.15,193.84 L158.56,197.76 L165.09,201.60 L171.75,205.37 L178.53,209.07 L185.43,212.69 L192.45,216.22 L199.59,219.66 L206.83,223.02 L214.18,226.27 L221.64,229.44 L229.20,232.49 L236.85,235.45 L244.60,238.29 L252.45,241.03 L260.38,243.65 L268.39,246.15 L276.49,248.53 L284.66,250.79 L292.90,252.93 L301.21,254.94 L309.59,256.82 L318.02,258.57 L326.51,260.19 L335.05,261.67 L343.63,263.01 L352.26,264.22 L360.92,265.29 L369.62,266.22 L378.35,267.00 L387.09,267.65 L395.86,268.15 L404.64,268.51 L413.43,268.73 L422.23,268.80 L422.23,321.60 L0,321.60 z" fill="white" stroke="#C0511D" stroke-width="2" stroke-linejoin="round"/>
+    <circle cx="0" cy="0" r="5" fill="#3A3A3A"/>
+    <circle cx="422.23" cy="268.80" r="5" fill="#3A3A3A"/>
+    <text x="14" y="147.83999999999997" font-size="12" fill="#8A8A8A">CUT TWO</text>
+    <text x="14" y="165.83999999999997" font-size="10.5" fill="#8A8A8A">the curved one</text>
+  </svg></div>
+  <div class="ramp"><svg viewBox="-3 -3 428 328"
+    width="422" height="322"
+    role="img" aria-label="the straight ramp, at true size, to cut out twice">
+    <path d="M0,0 L422.23,268.80 L422.23,321.60 L0,321.60 z" fill="white" stroke="#C0511D" stroke-width="2" stroke-linejoin="round"/>
+    <circle cx="0" cy="0" r="5" fill="#3A3A3A"/>
+    <circle cx="422.23" cy="268.80" r="5" fill="#3A3A3A"/>
+    <text x="14" y="147.83999999999997" font-size="12" fill="#8A8A8A">CUT TWO</text>
+    <text x="14" y="165.83999999999997" font-size="10.5" fill="#8A8A8A">the straight one</text>
+  </svg></div>
+
+  <footer>
+    <span>Race them on page 3 &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Two ramps, printed the same</span>
+  </footer>
+</div>
+
+<div class="page g5">
+  <header class="cont">
+    
+    <h1>The Race</h1>
+    <p class="sub">Making &middot; Projects &middot; Page 3 of 6</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Five races. Swap the marbles over halfway, in case it is the marble.
+  </div>
+
+
+  <div class="note"><b>Each ramp.</b> Stand two matching pieces upright, half a marble apart, so a marble
+  rides on the two top edges. Tape card scraps between them at each end.</div>
+
+  <div class="note"><b>Start together:</b> hold both marbles behind a ruler at the top and lift it
+  straight up. No pushing.</div>
+
+  <table class="tbl ">
+    <thead><tr><th>Race</th><th>Which marble was on the curve</th><th>Which arrived first</th><th>By a lot or a little?</th></tr></thead>
+    <tbody><tr><td><b>1</b></td><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr><tr><td><b>2</b></td><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr><tr><td><b>3</b></td><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr><tr><td><b>4</b></td><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr><tr><td><b>5</b></td><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr></tbody>
+  </table>
+
+  <div class="find"><b>If the straight ramp wins, check the setup:</b> ramps upright? dots at the same height and place? anything catching? both let go at once?</div>
+
+  <footer>
+    <span>Why it happens &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>The race</span>
+  </footer>
+</div>
+
+<div class="page g6">
+  <header class="cont">
+    
+    <h1>Why, and the Rule It Gives You</h1>
+    <p class="sub">Making &middot; Projects &middot; Page 4 of 6</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Read this after you have raced them.
+  </div>
+
+
+  <div class="find"><b>Speed comes from how far you have dropped.</b> The curve drops early, so its marble is fast almost all the way. This curve (traced by a point on a rolling wheel) is <i>the</i> fastest path there is.</div>
+
+  <div class="note"><b>In 1696 Johann Bernoulli set this as a challenge.</b> Isaac Newton solved it in
+  one night and sent it back unsigned. Bernoulli: <i>"I recognize the lion by his claw."</i></div>
+
+  <div class="find"><b>A marble never climbs back to where it started</b>: rubbing takes some of the drop. <b>So every hill must be lower than the one before.</b></div>
+
+  <div class="two hills">
+    <div class="fig"><svg viewBox="0 0 330 200" width="100%"
+    role="img" aria-label="a run where the third hill is higher than the second, and the marble stalls">
+    <path d="M14,40 L14,168 M310,140 L310,168"
+          fill="none" stroke="#CFC3B2" stroke-width="1.2"/>
+    <path d="M8,40 L322,40" fill="none" stroke="#B9B0A2" stroke-width="1.3" stroke-dasharray="5 4"/>
+    <text x="322" y="34" font-size="10" fill="#8A8A8A" text-anchor="end">where it started</text>
+    <path d="M14,40 C51,40 51,76 88,76 C125,76 125,22 162,22 C199,22 199,120 236,120 C273,120 273,140 310,140" fill="none" stroke="#3A3A3A" stroke-width="2.6"/>
+    <circle cx="188" cy="54" r="8" fill="#FFFFFF" stroke="#C0511D" stroke-width="2.4"/>
+           <path d="M174,36 L140,36" fill="none" stroke="#C0511D" stroke-width="2"/>
+           <path d="M152,29 L139,36 L152,43"
+                 fill="none" stroke="#C0511D" stroke-width="2" stroke-linejoin="round"/>
+           <text x="165" y="192" font-size="11.5" fill="#C0511D" text-anchor="middle">this hill is above where it started &mdash; it rolls back</text>
+  </svg></div>
+    <div class="fig"><svg viewBox="0 0 330 200" width="100%"
+    role="img" aria-label="a run where every hill is lower than the one before, and the marble finishes">
+    <path d="M14,40 L14,168 M310,140 L310,168"
+          fill="none" stroke="#CFC3B2" stroke-width="1.2"/>
+    <path d="M8,40 L322,40" fill="none" stroke="#B9B0A2" stroke-width="1.3" stroke-dasharray="5 4"/>
+    <text x="322" y="34" font-size="10" fill="#8A8A8A" text-anchor="end">where it started</text>
+    <path d="M14,40 C51,40 51,76 88,76 C125,76 125,104 162,104 C199,104 199,128 236,128 C273,128 273,140 310,140" fill="none" stroke="#3A3A3A" stroke-width="2.6"/>
+    <circle cx="300" cy="144" r="8" fill="#FFFFFF" stroke="#C0511D" stroke-width="2.4"/>
+           <text x="165" y="192" font-size="11.5" fill="#3A3A3A" text-anchor="middle">every hill lower than the last &mdash; it gets there</text>
+  </svg></div>
+  </div>
+
+  <div class="note"><b>Rubbing means a hill just below the line fails too.</b> Build by the stricter rule:
+  <b>every hill lower than the one before</b>.</div>
+
+  <footer>
+    <span>Build a real one &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Why, and the rule it gives you</span>
+  </footer>
+</div>
+
+<div class="page g3">
+  <header class="cont">
+    
+    <h1>A Real One, Down a Door</h1>
+    <p class="sub">Making &middot; Projects &middot; Page 5 of 6</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Build it all, starting with a steep drop. Then test and fix one piece at a time.
+  </div>
+
+
+  <table class="tbl ">
+    <thead><tr><th>Do this</th><th>How</th><th>Why</th></tr></thead>
+    <tbody><tr><td><b>Cut the tubes in half the long way</b></td><td>Squash the tube flat, cut along one fold, open it out, cut along the other. Two half-pipes from one tube.</td><td>A whole tube hides the marble. Half a tube shows you exactly where it went wrong, which is the only way to fix anything.</td></tr><tr><td><b>Tape it to a door, top to bottom</b></td><td>Masking tape, two strips per piece, and press hard. Start at the top and work down.</td><td>A door is flat, tall, free, and you can take the whole thing off afterwards. Masking tape comes off paint; other tape does not.</td></tr><tr><td><b>Overlap each piece INSIDE the one below</b></td><td>The top of the lower piece goes underneath the bottom of the upper one, by about an inch.</td><td>Butt them end to end and the marble hits the lip and stops. Overlap the wrong way and it launches into the room.</td></tr><tr><td><b>Every drop lower than the last</b></td><td>Work down the door and never go back up.</td><td>Page 4. It cannot climb higher than it started, and it is lower than that already.</td></tr><tr><td><b>Corners cost you</b></td><td>Sweep them wide. A tight corner throws the marble up the outside wall.</td><td>Going up the wall is going uphill, and everything it spends climbing it does not get back.</td></tr><tr><td><b>Put a box at the bottom</b></td><td>A shoebox on its side, or a bowl.</td><td>Otherwise the marble goes under the sofa and this is the last time anybody plays with it.</td></tr></tbody>
+  </table>
+
+  <div class="find"><b>Start steep</b>, so the marble is fast for the rest of the run.</div>
+
+  <footer>
+    <span>Last page &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>A real one, down a door</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>What You Found Out</h1>
+    <p class="sub">Making &middot; Projects &middot; Page 6 of 6</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Run still on the door.
+  </div>
+
+
+  <ol class="qs" start="2"><li><span class="qt">Look back at your prediction on page 1, and at what the grown-up said. Were either of you right? What had you both been assuming?</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">One place on your run kept failing. Where was it, and what did you change in the end?</span><div class="write"></div><div class="write"></div></li><li><span class="qt">Time the marble down the whole run. Now make ONE change and time it again. What did you change, and did it help?</span><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Somebody says: &ldquo;make the whole run steeper and it will be quicker.&rdquo; Using what you found on page 3, say what is right about that and what is wrong with it.</span><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Done &mdash; leave it up</span>
+    <span class="brand">Kitchen Table</span>
+    <span>What you found out</span>
+  </footer>
+</div>
+
+</body>
+</html>

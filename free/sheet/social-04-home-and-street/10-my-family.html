@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="sheet-kind" content="form">
+<title>The People in My Home</title>
+<style>
+  @page { size: letter portrait; margin: 0.4in 0.45in; }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  :root {
+    --ink:    #16130F;
+    --muted:  #6B635A;
+    --rule:   #CFC3B2;
+    --guide:  #BCAE9C;
+    --accent: #C0511D;
+    --tint:   #F7EDE4;
+    --slate:  #2E5A78;
+    --tintslate: #E9EFF4;
+    --deep:   #2C4A45;
+    --tintdeep: #ECF1EF;
+  }
+
+  body {
+    font-family: Quicksand, 'URW Gothic', 'Century Gothic', sans-serif;
+    color: #000; background: #fff;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+
+  /* ORDER MATTERS. This generic rule must come BEFORE the @media screen block:
+   * both selectors have the same specificity, so whichever is declared last
+   * wins. With it after, it overrode the screen width and the preview stretched
+   * to the viewport — rows scaled up and pages measured 16in tall. Print was
+   * always fine (@media screen doesn't apply), but the on-screen proof lied. */
+  .page { width: 100%; }
+  .page + .page { page-break-before: always; }
+
+  @media screen {
+    body { padding: 0.4in; background: #ddd; }
+    .page {
+      background: #fff; padding: 0.4in 0.45in;
+      width: 8.5in; min-height: 11in;
+      margin: 0 auto 22px; box-shadow: 0 2px 10px rgba(0,0,0,.3);
+    }
+  }
+
+  header {
+    display: flex; align-items: center; gap: 16px;
+    border-bottom: 3px solid var(--slate); padding-bottom: 7px; margin-bottom: 2px;
+  }
+  .bigletter { font-size: 38pt; font-weight: 700; line-height: 1; letter-spacing: .02em; }
+  .htext { flex: 1; }
+  h1 { font-size: 14pt; font-weight: 700; margin: 0 0 2px; }
+  .sub { font-size: 10pt; color: var(--muted); margin: 0; }
+  .nameline {
+    font-size: 9.5pt; color: var(--muted);
+    border-bottom: 1px solid var(--ink); width: 2in;
+    padding-bottom: 1px; align-self: flex-end;
+  }
+
+  .label { font-size: 11.5pt; font-weight: 700; margin: 9px 0 1px; }
+  .label span { font-weight: 400; font-size: 10pt; color: var(--muted); }
+
+  .row { display: block; width: 100%; height: auto; margin-bottom: .06in; }
+  /* Rows that follow the header directly would otherwise jam against its rule. */
+  header + .row { margin-top: .12in; }
+
+  .words {
+    margin-top: 10px; padding-top: 7px; border-top: 1px solid var(--rule);
+    font-size: 12.5pt;
+    display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap;
+  }
+  .words b { font-size: 14pt; }
+  .words em { font-style: normal; color: var(--muted); }
+
+  /* The wordmark rides in the footer line that was already there — see the note
+     in lib/sheet.js. No height, upright, a size down, and never louder than the
+     two slots it sits between. */
+  .brand { font-style: normal; font-size: 7pt; letter-spacing: .04em;
+    color: var(--accent); align-self: center; }
+
+  footer {
+    margin-top: 7px; font-size: 8.5pt; color: var(--muted);
+    display: flex; justify-content: space-between;
+  }
+
+  .chart { display: grid; grid-template-columns: repeat(6, 1fr); gap: 7px; margin-top: 14px; }
+  .cell {
+    border: 2px solid var(--slate); border-radius: 8px; height: 1.35in;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .page.key { background: #fcfcfa; }
+  .page.key header { border-bottom-style: double; border-bottom-width: 3px; }
+  .keylist { font-size: 11pt; line-height: 1.7; }
+  .keylist p { margin: .02in 0; }
+  .keynote { border: 1.5px solid var(--deep); border-radius: 8px; padding: .07in .12in;
+    margin: .1in 0 0; font-size: 10pt; line-height: 1.5; }
+
+  .note { border: 1.5px solid var(--deep); border-radius: 8px; padding: .07in .12in;
+    margin: .06in 0 .1in; font-size: 10pt; color: var(--ink); }
+  svg { display: block; }
+
+  .picks { display: flex; gap: .2in; margin-left: auto; }
+  .pick { display: flex; align-items: center; gap: .07in; font-size: 11pt; }
+  .pick i { width: .28in; height: .28in; border: 2.2px solid var(--slate); border-radius: 5px;
+    display: block; flex: 0 0 auto; }
+
+  .task { border-top: 2.4px solid var(--slate); margin-top: .16in; padding-top: .08in; }
+  .tasktitle { font-size: 11.5pt; font-weight: 700; margin: .07in 0 .03in; }
+  .twoboxes { display: flex; gap: .2in; }
+  .tbcell { flex: 1; display: flex; flex-direction: column; align-items: center; }
+  .tbcell span { font-size: 10pt; color: var(--muted); }
+  .tbox { width: 100%; height: 2.1in; border: 2.5px solid var(--slate); border-radius: 10px; }
+
+  .bigbox { height: 3.9in; border: 2.5px solid var(--slate); border-radius: 10px; margin-top: .12in; }
+  .frows { margin-top: .12in; }
+  .frow { display: flex; align-items: center; border-bottom: 1px solid var(--ink); padding: .05in 0; }
+  .frow span { font-size: 12.5pt; }
+  .fbox { width: .7in; height: .55in; margin-left: auto; display: block;
+    border: 2.5px solid var(--slate); border-radius: 8px; }
+
+  .crow { display: flex; align-items: center; gap: .16in;
+    border-bottom: 1px solid var(--rule); padding: .4in .02in; }
+  .ctext { font-size: 14.5pt; }
+
+  .rblock { margin-top: .12in; }
+  .rhead { font-size: 13pt; font-weight: 700; border-bottom: 2px solid var(--slate);
+    padding-bottom: .03in; margin-bottom: .04in; }
+  .rrow { display: flex; gap: .1in; align-items: flex-start; padding: .04in 0 .3in; }
+  .rnum { font-size: 16pt; font-weight: 700; width: .22in; padding-top: .1in; }
+  .rlines { flex: 1; }
+  .rwhy { font-size: 12pt; color: var(--muted); margin: .02in 0 -.02in; }
+
+  .arow { display: flex; align-items: center; gap: .2in; justify-content: space-around;
+    border-bottom: 1px solid var(--rule); padding: .1in .02in; }
+  .acell { display: flex; flex-direction: column; align-items: center; }
+  .acell span { font-size: 10.5pt; color: var(--ink); }
+  .aarrow { display: flex; flex-direction: column; align-items: center; }
+  .aarrow span { font-size: 9pt; color: var(--muted); }
+
+  .mapframe { height: 6.2in; border: 3px solid var(--slate); border-radius: 6px; margin-top: .12in;
+    background:
+      linear-gradient(#eee 1px, transparent 1px) 0 0 / 100% .4in,
+      linear-gradient(90deg, #eee 1px, transparent 1px) 0 0 / .4in 100%; }
+  .keyrow { display: flex; align-items: center; gap: .18in; margin-top: .1in; }
+  .keytitle { font-size: 12pt; font-weight: 700; }
+  .keycell { display: flex; align-items: center; gap: .06in; }
+  .keybox { width: .34in; height: .34in; border: 2.2px solid var(--deep); border-radius: 5px; display: block; }
+  .keycell span { font-size: 11pt; color: var(--ink); }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <header>
+    <div class="bigletter">&#9787;&#9787;</div>
+    <div class="htext">
+      <h1>The People in My Home</h1>
+      <p class="sub">Draw everyone who lives in your home. Then count them.</p>
+    </div>
+    <div class="nameline">Name</div>
+  </header>
+
+  <div class="bigbox"></div>
+  <div class="frows">
+    <div class="frow"><span>How many people live here?</span><i class="fbox"></i></div>
+    <div class="frow"><span>How many are grown-ups?</span><i class="fbox"></i></div>
+    <div class="frow"><span>How many are children?</span><i class="fbox"></i></div>
+  </div>
+  <div class="task">
+    <div class="tasktitle">Who is the oldest?</div>
+          <svg class="row" viewBox="0 0 729.6 81.68" width="100%" role="img" aria-label="write here">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="32.84" x2="729.6" y2="32.84" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="60.68" x2="729.6" y2="60.68" stroke="#16130F" stroke-width="2.6"/>
+      </svg>
+    <div class="tasktitle">Something we all do together:</div>
+          <svg class="row" viewBox="0 0 729.6 81.68" width="100%" role="img" aria-label="write here">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="32.84" x2="729.6" y2="32.84" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="60.68" x2="729.6" y2="60.68" stroke="#16130F" stroke-width="2.6"/>
+      </svg>
+  </div>
+
+  <footer>
+    <span>one drawing, three counts</span>
+    <span class="brand">Kitchen Table</span>
+    <span>My family</span>
+  </footer>
+</div>
+
+</body>
+</html>

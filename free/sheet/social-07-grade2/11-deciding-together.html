@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="sheet-kind" content="worksheet">
+<title>How Does a Group Decide?</title>
+<style>
+  @page { size: letter portrait; margin: 0.4in 0.45in; }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  :root {
+    --ink:    #16130F;
+    --muted:  #6B635A;
+    --rule:   #CFC3B2;
+    --guide:  #BCAE9C;
+    --accent: #C0511D;
+    --tint:   #F7EDE4;
+    --slate:  #2E5A78;
+    --tintslate: #E9EFF4;
+    --deep:   #2C4A45;
+    --tintdeep: #ECF1EF;
+  }
+
+  body {
+    font-family: Quicksand, 'URW Gothic', 'Century Gothic', sans-serif;
+    color: #000; background: #fff;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+
+  /* ORDER MATTERS. This generic rule must come BEFORE the @media screen block:
+   * both selectors have the same specificity, so whichever is declared last
+   * wins. With it after, it overrode the screen width and the preview stretched
+   * to the viewport — rows scaled up and pages measured 16in tall. Print was
+   * always fine (@media screen doesn't apply), but the on-screen proof lied. */
+  .page { width: 100%; }
+  .page + .page { page-break-before: always; }
+
+  @media screen {
+    body { padding: 0.4in; background: #ddd; }
+    .page {
+      background: #fff; padding: 0.4in 0.45in;
+      width: 8.5in; min-height: 11in;
+      margin: 0 auto 22px; box-shadow: 0 2px 10px rgba(0,0,0,.3);
+    }
+  }
+
+  header {
+    display: flex; align-items: center; gap: 16px;
+    border-bottom: 3px solid var(--slate); padding-bottom: 7px; margin-bottom: 2px;
+  }
+  .bigletter { font-size: 38pt; font-weight: 700; line-height: 1; letter-spacing: .02em; }
+  .htext { flex: 1; }
+  h1 { font-size: 14pt; font-weight: 700; margin: 0 0 2px; }
+  .sub { font-size: 10pt; color: var(--muted); margin: 0; }
+  .nameline {
+    font-size: 9.5pt; color: var(--muted);
+    border-bottom: 1px solid var(--ink); width: 2in;
+    padding-bottom: 1px; align-self: flex-end;
+  }
+
+  .label { font-size: 11.5pt; font-weight: 700; margin: 9px 0 1px; }
+  .label span { font-weight: 400; font-size: 10pt; color: var(--muted); }
+
+  .row { display: block; width: 100%; height: auto; margin-bottom: .06in; }
+  /* Rows that follow the header directly would otherwise jam against its rule. */
+  header + .row { margin-top: .12in; }
+
+  .words {
+    margin-top: 10px; padding-top: 7px; border-top: 1px solid var(--rule);
+    font-size: 12.5pt;
+    display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap;
+  }
+  .words b { font-size: 14pt; }
+  .words em { font-style: normal; color: var(--muted); }
+
+  /* The wordmark rides in the footer line that was already there — see the note
+     in lib/sheet.js. No height, upright, a size down, and never louder than the
+     two slots it sits between. */
+  .brand { font-style: normal; font-size: 7pt; letter-spacing: .04em;
+    color: var(--accent); align-self: center; }
+
+  footer {
+    margin-top: 7px; font-size: 8.5pt; color: var(--muted);
+    display: flex; justify-content: space-between;
+  }
+
+  .chart { display: grid; grid-template-columns: repeat(6, 1fr); gap: 7px; margin-top: 14px; }
+  .cell {
+    border: 2px solid var(--slate); border-radius: 8px; height: 1.35in;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .page.key { background: #fcfcfa; }
+  .page.key header { border-bottom-style: double; border-bottom-width: 3px; }
+  .keylist { font-size: 11pt; line-height: 1.7; }
+  .keylist p { margin: .02in 0; }
+  .keynote { border: 1.5px solid var(--deep); border-radius: 8px; padding: .07in .12in;
+    margin: .1in 0 0; font-size: 10pt; line-height: 1.5; }
+
+  .note { border: 1.5px solid var(--deep); border-radius: 8px; padding: .07in .12in;
+    margin: .06in 0 .1in; font-size: 10pt; color: var(--ink); }
+  .tasknote { border: 1.5px solid var(--deep); border-radius: 8px; padding: .07in .12in;
+    margin-top: .1in; font-size: 10.5pt; }
+  svg { display: block; }
+
+  .wqs { margin-top: .06in; }
+  .wq { margin-bottom: .03in; }
+  .wqt { font-size: 10.5pt; font-weight: 700; margin-bottom: .01in; }
+
+  .pick { display: flex; align-items: center; gap: .05in; font-size: 10pt;
+    white-space: nowrap; }
+  .drow2 { border-bottom: 1px solid var(--slate); padding: .07in 0 .04in; }
+  .dwhat { font-size: 11pt; font-weight: 700; margin-bottom: .03in; }
+  .dpicks { display: flex; gap: .24in; margin-bottom: .02in; }
+  .pick i { width: .22in; height: .22in; border: 2px solid var(--slate); border-radius: 4px;
+    display: inline-block; flex: 0 0 auto; }
+
+  .twobox { display: flex; gap: .2in; margin-bottom: .1in; }
+  .tb { flex: 1; border: 2.2px solid var(--slate); border-radius: 9px; padding: .07in .1in; }
+  .tbt { font-size: 11.5pt; font-weight: 700; }
+  .tbd { font-size: 10pt; }
+
+  .sortrow { display: flex; align-items: center; gap: .1in;
+    border-bottom: 1px solid var(--rule); padding: .07in 0; }
+  .sortname { flex: 1; font-size: 10.5pt; }
+
+  .prow { border-bottom: 1px solid var(--ink); padding: .05in 0; }
+  .pwhat { font-size: 11pt; }
+  .ppick { display: flex; gap: .2in; margin: .03in 0; }
+
+  .bothlist, .pclist { border: 2px solid var(--slate); border-radius: 9px; overflow: hidden; }
+  .bhead, .pchead { display: grid; grid-template-columns: 1.9in 1fr 1fr; font-size: 9.5pt;
+    font-weight: 700; border-bottom: 1.6px solid var(--slate); }
+  .bhead span, .pchead span { padding: .05in .07in; }
+  .brow, .pcrow { display: grid; grid-template-columns: 1.9in 1fr 1fr;
+    border-bottom: 1px solid var(--rule); min-height: .58in; align-items: stretch; }
+  .brow:last-child, .pcrow:last-child { border-bottom: 0; }
+  .bwhat, .pcwho { font-size: 10.5pt; padding: .12in .07in; }
+  .bcell, .pccell { border-left: 1px solid var(--ink); }
+
+  .chainbox { border: 2.2px solid var(--slate); border-radius: 9px; padding: .07in .12in;
+    margin-top: .1in; }
+  .ctitle { font-size: 11.5pt; font-weight: 700; margin-bottom: .04in; }
+  .cchain { display: flex; align-items: center; gap: .07in; flex-wrap: wrap; }
+  .cchain span { font-size: 10pt; }
+  .cchain b { font-size: 13pt; }
+  .cblank { display: inline-block; width: 1.5in; height: .38in;
+    border: 2px solid var(--slate); border-radius: 5px; }
+  .chint { font-size: 10pt; color: var(--muted); margin-top: .04in; }
+
+  .storybox { border: 2.4px solid var(--slate); border-radius: 9px; padding: .08in .13in;
+    margin-bottom: .06in; }
+  .stitle { font-size: 12.5pt; font-weight: 700; margin-bottom: .03in; }
+  .storybox p { margin: 0 0 .04in; font-size: 11pt; line-height: 1.45; }
+
+  .dobox { border: 2.4px solid var(--slate); border-radius: 9px; padding: .08in .12in;
+    margin-bottom: .1in; }
+  .dotitle { font-size: 11.5pt; font-weight: 700; margin-bottom: .03in; }
+  .dosteps { margin: 0; padding-left: .22in; }
+  .dosteps li { font-size: 10.5pt; margin-bottom: .02in; }
+
+  .swaptable { border: 2px solid var(--slate); border-radius: 9px; overflow: hidden; }
+  .swhead { display: grid; grid-template-columns: 1.9in 1fr 1fr; font-size: 10pt;
+    font-weight: 700; border-bottom: 1.6px solid var(--slate); }
+  .swhead span { padding: .05in .07in; }
+  .swrow { display: grid; grid-template-columns: 1.9in 1fr 1fr;
+    border-bottom: 1px solid var(--rule); min-height: .5in; align-items: stretch; }
+  .swrow:last-child { border-bottom: 0; }
+  .swk { font-size: 10pt; padding: .13in .07in; }
+  .swrow i { border-left: 1px solid var(--ink); display: block; }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <header>
+    <div class="bigletter">&#9745;</div>
+    <div class="htext">
+      <h1>How Does a Group Decide?</h1>
+      <p class="sub">Tick the fair way to decide each one. Say why.</p>
+    </div>
+    <div class="nameline">Name</div>
+  </header>
+
+  <div class="note"><b>Vote:</b> the biggest group wins. <b>Take turns:</b> everybody gets a go. <b>One person decides:</b> it is theirs, or they do the work.</div>
+
+  <div class="decidelist">
+    <div class="drow2">
+      <div class="dwhat">Which film the whole class watches on the last day of term</div>
+      <div class="dpicks">
+        <label class="pick"><i></i>vote</label>
+        <label class="pick"><i></i>take turns</label>
+        <label class="pick"><i></i>one person decides</label>
+      </div>
+            <svg class="row" viewBox="0 0 729.6 73.92" width="100%" role="img" aria-label="why is that the fair way?">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="29.96" x2="729.6" y2="29.96" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="54.92" x2="729.6" y2="54.92" stroke="#16130F" stroke-width="2.6"/>
+      </svg>
+    </div>
+    <div class="drow2">
+      <div class="dwhat">What you have in your own lunchbox</div>
+      <div class="dpicks">
+        <label class="pick"><i></i>vote</label>
+        <label class="pick"><i></i>take turns</label>
+        <label class="pick"><i></i>one person decides</label>
+      </div>
+            <svg class="row" viewBox="0 0 729.6 73.92" width="100%" role="img" aria-label="why is that the fair way?">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="29.96" x2="729.6" y2="29.96" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="54.92" x2="729.6" y2="54.92" stroke="#16130F" stroke-width="2.6"/>
+      </svg>
+    </div>
+    <div class="drow2">
+      <div class="dwhat">Whether one child has to give up the swing they are on</div>
+      <div class="dpicks">
+        <label class="pick"><i></i>vote</label>
+        <label class="pick"><i></i>take turns</label>
+        <label class="pick"><i></i>one person decides</label>
+      </div>
+            <svg class="row" viewBox="0 0 729.6 73.92" width="100%" role="img" aria-label="why is that the fair way?">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="29.96" x2="729.6" y2="29.96" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="54.92" x2="729.6" y2="54.92" stroke="#16130F" stroke-width="2.6"/>
+      </svg>
+    </div>
+    <div class="drow2">
+      <div class="dwhat">Which two people go first in a game</div>
+      <div class="dpicks">
+        <label class="pick"><i></i>vote</label>
+        <label class="pick"><i></i>take turns</label>
+        <label class="pick"><i></i>one person decides</label>
+      </div>
+            <svg class="row" viewBox="0 0 729.6 73.92" width="100%" role="img" aria-label="why is that the fair way?">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="29.96" x2="729.6" y2="29.96" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="54.92" x2="729.6" y2="54.92" stroke="#16130F" stroke-width="2.6"/>
+      </svg>
+    </div>
+    <div class="drow2">
+      <div class="dwhat">Whether the class trip goes to the museum or the park</div>
+      <div class="dpicks">
+        <label class="pick"><i></i>vote</label>
+        <label class="pick"><i></i>take turns</label>
+        <label class="pick"><i></i>one person decides</label>
+      </div>
+            <svg class="row" viewBox="0 0 729.6 73.92" width="100%" role="img" aria-label="why is that the fair way?">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="29.96" x2="729.6" y2="29.96" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="54.92" x2="729.6" y2="54.92" stroke="#16130F" stroke-width="2.6"/>
+      </svg>
+    </div>
+    <div class="drow2">
+      <div class="dwhat">What time your family eats dinner</div>
+      <div class="dpicks">
+        <label class="pick"><i></i>vote</label>
+        <label class="pick"><i></i>take turns</label>
+        <label class="pick"><i></i>one person decides</label>
+      </div>
+            <svg class="row" viewBox="0 0 729.6 73.92" width="100%" role="img" aria-label="why is that the fair way?">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="29.96" x2="729.6" y2="29.96" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="54.92" x2="729.6" y2="54.92" stroke="#16130F" stroke-width="2.6"/>
+      </svg>
+    </div>
+  </div>
+
+  <footer>
+    <span>6 to decide</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Deciding together</span>
+  </footer>
+</div>
+
+<div class="page">
+  <header>
+    <div class="bigletter">&#9998;</div>
+    <div class="htext">
+      <h1>The Class Trip</h1>
+      <p class="sub">A class of 24 voted. Museum: 9. Park: 15. The park wins.</p>
+    </div>
+    <div class="nameline">Name</div>
+  </header>
+
+  <div class="wqs">
+    <div class="wq"><div class="wqt">How many more people voted for the park than the museum?</div>      <svg class="row" viewBox="0 0 729.6 106.88" width="100%" role="img" aria-label="write here">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="42.44" x2="729.6" y2="42.44" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="79.88" x2="729.6" y2="79.88" stroke="#16130F" stroke-width="2.6"/>
+      </svg></div>
+    <div class="wq"><div class="wqt">Did the museum children do anything wrong by voting for the museum?</div>      <svg class="row" viewBox="0 0 729.6 106.88" width="100%" role="img" aria-label="write here">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="42.44" x2="729.6" y2="42.44" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="79.88" x2="729.6" y2="79.88" stroke="#16130F" stroke-width="2.6"/>
+      </svg></div>
+    <div class="wq"><div class="wqt">The nine still have to go to the park. Is that fair? Say why you think so.</div>      <svg class="row" viewBox="0 0 729.6 106.88" width="100%" role="img" aria-label="write here">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="42.44" x2="729.6" y2="42.44" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="79.88" x2="729.6" y2="79.88" stroke="#16130F" stroke-width="2.6"/>
+      </svg></div>
+    <div class="wq"><div class="wqt">What could the fifteen do to make it better for the nine? Think of something real.</div>      <svg class="row" viewBox="0 0 729.6 106.88" width="100%" role="img" aria-label="write here">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="42.44" x2="729.6" y2="42.44" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="79.88" x2="729.6" y2="79.88" stroke="#16130F" stroke-width="2.6"/>
+      </svg></div>
+  </div>
+
+  <div class="tasknote">What if it was <b>13 to 11</b>? Does that feel different? Should it?</div>
+        <svg class="row" viewBox="0 0 729.6 106.88" width="100%" role="img" aria-label="write here">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="42.44" x2="729.6" y2="42.44" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="79.88" x2="729.6" y2="79.88" stroke="#16130F" stroke-width="2.6"/>
+      </svg>
+
+  <div class="tasknote">The class votes 23 to 1 that one child can never join in at break. Is that fair?</div>
+        <svg class="row" viewBox="0 0 729.6 106.88" width="100%" role="img" aria-label="write here">
+        <line x1="0" y1="5" x2="729.6" y2="5" stroke="#CFC3B2" stroke-width="1.4"/>
+        <line x1="0" y1="42.44" x2="729.6" y2="42.44" stroke="#BCAE9C" stroke-width="1.4" stroke-dasharray="7 7"/>
+        <line x1="0" y1="79.88" x2="729.6" y2="79.88" stroke="#16130F" stroke-width="2.6"/>
+      </svg>
+
+  <footer>
+    <span>6 to write</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Deciding together</span>
+  </footer>
+</div>
+
+</body>
+</html>

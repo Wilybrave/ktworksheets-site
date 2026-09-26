@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="sheet-kind" content="worksheet">
+<title>An Award</title>
+<style>
+  @page { size: letter portrait; margin: 0.4in 0.45in; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  :root {
+    --ink: #16130F; --muted: #6B635A; --rule: #CFC3B2; --guide: #BCAE9C;
+    --accent: #C0511D; --tint: #F7EDE4; --slate: #2E5A78;
+  }
+  body {
+    font-family: Quicksand, 'URW Gothic', 'Century Gothic', sans-serif;
+    color: #000; background: #fff;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  .page { width: 100%; }
+  .page + .page { page-break-before: always; }
+  /* A screen ignores @page margins, so the preview drew every made sheet edge
+     to edge while the paper has 0.4in / 0.45in of white round it. The shelf's
+     sheets carry the same screen padding; print is untouched. */
+  @media screen { .page { padding: 0.4in 0.45in; } }
+  header {
+    display: flex; align-items: center; gap: 16px;
+    border-bottom: 3px solid var(--slate); padding-bottom: 7px; margin-bottom: 2px;
+  }
+  .bigletter { font-size: 38pt; font-weight: 700; line-height: 1; letter-spacing: .02em; }
+  .htext { flex: 1; }
+  h1 { font-size: 14pt; font-weight: 700; margin: 0 0 2px; }
+  .sub { font-size: 10pt; color: var(--muted); margin: 0; }
+  .nameline {
+    font-size: 9.5pt; color: var(--muted);
+    border-bottom: 1px solid var(--ink); width: 2in;
+    padding-bottom: 1px; align-self: flex-end;
+  }
+  .dir { font-size: 11pt; margin: 12px 0 10px; }
+  footer {
+    margin-top: 10px; padding-top: 6px; border-top: 1px solid var(--rule);
+    font-size: 8.5pt; color: var(--muted);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .brand { font-size: 7pt; letter-spacing: .04em; color: var(--accent); }
+  table { border-collapse: collapse; }
+  /* The parent-copy badge, lifted from the shelf's key pages so the two match
+     on paper. Tinted rather than outlined, because it has to be recognisable
+     at a glance from across a table with the page upside down. */
+  .badgeline {
+    display: inline-block; font-size: 8.5pt; font-weight: 700;
+    letter-spacing: .06em; text-transform: uppercase;
+    color: var(--accent); background: var(--tint);
+    border: 1.5px solid var(--accent); padding: 2px 8px; margin-bottom: 8px;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <div class="bigletter">★</div>
+    <div class="htext">
+      <h1>An Award</h1>
+      <p class="sub">The blank is the point — say what they did</p>
+    </div>
+    <div class="nameline">Name</div>
+  </header>
+  
+  
+<style>
+  .sheetgrid { display: grid; gap: .16in; }
+  .sheetgrid.up1, .sheetgrid.up2 { grid-template-columns: 1fr; }
+  .sheetgrid.up4 { grid-template-columns: 1fr 1fr; }
+
+  .card { border: 2.6px solid var(--ink); border-radius: 10px;
+    padding: .16in .2in; height: 9.10in;
+    display: flex; flex-direction: column; text-align: center; position: relative; }
+  /* Takes all the room the feet do not, and centres the words inside it. */
+  .top { flex: 1; display: flex; flex-direction: column; align-items: center;
+    justify-content: center; width: 100%; }
+  .sheetgrid.up4 .card { padding: .1in .12in; }
+
+  .badge { margin-bottom: .04in; }
+  /*
+   * BOTH DIMENSIONS, NOT width:auto.
+   *
+   * An <svg> with a viewBox and width:auto is a replaced element with an
+   * intrinsic ratio, and browsers have historically disagreed about what that
+   * resolves to — WebKit can give it a zero or a default 300px rather than
+   * deriving it from the height. The ratios are known here (the rosette is
+   * 120x150 and the banner 280x84), so both are stated and nothing is left to
+   * a resolution rule.
+   */
+  .mark { display: block; margin: 0 auto;
+    height: 1.5in;
+    width: 1.2in; }
+  .mark path, .mark circle { fill: none; stroke: var(--ink); stroke-width: 3;
+    stroke-linejoin: round; }
+  .mark.wide { height: 0.95in;
+    width: 3.17in; }
+
+  .towho { font-size: 30pt;
+    font-weight: 700; line-height: 1.15; }
+  .towho .blank { display: block; width: 3.4in;
+    border-bottom: 2.5px solid var(--ink); height: .5in; }
+  .lead { font-size: 12pt; color: var(--muted);
+    margin: .06in 0 .05in; }
+  .deed { width: 100%; font-size: 17pt; }
+  .deed .wln { display: block; border-bottom: 2px solid var(--rule);
+    height: .46in; margin: 0 auto .06in; width: 92%; }
+
+  /* BIG ENOUGH TO WANT FILLING. A goal chart goes on a wall and the boxes are
+   * the whole of it — half-inch squares in the middle of an empty page read as
+   * a form. They wrap to a second row rather than shrinking. */
+  .boxes { display: flex; flex-wrap: wrap; gap: .12in; justify-content: center;
+    margin: .16in 0; max-width: 100%; }
+  .boxes i { display: block; width: .86in;
+    height: .86in; border: 2.6px solid var(--ink);
+    border-radius: 6px; }
+
+  .feet { display: flex; gap: .3in; width: 100%; padding-top: .1in; justify-content: center; }
+  .ln { flex: 1; max-width: 2.2in; }
+  .ln i { display: block; border-bottom: 2px solid var(--rule); height: .34in; }
+  .ln span { font-size: 8.5pt; color: var(--muted); }
+
+  .band { margin: .04in 0; width: 100%; }
+  /* Same reason as .mark: the height is derived from the width and the count,
+   * and stating it beats leaving height:auto to a replaced-element rule. */
+  .band svg { display: block; width: 100%;
+    height: 0.36in; }
+  .band svg circle, .band svg path, .band svg rect { fill: none; stroke: var(--ink);
+    stroke-width: 2.4; }
+</style>
+<div class="sheetgrid up1">  <div class="card">
+    
+    <div class="top">
+      <div class="badge"><svg viewBox="0 0 120 150" class="mark">
+  <path d="M44 92 L34 146 L60 132 L86 146 L76 92 Z"/>
+  <circle cx="60" cy="60" r="46"/>
+  <circle cx="60" cy="60" r="30"/>
+  <path d="M92.0 60.0 L104.0 60.0"/><path d="M89.6 72.2 L100.7 76.8"/><path d="M82.6 82.6 L91.1 91.1"/><path d="M72.2 89.6 L76.8 100.7"/><path d="M60.0 92.0 L60.0 104.0"/><path d="M47.8 89.6 L43.2 100.7"/><path d="M37.4 82.6 L28.9 91.1"/><path d="M30.4 72.2 L19.3 76.8"/><path d="M28.0 60.0 L16.0 60.0"/><path d="M30.4 47.8 L19.3 43.2"/><path d="M37.4 37.4 L28.9 28.9"/><path d="M47.8 30.4 L43.2 19.3"/><path d="M60.0 28.0 L60.0 16.0"/><path d="M72.2 30.4 L76.8 19.3"/><path d="M82.6 37.4 L91.1 28.9"/><path d="M89.6 47.8 L100.7 43.2"/>
+</svg></div>
+      <div class="towho">Milo</div>
+      <div class="lead">is getting this for</div>
+      <div class="deed"><span>finishing the whole pack</span></div>
+    </div>
+    <div class="feet">
+      <div class="ln "><i></i><span>Date</span></div>
+      <div class="ln "><i></i><span>From</span></div>
+    </div>
+    
+  </div></div>
+
+  <footer>
+    <span>1 to a page</span>
+    <span class="brand">KITCHEN TABLE</span>
+    <span>Award</span>
+  </footer>
+</div>
+
+</body>
+</html>

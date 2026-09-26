@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="sheet-kind" content="worksheet">
+<title>Five Sounds — Spanish</title>
+<style>
+  @page { size: letter portrait; margin: 0.4in 0.45in; }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  :root {
+    --ink:    #16130F;
+    --muted:  #6B635A;
+    --rule:   #CFC3B2;
+    --guide:  #BCAE9C;
+    --accent: #C0511D;
+    --tint:   #F7EDE4;
+    --slate:  #2E5A78;
+    --tintslate: #E9EFF4;
+    --deep:   #2C4A45;
+    --tintdeep: #ECF1EF;
+  }
+
+  body {
+    font-family: Quicksand, 'URW Gothic', 'Century Gothic', sans-serif;
+    color: #000; background: #fff;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+
+  /* ORDER MATTERS. This generic rule must come BEFORE the @media screen block:
+   * both selectors have the same specificity, so whichever is declared last
+   * wins. With it after, it overrode the screen width and the preview stretched
+   * to the viewport — rows scaled up and pages measured 16in tall. Print was
+   * always fine (@media screen doesn't apply), but the on-screen proof lied. */
+  .page { width: 100%; }
+  .page + .page { page-break-before: always; }
+
+  @media screen {
+    body { padding: 0.4in; background: #ddd; }
+    .page {
+      background: #fff; padding: 0.4in 0.45in;
+      width: 8.5in; min-height: 11in;
+      margin: 0 auto 22px; box-shadow: 0 2px 10px rgba(0,0,0,.3);
+    }
+  }
+
+  header {
+    display: flex; align-items: center; gap: 16px;
+    border-bottom: 3px solid var(--slate); padding-bottom: 7px; margin-bottom: 2px;
+  }
+  .bigletter { font-size: 38pt; font-weight: 700; line-height: 1; letter-spacing: .02em; }
+  .htext { flex: 1; }
+  h1 { font-size: 14pt; font-weight: 700; margin: 0 0 2px; }
+  .sub { font-size: 10pt; color: var(--muted); margin: 0; }
+  .nameline {
+    font-size: 9.5pt; color: var(--muted);
+    border-bottom: 1px solid var(--ink); width: 2in;
+    padding-bottom: 1px; align-self: flex-end;
+  }
+
+  .label { font-size: 11.5pt; font-weight: 700; margin: 9px 0 1px; }
+  .label span { font-weight: 400; font-size: 10pt; color: var(--muted); }
+
+  .row { display: block; width: 100%; height: auto; margin-bottom: .06in; }
+  /* Rows that follow the header directly would otherwise jam against its rule. */
+  header + .row { margin-top: .12in; }
+
+  .words {
+    margin-top: 10px; padding-top: 7px; border-top: 1px solid var(--rule);
+    font-size: 12.5pt;
+    display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap;
+  }
+  .words b { font-size: 14pt; }
+  .words em { font-style: normal; color: var(--muted); }
+
+  /* The wordmark rides in the footer line that was already there — see the note
+     in lib/sheet.js. No height, upright, a size down, and never louder than the
+     two slots it sits between. */
+  .brand { font-style: normal; font-size: 7pt; letter-spacing: .04em;
+    color: var(--accent); align-self: center; }
+
+  footer {
+    margin-top: 7px; font-size: 8.5pt; color: var(--muted);
+    display: flex; justify-content: space-between;
+  }
+
+  .chart { display: grid; grid-template-columns: repeat(6, 1fr); gap: 7px; margin-top: 14px; }
+  .cell {
+    border: 2px solid var(--slate); border-radius: 8px; height: 1.35in;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .page.key { background: #fcfcfa; }
+  .page.key header { border-bottom-style: double; border-bottom-width: 3px; }
+  .keylist { font-size: 11pt; line-height: 1.7; }
+  .keylist p { margin: .02in 0; }
+  .keynote { border: 1.5px solid var(--deep); border-radius: 8px; padding: .07in .12in;
+    margin: .1in 0 0; font-size: 10pt; line-height: 1.5; }
+
+  /* Everything is oversized. A four-year-old is looking at letter SHAPES, and
+     a vowel set at 14pt is a smudge rather than an object. */
+  .srow { display: grid; grid-template-columns: 1.15in 1fr; gap: 14px;
+    align-items: center; border: 2.4px solid var(--ink); border-radius: 11px;
+    padding: 10px 14px; margin: 11px 0; }
+  .srow .letter { text-align: center; }
+  .grown { font-size: 11pt; line-height: 1.45; }
+  .grown b { font-size: 13pt; }
+  .grown .lead { display: block; font-size: 8.5pt; letter-spacing: .09em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 3px; }
+  .say { display: flex; align-items: center; gap: 9px; margin-top: 6px;
+    font-size: 10.5pt; color: var(--muted); }
+  .tick { display: inline-block; width: .32in; height: .32in;
+    border: 2.4px solid var(--ink); border-radius: 5px; flex: none; }
+  .wrow { display: grid; grid-template-columns: 1.8in 1fr; gap: 18px;
+    align-items: center; border: 2.4px solid var(--ink); border-radius: 11px;
+    padding: 16px 16px; margin: 16px 0; }
+  .wrow .pic { text-align: center; }
+  .wrow .word { font-size: 72pt; font-weight: 700; font-style: italic;
+    letter-spacing: .07em; line-height: 1; }
+  .wrow .ask { font-size: 12pt; color: var(--muted); margin-top: 5px; }
+  .closing { border: 2.4px solid var(--ink); border-radius: 11px;
+    padding: 12px 14px; margin-top: 15px; font-size: 12pt; }
+
+  /* ---- sheets 20-60 ---- */
+  .tlabel { font-size: 12pt; margin: 12px 0 2px; }
+  .tlabel b { font-size: 19pt; }
+  .tlabel span { color: var(--muted); font-size: 10.5pt; }
+  .prow { border: 2.4px solid var(--ink); border-radius: 11px; padding: 9px 12px 11px;
+    margin: 12px 0; display: grid; grid-template-columns: 1.1in 1fr; gap: 14px; align-items: center; }
+  .prow .v { text-align: center; }
+  .prow .pics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 9px; }
+  .prow .pics > div { text-align: center; }
+  .prow .pics .tick { display: block; margin: 6px auto 0; width: .44in; height: .44in; }
+  .cols { display: grid; grid-template-columns: repeat(5, 1fr); gap: 7px; margin: 10px 0; }
+  .cols .col { border: 2.4px solid var(--ink); border-radius: 10px; min-height: 6.2in; padding: 5px 3px; }
+  .cols .col .h { text-align: center; border-bottom: 2px solid var(--ink); padding-bottom: 3px; margin-bottom: 4px; }
+  .cutgrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; margin: 10px 0; }
+  .cutgrid > div { border: 2px dashed var(--rule); padding: 16px 3px 16px; text-align: center; }
+  .cutgrid .es { display: block; font-size: 14pt; font-style: italic; margin-top: 3px; }
+  .bingo { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; margin: 11px 0; }
+  .bingo > div { border: 2.4px solid var(--ink); border-radius: 10px; padding: 10px 3px 12px;
+    text-align: center; }
+  .bingo .es { display: block; font-size: 13pt; font-style: italic; color: var(--muted); margin-top: 3px; }
+  .vrow { border: 2.4px solid var(--ink); border-radius: 11px; padding: 9px 13px; margin: 12px 0;
+    display: grid; grid-template-columns: 2.1in 1fr; gap: 14px; align-items: center; }
+  .vrow .es { font-size: 38pt; font-weight: 700; font-style: italic; letter-spacing: .05em; }
+  .vrow .boxes { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+  .vrow .boxes > div { border: 2.4px solid var(--ink); border-radius: 8px; text-align: center;
+    padding: 4px 0 6px; }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <header>
+    <div class="bigletter">a e i</div>
+    <div class="htext">
+      <h1>Five Sounds</h1>
+      <p class="sub">A grown-up reads this part. Say each sound twice, and let them say it back.</p>
+    </div>
+    <div class="nameline">Name</div>
+  </header>
+
+  <div class="srow">
+    <div class="letter"><svg viewBox="0 0 48 107.04" height="107.04" role="img" aria-label="a"><g transform="translate(6 6) scale(72)"><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round"/><path d="M.46 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <div class="grown">
+      the sound in <b>father</b> &mdash; Short, and open. Not the a in cat.
+
+      <div class="say"><span class="tick"></span> they said it back</div>
+    </div>
+  </div>
+  <div class="srow">
+    <div class="letter"><svg viewBox="0 0 46.56 107.04" height="107.04" role="img" aria-label="e"><g transform="translate(6 6) scale(72)"><path d="M.04 .75 H.45 A.21 .25 0 1 0 .38 .93" fill="none" stroke="#C0511D" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <div class="grown">
+      the sound in <b>bed</b> &mdash; Stop it short. Not "ay".
+
+      <div class="say"><span class="tick"></span> they said it back</div>
+    </div>
+  </div>
+  <div class="srow">
+    <div class="letter"><svg viewBox="0 0 30.72 107.04" height="107.04" role="img" aria-label="i"><g transform="translate(6 6) scale(72)"><path d="M.13 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.13" cy="0.34" r="0.04" fill="#C0511D"/></g></svg></div>
+    <div class="grown">
+      the sound in <b>see</b> &mdash; The ee sound, on its own.
+
+      <div class="say"><span class="tick"></span> they said it back</div>
+    </div>
+  </div>
+  <div class="srow">
+    <div class="letter"><svg viewBox="0 0 48 107.04" height="107.04" role="img" aria-label="o"><g transform="translate(6 6) scale(72)"><path d="M.25 .5 A.22 .25 0 0 0 .25 1 A.22 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <div class="grown">
+      the sound in <b>more</b> &mdash; Round, and stopped. Not "oh-w".
+
+      <div class="say"><span class="tick"></span> they said it back</div>
+    </div>
+  </div>
+  <div class="srow">
+    <div class="letter"><svg viewBox="0 0 48 107.04" height="107.04" role="img" aria-label="u"><g transform="translate(6 6) scale(72)"><path d="M.04 .5 V.75 A.21 .25 0 0 0 .46 .75" fill="none" stroke="#C0511D" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round"/><path d="M.46 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.04" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <div class="grown">
+      the sound in <b>moon</b> &mdash; The oo sound. Lips forward.
+
+      <div class="say"><span class="tick"></span> they said it back</div>
+    </div>
+  </div>
+
+  <footer>
+    <span>Page 1 of 2 &mdash; keep going &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Five sounds</span>
+  </footer>
+</div>
+
+<div class="page">
+  <header>
+    <div class="bigletter">&#9679;</div>
+    <div class="htext">
+      <h1>Three Real Words</h1>
+      <p class="sub">A grown-up says the word. Say it back. Then circle every letter that made that sound.</p>
+    </div>
+  </header>
+
+  <div class="wrow">
+    <div class="pic"><svg viewBox="0 0 162 162" height="162" role="img" aria-label="house"><image href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAFVklEQVR42u3d204cMRAEUNza//9l5w2JiEg7m7nYXec8RhGCGVe5bRB8fQEAAAAArQ2PINK0FvDShd+aCFcegfB/8H9QADQMvxJQAISHXwkoAMLDrwRCuPARfGvFBEBo+MeBYJsGFADNwn90d1cCjgBsHv5xcnmgAGgQ/qs+Fo4AbBT+d/+v44ACoGH4lYACIDz8SkABEB5+JRDARU7P4F/xbn2HwARAaPiPfEzTgAmAZuF/6viBAmDRwCkBRwCCg+ZyUAEQvssqAQVA+IitBNwB4Hzt24QmAFLDf+RzMg2YAGi8g5oETAAEh8YkYALAjrn1cUYBICC+RkcABOOOTcZxwAQg/M3fjctBEwDBI7HLQROA4HsnnoMCEH7vw+WgI4CFHr3YXQ4qAOEP3+mUgCOAERfPygRgQduITAImAOH37Dw/E4Dw25BMAwpA+JWAEnAEMLZ6tp6rCUD4bVAmAQUg/EpACSgA4VcCSsAdgHOpZ+/5mwCE34ZlGlAAwq8ElIACEH4loAQUgPArASVg4V4YfM9QSZsAhJ8NNjKTgAIQfiWARSz83qF3aAKwcKI3NdOAxXxoMXhWCt0EIPyYBEwAwo/3bAKwKGiz0U0PRvCF37uPeu9lAVgENrzcScDfohN+k0DwWigvXPhNArnTwBB+wTcJ5K6P8oKF3ySQOwmU8KMEcktgCD/krpvyEuHQuphpX3Cn4As/NpGGYRB+rKnQI4Dw8+TmOBWA8KMEHAGc03AcUADCT3IRbLXuykuAUzfMqQCEHyWgAIQfJeAO4I7gCz/WZsMJQPjpsIFOBSD8KAFHAOd9HAcUgPCTXATLrN/y8OD2TXUqAOFHCSgA4UcJ5N4BuOnHncCD63sIP+Su9fJAYJmNdiYUgPCjBBYpgbFg+AUfx4GbcjCEH5YtgsvzUMIPyx4JZocCEH5YtARK+CG3BMaDwRd+eDgzJfywzSRw+jRQwg+5JVDCD7klMG4Mv+DDYrkq4Yetp4H5ZAEIP2xcAiX8kFsC46LgCz9scCcwhB/alcDbGSzhh3bHgbfzWsIPuSVw1uWC4MOG9wIl/NB+GpifFIDwQ/MSKOGH3BIo4YfcEijhh9wSGAeCL/ywj7c28yM/CCT80GwSKGM/5JbA+Lr21w4rDrhnnP9IebaQa4W/CwA8lKEypkOs7+8CKAEIC//fRwAlABnB/87667dWcN6HPXbwM+4AgFAKABQAoAAABQAoAEABAAoAUACAAgAUAKAAAAUAKABAAQAKAFjWa8HPqcMvFvHblayNLdZGecGQu8YdARSZZ+oOAFAAQJTX4p/fmRcm88aPjfWxxfowAYAjAKAAAHcALKPL3YIfjDIBEBr+bl+LAkBgUACAAgB25RJwHztdpDnCmAAABQAoAEABAAoAUACAAgAUAKAAgLus/pOAc9OPjfVhAgAUAKAAAHcAx/i1z1gfJgBAAQAKAFAAgAIAFACgAAAFACgAQAEACgBQAIACABQAKABAAQAKAFAAQHN+LTg7sz5MAIACABTAIoZH4JkqAGBpq10Canmsj+ACYF1TIB0BEP53/h0FQPPwKwEFQOAZfPwy+isBBUDz3X84/ysAQAEACoCEM/+/zvnO/Q34OQA+vRNwH2ACIGwKQAGgBH78u4JwBMAkgAkAUACAAgAUAKAAAAUAKABAAQAKAFAAgAIAFACgAAAFACgAQAEACgBQAIACABQAoAAABQAoAEABAAoAUACgAAAFACgAQAEACgBQAIACABQAoAAABQAoAEABADsZJ36s6XHCXtk1AYAjAKAAAAXw5JkEuC9rteonBsgYAAAAAPCf/gAacQvhhoz85wAAAABJRU5ErkJggg==" x="6" y="6" width="150" height="150"/></svg></div>
+    <div>
+      <div class="word">casa</div>
+      <div class="ask">Every vowel is <b>a</b>, as in <b>father</b>.</div>
+    </div>
+  </div>
+  <div class="wrow">
+    <div class="pic"><svg viewBox="0 0 162 162" height="162" role="img" aria-label="fish"><image href="data:image/png;base64,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" x="6" y="6" width="150" height="150"/></svg></div>
+    <div>
+      <div class="word">pez</div>
+      <div class="ask">Every vowel is <b>e</b>, as in <b>bed</b>.</div>
+    </div>
+  </div>
+  <div class="wrow">
+    <div class="pic"><svg viewBox="0 0 162 162" height="162" role="img" aria-label="sun"><image href="data:image/png;base64,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" x="6" y="6" width="150" height="150"/></svg></div>
+    <div>
+      <div class="word">sol</div>
+      <div class="ask">Every vowel is <b>o</b>, as in <b>more</b>.</div>
+    </div>
+  </div>
+
+
+
+  <footer>
+    <span>Page 2 of 2</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Five sounds</span>
+  </footer>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="sheet-kind" content="form">
+<title>Pencil Paths</title>
+<style>
+  @page { size: letter portrait; margin: 0.4in 0.45in; }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  :root {
+    --ink:    #16130F;
+    --muted:  #6B635A;
+    --rule:   #CFC3B2;
+    --guide:  #BCAE9C;
+    --accent: #C0511D;
+    --tint:   #F7EDE4;
+    --slate:  #2E5A78;
+    --tintslate: #E9EFF4;
+    --deep:   #2C4A45;
+    --tintdeep: #ECF1EF;
+  }
+
+  body {
+    font-family: Quicksand, 'URW Gothic', 'Century Gothic', sans-serif;
+    color: #000; background: #fff;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+
+  /* ORDER MATTERS. This generic rule must come BEFORE the @media screen block:
+   * both selectors have the same specificity, so whichever is declared last
+   * wins. With it after, it overrode the screen width and the preview stretched
+   * to the viewport — rows scaled up and pages measured 16in tall. Print was
+   * always fine (@media screen doesn't apply), but the on-screen proof lied. */
+  .page { width: 100%; }
+  .page + .page { page-break-before: always; }
+
+  @media screen {
+    body { padding: 0.4in; background: #ddd; }
+    .page {
+      background: #fff; padding: 0.4in 0.45in;
+      width: 8.5in; min-height: 11in;
+      margin: 0 auto 22px; box-shadow: 0 2px 10px rgba(0,0,0,.3);
+    }
+  }
+
+  header {
+    display: flex; align-items: center; gap: 16px;
+    border-bottom: 3px solid var(--slate); padding-bottom: 7px; margin-bottom: 2px;
+  }
+  .bigletter { font-size: 38pt; font-weight: 700; line-height: 1; letter-spacing: .02em; }
+  .htext { flex: 1; }
+  h1 { font-size: 14pt; font-weight: 700; margin: 0 0 2px; }
+  .sub { font-size: 10pt; color: var(--muted); margin: 0; }
+  .nameline {
+    font-size: 9.5pt; color: var(--muted);
+    border-bottom: 1px solid var(--ink); width: 2in;
+    padding-bottom: 1px; align-self: flex-end;
+  }
+
+  .label { font-size: 11.5pt; font-weight: 700; margin: 9px 0 1px; }
+  .label span { font-weight: 400; font-size: 10pt; color: var(--muted); }
+
+  .row { display: block; width: 100%; height: auto; margin-bottom: .06in; }
+  /* Rows that follow the header directly would otherwise jam against its rule. */
+  header + .row { margin-top: .12in; }
+
+  .words {
+    margin-top: 10px; padding-top: 7px; border-top: 1px solid var(--rule);
+    font-size: 12.5pt;
+    display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap;
+  }
+  .words b { font-size: 14pt; }
+  .words em { font-style: normal; color: var(--muted); }
+
+  /* The wordmark rides in the footer line that was already there — see the note
+     in lib/sheet.js. No height, upright, a size down, and never louder than the
+     two slots it sits between. */
+  .brand { font-style: normal; font-size: 7pt; letter-spacing: .04em;
+    color: var(--accent); align-self: center; }
+
+  footer {
+    margin-top: 7px; font-size: 8.5pt; color: var(--muted);
+    display: flex; justify-content: space-between;
+  }
+
+  .chart { display: grid; grid-template-columns: repeat(6, 1fr); gap: 7px; margin-top: 14px; }
+  .cell {
+    border: 2px solid var(--slate); border-radius: 8px; height: 1.35in;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .page.key { background: #fcfcfa; }
+  .page.key header { border-bottom-style: double; border-bottom-width: 3px; }
+  .keylist { font-size: 11pt; line-height: 1.7; }
+  .keylist p { margin: .02in 0; }
+  .keynote { border: 1.5px solid var(--deep); border-radius: 8px; padding: .07in .12in;
+    margin: .1in 0 0; font-size: 10pt; line-height: 1.5; }
+
+  .road { display: block; width: 100%; height: auto; margin-bottom: .05in; }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <header>
+    <div class="bigletter">&#10230;</div>
+    <div class="htext">
+      <h1>Pencil Paths</h1>
+      <p class="sub">Start on the dot and drive to the star. Try to stay inside the road.</p>
+    </div>
+    <div class="nameline">Name</div>
+  </header>
+
+  <div class="label">Straight road</div>
+      <svg class="road" viewBox="0 0 729.6 126" width="100%" role="img" aria-label="Straight road">
+        <path d="M40 62 H690" fill="none" stroke="#bdbdbd" stroke-width="48" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M40 62 H690" fill="none" stroke="#e6e6e6" stroke-width="44" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M40 62 H690" fill="none" stroke="#9a9a9a" stroke-width="1.6" stroke-dasharray="7 9" stroke-linecap="round"/>
+        <circle cx="40" cy="62" r="7" fill="#3a3a3a"/>
+        <path d="M690 49 L693.44 57.27 L702.36 57.98 L695.56 63.81 L697.64 72.52 L690 67.85 L682.36 72.52 L684.44 63.81 L677.64 57.98 L686.56 57.27 Z" fill="#3a3a3a"/>
+      </svg>
+  <div class="label">Gentle hill</div>
+      <svg class="road" viewBox="0 0 729.6 126" width="100%" role="img" aria-label="Gentle hill">
+        <path d="M40 92 Q365 -24 690 92" fill="none" stroke="#bdbdbd" stroke-width="48" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M40 92 Q365 -24 690 92" fill="none" stroke="#e6e6e6" stroke-width="44" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M40 92 Q365 -24 690 92" fill="none" stroke="#9a9a9a" stroke-width="1.6" stroke-dasharray="7 9" stroke-linecap="round"/>
+        <circle cx="40" cy="92" r="7" fill="#3a3a3a"/>
+        <path d="M690 79 L693.44 87.27 L702.36 87.98 L695.56 93.81 L697.64 102.52 L690 97.85 L682.36 102.52 L684.44 93.81 L677.64 87.98 L686.56 87.27 Z" fill="#3a3a3a"/>
+      </svg>
+  <div class="label">Long wave</div>
+      <svg class="road" viewBox="0 0 729.6 126" width="100%" role="img" aria-label="Long wave">
+        <path d="M40 62 Q202 -2 365 62 T690 62" fill="none" stroke="#bdbdbd" stroke-width="48" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M40 62 Q202 -2 365 62 T690 62" fill="none" stroke="#e6e6e6" stroke-width="44" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M40 62 Q202 -2 365 62 T690 62" fill="none" stroke="#9a9a9a" stroke-width="1.6" stroke-dasharray="7 9" stroke-linecap="round"/>
+        <circle cx="40" cy="62" r="7" fill="#3a3a3a"/>
+        <path d="M690 49 L693.44 57.27 L702.36 57.98 L695.56 63.81 L697.64 72.52 L690 67.85 L682.36 72.52 L684.44 63.81 L677.64 57.98 L686.56 57.27 Z" fill="#3a3a3a"/>
+      </svg>
+  <div class="label">Down and along</div>
+      <svg class="road" viewBox="0 0 729.6 126" width="100%" role="img" aria-label="Down and along">
+        <path d="M62 26 V98 H690" fill="none" stroke="#bdbdbd" stroke-width="48" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M62 26 V98 H690" fill="none" stroke="#e6e6e6" stroke-width="44" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M62 26 V98 H690" fill="none" stroke="#9a9a9a" stroke-width="1.6" stroke-dasharray="7 9" stroke-linecap="round"/>
+        <circle cx="62" cy="26" r="7" fill="#3a3a3a"/>
+        <path d="M690 85 L693.44 93.27 L702.36 93.98 L695.56 99.81 L697.64 108.52 L690 103.85 L682.36 108.52 L684.44 99.81 L677.64 93.98 L686.56 93.27 Z" fill="#3a3a3a"/>
+      </svg>
+  <div class="label">Two corners</div>
+      <svg class="road" viewBox="0 0 729.6 126" width="100%" role="img" aria-label="Two corners">
+        <path d="M40 96 H360 V30 H690" fill="none" stroke="#bdbdbd" stroke-width="48" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M40 96 H360 V30 H690" fill="none" stroke="#e6e6e6" stroke-width="44" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M40 96 H360 V30 H690" fill="none" stroke="#9a9a9a" stroke-width="1.6" stroke-dasharray="7 9" stroke-linecap="round"/>
+        <circle cx="40" cy="96" r="7" fill="#3a3a3a"/>
+        <path d="M690 17 L693.44 25.27 L702.36 25.98 L695.56 31.81 L697.64 40.52 L690 35.85 L682.36 40.52 L684.44 31.81 L677.64 25.98 L686.56 25.27 Z" fill="#3a3a3a"/>
+      </svg>
+
+  <footer>
+    <span>Page 1 of 4 &middot; 5 roads &middot; lane 0.46in wide</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Pencil Paths</span>
+  </footer>
+</div>
+
+<div class="page">
+  <header>
+    <div class="bigletter">&#10230;</div>
+    <div class="htext">
+      <h1>Pencil Paths</h1>
+      <p class="sub">The roads are narrower now. Go slowly and stay inside.</p>
+    </div>
+    <div class="nameline">Name</div>
+  </header>
+
+  <div class="label">Rolling hills</div>
+      <svg class="road" viewBox="0 0 729.6 106" width="100%" role="img" aria-label="Rolling hills">
+        <path d="M40 82 Q122 -30 204 82 Q286 -30 368 82 Q450 -30 532 82 Q614 -30 690 82" fill="none" stroke="#bdbdbd" stroke-width="36" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M40 82 Q122 -30 204 82 Q286 -30 368 82 Q450 -30 532 82 Q614 -30 690 82" fill="none" stroke="#e6e6e6" stroke-width="32" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M40 82 Q122 -30 204 82 Q286 -30 368 82 Q450 -30 532 82 Q614 -30 690 82" fill="none" stroke="#9a9a9a" stroke-width="1.6" stroke-dasharray="7 9" stroke-linecap="round"/>
+        <circle cx="40" cy="82" r="7" fill="#3a3a3a"/>
+        <path d="M690 69 L693.44 77.27 L702.36 77.98 L695.56 83.81 L697.64 92.52 L690 87.85 L682.36 92.52 L684.44 83.81 L677.64 77.98 L686.56 77.27 Z" fill="#3a3a3a"/>
+      </svg>
+  <div class="label">Zigzag</div>
+      <svg class="road" viewBox="0 0 729.6 106" width="100%" role="img" aria-label="Zigzag">
+        <path d="M40 24 L170 84 L300 24 L430 84 L560 24 L690 84" fill="none" stroke="#bdbdbd" stroke-width="36" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M40 24 L170 84 L300 24 L430 84 L560 24 L690 84" fill="none" stroke="#e6e6e6" stroke-width="32" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M40 24 L170 84 L300 24 L430 84 L560 24 L690 84" fill="none" stroke="#9a9a9a" stroke-width="1.6" stroke-dasharray="7 9" stroke-linecap="round"/>
+        <circle cx="40" cy="24" r="7" fill="#3a3a3a"/>
+        <path d="M690 71 L693.44 79.27 L702.36 79.98 L695.56 85.81 L697.64 94.52 L690 89.85 L682.36 94.52 L684.44 85.81 L677.64 79.98 L686.56 79.27 Z" fill="#3a3a3a"/>
+      </svg>
+  <div class="label">Staircase</div>
+      <svg class="road" viewBox="0 0 729.6 106" width="100%" role="img" aria-label="Staircase">
+        <path d="M40 88 V70 H200 V52 H360 V34 H520 V22 H690" fill="none" stroke="#bdbdbd" stroke-width="36" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M40 88 V70 H200 V52 H360 V34 H520 V22 H690" fill="none" stroke="#e6e6e6" stroke-width="32" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M40 88 V70 H200 V52 H360 V34 H520 V22 H690" fill="none" stroke="#9a9a9a" stroke-width="1.6" stroke-dasharray="7 9" stroke-linecap="round"/>
+        <circle cx="40" cy="88" r="7" fill="#3a3a3a"/>
+        <path d="M690 9 L693.44 17.27 L702.36 17.98 L695.56 23.81 L697.64 32.52 L690 27.85 L682.36 32.52 L684.44 23.81 L677.64 17.98 L686.56 17.27 Z" fill="#3a3a3a"/>
+      </svg>
+  <div class="label">Bumpy road</div>
+      <svg class="road" viewBox="0 0 729.6 106" width="100%" role="img" aria-label="Bumpy road">
+        <path d="M40 52 Q94 18 148 52 T256 52 T364 52 T472 52 T580 52 T688 52" fill="none" stroke="#bdbdbd" stroke-width="36" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M40 52 Q94 18 148 52 T256 52 T364 52 T472 52 T580 52 T688 52" fill="none" stroke="#e6e6e6" stroke-width="32" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M40 52 Q94 18 148 52 T256 52 T364 52 T472 52 T580 52 T688 52" fill="none" stroke="#9a9a9a" stroke-width="1.6" stroke-dasharray="7 9" stroke-linecap="round"/>
+        <circle cx="40" cy="52" r="7" fill="#3a3a3a"/>
+        <path d="M688 39 L691.44 47.27 L700.36 47.98 L693.56 53.81 L695.64 62.52 L688 57.85 L680.36 62.52 L682.44 53.81 L675.64 47.98 L684.56 47.27 Z" fill="#3a3a3a"/>
+      </svg>
+  <div class="label">Up the mountain</div>
+      <svg class="road" viewBox="0 0 729.6 106" width="100%" role="img" aria-label="Up the mountain">
+        <path d="M40 88 L365 22 L690 88" fill="none" stroke="#bdbdbd" stroke-width="36" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M40 88 L365 22 L690 88" fill="none" stroke="#e6e6e6" stroke-width="32" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M40 88 L365 22 L690 88" fill="none" stroke="#9a9a9a" stroke-width="1.6" stroke-dasharray="7 9" stroke-linecap="round"/>
+        <circle cx="40" cy="88" r="7" fill="#3a3a3a"/>
+        <path d="M690 75 L693.44 83.27 L702.36 83.98 L695.56 89.81 L697.64 98.52 L690 93.85 L682.36 98.52 L684.44 89.81 L677.64 83.98 L686.56 83.27 Z" fill="#3a3a3a"/>
+      </svg>
+  <div class="label">Big loop</div>
+      <svg class="road" viewBox="0 0 729.6 106" width="100%" role="img" aria-label="Big loop">
+        <path d="M40 88 H200 A34 34 0 1 1 228 88 H690" fill="none" stroke="#bdbdbd" stroke-width="36" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M40 88 H200 A34 34 0 1 1 228 88 H690" fill="none" stroke="#e6e6e6" stroke-width="32" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M40 88 H200 A34 34 0 1 1 228 88 H690" fill="none" stroke="#9a9a9a" stroke-width="1.6" stroke-dasharray="7 9" stroke-linecap="round"/>
+        <circle cx="40" cy="88" r="7" fill="#3a3a3a"/>
+        <path d="M690 75 L693.44 83.27 L702.36 83.98 L695.56 89.81 L697.64 98.52 L690 93.85 L682.36 98.52 L684.44 89.81 L677.64 83.98 L686.56 83.27 Z" fill="#3a3a3a"/>
+      </svg>
+
+  <footer>
+    <span>Page 2 of 4 &middot; 6 roads &middot; lane 0.33in wide</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Pencil Paths</span>
+  </footer>
+</div>
+
+<div class="page">
+  <header>
+    <div class="bigletter">&#10230;</div>
+    <div class="htext">
+      <h1>Pencil Paths</h1>
+      <p class="sub">The narrowest roads. Take your time — slow is better than fast.</p>
+    </div>
+    <div class="nameline">Name</div>
+  </header>
+
+  <div class="label">Busy wave</div>
+      <svg class="road" viewBox="0 0 729.6 100" width="100%" role="img" aria-label="Busy wave">
+        <path d="M40 50 Q94 16 148 50 T256 50 T364 50 T472 50 T580 50 T688 50" fill="none" stroke="#bdbdbd" stroke-width="26" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M40 50 Q94 16 148 50 T256 50 T364 50 T472 50 T580 50 T688 50" fill="none" stroke="#e6e6e6" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M40 50 Q94 16 148 50 T256 50 T364 50 T472 50 T580 50 T688 50" fill="none" stroke="#9a9a9a" stroke-width="1.6" stroke-dasharray="7 9" stroke-linecap="round"/>
+        <circle cx="40" cy="50" r="6" fill="#3a3a3a"/>
+        <path d="M688 39 L690.91 46 L698.46 46.6 L692.71 51.53 L694.47 58.9 L688 54.95 L681.53 58.9 L683.29 51.53 L677.54 46.6 L685.09 46 Z" fill="#3a3a3a"/>
+      </svg>
+  <div class="label">Sharp zigzag</div>
+      <svg class="road" viewBox="0 0 729.6 100" width="100%" role="img" aria-label="Sharp zigzag">
+        <path d="M40 18 L105 82 L170 18 L235 82 L300 18 L365 82 L430 18 L495 82 L560 18 L625 82 L690 18" fill="none" stroke="#bdbdbd" stroke-width="26" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M40 18 L105 82 L170 18 L235 82 L300 18 L365 82 L430 18 L495 82 L560 18 L625 82 L690 18" fill="none" stroke="#e6e6e6" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M40 18 L105 82 L170 18 L235 82 L300 18 L365 82 L430 18 L495 82 L560 18 L625 82 L690 18" fill="none" stroke="#9a9a9a" stroke-width="1.6" stroke-dasharray="7 9" stroke-linecap="round"/>
+        <circle cx="40" cy="18" r="6" fill="#3a3a3a"/>
+        <path d="M690 7 L692.91 14 L700.46 14.6 L694.71 19.53 L696.47 26.9 L690 22.95 L683.53 26.9 L685.29 19.53 L679.54 14.6 L687.09 14 Z" fill="#3a3a3a"/>
+      </svg>
+  <div class="label">Steep steps</div>
+      <svg class="road" viewBox="0 0 729.6 100" width="100%" role="img" aria-label="Steep steps">
+        <path d="M40 86 V70 H160 V54 H280 V38 H400 V22 H690" fill="none" stroke="#bdbdbd" stroke-width="26" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M40 86 V70 H160 V54 H280 V38 H400 V22 H690" fill="none" stroke="#e6e6e6" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M40 86 V70 H160 V54 H280 V38 H400 V22 H690" fill="none" stroke="#9a9a9a" stroke-width="1.6" stroke-dasharray="7 9" stroke-linecap="round"/>
+        <circle cx="40" cy="86" r="6" fill="#3a3a3a"/>
+        <path d="M690 11 L692.91 18 L700.46 18.6 L694.71 23.53 L696.47 30.9 L690 26.95 L683.53 30.9 L685.29 23.53 L679.54 18.6 L687.09 18 Z" fill="#3a3a3a"/>
+      </svg>
+  <div class="label">Tight corners</div>
+      <svg class="road" viewBox="0 0 729.6 100" width="100%" role="img" aria-label="Tight corners">
+        <path d="M40 20 H160 V80 H280 V20 H400 V80 H520 V20 H690" fill="none" stroke="#bdbdbd" stroke-width="26" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M40 20 H160 V80 H280 V20 H400 V80 H520 V20 H690" fill="none" stroke="#e6e6e6" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M40 20 H160 V80 H280 V20 H400 V80 H520 V20 H690" fill="none" stroke="#9a9a9a" stroke-width="1.6" stroke-dasharray="7 9" stroke-linecap="round"/>
+        <circle cx="40" cy="20" r="6" fill="#3a3a3a"/>
+        <path d="M690 9 L692.91 16 L700.46 16.6 L694.71 21.53 L696.47 28.9 L690 24.95 L683.53 28.9 L685.29 21.53 L679.54 16.6 L687.09 16 Z" fill="#3a3a3a"/>
+      </svg>
+  <div class="label">Loop the loop</div>
+      <svg class="road" viewBox="0 0 729.6 100" width="100%" role="img" aria-label="Loop the loop">
+        <path d="M40 80 H150 A24 24 0 1 1 176 80 H310 A24 24 0 1 1 336 80 H470 A24 24 0 1 1 496 80 H690" fill="none" stroke="#bdbdbd" stroke-width="26" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M40 80 H150 A24 24 0 1 1 176 80 H310 A24 24 0 1 1 336 80 H470 A24 24 0 1 1 496 80 H690" fill="none" stroke="#e6e6e6" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M40 80 H150 A24 24 0 1 1 176 80 H310 A24 24 0 1 1 336 80 H470 A24 24 0 1 1 496 80 H690" fill="none" stroke="#9a9a9a" stroke-width="1.6" stroke-dasharray="7 9" stroke-linecap="round"/>
+        <circle cx="40" cy="80" r="6" fill="#3a3a3a"/>
+        <path d="M690 69 L692.91 76 L700.46 76.6 L694.71 81.53 L696.47 88.9 L690 84.95 L683.53 88.9 L685.29 81.53 L679.54 76.6 L687.09 76 Z" fill="#3a3a3a"/>
+      </svg>
+  <div class="label">Up and down the stairs</div>
+      <svg class="road" viewBox="0 0 729.6 100" width="100%" role="img" aria-label="Up and down the stairs">
+        <path d="M40 80 V60 H170 V40 H300 V20 H430 V40 H560 V60 H690" fill="none" stroke="#bdbdbd" stroke-width="26" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M40 80 V60 H170 V40 H300 V20 H430 V40 H560 V60 H690" fill="none" stroke="#e6e6e6" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M40 80 V60 H170 V40 H300 V20 H430 V40 H560 V60 H690" fill="none" stroke="#9a9a9a" stroke-width="1.6" stroke-dasharray="7 9" stroke-linecap="round"/>
+        <circle cx="40" cy="80" r="6" fill="#3a3a3a"/>
+        <path d="M690 49 L692.91 56 L700.46 56.6 L694.71 61.53 L696.47 68.9 L690 64.95 L683.53 68.9 L685.29 61.53 L679.54 56.6 L687.09 56 Z" fill="#3a3a3a"/>
+      </svg>
+
+  <footer>
+    <span>Page 3 of 4 &middot; 6 roads &middot; lane 0.23in wide</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Pencil Paths</span>
+  </footer>
+</div>
+
+<div class="page">
+  <header>
+    <div class="bigletter">&#10230;</div>
+    <div class="htext">
+      <h1>Pencil Paths</h1>
+      <p class="sub">These roads turn back on themselves. Follow all the way — the star may not be where you expect.</p>
+    </div>
+    <div class="nameline">Name</div>
+  </header>
+
+  <div class="label">Round the bend</div>
+      <svg class="road" viewBox="0 0 729.6 118" width="100%" role="img" aria-label="Round the bend">
+        <path d="M40 26 H240 A34 34 0 0 1 240 94 H440 A34 34 0 0 0 440 26 H690" fill="none" stroke="#bdbdbd" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M40 26 H240 A34 34 0 0 1 240 94 H440 A34 34 0 0 0 440 26 H690" fill="none" stroke="#e6e6e6" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M40 26 H240 A34 34 0 0 1 240 94 H440 A34 34 0 0 0 440 26 H690" fill="none" stroke="#9a9a9a" stroke-width="1.6" stroke-dasharray="7 9" stroke-linecap="round"/>
+        <circle cx="40" cy="26" r="6" fill="#3a3a3a"/>
+        <path d="M690 15 L692.91 22 L700.46 22.6 L694.71 27.53 L696.47 34.9 L690 30.95 L683.53 34.9 L685.29 27.53 L679.54 22.6 L687.09 22 Z" fill="#3a3a3a"/>
+      </svg>
+  <div class="label">The other way round</div>
+      <svg class="road" viewBox="0 0 729.6 118" width="100%" role="img" aria-label="The other way round">
+        <path d="M40 94 H240 A34 34 0 0 0 240 26 H440 A34 34 0 0 1 440 94 H690" fill="none" stroke="#bdbdbd" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M40 94 H240 A34 34 0 0 0 240 26 H440 A34 34 0 0 1 440 94 H690" fill="none" stroke="#e6e6e6" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M40 94 H240 A34 34 0 0 0 240 26 H440 A34 34 0 0 1 440 94 H690" fill="none" stroke="#9a9a9a" stroke-width="1.6" stroke-dasharray="7 9" stroke-linecap="round"/>
+        <circle cx="40" cy="94" r="6" fill="#3a3a3a"/>
+        <path d="M690 83 L692.91 90 L700.46 90.6 L694.71 95.53 L696.47 102.9 L690 98.95 L683.53 102.9 L685.29 95.53 L679.54 90.6 L687.09 90 Z" fill="#3a3a3a"/>
+      </svg>
+  <div class="label">There and back</div>
+      <svg class="road" viewBox="0 0 729.6 118" width="100%" role="img" aria-label="There and back">
+        <path d="M60 30 H660 A26 26 0 0 1 660 82 H60" fill="none" stroke="#bdbdbd" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M60 30 H660 A26 26 0 0 1 660 82 H60" fill="none" stroke="#e6e6e6" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M60 30 H660 A26 26 0 0 1 660 82 H60" fill="none" stroke="#9a9a9a" stroke-width="1.6" stroke-dasharray="7 9" stroke-linecap="round"/>
+        <circle cx="60" cy="30" r="6" fill="#3a3a3a"/>
+        <path d="M60 71 L62.91 78 L70.46 78.6 L64.71 83.53 L66.47 90.9 L60 86.95 L53.53 90.9 L55.29 83.53 L49.54 78.6 L57.09 78 Z" fill="#3a3a3a"/>
+      </svg>
+  <div class="label">Snake</div>
+      <svg class="road" viewBox="0 0 729.6 118" width="100%" role="img" aria-label="Snake">
+        <path d="M40 22 H630 A19 19 0 0 1 630 60 H110 A19 19 0 0 0 110 98 H690" fill="none" stroke="#bdbdbd" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M40 22 H630 A19 19 0 0 1 630 60 H110 A19 19 0 0 0 110 98 H690" fill="none" stroke="#e6e6e6" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M40 22 H630 A19 19 0 0 1 630 60 H110 A19 19 0 0 0 110 98 H690" fill="none" stroke="#9a9a9a" stroke-width="1.6" stroke-dasharray="7 9" stroke-linecap="round"/>
+        <circle cx="40" cy="22" r="6" fill="#3a3a3a"/>
+        <path d="M690 87 L692.91 94 L700.46 94.6 L694.71 99.53 L696.47 106.9 L690 102.95 L683.53 106.9 L685.29 99.53 L679.54 94.6 L687.09 94 Z" fill="#3a3a3a"/>
+      </svg>
+  <div class="label">Back from the right</div>
+      <svg class="road" viewBox="0 0 729.6 118" width="100%" role="img" aria-label="Back from the right">
+        <path d="M660 30 H60 A26 26 0 0 0 60 82 H660" fill="none" stroke="#bdbdbd" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M660 30 H60 A26 26 0 0 0 60 82 H660" fill="none" stroke="#e6e6e6" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M660 30 H60 A26 26 0 0 0 60 82 H660" fill="none" stroke="#9a9a9a" stroke-width="1.6" stroke-dasharray="7 9" stroke-linecap="round"/>
+        <circle cx="660" cy="30" r="6" fill="#3a3a3a"/>
+        <path d="M660 71 L662.91 78 L670.46 78.6 L664.71 83.53 L666.47 90.9 L660 86.95 L653.53 90.9 L655.29 83.53 L649.54 78.6 L657.09 78 Z" fill="#3a3a3a"/>
+      </svg>
+
+  <footer>
+    <span>Page 4 of 4 &middot; 5 roads &middot; lane 0.25in wide</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Pencil Paths</span>
+  </footer>
+</div>
+
+</body>
+</html>

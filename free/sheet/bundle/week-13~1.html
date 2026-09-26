@@ -1,0 +1,509 @@
+<!DOCTYPE html><html><head>
+<meta charset="utf-8">
+<!-- Declared, because everything else on the shelf declares it and the app now
+     reads it. These sets are worksheets in the strict sense the tag means: ten
+     questions with a settled right answer and a key on the second page. They
+     had no tag only because this file writes its own head instead of going
+     through lib/sheet.js doc(), which is where the tag is normally emitted. -->
+<meta name="sheet-kind" content="worksheet">
+<title>Daily Language Review — Grade 8, Set 1</title>
+<style>
+  /* Page margins live HERE only — body padding stays 0 for print
+     so the two don't stack and eat the sheet. */
+  @page { size: letter portrait; margin: 0.45in 0.5in; }
+
+  :root {
+    --ink:    #16130F;
+    --muted:  #6B635A;
+    --rule:   #CFC3B2;
+    --guide:  #BCAE9C;
+    --accent: #C0511D;
+    --tint:   #F7EDE4;
+    --slate:  #2E5A78;
+    --tintslate: #E9EFF4;
+    --deep:   #2C4A45;
+    --tintdeep: #ECF1EF;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body { margin: 0; padding: 0; }
+
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    color: var(--ink);
+    background: #ddd;
+    font-size: 12pt;
+    line-height: 1.3;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Screen-only breathing room. Print uses @page margins instead. */
+  /* ORDER MATTERS. This generic rule must come BEFORE the @media screen block:
+   * same specificity, so whichever is declared last wins. With it after, the
+   * on-screen preview stretched to the viewport instead of 8.5in. Print was
+   * unaffected, but the proof you check before printing was wrong. */
+  .page { width: 100%; }
+  .page + .page { page-break-before: always; }
+
+  @media screen {
+    body { padding: 0.5in; background: #ddd; }
+    .page {
+      background: #fff;
+      padding: 0.45in 0.5in;
+      width: 8.5in;
+      min-height: 11in;
+      margin: 0 auto 24px;
+      box-shadow: 0 2px 10px rgba(0,0,0,.3);
+    }
+  }
+
+  header { border-bottom: 3px double var(--accent); padding-bottom: 6px; margin-bottom: 0; }
+  header.cont { border-bottom-width: 1px; border-bottom-style: solid; }
+
+  h1 { font-size: 16pt; margin: 0 0 1px; letter-spacing: .01em; }
+  .sub { font-size: 10pt; font-style: italic; color: var(--muted); margin: 0; }
+
+  .nameline {
+    display: flex;
+    gap: 26px;
+    font-size: 10.5pt;
+    margin: 11px 0 12px;
+  }
+  .nameline span { flex: 1; border-bottom: 1px solid var(--ink); padding-bottom: 1px; }
+  .nameline span.short { flex: 0 0 2in; }
+
+  .directions {
+    font-size: 10.5pt;
+    line-height: 1.35;
+    background: var(--tint);
+    border-left: 4px solid var(--slate);
+    padding: 7px 10px;
+    margin-bottom: 14px;
+  }
+  .directions b { letter-spacing: .03em; }
+  .cups { font-style: italic; margin-top: 3px; }
+
+  ol { margin: 0; padding: 0; list-style: none; }
+
+  li {
+    margin-bottom: 12px;
+    page-break-inside: avoid;
+  }
+  li::before {
+    content: attr(data-n) ".";
+    font-weight: bold;
+    display: inline-block;
+    width: .3in;
+  }
+
+  .bad {
+    font-family: "Courier New", Courier, monospace;
+    font-size: 11.5pt;
+  }
+
+  /* Primary handwriting lines: solid top rule, dashed midline,
+     heavy baseline — capitals reach the top, lowercase sits
+     in the bottom half. Two strips per sentence. */
+  .write {
+    position: relative;
+    height: .45in;
+    margin: 6px 0 0 .3in;
+    border-top: 1px solid var(--rule);
+    border-bottom: 2px solid var(--slate);
+  }
+  .write + .write { margin-top: .17in; }
+  .write::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    border-top: 1px dashed #9a9a9a;
+  }
+
+  /* ---------- number 1, done for you (2026-09-23) ----------
+   * THE OWNER PRINTED THESE AND SAID THE SHEETS WERE NOT INTUITIVE, and a blind
+   * re-score with the directions hidden agreed: "faulty sentences over blank
+   * lines read as 'copy it'; that the errors must be fixed is not shown", and
+   * at grade 7 "copy, correct or improve are all plausible". So number 1 is
+   * now shown FIXED, written on its line, with every correction lit the way
+   * the key lights it — a child who never reads the directions can see that
+   * the job is to change things, and which kinds of thing. It is a different
+   * class from the key's .fixed on purpose: check.js pairs every .bad with
+   * one .fixed, and the example is not a second answer. */
+  li.done { background: var(--tint); border-left: 4px solid var(--accent);
+    padding: 5px 8px 8px 0; }
+  .donetag { display: inline-block; font-family: Georgia, serif; font-size: 8pt;
+    font-weight: bold; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--accent); border: 1.5px solid var(--accent); padding: 0 5px;
+    margin-left: 8px; vertical-align: 1px; }
+  .write.filled { display: flex; align-items: flex-end; padding: 0 0 1px 6px; }
+  .write.filled::after { z-index: 0; }
+  .fixedlabel { font-size: 8.5pt; font-weight: bold; letter-spacing: .05em;
+    text-transform: uppercase; color: var(--accent); margin-right: 8px;
+    position: relative; z-index: 1; white-space: nowrap; }
+  .donefix { position: relative; z-index: 1; font-style: italic;
+    color: var(--deep); white-space: nowrap; line-height: 1; }
+  .donefix u { text-decoration: none; background: #fff; font-weight: bold;
+    padding: 0 1px; border-bottom: 2px solid var(--accent); }
+
+  .brand { font-style: normal; font-size: 7.5pt; letter-spacing: .04em;
+    color: var(--accent); align-self: center; }
+
+  footer {
+    margin-top: 14px;
+    padding-top: 6px;
+    border-top: 1px solid var(--rule);
+    font-size: 9pt;
+    font-style: italic;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+  }
+
+  /* ---------- answer key ---------- */
+  .key li { margin-bottom: 12px; }
+  .key .fixed u {
+    text-decoration: none;
+    background: var(--tint);
+    padding: 0 2px;
+    font-weight: bold;
+  }
+  .key .why {
+    display: block;
+    margin-left: .3in;
+    font-size: 9.5pt;
+    font-style: italic;
+    color: var(--muted);
+    margin-top: 1px;
+  }
+  .keybadge {
+    display: inline-block;
+    border: 2px solid var(--deep);
+    padding: 2px 9px;
+    font-size: 9.5pt;
+    font-weight: bold;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+</style>
+</head><body>
+
+<!-- ============ PAGE 1 — STUDENT, 1–5 ============ -->
+<div class="page">
+  <header>
+    <h1>Daily Language Review — Set 1</h1>
+    <p class="sub">Grade 8 &nbsp;·&nbsp; Mixed Review &nbsp;·&nbsp; Page 1 of 2</p>
+  </header>
+
+  <div class="nameline">
+    <span>Name</span>
+    <span class="short">Date</span>
+  </div>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Fix every mistake and write the sentence right on the lines. Number 1 is done.
+    <div class="cups"><b>Remember CUPS:</b> Capital letters &nbsp;·&nbsp; Usage (right word) &nbsp;·&nbsp; Punctuation &nbsp;·&nbsp; Spelling</div>
+  </div>
+
+  <ol>
+    <li data-n="1" class="done"><span class="bad">running the concession stand at halftime were the worst job i ever had... and my sister got paid more</span><span class="donetag">Done for you</span><div class="write filled"><span class="fixedlabel">Fixed:</span><span class="donefix" style="font-size:10pt"><u>R</u>unning the concession stand at halftime <u>was</u> the worst job <u>I</u> ever had<u>,</u> and my sister got paid more<u>.</u></span></div></li>
+    <li data-n="2"><span class="bad">the whole locker room was cleaned by us before coach even asked and it took an hour</span><div class="write"></div><div class="write"></div></li>
+    <li data-n="3"><span class="bad">if i was you i would just tell mom about the grade before she sees it herself</span><div class="write"></div><div class="write"></div></li>
+    <li data-n="4"><span class="bad">walking home from practice my phone died and i had to guess the way</span><div class="write"></div><div class="write"></div></li>
+    <li data-n="5"><span class="bad">my brother said he would help — but then he just sat there and watched the whole thing get built by me</span><div class="write"></div><div class="write"></div></li>
+  </ol>
+
+  <footer>
+    <span>Keep going on page 2 &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Set 1</span>
+  </footer>
+</div>
+
+<!-- ============ PAGE 2 — STUDENT, 6–10 ============ -->
+<div class="page">
+  <header class="cont">
+    <h1>Set 1, continued</h1>
+    <p class="sub">Grade 8 &nbsp;·&nbsp; Mixed Review &nbsp;·&nbsp; Page 2 of 2</p>
+  </header>
+
+  <ol style="margin-top:16px">
+    <li data-n="6"><span class="bad">i told her i would try and finish the poster before class but i forgot it at home</span><div class="write"></div><div class="write"></div></li>
+    <li data-n="7"><span class="bad">first you should mix the paint then you add the water and then the brush should be rinsed between coats</span><div class="write"></div><div class="write"></div></li>
+    <li data-n="8"><span class="bad">the vending machine was smashed sometime over the weekend and nobody in the office know who did it</span><div class="write"></div><div class="write"></div></li>
+    <li data-n="9"><span class="bad">staying up late and then blaming the wifi for my grade are not a strategy according to mom</span><div class="write"></div><div class="write"></div></li>
+    <li data-n="10"><span class="bad">if you want to make the team you have to show up early — practice is run by coach at six and excuses are not accepted by him</span><div class="write"></div><div class="write"></div></li>
+  </ol>
+
+  <footer>
+    <!-- / 9, not / 10: number 1 is the worked example (2026-09-23). -->
+    <span>Score: ______ / 9</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Set 1</span>
+  </footer>
+</div>
+
+<!-- ============ PAGE 3 — ANSWER KEY ============ -->
+
+<div style="page-break-before:always"></div>
+
+
+<div class="page ">
+  <header>
+    
+    <h1>Inside a Kind of Piece</h1>
+    <p class="sub">Grade 8 · Atoms · Page 1 of 3</p>
+  </header>
+  <div class="nameline">
+    <span>Name</span>
+    <span class="short">Date</span>
+  </div>
+  <div class="directions">
+    <b>DIRECTIONS:</b> There are about ninety kinds of atom. What makes one kind different from another? Read, then answer.
+  </div>
+
+
+  <div class="note" style="margin-top:2px">An atom has a tiny, heavy center of <b>protons</b> and <b>neutrons</b>,
+  with <b>electrons</b> around it. The number of protons decides the kind: 1 is hydrogen, 6 carbon, 79 gold.</div>
+
+  <table class="tbl h75">
+    <thead><tr><th>#</th><th>If the center holds…</th><th>Which kind is it?</th><th>How do you know?</th></tr></thead>
+    <tbody><tr><td><span class="pn">1.</span></td><td>1 proton</td><td class="blank"></td><td class="blank"></td></tr><tr><td><span class="pn">2.</span></td><td>6 protons</td><td class="blank"></td><td class="blank"></td></tr><tr><td><span class="pn">3.</span></td><td>6 protons and 8 neutrons instead of 6</td><td class="blank"></td><td class="blank"></td></tr><tr><td><span class="pn">4.</span></td><td>8 protons</td><td class="blank"></td><td class="blank"></td></tr></tbody>
+  </table>
+
+  <ol class="qs" start="5"><li><span class="qt">Row 3 is the interesting one. Say what changed and what did not, and why the kind stayed the same.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Keep going on page 2 →</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Inside an atom</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>How Anybody Knows</h1>
+    <p class="sub">Grade 8 · Atoms · Page 2 of 3</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Nobody has seen inside an atom. Read the 1909 experiment, then answer.
+  </div>
+
+
+  <div class="note" style="margin-top:2px">Fast, heavy particles were fired at thin gold foil. Nearly all went
+  straight through. <b>About one in eight thousand came back.</b></div>
+
+  <div style="text-align:center;margin:2px 0"><svg class="inline" viewBox="0 0 400 150" width="400" height="150" role="img" aria-label="particles fired at gold foil, nearly all passing through and one rebounding" xmlns="http://www.w3.org/2000/svg"><rect x="150" y="18" width="8" height="114" rx="0" fill="#dcdcdc" stroke="#16130F" stroke-width="1.4"/><text x="154" y="144" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="9" font-weight="normal" text-anchor="middle" fill="#16130F">gold foil</text><text x="30" y="22" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="9" font-weight="bold" text-anchor="middle" fill="#16130F">source</text><line x1="56" y1="40" x2="388" y2="40" stroke="#16130F" stroke-width="0.9" stroke-dasharray="4 3" stroke-linecap="round"/><line x1="56" y1="52" x2="388" y2="52" stroke="#16130F" stroke-width="0.9" stroke-dasharray="4 3" stroke-linecap="round"/><line x1="56" y1="64" x2="388" y2="64" stroke="#16130F" stroke-width="0.9" stroke-dasharray="4 3" stroke-linecap="round"/><line x1="56" y1="76" x2="388" y2="76" stroke="#16130F" stroke-width="0.9" stroke-dasharray="4 3" stroke-linecap="round"/><line x1="56" y1="88" x2="388" y2="88" stroke="#16130F" stroke-width="0.9" stroke-dasharray="4 3" stroke-linecap="round"/><line x1="56" y1="100" x2="388" y2="100" stroke="#16130F" stroke-width="0.9" stroke-dasharray="4 3" stroke-linecap="round"/><line x1="56" y1="112" x2="388" y2="112" stroke="#16130F" stroke-width="0.9" stroke-dasharray="4 3" stroke-linecap="round"/><line x1="56" y1="76" x2="152" y2="76" stroke="#16130F" stroke-width="2" stroke-linecap="round"/><path d="M152,76 L96,44" fill="none" stroke="#C0511D" stroke-width="2"/><line x1="100" y1="42" x2="96" y2="44" stroke="#16130F" stroke-width="2" stroke-linecap="round"/><line x1="98" y1="50" x2="96" y2="44" stroke="#16130F" stroke-width="2" stroke-linecap="round"/><text x="300" y="32" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="9" font-weight="normal" text-anchor="middle" fill="#6B635A">almost all go straight through</text><text x="72" y="34" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="9" font-weight="bold" text-anchor="start" fill="#16130F">about 1 in 8,000 comes back</text><circle cx="154" cy="76" r="3.4" fill="#16130F" stroke="#16130F" stroke-width="0"/></svg></div>
+
+  <ol class="qs" start="6"><li><span class="qt">What does "nearly all of them went straight through" tell you about an atom?</span><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">What does the tiny number that bounced straight back tell you? Say why "small" and "heavy" both follow.</span><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt"><b>science-11-grade6 sheet 30</b> works out the inside of a planet from earthquake waves that never arrive. Say what the two investigations have in common.</span><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Keep going on page 3 →</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Inside an atom</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>Mostly Nothing</h1>
+    <p class="sub">Grade 8 · Atoms · Page 3 of 3</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> If an atom's center were a marble in the middle of a football field, the atom would reach the stands.
+  </div>
+
+
+  <div class="note" style="margin-top:2px">So a table is almost entirely empty space. Your hand stops because the
+  electrons of one atom push hard on the electrons of the next.</div>
+
+  <ol class="qs" start="9"><li><span class="qt">A friend says solids feel solid because their atoms are packed with no gaps. Using this page, say what is wrong and what actually holds your hand up.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Almost all of an atom's mass is in that tiny center. Explain how something so small can be nearly all of the weight.</span><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Say what you would have concluded in 1909 if every single particle had gone straight through with none coming back.</span><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Score: ______ / 11</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Inside an atom</span>
+  </footer>
+</div>
+
+
+<div style="page-break-before:always"></div>
+
+
+<div class="page ">
+  <header>
+    
+    <h1>The Square Number Maze</h1>
+    <p class="sub">Grade 8 · Games · Page 1 of 2</p>
+  </header>
+  <div class="nameline">
+    <span>Name</span>
+    <span class="short">Date</span>
+  </div>
+  <div class="directions">
+    <b>DIRECTIONS:</b> Step only on <b>perfect squares</b> (a whole-number square root). Go across or down.
+    <div class="tip">The wrong ones are within 3 of a square. Know your squares to 22&sup2;.</div>
+  </div>
+
+
+  <table class="rmaze p1" style="--c:115px;--h:0.97;--f:16pt"><tbody><tr><td class="mend done"><span class="mlab">START</span>4<sup>2</sup><span class="rm-arr rm-d">&darr;</span></td><td class="nope">&radic;25<span class="rm-x">&#x2717;</span></td><td>34</td><td>&radic;49</td><td>83</td><td>80</td></tr><tr><td class="done">16</td><td>12</td><td>363</td><td>440</td><td>255</td><td>227</td></tr><tr><td>21<sup>2</sup></td><td>170</td><td>199</td><td>287</td><td>257</td><td>&radic;25</td></tr><tr><td>&radic;256</td><td>17<sup>2</sup></td><td>146</td><td>147</td><td>398</td><td>12</td></tr><tr><td>&radic;400</td><td>12<sup>2</sup></td><td>326</td><td>327</td><td>98</td><td>170</td></tr><tr><td>&radic;361</td><td>12<sup>2</sup></td><td>19<sup>2</sup></td><td>2<sup>2</sup></td><td>18<sup>2</sup></td><td class="mend"><span class="mlab">FINISH</span>256</td></tr></tbody></table>
+  <div class="rm-note"><span class="rm-tag">Done for you</span> <b>4<sup>2</sup></b> = 16 <b class="rm-ok">&#x2713;</b> &rarr; <b>16</b> = 4 &times; 4 <b class="rm-ok">&#x2713;</b>. &nbsp;<b>&radic;25</b> = 5 <b class="rm-no">&#x2717;</b> not that way. Carry on from there.</div>
+
+  <footer>
+    <span>Keep going on page 2 &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>The Square Number Maze</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>The Square Number Maze — Questions</h1>
+    <p class="sub">Grade 8 · Games · Page 2 of 2</p>
+  </header>
+
+
+
+
+  <div class="tasknote" style="margin-top:4px"><b>Write the squares you stepped on, each with its root.</b></div>
+  <div class="write rm-first"><span class="rm-hand">4<sup>2</sup> (4) &rarr; 16 (4) &rarr;</span></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div>
+
+  <ol class="qs" start="1"><li><span class="qt">Which was the largest square number on your route, and what is its root?</span><div class="write"></div></li><li><span class="qt">Pick a square you could NOT step on. Name the two perfect squares it sits between.</span><div class="write"></div><div class="write"></div></li><li><span class="qt">A right-angled triangle has short sides of 5 and 12. The square on the long side is 169. How long is it, and how did the maze help?</span><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Then check it against the answer page</span>
+    <span class="brand">Kitchen Table</span>
+    <span>The Square Number Maze</span>
+  </footer>
+</div>
+
+
+<div style="page-break-before:always"></div>
+
+
+<div class="page ">
+  <header>
+    
+    <h1>When the Fractions Run Out</h1>
+    <p class="sub">Grade 8 · Number · Page 1 of 2</p>
+  </header>
+  <div class="nameline">
+    <span>Name</span>
+    <span class="short">Date</span>
+  </div>
+  <div class="directions">
+    <b>DIRECTIONS:</b> Write <b>R</b> if the number can be written as a fraction of two whole numbers, <b>I</b> if it cannot.
+  </div>
+
+<div class="fill" style="zoom:1.35">
+  <div class="note" style="margin-top:2px"><b>Rational:</b> one whole number over another. Its decimal stops
+  or repeats (0.25, 0.333&hellip;). <b>Irrational:</b> the decimal never stops and never repeats, like
+  <span class="rt">√<span class="rad">2</span></span> = 1.41421356&hellip;</div>
+
+  <div class="label" style="font-weight:bold;font-size:11pt;margin:13px 0 6px">Part A — R or I?</div>
+  <div class="grid roomy" style="grid-template-columns:repeat(3,1fr)"><div class="prob"><span class="pn">1.</span><div class="pbody"><span class="expr">0.101001000100001&hellip; <span style="font-size:9pt;color:var(--muted)">(one more zero each time)</span></span> &nbsp;<span class="abox" style="width:0.5in;height:0.45in"></span></div></div><div class="prob"><span class="pn">2.</span><div class="pbody"><span class="expr"><span class="rt">√<span class="rad">7</span></span></span> &nbsp;<span class="abox" style="width:0.5in;height:0.45in"></span></div></div><div class="prob"><span class="pn">3.</span><div class="pbody"><span class="expr"><span class="rt">√<span class="rad">121</span></span></span> &nbsp;<span class="abox" style="width:0.5in;height:0.45in"></span></div></div><div class="prob"><span class="pn">4.</span><div class="pbody"><span class="expr"><span class="rt">√<span class="rad">9</span></span></span> &nbsp;<span class="abox" style="width:0.5in;height:0.45in"></span></div></div><div class="prob"><span class="pn">5.</span><div class="pbody"><span class="expr">0.35</span> &nbsp;<span class="abox" style="width:0.5in;height:0.45in"></span></div></div><div class="prob"><span class="pn">6.</span><div class="pbody"><span class="expr">&pi;</span> &nbsp;<span class="abox" style="width:0.5in;height:0.45in"></span></div></div><div class="prob"><span class="pn">7.</span><div class="pbody"><span class="expr"><span class="rt">√<span class="rad">2</span></span></span> &nbsp;<span class="abox" style="width:0.5in;height:0.45in"></span></div></div><div class="prob"><span class="pn">8.</span><div class="pbody"><span class="expr"><sup>4</sup>&frasl;<sub>3</sub></span> &nbsp;<span class="abox" style="width:0.5in;height:0.45in"></span></div></div><div class="prob"><span class="pn">9.</span><div class="pbody"><span class="expr"><sup>22</sup>&frasl;<sub>7</sub></span> &nbsp;<span class="abox" style="width:0.5in;height:0.45in"></span></div></div><div class="prob"><span class="pn">10.</span><div class="pbody"><span class="expr"><span class="rt">√<span class="rad">18</span></span></span> &nbsp;<span class="abox" style="width:0.5in;height:0.45in"></span></div></div><div class="prob"><span class="pn">11.</span><div class="pbody"><span class="expr">&minus;13</span> &nbsp;<span class="abox" style="width:0.5in;height:0.45in"></span></div></div><div class="prob"><span class="pn">12.</span><div class="pbody"><span class="expr">0.333333&hellip;</span> &nbsp;<span class="abox" style="width:0.5in;height:0.45in"></span></div></div></div>
+</div>
+
+  <footer>
+    <span>Keep going on page 2 &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Number</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>When the Fractions Run Out — continued</h1>
+    <p class="sub">Grade 8 · Number · Page 2 of 2</p>
+  </header>
+
+
+
+
+  <div class="note" style="margin-top:2px"><span class="rt">√<span class="rad">16</span></span> = 4, rational. <span class="rt">√<span class="rad">17</span></span> = 4.1231056&hellip;, irrational.
+  Look under the root sign: <b>is it a perfect square?</b></div>
+
+  <div class="label" style="font-weight:bold;font-size:11pt;margin:13px 0 6px">Part B — Rational or irrational? If it is rational, write what it equals.</div>
+  <div class="grid " style="grid-template-columns:repeat(2,1fr)"><div class="prob"><span class="pn">13.</span><div class="pbody"><span class="expr"><span class="rt">√<span class="rad">36</span></span></span> &nbsp;<span class="abox" style="width:0.34in;height:0.3in"></span> &nbsp;<span style="font-size:9pt;color:var(--muted)">=</span> <span class="abox" style="width:0.52in;height:0.3in"></span></div></div><div class="prob"><span class="pn">14.</span><div class="pbody"><span class="expr"><span class="rt">√<span class="rad">12</span></span></span> &nbsp;<span class="abox" style="width:0.34in;height:0.3in"></span> &nbsp;<span style="font-size:9pt;color:var(--muted)">=</span> <span class="abox" style="width:0.52in;height:0.3in"></span></div></div><div class="prob"><span class="pn">15.</span><div class="pbody"><span class="expr"><span class="rt">√<span class="rad">3</span></span></span> &nbsp;<span class="abox" style="width:0.34in;height:0.3in"></span> &nbsp;<span style="font-size:9pt;color:var(--muted)">=</span> <span class="abox" style="width:0.52in;height:0.3in"></span></div></div><div class="prob"><span class="pn">16.</span><div class="pbody"><span class="expr"><span class="rt">√<span class="rad">10</span></span></span> &nbsp;<span class="abox" style="width:0.34in;height:0.3in"></span> &nbsp;<span style="font-size:9pt;color:var(--muted)">=</span> <span class="abox" style="width:0.52in;height:0.3in"></span></div></div><div class="prob"><span class="pn">17.</span><div class="pbody"><span class="expr"><span class="rt">√<span class="rad">13</span></span></span> &nbsp;<span class="abox" style="width:0.34in;height:0.3in"></span> &nbsp;<span style="font-size:9pt;color:var(--muted)">=</span> <span class="abox" style="width:0.52in;height:0.3in"></span></div></div><div class="prob"><span class="pn">18.</span><div class="pbody"><span class="expr"><span class="rt">√<span class="rad">49</span></span></span> &nbsp;<span class="abox" style="width:0.34in;height:0.3in"></span> &nbsp;<span style="font-size:9pt;color:var(--muted)">=</span> <span class="abox" style="width:0.52in;height:0.3in"></span></div></div></div>
+
+  <div class="label" style="font-weight:bold;font-size:11pt;margin:13px 0 6px">Part C — Explain it.</div>
+  <ol class="qs" start="19"><li><span class="qt">Ella says <span class="rt">√<span class="rad">25</span></span> must be irrational, &ldquo;because it has a square root sign on it.&rdquo; Is she right? What is <span class="rt">√<span class="rad">25</span></span>, and what should she have looked at instead?</span><div class="write"></div><div class="write"></div></li><li><span class="qt"><sup>22</sup>&frasl;<sub>7</sub> is often used in place of &pi;. Is <sup>22</sup>&frasl;<sub>7</sub> rational or irrational? Is &pi;? And are the two numbers equal &mdash; how would you check?</span><div class="write"></div><div class="write"></div></li><li><span class="qt">A calculator shows <span class="rt">√<span class="rad">2</span></span> = 1.414213562. Square that number by hand. Does it come out as exactly 2? What does that tell you about what the screen was showing you?</span><div class="work" style="height:1.5in"><span>Show your work</span></div><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Score: ______ / 21</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Number</span>
+  </footer>
+</div>
+
+
+<div style="page-break-before:always"></div>
+
+
+<!-- ============ PAGE 1 — STUDENT, 1–5 ============ -->
+<div class="page">
+  <header>
+    <h1>Daily Language Review — Set 2</h1>
+    <p class="sub">Grade 8 &nbsp;·&nbsp; Mixed Review &nbsp;·&nbsp; Page 1 of 2</p>
+  </header>
+
+  <div class="nameline">
+    <span>Name</span>
+    <span class="short">Date</span>
+  </div>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Fix every mistake and write the sentence right on the lines. Number 1 is done.
+    <div class="cups"><b>Remember CUPS:</b> Capital letters &nbsp;·&nbsp; Usage (right word) &nbsp;·&nbsp; Punctuation &nbsp;·&nbsp; Spelling</div>
+  </div>
+
+  <ol>
+    <li data-n="1" class="done"><span class="bad">arguing with the ref never work and it usually gets somebody carded</span><span class="donetag">Done for you</span><div class="write filled"><span class="fixedlabel">Fixed:</span><span class="donefix" style="font-size:12.5pt"><u>A</u>rguing with the ref never <u>works,</u> and it usually gets somebody carded<u>.</u></span></div></li>
+    <li data-n="2"><span class="bad">a hole was put in the drywall by my brother and then it was blamed on the dog by him</span><div class="write"></div><div class="write"></div></li>
+    <li data-n="3"><span class="bad">if i was in charge practice would be started at four and everyone would be home by five</span><div class="write"></div><div class="write"></div></li>
+    <li data-n="4"><span class="bad">just text me when the bus gets there? and dont leave your kit on the field again?</span><div class="write"></div><div class="write"></div></li>
+    <li data-n="5"><span class="bad">covered in mud from the last game my mom refused to let the jersey in the house</span><div class="write"></div><div class="write"></div></li>
+  </ol>
+
+  <footer>
+    <span>Keep going on page 2 &rarr;</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Set 2</span>
+  </footer>
+</div>
+
+<!-- ============ PAGE 2 — STUDENT, 6–10 ============ -->
+<div class="page">
+  <header class="cont">
+    <h1>Set 2, continued</h1>
+    <p class="sub">Grade 8 &nbsp;·&nbsp; Mixed Review &nbsp;·&nbsp; Page 2 of 2</p>
+  </header>
+
+  <ol style="margin-top:16px">
+    <li data-n="6"><span class="bad">the field was closed all week because of the rain and the games was moved to the turf</span><div class="write"></div><div class="write"></div></li>
+    <li data-n="7"><span class="bad">i told her i would think about it... but honestly i already knew... it was a no</span><div class="write"></div><div class="write"></div></li>
+    <li data-n="8"><span class="bad">we set up every chair in the gym in twenty minutes then the whole thing was taken apart by us at nine</span><div class="write"></div><div class="write"></div></li>
+    <li data-n="9"><span class="bad">she wants us to at some point this week decide who is bringing what</span><div class="write"></div><div class="write"></div></li>
+    <li data-n="10"><span class="bad">the only kid who studied — luis of course — were the one who forgot his calculator</span><div class="write"></div><div class="write"></div></li>
+  </ol>
+
+  <footer>
+    <!-- / 9, not / 10: number 1 is the worked example (2026-09-23). -->
+    <span>Score: ______ / 9</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Set 2</span>
+  </footer>
+</div>
+
+<!-- ============ PAGE 3 — ANSWER KEY ============ -->
+</body></html>

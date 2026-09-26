@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="sheet-kind" content="worksheet">
+<title>The Masu Box — Origami</title>
+<style>
+  :root { --font: Georgia, "Times New Roman", serif; }
+
+  /* Page margins live HERE only — body padding stays 0 for print so the two
+     don't stack and eat the sheet. */
+  @page { size: letter portrait; margin: 0.45in 0.5in; }
+
+  /*
+   * THE PALETTE. The same one the shop wears (kitchen-table/BRAND.md): warm
+   * near-black ink, one accent, pine kept back for the answer key.
+   *
+   * WHY A SHEET HAS COLOR AT ALL. Every sheet was pure grayscale — #000 rules,
+   * #333 subtitles, #f0f0f0 boxes — which is what you get by never deciding.
+   * The paper is the product and it looked like a fax. A printer set to
+   * grayscale, or one that has no color to give, renders all of this as the
+   * greys it already had, so nothing below costs a parent anything they were
+   * not already spending.
+   *
+   * WHAT STAYS BLACK, ON PURPOSE:
+   *   - anything drawn to be written on (rules, name lines, answer boxes)
+   *   - anything drawn to be traced or colored in (line art, letter guides)
+   *   - the confidence rings, which have to survive a mono laser
+   * Color marks the sheet's own furniture — its rule, its numbering, its
+   * boxes — and never the part a child puts a pencil through.
+   */
+  :root {
+    --ink:    #16130F;
+    --muted:  #6B635A;
+    --rule:   #CFC3B2;
+    --guide:  #BCAE9C;
+    --accent: #C0511D;
+    --tint:   #F7EDE4;
+    --slate:  #2E5A78;
+    --tintslate: #E9EFF4;
+    --deep:   #2C4A45;
+    --tintdeep: #ECF1EF;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font);
+    color: #000; background: #fff;
+    font-size: 12pt; line-height: 1.3;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+
+  /* ORDER MATTERS. This generic rule must come BEFORE the @media screen block:
+     same specificity, so whichever is declared last wins. With it after, the
+     on-screen preview stretches to the viewport instead of 8.5in — print is
+     unaffected, but the proof you check before printing is wrong. */
+  .page { width: 100%; }
+  .page + .page { page-break-before: always; }
+
+  @media screen {
+    body { padding: 0.5in; background: #ddd; }
+    .page {
+      background: #fff; padding: 0.45in 0.5in;
+      width: 8.5in; min-height: 11in;
+      margin: 0 auto 24px; box-shadow: 0 2px 10px rgba(0,0,0,.3);
+    }
+  }
+
+  /* ------------------------------------------------------------- header */
+  header { border-bottom: 3px double var(--accent); padding-bottom: 6px; }
+  header.cont { border-bottom: 1px solid var(--rule); }
+  h1 { font-size: 16pt; margin: 0 0 1px; letter-spacing: .01em; }
+  .sub { font-size: 10pt; font-style: italic; color: var(--muted); margin: 0; }
+
+  .nameline { display: flex; gap: 26px; font-size: 10.5pt; margin: 11px 0 12px; }
+  .nameline span { flex: 1; border-bottom: 1px solid var(--ink); padding-bottom: 1px; }
+  .nameline span.short { flex: 0 0 1.9in; }
+
+  .directions {
+    font-size: 10.5pt; line-height: 1.35;
+    background: var(--tint); border-left: 4px solid var(--accent);
+    padding: 7px 10px; margin: 12px 0 14px;
+  }
+  .directions b { letter-spacing: .03em; }
+  .tip { font-style: italic; margin-top: 3px; }
+
+  /* ------------------------------------------------- problems and grids */
+  .grid { display: grid; gap: 13px 16px; margin-top: 4px; }
+  .prob { page-break-inside: avoid; display: flex; gap: 5px; align-items: flex-start; }
+  .pn { font-weight: bold; font-size: 11pt; min-width: .28in; flex: 0 0 auto; color: var(--accent); }
+  .pbody { flex: 1; min-width: 0; }
+
+  /* Digits need lining figures and even widths whatever the body font is. */
+  .num, .vert, .horiz { font-family: "Trebuchet MS", "Segoe UI", Tahoma, Verdana, sans-serif; font-variant-numeric: lining-nums tabular-nums; }
+
+  /* A stacked column algorithm.
+     Two grid columns — operator, then digits — because a floated or absolutely
+     positioned operator overlaps the digits as soon as the numbers get wide,
+     and "324" with a + sitting on the 3 is unreadable. The grid also lets the
+     rule under the last operand span BOTH columns, which is how it is written
+     by hand. The rule is heavy: it is the line you write the answer beneath. */
+  .vert {
+    display: inline-grid; grid-template-columns: auto auto;
+    font-size: 15pt; line-height: 1.3; text-align: right;
+  }
+  .vert > span { padding: 0 0 1px 0; }
+  .vert .op { text-align: left; padding-right: .16in; }
+  .vert .last { border-bottom: 2.5px solid var(--ink); padding-bottom: 3px; }
+  .vert .ans { height: .4in; }
+  /* Partial-products working, for 2-digit x 1-digit before the short method. */
+  .vert .part { font-size: 11pt; color: var(--muted); }
+  /* A row of worked examples that fade — see lib/formats.js faded(). The
+     caption is what makes the fade legible: without it the third one looks like
+     a question somebody forgot to number. */
+  .egrow { display: flex; gap: .34in; align-items: flex-start; margin: 0 0 4px; }
+  .eg { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; }
+  .eglab { font-size: 8.5pt; color: var(--slate); letter-spacing: .02em; }
+
+  /* The carried digits. Small and grey so the sum still reads as the sum, and
+     tight to the row below it so a carry sits ON the column it goes into. */
+  .vert .carry { font-size: 9pt; color: var(--slate); line-height: 1; padding: 0 0 1px 0; }
+
+  .horiz { font-size: 14pt; white-space: nowrap; }
+
+  /* Row numbers in a word list. Gray and small: they are there so a list can be
+     dictated ("number seven") and marked without counting down the page, and
+     they must not compete with the word itself. */
+  .wn { color: var(--muted); font-size: 9pt; }
+
+  /* The box an answer goes in. inline-block so it can sit mid-sentence. */
+  .abox {
+    display: inline-block; border: 1.6px solid var(--slate); border-radius: 3px;
+    vertical-align: middle; margin: 0 3px; position: relative; background: #fff;
+  }
+  /* Scoped to the box: as a bare ".alab" it pinned any generator's own .alab
+     to the bottom of the page (life-07-signs-and-forms 40, 2026-09-24). */
+  .abox > .alab {
+    position: absolute; bottom: 1px; left: 0; right: 0;
+    text-align: center; font-size: 7pt; color: var(--muted); font-style: italic;
+  }
+
+  /* Confidence marks. The rings are drawn with a border and a gradient rather
+     than an SVG so they stay inline with the question text at any font size,
+     and print black on a mono laser without relying on a background image. */
+  .conf { float: right; margin: 2px 0 0 8px; white-space: nowrap; }
+  .cring {
+    display: inline-block; width: 11px; height: 11px; margin-left: 4px;
+    border: 1.4px solid var(--slate); border-radius: 50%; vertical-align: middle;
+  }
+  .cring-full { background: var(--accent); }
+  .cring-half { background: linear-gradient(90deg, var(--accent) 50%, #fff 50%); }
+  .cring-none { background: #fff; }
+  ol.qs.hasconf li { overflow: hidden; }
+
+  .conflegend {
+    border: 1.2px solid var(--rule); border-radius: 4px;
+    padding: 3px 8px; margin: 0 0 7px;
+    font-size: 8.5pt; color: var(--muted); display: flex; gap: 14px; align-items: center;
+  }
+  .conftitle { font-weight: 700; color: var(--ink); }
+  .confitem { white-space: nowrap; }
+
+  .work {
+    border: 1.4px dashed var(--rule); border-radius: 4px;
+    margin: 6px 0 2px; position: relative;
+  }
+  /* The label S.work() puts in the box: a DIRECT child only. As ".work span"
+     it also caught every span inside any generator's own .work content and
+     stacked them all at the top-left corner (math-11-grade6 47, 2026-09-23). */
+  .work > span {
+    position: absolute; top: 3px; left: 6px;
+    font-size: 8pt; color: var(--muted); font-style: italic;
+  }
+
+  /* ------------------------------------------------------ writing lines */
+  /* Primary rule: solid top, dashed midline, heavy baseline. Capitals reach
+     the top line, lowercase bodies sit under the dashed one. */
+  .write {
+    position: relative; height: 0.375in;
+    margin: 6px 0 0 .3in;
+    border-top: 1px solid var(--rule); border-bottom: 2px solid var(--ink);
+  }
+  .write.flush { margin-left: 0; }
+  .write + .write { margin-top: .17in; }
+  .write::after {
+    content: ""; position: absolute; left: 0; right: 0; top: 50%;
+    border-top: 1px dashed var(--guide);
+  }
+
+  /* ------------------------------------------------------- question list */
+  ol.qs { margin: 0; padding: 0 0 0 .34in; }
+  ol.qs li { margin-bottom: 13px; page-break-inside: avoid; }
+  ol.qs li::marker { font-weight: bold; font-size: 11pt; color: var(--accent); }
+  .qt { display: block; }
+
+  .mcq { display: grid; gap: 3px 14px; margin: 5px 0 2px .12in; font-size: 11pt; }
+  .opt { white-space: nowrap; }
+
+  /* -------------------------------------------------------------- tables */
+  .tbl { border-collapse: collapse; margin: 8px 0; font-size: 11pt; width: 100%; }
+  .tbl th, .tbl td { border: 1.4px solid var(--ink); padding: 5px 8px; text-align: left; }
+  .tbl th { color: var(--slate); }
+  .tbl th { background: var(--tint); font-size: 10pt; letter-spacing: .02em; }
+  .tbl td.blank { height: .34in; }
+  .tbl.narrow { width: auto; }
+  .tbl.center td, .tbl.center th { text-align: center; }
+
+  /* ------------------------------------------------------------ passages */
+  .passage {
+    border: 1.5px solid var(--slate); border-radius: 4px;
+    padding: 11px 14px; margin-bottom: 12px;
+    font-size: 11.5pt; line-height: 1.55;
+  }
+  .passage h2 { font-size: 13pt; margin: 0 0 6px; color: var(--deep); }
+  .passage p { margin: 0 0 8px; }
+  .passage p:last-child { margin-bottom: 0; }
+  .passage .byline { font-size: 9.5pt; font-style: italic; color: var(--muted); margin-bottom: 8px; }
+  /* Numbered paragraphs, so a question can say "in paragraph 2". */
+  .passage p.np { position: relative; padding-left: .3in; }
+  .passage p.np::before {
+    content: attr(data-p); position: absolute; left: 0; top: 0;
+    font-size: 9pt; color: var(--accent); font-weight: bold;
+  }
+
+  .wordbank {
+    border: 1.5px dashed var(--slate); border-radius: 4px;
+    padding: 8px 12px; margin: 10px 0 12px;
+    font-size: 11.5pt; text-align: center;
+  }
+  .wordbank b { display: block; font-size: 9.5pt; letter-spacing: .06em;
+    text-transform: uppercase; margin-bottom: 4px; color: var(--accent); }
+  .wordbank span { display: inline-block; margin: 2px 11px; }
+
+  .note {
+    border-left: 4px solid var(--deep); background: var(--tintdeep);
+    padding: 7px 11px; margin: 10px 0; font-size: 10.5pt;
+  }
+  .note b { letter-spacing: .02em; }
+
+  /* -------------------------------------------------------------- footer */
+  /* THE WORDMARK SITS IN THE FOOTER THAT WAS ALREADY THERE, so it costs no
+     height at all — a sheet that fitted before fits now. Upright where the rest
+     of the line is italic, and a size down: it is a signature, not a message,
+     and it must never compete with "Score: ___ / 10". */
+  .brand { font-style: normal; font-size: 7.5pt; letter-spacing: .04em;
+    color: var(--accent); align-self: center; }
+
+  footer {
+    margin-top: 14px; padding-top: 6px; border-top: 1px solid var(--rule);
+    font-size: 9pt; font-style: italic; color: var(--muted);
+    display: flex; justify-content: space-between;
+  }
+
+  /* ---------------------------------------------------------- answer key */
+  .keybadge {
+    display: inline-block; border: 2px solid var(--deep); color: var(--deep); padding: 2px 9px;
+    font-size: 9.5pt; font-weight: bold; letter-spacing: .08em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .key .why {
+    display: block; font-size: 9pt; font-style: italic; color: var(--muted); margin-top: 1px;
+  }
+  /* Highlight rather than underline: <u> in a key marks WHAT CHANGED, and an
+     underline under a comma is invisible. */
+  .key u { text-decoration: none; background: var(--tint); padding: 0 2px; font-weight: bold; }
+  .keygrid .pbody { font-family: "Trebuchet MS", "Segoe UI", Tahoma, Verdana, sans-serif; font-size: 12pt; }
+  /* A key's pictures scale to their column: at 1fr a wide drawing pushed a
+     three-column key 92px off the paper (art-04-drawing 10, 2026-09-24). */
+  .keygrid svg { max-width: 100%; height: auto; }
+  .keylist .qt { font-weight: normal; }
+
+  /*
+   * The guide page. Four lines per question, and the ASK line is the one that
+   * gets used at the table, so it is the one with a rule beside it — a parent
+   * scanning this page in ten seconds should land on the follow-up question
+   * and nothing else.
+   */
+  .guide { padding-left: .3in; }
+  .guide li { margin-bottom: 11px; page-break-inside: avoid; }
+  .guide .gq { font-weight: bold; font-size: 11pt; margin-bottom: 3px; }
+  /* 9pt, matching the key's own why line, because the guide page is the
+     binding constraint on every open sheet: four lines per question against a
+     key's one, and at 10pt a sheet with seven questions ran onto a second
+     side. Found by measuring, not chosen. (No backticks in here — this CSS
+     lives inside a template literal and one would close it.) */
+  .guide .glook, .guide .gthin, .guide .gstrong {
+    font-size: 9pt; line-height: 1.3; margin-top: 1px;
+  }
+  .guide .gthin { color: var(--muted); }
+  .guide .gstrong { color: var(--muted); font-style: italic; }
+  .guide .gask {
+    font-size: 9.5pt; line-height: 1.3; margin-top: 3px;
+    border-left: 3px solid var(--slate); padding-left: 7px;
+  }
+  .key .qs li { margin-bottom: 9px; }
+
+  /*
+   * INLINE-BLOCK, NOT BLOCK, AND THIS WAS WRONG FOR A LONG TIME. A block-level
+   * svg ignores text-align: center on its parent and sits flush left — so 117
+   * sheets across 35 packs said "centre this diagram" and got a left-aligned
+   * one. Twenty-five of them were origami and paper-plane fold sequences, where
+   * the whole page is diagrams.
+   *
+   * Nobody spotted it because a left-flush diagram looks deliberate; it only
+   * reads as wrong next to a centered one, and no sheet has both.
+   *
+   * inline-block makes text-align do what every one of those authors meant,
+   * and leaves a diagram in a left-aligned container exactly where it was.
+   * vertical-align: top kills the baseline gap that inline elements otherwise
+   * leave underneath them, which would have pushed long pages over.
+   */
+  svg { display: inline-block; vertical-align: top; }
+  svg.inline { vertical-align: middle; }
+
+  .page.g1 .tbl td { font-size: 12pt; padding-top: 7px; padding-bottom: 7px; line-height: 1.38; }
+  .page.g1 .tbl th { font-size: 10.5pt; padding-top: 6px; padding-bottom: 6px; }
+  .page.g1 .tbl td.blank { height: 0.45999999999999996in; }
+  .page.g1 .write + .write { margin-top: 0.25in; }
+  .page.g1 ol.qs li { margin-bottom: 19px; }
+  .page.g1 ol.qs .qt { font-size: 12pt; }
+  .page.g2 .tbl td { font-size: 12.5pt; padding-top: 12px; padding-bottom: 12px; line-height: 1.38; }
+  .page.g2 .tbl th { font-size: 10.5pt; padding-top: 6px; padding-bottom: 6px; }
+  .page.g2 .tbl td.blank { height: 0.62in; }
+  .page.g2 .write + .write { margin-top: 0.33in; }
+  .page.g2 ol.qs li { margin-bottom: 25px; }
+  .page.g2 ol.qs .qt { font-size: 12.5pt; }
+  .page.g3 .tbl td { font-size: 13pt; padding-top: 17px; padding-bottom: 17px; line-height: 1.38; }
+  .page.g3 .tbl th { font-size: 10.5pt; padding-top: 6px; padding-bottom: 6px; }
+  .page.g3 .tbl td.blank { height: 0.78in; }
+  .page.g3 .write + .write { margin-top: 0.41in; }
+  .page.g3 ol.qs li { margin-bottom: 31px; }
+  .page.g3 ol.qs .qt { font-size: 13pt; }
+  .page.g4 .tbl td { font-size: 13.5pt; padding-top: 22px; padding-bottom: 22px; line-height: 1.38; }
+  .page.g4 .tbl th { font-size: 10.5pt; padding-top: 6px; padding-bottom: 6px; }
+  .page.g4 .tbl td.blank { height: 0.94in; }
+  .page.g4 .write + .write { margin-top: 0.45in; }
+  .page.g4 ol.qs li { margin-bottom: 37px; }
+  .page.g4 ol.qs .qt { font-size: 13.5pt; }
+  .page.g5 .tbl td { font-size: 14pt; padding-top: 27px; padding-bottom: 27px; line-height: 1.38; }
+  .page.g5 .tbl th { font-size: 10.5pt; padding-top: 6px; padding-bottom: 6px; }
+  .page.g5 .tbl td.blank { height: 1.1in; }
+  .page.g5 .write + .write { margin-top: 0.45in; }
+  .page.g5 ol.qs li { margin-bottom: 43px; }
+  .page.g5 ol.qs .qt { font-size: 14pt; }
+  .page.g6 .tbl td { font-size: 14.5pt; padding-top: 32px; padding-bottom: 32px; line-height: 1.38; }
+  .page.g6 .tbl th { font-size: 10.5pt; padding-top: 6px; padding-bottom: 6px; }
+  .page.g6 .tbl td.blank { height: 1.26in; }
+  .page.g6 .write + .write { margin-top: 0.45in; }
+  .page.g6 ol.qs li { margin-bottom: 49px; }
+  .page.g6 ol.qs .qt { font-size: 14.5pt; }
+  ol.qs li { margin-bottom: 8px; }
+  .note { margin: 8px 0; }
+  .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: .08in; margin-top: .08in; }
+  .step { border: 1.2px solid var(--slate); border-radius: 6px; padding: .06in; }
+  .step .n { font-size: 10pt; font-weight: bold; }
+  .step .cap { font-size: 9.5pt; color: var(--ink); display: block; margin-top: 2px; line-height: 1.25; }
+  .step svg { width: 100%; height: auto; max-height: var(--h, 3.1in); }
+  .steps[style*="repeat(2"] .cap, .steps[style*="repeat(3"] .cap { font-size: 11pt; }
+  .legend { margin: .08in 0 .04in; }
+  .cutnote { font-size: 9.5pt; color: var(--muted); font-style: italic; margin-top: 4px; }
+
+</style>
+</head>
+<body>
+
+<div class="page ">
+  <header>
+    
+    <h1>The Masu Box — Cut It Out and Fold It</h1>
+    <p class="sub">Making · Origami · Page 1 of 3</p>
+  </header>
+
+
+
+
+  <div class="plan" style="display:flex;align-items:stretch;gap:.08in;margin:.02in 0 .1in"><div style="flex:1;display:flex;align-items:center;gap:.07in;border:1.8px solid var(--ink);border-radius:5px;padding:.05in .08in"><span style="flex:0 0 auto;display:inline-block;width:.26in;height:.26in;line-height:.26in;border-radius:50%;background:var(--ink);color:#fff;text-align:center;font-weight:700;font-size:11pt">1</span><span style="font-size:10.5pt;font-weight:700;line-height:1.2">Cut out the square</span></div><div style="align-self:center;font-size:16pt;font-weight:700;color:var(--ink)">&rarr;</div><div style="flex:1;display:flex;align-items:center;gap:.07in;border:1.8px solid var(--ink);border-radius:5px;padding:.05in .08in"><span style="flex:0 0 auto;display:inline-block;width:.26in;height:.26in;line-height:.26in;border-radius:50%;background:var(--ink);color:#fff;text-align:center;font-weight:700;font-size:11pt">2</span><span style="font-size:10.5pt;font-weight:700;line-height:1.2">Fold 1, then 2, then 3&hellip;</span></div><div style="align-self:center;font-size:16pt;font-weight:700;color:var(--ink)">&rarr;</div><div style="flex:1;display:flex;align-items:center;gap:.07in;border:1.8px solid var(--ink);border-radius:5px;padding:.05in .08in"><span style="flex:0 0 auto;display:inline-block;width:.26in;height:.26in;line-height:.26in;border-radius:50%;background:var(--ink);color:#fff;text-align:center;font-weight:700;font-size:11pt">3</span><span style="font-size:10.5pt;font-weight:700;line-height:1.2">Page 2 shows each fold</span></div></div>
+  <div class="cutnote">Fold <b>in the order of the circled numbers</b>, printed side facing you. Press every
+  crease hard with a thumbnail.</div>
+
+  <div class="legend"><svg class="" viewBox="0 0 423.40 41.76" width="423.40" height="41.76" role="img" aria-label="what the lines mean" xmlns="http://www.w3.org/2000/svg"><line x1="2.90" y1="14.50" x2="38.86" y2="14.50" stroke="#111" stroke-width="1.3" stroke-dasharray="7 5" stroke-linecap="round"/><text x="45.82" y="19.72" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="10.5" font-weight="normal" text-anchor="start" fill="#111">valley — fold toward you</text><line x1="205.90" y1="14.50" x2="241.86" y2="14.50" stroke="#111" stroke-width="1.3" stroke-dasharray="11 4 2 4" stroke-linecap="round"/><text x="248.82" y="19.72" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="10.5" font-weight="normal" text-anchor="start" fill="#111">mountain — fold away</text><line x1="2.90" y1="33.06" x2="38.86" y2="33.06" stroke="#9a9a9a" stroke-width="1.1" stroke-dasharray="3 3" stroke-linecap="round"/><text x="45.82" y="38.28" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="10.5" font-weight="normal" text-anchor="start" fill="#111">cut along this line</text><text x="205.90" y="38.28" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="10.5" font-weight="normal" text-anchor="start" fill="#111">circled numbers = the order to fold in</text></svg></div>
+
+  <div style="text-align:center;margin-top:.04in"><svg class="" viewBox="0 0 660.48 660.48" width="660.48" height="660.48" role="img" aria-label="the crease pattern for The Masu Box" xmlns="http://www.w3.org/2000/svg"><path d="M23.04,23.04 L637.44,23.04 L637.44,637.44 L23.04,637.44 Z" fill="none" stroke="#9a9a9a" stroke-width="1.1" stroke-linejoin="round"/><path d="M32.64,32.64 L627.84,32.64 L627.84,627.84 L32.64,627.84 Z" fill="none" stroke="#111" stroke-width="1.8" stroke-linejoin="round"/><line x1="32.64" y1="32.64" x2="627.84" y2="627.84" stroke="#111" stroke-width="1.3" stroke-dasharray="7 5" stroke-linecap="round"/><line x1="627.84" y1="32.64" x2="32.64" y2="627.84" stroke="#111" stroke-width="1.3" stroke-dasharray="7 5" stroke-linecap="round"/><line x1="330.24" y1="32.64" x2="32.64" y2="330.24" stroke="#111" stroke-width="1.3" stroke-dasharray="7 5" stroke-linecap="round"/><line x1="330.24" y1="32.64" x2="627.84" y2="330.24" stroke="#111" stroke-width="1.3" stroke-dasharray="7 5" stroke-linecap="round"/><line x1="627.84" y1="330.24" x2="330.24" y2="627.84" stroke="#111" stroke-width="1.3" stroke-dasharray="7 5" stroke-linecap="round"/><line x1="330.24" y1="627.84" x2="32.64" y2="330.24" stroke="#111" stroke-width="1.3" stroke-dasharray="7 5" stroke-linecap="round"/><line x1="181.44" y1="479.04" x2="181.44" y2="181.44" stroke="#111" stroke-width="1.3" stroke-dasharray="7 5" stroke-linecap="round"/><line x1="32.64" y1="479.04" x2="181.44" y2="479.04" stroke="#111" stroke-width="1.3" stroke-dasharray="11 4 2 4" stroke-linecap="round"/><line x1="181.44" y1="181.44" x2="32.64" y2="181.44" stroke="#111" stroke-width="1.3" stroke-dasharray="11 4 2 4" stroke-linecap="round"/><line x1="479.04" y1="181.44" x2="479.04" y2="479.04" stroke="#111" stroke-width="1.3" stroke-dasharray="7 5" stroke-linecap="round"/><line x1="627.84" y1="479.04" x2="479.04" y2="479.04" stroke="#111" stroke-width="1.3" stroke-dasharray="11 4 2 4" stroke-linecap="round"/><line x1="627.84" y1="181.44" x2="479.04" y2="181.44" stroke="#111" stroke-width="1.3" stroke-dasharray="11 4 2 4" stroke-linecap="round"/><line x1="479.04" y1="181.44" x2="181.44" y2="181.44" stroke="#111" stroke-width="1.3" stroke-dasharray="7 5" stroke-linecap="round"/><line x1="479.04" y1="32.64" x2="479.04" y2="181.44" stroke="#111" stroke-width="1.3" stroke-dasharray="11 4 2 4" stroke-linecap="round"/><line x1="181.44" y1="32.64" x2="181.44" y2="181.44" stroke="#111" stroke-width="1.3" stroke-dasharray="11 4 2 4" stroke-linecap="round"/><line x1="479.04" y1="479.04" x2="181.44" y2="479.04" stroke="#111" stroke-width="1.3" stroke-dasharray="7 5" stroke-linecap="round"/><line x1="181.44" y1="627.84" x2="181.44" y2="479.04" stroke="#111" stroke-width="1.3" stroke-dasharray="11 4 2 4" stroke-linecap="round"/><line x1="479.04" y1="627.84" x2="479.04" y2="479.04" stroke="#111" stroke-width="1.3" stroke-dasharray="11 4 2 4" stroke-linecap="round"/><circle cx="212.24" cy="233.97" r="12.96" fill="#F7EDE4" stroke="#111" stroke-width="1.2"/><text x="212.24" y="239.41" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="12.312" font-weight="bold" text-anchor="middle" fill="#111">1</text><circle cx="426.51" cy="212.24" r="12.96" fill="#F7EDE4" stroke="#111" stroke-width="1.2"/><text x="426.51" y="217.69" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="12.312" font-weight="bold" text-anchor="middle" fill="#111">2</text><circle cx="224.15" cy="117.01" r="12.96" fill="#F7EDE4" stroke="#111" stroke-width="1.2"/><text x="224.15" y="122.45" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="12.312" font-weight="bold" text-anchor="middle" fill="#111">3</text><circle cx="414.61" cy="138.73" r="12.96" fill="#F7EDE4" stroke="#111" stroke-width="1.2"/><text x="414.61" y="144.18" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="12.312" font-weight="bold" text-anchor="middle" fill="#111">4</text><circle cx="521.75" cy="414.61" r="12.96" fill="#F7EDE4" stroke="#111" stroke-width="1.2"/><text x="521.75" y="420.05" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="12.312" font-weight="bold" text-anchor="middle" fill="#111">5</text><circle cx="245.87" cy="521.75" r="12.96" fill="#F7EDE4" stroke="#111" stroke-width="1.2"/><text x="245.87" y="527.19" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="12.312" font-weight="bold" text-anchor="middle" fill="#111">6</text><circle cx="196.80" cy="383.81" r="12.96" fill="#F7EDE4" stroke="#111" stroke-width="1.2"/><text x="196.80" y="389.25" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="12.312" font-weight="bold" text-anchor="middle" fill="#111">7</text><circle cx="463.68" cy="276.67" r="12.96" fill="#F7EDE4" stroke="#111" stroke-width="1.2"/><text x="463.68" y="282.12" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="12.312" font-weight="bold" text-anchor="middle" fill="#111">8</text><circle cx="383.81" cy="166.08" r="12.96" fill="#F7EDE4" stroke="#111" stroke-width="1.2"/><text x="383.81" y="171.52" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="12.312" font-weight="bold" text-anchor="middle" fill="#111">9</text><circle cx="383.81" cy="463.68" r="12.96" fill="#F7EDE4" stroke="#111" stroke-width="1.2"/><text x="383.81" y="469.12" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="12.312" font-weight="bold" text-anchor="middle" fill="#111">10</text><text x="330.24" y="15.36" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="10" font-weight="normal" text-anchor="middle" fill="#9a9a9a">A SQUARE — cut on the dotted line</text></svg></div>
+
+  <footer>
+    <span>Folding steps on page 2 →</span>
+    <span class="brand">Kitchen Table</span>
+    <span>The Masu Box</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>The Masu Box — The Folds</h1>
+    <p class="sub">Making · Origami · Page 2 of 3</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Any square of paper works. Each picture shows the paper <b>before</b> the fold.
+  </div>
+
+
+  <div class="steps" style="grid-template-columns: repeat(4, 1fr); --h: 1.58in">
+    <div class="step"><span class="n">1.</span>
+      <div style="text-align:center"><svg class="" viewBox="0 0 118.80 118.80" width="118.80" height="118.80" role="img" aria-label="Crease both diagonals: fold corner to corner, open out, then the other way." xmlns="http://www.w3.org/2000/svg"><path d="M3.60,3.60 L115.20,3.60 L115.20,115.20 L3.60,115.20 Z" fill="#fbfbfb" stroke="#111" stroke-width="1.2" stroke-linejoin="round"/><line x1="3.60" y1="3.60" x2="115.20" y2="115.20" stroke="#111" stroke-width="1.3" stroke-dasharray="7 5" stroke-linecap="round"/><path d="M40.80,78.00 Q67.58,67.58 78.00,40.80" fill="none" stroke="#111" stroke-width="1.5"/><path d="M78.00,40.80 L78.47,51.61 L70.35,48.45 Z" fill="#111"/></svg></div>
+      <span class="cap">Crease both diagonals: fold corner to corner, open out, then the other way.</span></div>
+    <div class="step"><span class="n">2.</span>
+      <div style="text-align:center"><svg class="" viewBox="0 0 118.80 118.80" width="118.80" height="118.80" role="img" aria-label="And the other diagonal, the same way. The two crossing creases find the middle for you." xmlns="http://www.w3.org/2000/svg"><path d="M3.60,3.60 L115.20,3.60 L115.20,115.20 L3.60,115.20 Z" fill="#fbfbfb" stroke="#111" stroke-width="1.2" stroke-linejoin="round"/><line x1="3.60" y1="3.60" x2="115.20" y2="115.20" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="115.20" y1="3.60" x2="3.60" y2="115.20" stroke="#111" stroke-width="1.3" stroke-dasharray="7 5" stroke-linecap="round"/><path d="M40.80,40.80 Q51.22,67.58 78.00,78.00" fill="none" stroke="#111" stroke-width="1.5"/><path d="M78.00,78.00 L67.19,78.47 L70.35,70.35 Z" fill="#111"/></svg></div>
+      <span class="cap">And the other diagonal, the same way. The two crossing creases find the middle for you.</span></div>
+    <div class="step"><span class="n">3.</span>
+      <div style="text-align:center"><svg class="" viewBox="0 0 118.80 118.80" width="118.80" height="118.80" role="img" aria-label="Fold the top left corner in until its point touches the middle." xmlns="http://www.w3.org/2000/svg"><path d="M3.60,3.60 L115.20,3.60 L115.20,115.20 L3.60,115.20 Z" fill="#fbfbfb" stroke="#111" stroke-width="1.2" stroke-linejoin="round"/><line x1="3.60" y1="3.60" x2="115.20" y2="115.20" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="115.20" y1="3.60" x2="3.60" y2="115.20" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="59.40" y1="3.60" x2="3.60" y2="59.40" stroke="#111" stroke-width="1.3" stroke-dasharray="7 5" stroke-linecap="round"/><path d="M22.20,22.20 Q27.41,35.59 40.80,40.80" fill="none" stroke="#111" stroke-width="1.5"/><path d="M40.80,40.80 L33.34,41.13 L35.52,35.52 Z" fill="#111"/></svg></div>
+      <span class="cap">Fold the top left corner in until its point touches the middle.</span></div>
+    <div class="step"><span class="n">4.</span>
+      <div style="text-align:center"><svg class="" viewBox="0 0 118.80 118.80" width="118.80" height="118.80" role="img" aria-label="The top right corner in to the middle." xmlns="http://www.w3.org/2000/svg"><path d="M59.40,3.60 L115.20,3.60 L115.20,115.20 L3.60,115.20 L3.60,59.40 Z" fill="#fbfbfb" stroke="#111" stroke-width="1.2" stroke-linejoin="round"/><path d="M59.40,59.40 L59.40,3.60 L3.60,59.40 Z" fill="#fbfbfb" stroke="#111" stroke-width="1.2" stroke-linejoin="round"/><line x1="31.50" y1="31.50" x2="115.20" y2="115.20" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="115.20" y1="3.60" x2="3.60" y2="115.20" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="59.40" y1="3.60" x2="3.60" y2="59.40" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="59.40" y1="59.40" x2="31.50" y2="31.50" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="59.40" y1="3.60" x2="3.60" y2="59.40" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="59.40" y1="3.60" x2="115.20" y2="59.40" stroke="#111" stroke-width="1.3" stroke-dasharray="7 5" stroke-linecap="round"/><path d="M96.60,22.20 Q83.21,27.41 78.00,40.80" fill="none" stroke="#111" stroke-width="1.5"/><path d="M78.00,40.80 L77.67,33.34 L83.28,35.52 Z" fill="#111"/></svg></div>
+      <span class="cap">The top right corner in to the middle.</span></div>
+    <div class="step"><span class="n">5.</span>
+      <div style="text-align:center"><svg class="" viewBox="0 0 118.80 118.80" width="118.80" height="118.80" role="img" aria-label="The bottom right corner in to the middle." xmlns="http://www.w3.org/2000/svg"><path d="M59.40,3.60 L115.20,59.40 L115.20,115.20 L3.60,115.20 L3.60,59.40 Z" fill="#fbfbfb" stroke="#111" stroke-width="1.2" stroke-linejoin="round"/><path d="M59.40,3.60 L59.40,59.40 L115.20,59.40 Z" fill="#fbfbfb" stroke="#111" stroke-width="1.2" stroke-linejoin="round"/><path d="M59.40,59.40 L59.40,3.60 L3.60,59.40 Z" fill="#fbfbfb" stroke="#111" stroke-width="1.2" stroke-linejoin="round"/><line x1="31.50" y1="31.50" x2="115.20" y2="115.20" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="87.30" y1="31.50" x2="3.60" y2="115.20" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="59.40" y1="3.60" x2="3.60" y2="59.40" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="59.40" y1="3.60" x2="115.20" y2="59.40" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="59.40" y1="59.40" x2="87.30" y2="31.50" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="59.40" y1="3.60" x2="115.20" y2="59.40" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="59.40" y1="59.40" x2="31.50" y2="31.50" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="59.40" y1="3.60" x2="3.60" y2="59.40" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="115.20" y1="59.40" x2="59.40" y2="115.20" stroke="#111" stroke-width="1.3" stroke-dasharray="7 5" stroke-linecap="round"/><path d="M96.60,96.60 Q91.39,83.21 78.00,78.00" fill="none" stroke="#111" stroke-width="1.5"/><path d="M78.00,78.00 L85.46,77.67 L83.28,83.28 Z" fill="#111"/></svg></div>
+      <span class="cap">The bottom right corner in to the middle.</span></div>
+    <div class="step"><span class="n">6.</span>
+      <div style="text-align:center"><svg class="" viewBox="0 0 118.80 118.80" width="118.80" height="118.80" role="img" aria-label="And the last corner. All four points meet in the middle — this is called a blintz." xmlns="http://www.w3.org/2000/svg"><path d="M59.40,3.60 L115.20,59.40 L59.40,115.20 L3.60,115.20 L3.60,59.40 Z" fill="#fbfbfb" stroke="#111" stroke-width="1.2" stroke-linejoin="round"/><path d="M115.20,59.40 L59.40,59.40 L59.40,115.20 Z" fill="#fbfbfb" stroke="#111" stroke-width="1.2" stroke-linejoin="round"/><path d="M59.40,3.60 L59.40,59.40 L115.20,59.40 Z" fill="#fbfbfb" stroke="#111" stroke-width="1.2" stroke-linejoin="round"/><path d="M59.40,59.40 L59.40,3.60 L3.60,59.40 Z" fill="#fbfbfb" stroke="#111" stroke-width="1.2" stroke-linejoin="round"/><line x1="31.50" y1="31.50" x2="87.30" y2="87.30" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="87.30" y1="31.50" x2="3.60" y2="115.20" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="59.40" y1="3.60" x2="3.60" y2="59.40" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="59.40" y1="3.60" x2="115.20" y2="59.40" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="115.20" y1="59.40" x2="59.40" y2="115.20" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="87.30" y1="87.30" x2="59.40" y2="59.40" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="115.20" y1="59.40" x2="59.40" y2="115.20" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="59.40" y1="59.40" x2="87.30" y2="31.50" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="59.40" y1="3.60" x2="115.20" y2="59.40" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="59.40" y1="59.40" x2="31.50" y2="31.50" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="59.40" y1="3.60" x2="3.60" y2="59.40" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="59.40" y1="115.20" x2="3.60" y2="59.40" stroke="#111" stroke-width="1.3" stroke-dasharray="7 5" stroke-linecap="round"/><path d="M22.20,96.60 Q35.59,91.39 40.80,78.00" fill="none" stroke="#111" stroke-width="1.5"/><path d="M40.80,78.00 L41.13,85.46 L35.52,83.28 Z" fill="#111"/></svg></div>
+      <span class="cap">And the last corner. All four points meet in the middle — this is called a blintz.</span></div>
+    <div class="step"><span class="n">7.</span>
+      <div style="text-align:center"><svg class="" viewBox="0 0 118.80 118.80" width="118.80" height="118.80" role="img" aria-label="Fold the left edge in to the middle line, then open it out again." xmlns="http://www.w3.org/2000/svg"><path d="M59.40,3.60 L115.20,59.40 L59.40,115.20 L3.60,59.40 Z" fill="#fbfbfb" stroke="#111" stroke-width="1.2" stroke-linejoin="round"/><path d="M59.40,115.20 L59.40,59.40 L3.60,59.40 Z" fill="#fbfbfb" stroke="#111" stroke-width="1.2" stroke-linejoin="round"/><path d="M115.20,59.40 L59.40,59.40 L59.40,115.20 Z" fill="#fbfbfb" stroke="#111" stroke-width="1.2" stroke-linejoin="round"/><path d="M59.40,3.60 L59.40,59.40 L115.20,59.40 Z" fill="#fbfbfb" stroke="#111" stroke-width="1.2" stroke-linejoin="round"/><path d="M59.40,59.40 L59.40,3.60 L3.60,59.40 Z" fill="#fbfbfb" stroke="#111" stroke-width="1.2" stroke-linejoin="round"/><line x1="31.50" y1="31.50" x2="87.30" y2="87.30" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="87.30" y1="31.50" x2="31.50" y2="87.30" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="59.40" y1="3.60" x2="3.60" y2="59.40" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="59.40" y1="3.60" x2="115.20" y2="59.40" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="115.20" y1="59.40" x2="59.40" y2="115.20" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="59.40" y1="115.20" x2="3.60" y2="59.40" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="31.50" y1="87.30" x2="59.40" y2="59.40" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="59.40" y1="115.20" x2="3.60" y2="59.40" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="87.30" y1="87.30" x2="59.40" y2="59.40" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="115.20" y1="59.40" x2="59.40" y2="115.20" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="59.40" y1="59.40" x2="87.30" y2="31.50" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="59.40" y1="3.60" x2="115.20" y2="59.40" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="59.40" y1="59.40" x2="31.50" y2="31.50" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="59.40" y1="3.60" x2="3.60" y2="59.40" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="31.50" y1="87.30" x2="31.50" y2="31.50" stroke="#111" stroke-width="1.3" stroke-dasharray="7 5" stroke-linecap="round"/><path d="M22.20,59.40 Q31.50,63.49 40.80,59.40" fill="none" stroke="#111" stroke-width="1.5"/><path d="M40.80,59.40 L37.23,63.30 L35.52,59.40 Z" fill="#111"/></svg></div>
+      <span class="cap">Fold the left edge in to the middle line, then open it out again.</span></div>
+    <div class="step"><span class="n">8.</span>
+      <div style="text-align:center"><svg class="" viewBox="0 0 118.80 118.80" width="118.80" height="118.80" role="img" aria-label="The right edge in to the middle, and open out again." xmlns="http://www.w3.org/2000/svg"><path d="M59.40,3.60 L115.20,59.40 L59.40,115.20 L3.60,59.40 Z" fill="#fbfbfb" stroke="#111" stroke-width="1.2" stroke-linejoin="round"/><path d="M59.40,115.20 L59.40,59.40 L3.60,59.40 Z" fill="#fbfbfb" stroke="#111" stroke-width="1.2" stroke-linejoin="round"/><path d="M115.20,59.40 L59.40,59.40 L59.40,115.20 Z" fill="#fbfbfb" stroke="#111" stroke-width="1.2" stroke-linejoin="round"/><path d="M59.40,3.60 L59.40,59.40 L115.20,59.40 Z" fill="#fbfbfb" stroke="#111" stroke-width="1.2" stroke-linejoin="round"/><path d="M59.40,59.40 L59.40,3.60 L3.60,59.40 Z" fill="#fbfbfb" stroke="#111" stroke-width="1.2" stroke-linejoin="round"/><line x1="31.50" y1="31.50" x2="87.30" y2="87.30" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="87.30" y1="31.50" x2="31.50" y2="87.30" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="59.40" y1="3.60" x2="3.60" y2="59.40" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="59.40" y1="3.60" x2="115.20" y2="59.40" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="115.20" y1="59.40" x2="59.40" y2="115.20" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="59.40" y1="115.20" x2="3.60" y2="59.40" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="31.50" y1="87.30" x2="31.50" y2="31.50" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="31.50" y1="87.30" x2="59.40" y2="59.40" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="59.40" y1="115.20" x2="3.60" y2="59.40" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="31.50" y1="59.40" x2="31.50" y2="87.30" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="87.30" y1="87.30" x2="59.40" y2="59.40" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="115.20" y1="59.40" x2="59.40" y2="115.20" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="59.40" y1="59.40" x2="87.30" y2="31.50" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="59.40" y1="3.60" x2="115.20" y2="59.40" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="59.40" y1="59.40" x2="31.50" y2="31.50" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="59.40" y1="3.60" x2="3.60" y2="59.40" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="31.50" y1="31.50" x2="31.50" y2="59.40" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="87.30" y1="31.50" x2="87.30" y2="87.30" stroke="#111" stroke-width="1.3" stroke-dasharray="7 5" stroke-linecap="round"/><path d="M96.60,59.40 Q87.30,55.31 78.00,59.40" fill="none" stroke="#111" stroke-width="1.5"/><path d="M78.00,59.40 L81.57,55.50 L83.28,59.40 Z" fill="#111"/></svg></div>
+      <span class="cap">The right edge in to the middle, and open out again.</span></div>
+    <div class="step"><span class="n">9.</span>
+      <div style="text-align:center"><svg class="" viewBox="0 0 118.80 118.80" width="118.80" height="118.80" role="img" aria-label="The top edge down to the middle, and open out." xmlns="http://www.w3.org/2000/svg"><path d="M59.40,3.60 L115.20,59.40 L59.40,115.20 L3.60,59.40 Z" fill="#fbfbfb" stroke="#111" stroke-width="1.2" stroke-linejoin="round"/><path d="M59.40,115.20 L59.40,59.40 L3.60,59.40 Z" fill="#fbfbfb" stroke="#111" stroke-width="1.2" stroke-linejoin="round"/><path d="M115.20,59.40 L59.40,59.40 L59.40,115.20 Z" fill="#fbfbfb" stroke="#111" stroke-width="1.2" stroke-linejoin="round"/><path d="M59.40,3.60 L59.40,59.40 L115.20,59.40 Z" fill="#fbfbfb" stroke="#111" stroke-width="1.2" stroke-linejoin="round"/><path d="M59.40,59.40 L59.40,3.60 L3.60,59.40 Z" fill="#fbfbfb" stroke="#111" stroke-width="1.2" stroke-linejoin="round"/><line x1="31.50" y1="31.50" x2="87.30" y2="87.30" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="87.30" y1="31.50" x2="31.50" y2="87.30" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="59.40" y1="3.60" x2="3.60" y2="59.40" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="59.40" y1="3.60" x2="115.20" y2="59.40" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="115.20" y1="59.40" x2="59.40" y2="115.20" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="59.40" y1="115.20" x2="3.60" y2="59.40" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="31.50" y1="87.30" x2="31.50" y2="31.50" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="87.30" y1="31.50" x2="87.30" y2="87.30" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="31.50" y1="87.30" x2="59.40" y2="59.40" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="59.40" y1="115.20" x2="3.60" y2="59.40" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="31.50" y1="59.40" x2="31.50" y2="87.30" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="87.30" y1="87.30" x2="59.40" y2="59.40" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="115.20" y1="59.40" x2="59.40" y2="115.20" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="87.30" y1="59.40" x2="87.30" y2="87.30" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="59.40" y1="59.40" x2="87.30" y2="31.50" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="59.40" y1="3.60" x2="115.20" y2="59.40" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="87.30" y1="59.40" x2="87.30" y2="31.50" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="59.40" y1="59.40" x2="31.50" y2="31.50" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="59.40" y1="3.60" x2="3.60" y2="59.40" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="31.50" y1="31.50" x2="31.50" y2="59.40" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="87.30" y1="31.50" x2="31.50" y2="31.50" stroke="#111" stroke-width="1.3" stroke-dasharray="7 5" stroke-linecap="round"/><path d="M59.40,22.20 Q55.31,31.50 59.40,40.80" fill="none" stroke="#111" stroke-width="1.5"/><path d="M59.40,40.80 L55.50,37.23 L59.40,35.52 Z" fill="#111"/></svg></div>
+      <span class="cap">The top edge down to the middle, and open out.</span></div>
+    <div class="step"><span class="n">10.</span>
+      <div style="text-align:center"><svg class="" viewBox="0 0 118.80 118.80" width="118.80" height="118.80" role="img" aria-label="The bottom edge up to the middle, and open out. Every crease you need is now in the paper." xmlns="http://www.w3.org/2000/svg"><path d="M59.40,3.60 L115.20,59.40 L59.40,115.20 L3.60,59.40 Z" fill="#fbfbfb" stroke="#111" stroke-width="1.2" stroke-linejoin="round"/><path d="M59.40,115.20 L59.40,59.40 L3.60,59.40 Z" fill="#fbfbfb" stroke="#111" stroke-width="1.2" stroke-linejoin="round"/><path d="M115.20,59.40 L59.40,59.40 L59.40,115.20 Z" fill="#fbfbfb" stroke="#111" stroke-width="1.2" stroke-linejoin="round"/><path d="M59.40,3.60 L59.40,59.40 L115.20,59.40 Z" fill="#fbfbfb" stroke="#111" stroke-width="1.2" stroke-linejoin="round"/><path d="M59.40,59.40 L59.40,3.60 L3.60,59.40 Z" fill="#fbfbfb" stroke="#111" stroke-width="1.2" stroke-linejoin="round"/><line x1="31.50" y1="31.50" x2="87.30" y2="87.30" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="87.30" y1="31.50" x2="31.50" y2="87.30" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="59.40" y1="3.60" x2="3.60" y2="59.40" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="59.40" y1="3.60" x2="115.20" y2="59.40" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="115.20" y1="59.40" x2="59.40" y2="115.20" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="59.40" y1="115.20" x2="3.60" y2="59.40" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="31.50" y1="87.30" x2="31.50" y2="31.50" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="87.30" y1="31.50" x2="87.30" y2="87.30" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="87.30" y1="31.50" x2="31.50" y2="31.50" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="31.50" y1="87.30" x2="59.40" y2="59.40" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="59.40" y1="115.20" x2="3.60" y2="59.40" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="31.50" y1="59.40" x2="31.50" y2="87.30" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="87.30" y1="87.30" x2="59.40" y2="59.40" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="115.20" y1="59.40" x2="59.40" y2="115.20" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="87.30" y1="59.40" x2="87.30" y2="87.30" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="59.40" y1="59.40" x2="87.30" y2="31.50" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="59.40" y1="3.60" x2="115.20" y2="59.40" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="87.30" y1="59.40" x2="87.30" y2="31.50" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="59.40" y1="31.50" x2="87.30" y2="31.50" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="59.40" y1="59.40" x2="31.50" y2="31.50" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="59.40" y1="3.60" x2="3.60" y2="59.40" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="31.50" y1="31.50" x2="31.50" y2="59.40" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="59.40" y1="31.50" x2="31.50" y2="31.50" stroke="#b4b4b4" stroke-width="0.7" stroke-linecap="round"/><line x1="87.30" y1="87.30" x2="31.50" y2="87.30" stroke="#111" stroke-width="1.3" stroke-dasharray="7 5" stroke-linecap="round"/><path d="M59.40,96.60 Q63.49,87.30 59.40,78.00" fill="none" stroke="#111" stroke-width="1.5"/><path d="M59.40,78.00 L63.30,81.57 L59.40,83.28 Z" fill="#111"/></svg></div>
+      <span class="cap">The bottom edge up to the middle, and open out. Every crease you need is now in the paper.</span></div>
+    <div class="step"><span class="n">✓</span>
+      <div style="text-align:center"><svg class="" viewBox="0 0 118.80 118.80" width="118.80" height="118.80" role="img" aria-label="the finished model" xmlns="http://www.w3.org/2000/svg"><path d="M59.40,3.60 L115.20,59.40 L59.40,115.20 L3.60,59.40 Z" fill="#fbfbfb" stroke="#111" stroke-width="1.2" stroke-linejoin="round"/><path d="M59.40,115.20 L59.40,59.40 L3.60,59.40 Z" fill="#fbfbfb" stroke="#111" stroke-width="1.2" stroke-linejoin="round"/><path d="M115.20,59.40 L59.40,59.40 L59.40,115.20 Z" fill="#fbfbfb" stroke="#111" stroke-width="1.2" stroke-linejoin="round"/><path d="M59.40,3.60 L59.40,59.40 L115.20,59.40 Z" fill="#fbfbfb" stroke="#111" stroke-width="1.2" stroke-linejoin="round"/><path d="M59.40,59.40 L59.40,3.60 L3.60,59.40 Z" fill="#fbfbfb" stroke="#111" stroke-width="1.2" stroke-linejoin="round"/></svg></div>
+      <span class="cap">All the creases are in. Build it as below.</span></div>
+  </div>
+
+  <div class="note" style="margin-top:.1in"><b>Build it.</b> Open the paper flat. Fold the left and right corners back to the middle. Lift the top and bottom edges up along the quarter creases: the sides stand up. Tuck the two pointed ends down inside and press them flat. <b>No glue, no tape, no cuts.</b></div>
+
+  <footer>
+    <span>Page 3 →</span>
+    <span class="brand">Kitchen Table</span>
+    <span>The Masu Box</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>The Masu Box — A Box Made of Nothing But Folds</h1>
+    <p class="sub">Making · Origami · Page 3 of 3</p>
+  </header>
+  <div class="nameline">
+    <span>Name</span>
+    <span class="short">Date</span>
+  </div>
+  <div class="directions">
+    <b>DIRECTIONS:</b> Build it first.
+  </div>
+
+
+
+
+  <ol class="qs" start="1"><li><span class="qt">Measure the square you started with, and measure the finished box. How wide is the box compared with the square?</span><div class="write"></div><div class="write"></div></li><li><span class="qt">Where did the paper for the <b>sides</b> of the box come from? It was flat a minute ago.</span><div class="write"></div><div class="write"></div></li><li><span class="qt">Fold a second one from a square twice as wide. What happens to the box — is it twice as big in every direction?</span><div class="write"></div><div class="write"></div></li><li><span class="qt">A box needs a lid. Make one from a square just slightly <b>bigger</b> than the first. How much bigger did it need to be?</span><div class="write"></div><div class="write"></div></li><li><span class="qt">Why does this box hold together with no glue at all? Name the part that does the holding.</span><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Score: ______ / 5</span>
+    <span class="brand">Kitchen Table</span>
+    <span>The Masu Box</span>
+  </footer>
+</div>
+
+</body>
+</html>

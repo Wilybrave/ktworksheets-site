@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="sheet-kind" content="worksheet">
+<title>Two Letters, Two Sounds</title>
+<style>
+  @page { size: letter portrait; margin: 0.4in 0.45in; }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  :root {
+    --ink:    #16130F;
+    --muted:  #6B635A;
+    --rule:   #CFC3B2;
+    --guide:  #BCAE9C;
+    --accent: #C0511D;
+    --tint:   #F7EDE4;
+    --slate:  #2E5A78;
+    --tintslate: #E9EFF4;
+    --deep:   #2C4A45;
+    --tintdeep: #ECF1EF;
+  }
+
+  body {
+    font-family: Quicksand, 'URW Gothic', 'Century Gothic', sans-serif;
+    color: #000; background: #fff;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+
+  /* ORDER MATTERS. This generic rule must come BEFORE the @media screen block:
+   * both selectors have the same specificity, so whichever is declared last
+   * wins. With it after, it overrode the screen width and the preview stretched
+   * to the viewport — rows scaled up and pages measured 16in tall. Print was
+   * always fine (@media screen doesn't apply), but the on-screen proof lied. */
+  .page { width: 100%; }
+  .page + .page { page-break-before: always; }
+
+  @media screen {
+    body { padding: 0.4in; background: #ddd; }
+    .page {
+      background: #fff; padding: 0.4in 0.45in;
+      width: 8.5in; min-height: 11in;
+      margin: 0 auto 22px; box-shadow: 0 2px 10px rgba(0,0,0,.3);
+    }
+  }
+
+  header {
+    display: flex; align-items: center; gap: 16px;
+    border-bottom: 3px solid var(--slate); padding-bottom: 7px; margin-bottom: 2px;
+  }
+  .bigletter { font-size: 38pt; font-weight: 700; line-height: 1; letter-spacing: .02em; }
+  .htext { flex: 1; }
+  h1 { font-size: 14pt; font-weight: 700; margin: 0 0 2px; }
+  .sub { font-size: 10pt; color: var(--muted); margin: 0; }
+  .nameline {
+    font-size: 9.5pt; color: var(--muted);
+    border-bottom: 1px solid var(--ink); width: 2in;
+    padding-bottom: 1px; align-self: flex-end;
+  }
+
+  .label { font-size: 11.5pt; font-weight: 700; margin: 9px 0 1px; }
+  .label span { font-weight: 400; font-size: 10pt; color: var(--muted); }
+
+  .row { display: block; width: 100%; height: auto; margin-bottom: .06in; }
+  /* Rows that follow the header directly would otherwise jam against its rule. */
+  header + .row { margin-top: .12in; }
+
+  .words {
+    margin-top: 10px; padding-top: 7px; border-top: 1px solid var(--rule);
+    font-size: 12.5pt;
+    display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap;
+  }
+  .words b { font-size: 14pt; }
+  .words em { font-style: normal; color: var(--muted); }
+
+  /* The wordmark rides in the footer line that was already there — see the note
+     in lib/sheet.js. No height, upright, a size down, and never louder than the
+     two slots it sits between. */
+  .brand { font-style: normal; font-size: 7pt; letter-spacing: .04em;
+    color: var(--accent); align-self: center; }
+
+  footer {
+    margin-top: 7px; font-size: 8.5pt; color: var(--muted);
+    display: flex; justify-content: space-between;
+  }
+
+  .chart { display: grid; grid-template-columns: repeat(6, 1fr); gap: 7px; margin-top: 14px; }
+  .cell {
+    border: 2px solid var(--slate); border-radius: 8px; height: 1.35in;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .page.key { background: #fcfcfa; }
+  .page.key header { border-bottom-style: double; border-bottom-width: 3px; }
+  .keylist { font-size: 11pt; line-height: 1.7; }
+  .keylist p { margin: .02in 0; }
+  .keynote { border: 1.5px solid var(--deep); border-radius: 8px; padding: .07in .12in;
+    margin: .1in 0 0; font-size: 10pt; line-height: 1.5; }
+
+  .note { border: 1.5px solid var(--deep); border-radius: 8px; padding: .07in .12in;
+    margin: .06in 0 .1in; font-size: 10pt; color: var(--ink); }
+  svg { display: block; }
+
+  .drow { display: flex; align-items: center; gap: .18in;
+    border-bottom: 1px solid var(--rule); padding: .09in .02in; }
+  .dpair { flex: 0 0 1.1in; }
+  .dsound { flex: 0 0 .9in; font-size: 11pt; color: var(--muted); }
+  .dwords { display: flex; gap: .16in; flex-wrap: wrap; }
+  /* the vowel-team poster has four rows on a whole side */
+  .drow.tall { padding: .24in .02in; }
+  .drow.tall .dsound { font-size: 13pt; }
+
+  .wrow { display: flex; align-items: center; gap: .3in;
+    border-bottom: 1px solid var(--rule); padding: .09in .02in; }
+  .wbox { width: 1.1in; height: .6in; margin-left: auto;
+    border: 2.5px solid var(--slate); border-radius: 8px; }
+  /* page 2 has only the four rows, so they print bigger than the try rows */
+  .page + .page .wrow { padding: .42in .02in; }
+  .page + .page .wbox { width: 1.8in; height: 1.1in; }
+
+  .srow { display: flex; align-items: center; gap: .3in;
+    border-bottom: 1px solid var(--rule); padding: .16in .02in; }
+  .sword { flex: 0 0 2.1in; }
+  .pick { display: flex; align-items: center; gap: .1in; font-size: 14pt; }
+  .pick i { width: .42in; height: .42in; border: 2.2px solid var(--slate); border-radius: 5px;
+    display: block; flex: 0 0 auto; }
+
+  .erow { display: flex; align-items: center; gap: .24in;
+    border-bottom: 1px solid var(--rule); padding: .1in .02in; }
+  .earrow { font-size: 24pt; color: var(--muted); }
+  .ehint { margin-left: auto; font-size: 11pt; color: var(--muted); font-style: italic; }
+
+  .ewrow, .trow { display: flex; align-items: center; gap: .2in;
+    border-bottom: 1px solid var(--rule); padding: .1in .02in; }
+  .eword, .tword { flex: 0 0 1.8in; }
+  .ewline, .tline { flex: 1; }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <header>
+    <div class="bigletter">st</div>
+    <div class="htext">
+      <h1>Two Letters, Two Sounds</h1>
+      <p class="sub">A blend is different. You can still hear BOTH letters — just said quickly.</p>
+    </div>
+    <div class="nameline">Name</div>
+  </header>
+
+  <div class="note"><b>Say <i>stop</i> slowly:</b> ssss-t. You hear the s and the t.</div>
+
+<div class="plan" style="display:flex;align-items:stretch;gap:.08in;margin:.02in 0 .1in"><div style="flex:1;display:flex;align-items:center;gap:.07in;border:1.8px solid var(--ink);border-radius:5px;padding:.05in .08in"><span style="flex:0 0 auto;display:inline-block;width:.26in;height:.26in;line-height:.26in;border-radius:50%;background:var(--ink);color:#fff;text-align:center;font-weight:700;font-size:11pt">1</span><span style="font-size:10.5pt;font-weight:700;line-height:1.2">Say each blend slowly</span></div><div style="align-self:center;font-size:16pt;font-weight:700;color:var(--ink)">&rarr;</div><div style="flex:1;display:flex;align-items:center;gap:.07in;border:1.8px solid var(--ink);border-radius:5px;padding:.05in .08in"><span style="flex:0 0 auto;display:inline-block;width:.26in;height:.26in;line-height:.26in;border-radius:50%;background:var(--ink);color:#fff;text-align:center;font-weight:700;font-size:11pt">2</span><span style="font-size:10.5pt;font-weight:700;line-height:1.2">Turn over: sort 14 words</span></div></div>  <div class="drow">
+    <div class="dpair"><svg viewBox="0 0 77.36 101.12" height="101.12" role="img" aria-label="st"><g transform="translate(7 7) scale(66)"><path d="M.38 .6 C.32 .48 .04 .48 .04 .66 C.04 .82 .36 .78 .36 .92 C.36 1.06 .08 1.04 .02 .94" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(45.28 7) scale(66)"><path d="M.14 .25 V.88 C.14 1.02 .3 1.02 .36 .96" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.02 .5 H.32" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <div class="dsound">both sounds</div>
+    <div class="dwords"><svg viewBox="0 0 105.2 66.8" height="66.8" role="img" aria-label="stop"><g transform="translate(7 7) scale(40)"><path d="M.38 .6 C.32 .48 .04 .48 .04 .66 C.04 .82 .36 .78 .36 .92 C.36 1.06 .08 1.04 .02 .94" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(30.2 7) scale(40)"><path d="M.14 .25 V.88 C.14 1.02 .3 1.02 .36 .96" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.02 .5 H.32" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(51.8 7) scale(40)"><path d="M.25 .5 A.22 .25 0 0 0 .25 1 A.22 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(78.2 7) scale(40)"><path d="M.04 .5 V1.3" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg><svg viewBox="0 0 100.4 66.8" height="66.8" role="img" aria-label="star"><g transform="translate(7 7) scale(40)"><path d="M.38 .6 C.32 .48 .04 .48 .04 .66 C.04 .82 .36 .78 .36 .92 C.36 1.06 .08 1.04 .02 .94" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(30.2 7) scale(40)"><path d="M.14 .25 V.88 C.14 1.02 .3 1.02 .36 .96" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.02 .5 H.32" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(51.8 7) scale(40)"><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.46 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(78.2 7) scale(40)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.17 .22 0 0 1 .33 .56" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg><svg viewBox="0 0 114 66.8" height="66.8" role="img" aria-label="stem"><g transform="translate(7 7) scale(40)"><path d="M.38 .6 C.32 .48 .04 .48 .04 .66 C.04 .82 .36 .78 .36 .92 C.36 1.06 .08 1.04 .02 .94" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(30.2 7) scale(40)"><path d="M.14 .25 V.88 C.14 1.02 .3 1.02 .36 .96" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.02 .5 H.32" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(51.8 7) scale(40)"><path d="M.04 .75 H.45 A.21 .25 0 1 0 .38 .93" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(77.4 7) scale(40)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.16 .22 0 0 1 .36 .72 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.36 .72 A.16 .22 0 0 1 .68 .72 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg><svg viewBox="0 0 104.4 66.8" height="66.8" role="img" aria-label="nest"><g transform="translate(7 7) scale(40)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.21 .22 0 0 1 .46 .72 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(33.4 7) scale(40)"><path d="M.04 .75 H.45 A.21 .25 0 1 0 .38 .93" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(59 7) scale(40)"><path d="M.38 .6 C.32 .48 .04 .48 .04 .66 C.04 .82 .36 .78 .36 .92 C.36 1.06 .08 1.04 .02 .94" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(82.2 7) scale(40)"><path d="M.14 .25 V.88 C.14 1.02 .3 1.02 .36 .96" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.02 .5 H.32" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+  </div>
+  <div class="drow">
+    <div class="dpair"><svg viewBox="0 0 68.12 101.12" height="101.12" role="img" aria-label="sl"><g transform="translate(7 7) scale(66)"><path d="M.38 .6 C.32 .48 .04 .48 .04 .66 C.04 .82 .36 .78 .36 .92 C.36 1.06 .08 1.04 .02 .94" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(45.28 7) scale(66)"><path d="M.12 0 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <div class="dsound">both sounds</div>
+    <div class="dwords"><svg viewBox="0 0 90 66.8" height="66.8" role="img" aria-label="slip"><g transform="translate(7 7) scale(40)"><path d="M.38 .6 C.32 .48 .04 .48 .04 .66 C.04 .82 .36 .78 .36 .92 C.36 1.06 .08 1.04 .02 .94" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(30.2 7) scale(40)"><path d="M.12 0 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(46.2 7) scale(40)"><path d="M.13 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.13" cy="0.34" r="0.04" fill="#C0511D"/></g><g transform="translate(63 7) scale(40)"><path d="M.04 .5 V1.3" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg><svg viewBox="0 0 99.6 66.8" height="66.8" role="img" aria-label="slug"><g transform="translate(7 7) scale(40)"><path d="M.38 .6 C.32 .48 .04 .48 .04 .66 C.04 .82 .36 .78 .36 .92 C.36 1.06 .08 1.04 .02 .94" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(30.2 7) scale(40)"><path d="M.12 0 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(46.2 7) scale(40)"><path d="M.04 .5 V.75 A.21 .25 0 0 0 .46 .75" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.46 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(72.6 7) scale(40)"><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.46 .5 V1.1 C.46 1.32 .12 1.32 .06 1.2" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg><svg viewBox="0 0 109.2 66.8" height="66.8" role="img" aria-label="slam"><g transform="translate(7 7) scale(40)"><path d="M.38 .6 C.32 .48 .04 .48 .04 .66 C.04 .82 .36 .78 .36 .92 C.36 1.06 .08 1.04 .02 .94" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(30.2 7) scale(40)"><path d="M.12 0 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(46.2 7) scale(40)"><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.46 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(72.6 7) scale(40)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.16 .22 0 0 1 .36 .72 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.36 .72 A.16 .22 0 0 1 .68 .72 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+  </div>
+  <div class="drow">
+    <div class="dpair"><svg viewBox="0 0 81.32 101.12" height="101.12" role="img" aria-label="cr"><g transform="translate(7 7) scale(66)"><path d="M.39 .57 A.21 .25 0 1 0 .39 .93" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(49.24 7) scale(66)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.17 .22 0 0 1 .33 .56" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <div class="dsound">both sounds</div>
+    <div class="dwords"><svg viewBox="0 0 107.6 66.8" height="66.8" role="img" aria-label="crab"><g transform="translate(7 7) scale(40)"><path d="M.39 .57 A.21 .25 0 1 0 .39 .93" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(32.6 7) scale(40)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.17 .22 0 0 1 .33 .56" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(54.2 7) scale(40)"><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.46 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(80.6 7) scale(40)"><path d="M.04 0 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg><svg viewBox="0 0 107.6 66.8" height="66.8" role="img" aria-label="crop"><g transform="translate(7 7) scale(40)"><path d="M.39 .57 A.21 .25 0 1 0 .39 .93" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(32.6 7) scale(40)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.17 .22 0 0 1 .33 .56" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(54.2 7) scale(40)"><path d="M.25 .5 A.22 .25 0 0 0 .25 1 A.22 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(80.6 7) scale(40)"><path d="M.04 .5 V1.3" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg><svg viewBox="0 0 127.6 66.8" height="66.8" role="img" aria-label="cross"><g transform="translate(7 7) scale(40)"><path d="M.39 .57 A.21 .25 0 1 0 .39 .93" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(32.6 7) scale(40)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.17 .22 0 0 1 .33 .56" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(54.2 7) scale(40)"><path d="M.25 .5 A.22 .25 0 0 0 .25 1 A.22 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(80.6 7) scale(40)"><path d="M.38 .6 C.32 .48 .04 .48 .04 .66 C.04 .82 .36 .78 .36 .92 C.36 1.06 .08 1.04 .02 .94" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(103.8 7) scale(40)"><path d="M.38 .6 C.32 .48 .04 .48 .04 .66 C.04 .82 .36 .78 .36 .92 C.36 1.06 .08 1.04 .02 .94" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+  </div>
+  <div class="drow">
+    <div class="dpair"><svg viewBox="0 0 82.64 101.12" height="101.12" role="img" aria-label="dr"><g transform="translate(7 7) scale(66)"><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.46 0 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(50.56 7) scale(66)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.17 .22 0 0 1 .33 .56" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <div class="dsound">both sounds</div>
+    <div class="dwords"><svg viewBox="0 0 118 66.8" height="66.8" role="img" aria-label="drum"><g transform="translate(7 7) scale(40)"><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.46 0 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(33.4 7) scale(40)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.17 .22 0 0 1 .33 .56" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(55 7) scale(40)"><path d="M.04 .5 V.75 A.21 .25 0 0 0 .46 .75" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.46 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(81.4 7) scale(40)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.16 .22 0 0 1 .36 .72 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.36 .72 A.16 .22 0 0 1 .68 .72 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg><svg viewBox="0 0 98.8 66.8" height="66.8" role="img" aria-label="drip"><g transform="translate(7 7) scale(40)"><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.46 0 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(33.4 7) scale(40)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.17 .22 0 0 1 .33 .56" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(55 7) scale(40)"><path d="M.13 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.13" cy="0.34" r="0.04" fill="#C0511D"/></g><g transform="translate(71.8 7) scale(40)"><path d="M.04 .5 V1.3" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg><svg viewBox="0 0 108.4 66.8" height="66.8" role="img" aria-label="drop"><g transform="translate(7 7) scale(40)"><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.46 0 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(33.4 7) scale(40)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.17 .22 0 0 1 .33 .56" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(55 7) scale(40)"><path d="M.25 .5 A.22 .25 0 0 0 .25 1 A.22 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(81.4 7) scale(40)"><path d="M.04 .5 V1.3" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+  </div>
+  <div class="drow">
+    <div class="dpair"><svg viewBox="0 0 66.8 101.12" height="101.12" role="img" aria-label="fl"><g transform="translate(7 7) scale(66)"><path d="M.36 .14 A.12 .12 0 0 0 .12 .14 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M0 .5 H.34" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(43.96 7) scale(66)"><path d="M.12 0 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <div class="dsound">both sounds</div>
+    <div class="dwords"><svg viewBox="0 0 98.8 66.8" height="66.8" role="img" aria-label="flag"><g transform="translate(7 7) scale(40)"><path d="M.36 .14 A.12 .12 0 0 0 .12 .14 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M0 .5 H.34" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(29.4 7) scale(40)"><path d="M.12 0 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(45.4 7) scale(40)"><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.46 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(71.8 7) scale(40)"><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.46 .5 V1.1 C.46 1.32 .12 1.32 .06 1.2" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg><svg viewBox="0 0 89.2 66.8" height="66.8" role="img" aria-label="flip"><g transform="translate(7 7) scale(40)"><path d="M.36 .14 A.12 .12 0 0 0 .12 .14 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M0 .5 H.34" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(29.4 7) scale(40)"><path d="M.12 0 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(45.4 7) scale(40)"><path d="M.13 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.13" cy="0.34" r="0.04" fill="#C0511D"/></g><g transform="translate(62.2 7) scale(40)"><path d="M.04 .5 V1.3" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg><svg viewBox="0 0 94 66.8" height="66.8" role="img" aria-label="flat"><g transform="translate(7 7) scale(40)"><path d="M.36 .14 A.12 .12 0 0 0 .12 .14 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M0 .5 H.34" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(29.4 7) scale(40)"><path d="M.12 0 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(45.4 7) scale(40)"><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.46 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(71.8 7) scale(40)"><path d="M.14 .25 V.88 C.14 1.02 .3 1.02 .36 .96" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.02 .5 H.32" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+  </div>
+  <div class="drow">
+    <div class="dpair"><svg viewBox="0 0 82.64 101.12" height="101.12" role="img" aria-label="gr"><g transform="translate(7 7) scale(66)"><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.46 .5 V1.1 C.46 1.32 .12 1.32 .06 1.2" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(50.56 7) scale(66)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.17 .22 0 0 1 .33 .56" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <div class="dsound">both sounds</div>
+    <div class="dwords"><svg viewBox="0 0 98.8 66.8" height="66.8" role="img" aria-label="grin"><g transform="translate(7 7) scale(40)"><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.46 .5 V1.1 C.46 1.32 .12 1.32 .06 1.2" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(33.4 7) scale(40)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.17 .22 0 0 1 .33 .56" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(55 7) scale(40)"><path d="M.13 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.13" cy="0.34" r="0.04" fill="#C0511D"/></g><g transform="translate(71.8 7) scale(40)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.21 .22 0 0 1 .46 .72 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg><svg viewBox="0 0 108.4 66.8" height="66.8" role="img" aria-label="grab"><g transform="translate(7 7) scale(40)"><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.46 .5 V1.1 C.46 1.32 .12 1.32 .06 1.2" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(33.4 7) scale(40)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.17 .22 0 0 1 .33 .56" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(55 7) scale(40)"><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.46 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(81.4 7) scale(40)"><path d="M.04 0 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg><svg viewBox="0 0 128.4 66.8" height="66.8" role="img" aria-label="grass"><g transform="translate(7 7) scale(40)"><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.46 .5 V1.1 C.46 1.32 .12 1.32 .06 1.2" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(33.4 7) scale(40)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.17 .22 0 0 1 .33 .56" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(55 7) scale(40)"><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.46 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(81.4 7) scale(40)"><path d="M.38 .6 C.32 .48 .04 .48 .04 .66 C.04 .82 .36 .78 .36 .92 C.36 1.06 .08 1.04 .02 .94" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(104.6 7) scale(40)"><path d="M.38 .6 C.32 .48 .04 .48 .04 .66 C.04 .82 .36 .78 .36 .92 C.36 1.06 .08 1.04 .02 .94" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+  </div>
+
+  <footer>
+    <span>6 blends &middot; set 202</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Blends</span>
+  </footer>
+</div>
+
+<div class="page">
+  <header>
+    <div class="bigletter">&#9636;</div>
+    <div class="htext">
+      <h1>One Sound or Two?</h1>
+      <p class="sub">Say each word slowly. Tick which kind the first two letters are.</p>
+    </div>
+    <div class="nameline">Name</div>
+  </header>
+
+  <div class="note">Two sounds squashed together? <b>Blend.</b> A brand new sound? <b>Digraph.</b></div>
+
+  <div class="srow">
+    <div class="sword"><svg viewBox="0 0 133.88 85.28" height="85.28" role="img" aria-label="chip"><g transform="translate(7 7) scale(54)"><path d="M.39 .57 A.21 .25 0 1 0 .39 .93" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(41.56 7) scale(54)"><path d="M.04 0 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.21 .22 0 0 1 .46 .72 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(77.2 7) scale(54)"><path d="M.13 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.13" cy="0.34" r="0.04" fill="#C0511D"/></g><g transform="translate(99.88 7) scale(54)"><path d="M.04 .5 V1.3" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <label class="pick"><i></i>one new sound</label>
+    <label class="pick"><i></i>two sounds</label>
+  </div>
+  <div class="srow">
+    <div class="sword"><svg viewBox="0 0 128.48 85.28" height="85.28" role="img" aria-label="flag"><g transform="translate(7 7) scale(54)"><path d="M.36 .14 A.12 .12 0 0 0 .12 .14 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M0 .5 H.34" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(37.24 7) scale(54)"><path d="M.12 0 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(58.84 7) scale(54)"><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.46 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(94.48 7) scale(54)"><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.46 .5 V1.1 C.46 1.32 .12 1.32 .06 1.2" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <label class="pick"><i></i>one new sound</label>
+    <label class="pick"><i></i>two sounds</label>
+  </div>
+  <div class="srow">
+    <div class="sword"><svg viewBox="0 0 133.88 85.28" height="85.28" role="img" aria-label="chin"><g transform="translate(7 7) scale(54)"><path d="M.39 .57 A.21 .25 0 1 0 .39 .93" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(41.56 7) scale(54)"><path d="M.04 0 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.21 .22 0 0 1 .46 .72 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(77.2 7) scale(54)"><path d="M.13 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.13" cy="0.34" r="0.04" fill="#C0511D"/></g><g transform="translate(99.88 7) scale(54)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.21 .22 0 0 1 .46 .72 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <label class="pick"><i></i>one new sound</label>
+    <label class="pick"><i></i>two sounds</label>
+  </div>
+  <div class="srow">
+    <div class="sword"><svg viewBox="0 0 128.48 85.28" height="85.28" role="img" aria-label="thin"><g transform="translate(7 7) scale(54)"><path d="M.14 .25 V.88 C.14 1.02 .3 1.02 .36 .96" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.02 .5 H.32" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(36.16 7) scale(54)"><path d="M.04 0 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.21 .22 0 0 1 .46 .72 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(71.8 7) scale(54)"><path d="M.13 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.13" cy="0.34" r="0.04" fill="#C0511D"/></g><g transform="translate(94.48 7) scale(54)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.21 .22 0 0 1 .46 .72 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <label class="pick"><i></i>one new sound</label>
+    <label class="pick"><i></i>two sounds</label>
+  </div>
+  <div class="srow">
+    <div class="sword"><svg viewBox="0 0 137.12 85.28" height="85.28" role="img" aria-label="stop"><g transform="translate(7 7) scale(54)"><path d="M.38 .6 C.32 .48 .04 .48 .04 .66 C.04 .82 .36 .78 .36 .92 C.36 1.06 .08 1.04 .02 .94" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(38.32 7) scale(54)"><path d="M.14 .25 V.88 C.14 1.02 .3 1.02 .36 .96" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.02 .5 H.32" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(67.48 7) scale(54)"><path d="M.25 .5 A.22 .25 0 0 0 .25 1 A.22 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(103.12 7) scale(54)"><path d="M.04 .5 V1.3" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <label class="pick"><i></i>one new sound</label>
+    <label class="pick"><i></i>two sounds</label>
+  </div>
+  <div class="srow">
+    <div class="sword"><svg viewBox="0 0 128.48 85.28" height="85.28" role="img" aria-label="grin"><g transform="translate(7 7) scale(54)"><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.46 .5 V1.1 C.46 1.32 .12 1.32 .06 1.2" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(42.64 7) scale(54)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.17 .22 0 0 1 .33 .56" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(71.8 7) scale(54)"><path d="M.13 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.13" cy="0.34" r="0.04" fill="#C0511D"/></g><g transform="translate(94.48 7) scale(54)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.21 .22 0 0 1 .46 .72 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <label class="pick"><i></i>one new sound</label>
+    <label class="pick"><i></i>two sounds</label>
+  </div>
+  <div class="srow">
+    <div class="sword"><svg viewBox="0 0 143.6 85.28" height="85.28" role="img" aria-label="whip"><g transform="translate(7 7) scale(54)"><path d="M.02 .5 L.16 1 L.33 .62 L.5 1 L.64 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(51.28 7) scale(54)"><path d="M.04 0 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.21 .22 0 0 1 .46 .72 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(86.92 7) scale(54)"><path d="M.13 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.13" cy="0.34" r="0.04" fill="#C0511D"/></g><g transform="translate(109.6 7) scale(54)"><path d="M.04 .5 V1.3" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <label class="pick"><i></i>one new sound</label>
+    <label class="pick"><i></i>two sounds</label>
+  </div>
+
+  <footer>
+    <span>Set 1 of 2 · 7 words &middot; set 202</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Blends</span>
+  </footer>
+</div>
+
+<div class="page">
+  <header>
+    <div class="bigletter">&#9636;</div>
+    <div class="htext">
+      <h1>One Sound or Two? — continued</h1>
+      <p class="sub">Say each word slowly. Tick which kind the first two letters are.</p>
+    </div>
+    <div class="nameline">Name</div>
+  </header>
+
+  <div class="note">Two sounds squashed together? <b>Blend.</b> A brand new sound? <b>Digraph.</b></div>
+
+  <div class="srow">
+    <div class="sword"><svg viewBox="0 0 143.6 85.28" height="85.28" role="img" aria-label="shop"><g transform="translate(7 7) scale(54)"><path d="M.38 .6 C.32 .48 .04 .48 .04 .66 C.04 .82 .36 .78 .36 .92 C.36 1.06 .08 1.04 .02 .94" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(38.32 7) scale(54)"><path d="M.04 0 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.21 .22 0 0 1 .46 .72 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(73.96 7) scale(54)"><path d="M.25 .5 A.22 .25 0 0 0 .25 1 A.22 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(109.6 7) scale(54)"><path d="M.04 .5 V1.3" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <label class="pick"><i></i>one new sound</label>
+    <label class="pick"><i></i>two sounds</label>
+  </div>
+  <div class="srow">
+    <div class="sword"><svg viewBox="0 0 154.4 85.28" height="85.28" role="img" aria-label="drum"><g transform="translate(7 7) scale(54)"><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.46 0 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(42.64 7) scale(54)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.17 .22 0 0 1 .33 .56" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(71.8 7) scale(54)"><path d="M.04 .5 V.75 A.21 .25 0 0 0 .46 .75" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.46 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(107.44 7) scale(54)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.16 .22 0 0 1 .36 .72 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.36 .72 A.16 .22 0 0 1 .68 .72 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <label class="pick"><i></i>one new sound</label>
+    <label class="pick"><i></i>two sounds</label>
+  </div>
+  <div class="srow">
+    <div class="sword"><svg viewBox="0 0 116.6 85.28" height="85.28" role="img" aria-label="slip"><g transform="translate(7 7) scale(54)"><path d="M.38 .6 C.32 .48 .04 .48 .04 .66 C.04 .82 .36 .78 .36 .92 C.36 1.06 .08 1.04 .02 .94" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(38.32 7) scale(54)"><path d="M.12 0 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(59.92 7) scale(54)"><path d="M.13 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.13" cy="0.34" r="0.04" fill="#C0511D"/></g><g transform="translate(82.6 7) scale(54)"><path d="M.04 .5 V1.3" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <label class="pick"><i></i>one new sound</label>
+    <label class="pick"><i></i>two sounds</label>
+  </div>
+  <div class="srow">
+    <div class="sword"><svg viewBox="0 0 130.64 85.28" height="85.28" role="img" aria-label="ship"><g transform="translate(7 7) scale(54)"><path d="M.38 .6 C.32 .48 .04 .48 .04 .66 C.04 .82 .36 .78 .36 .92 C.36 1.06 .08 1.04 .02 .94" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(38.32 7) scale(54)"><path d="M.04 0 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.21 .22 0 0 1 .46 .72 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(73.96 7) scale(54)"><path d="M.13 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.13" cy="0.34" r="0.04" fill="#C0511D"/></g><g transform="translate(96.64 7) scale(54)"><path d="M.04 .5 V1.3" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <label class="pick"><i></i>one new sound</label>
+    <label class="pick"><i></i>two sounds</label>
+  </div>
+  <div class="srow">
+    <div class="sword"><svg viewBox="0 0 140.36 85.28" height="85.28" role="img" aria-label="crab"><g transform="translate(7 7) scale(54)"><path d="M.39 .57 A.21 .25 0 1 0 .39 .93" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(41.56 7) scale(54)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.17 .22 0 0 1 .33 .56" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(70.72 7) scale(54)"><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.46 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(106.36 7) scale(54)"><path d="M.04 0 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <label class="pick"><i></i>one new sound</label>
+    <label class="pick"><i></i>two sounds</label>
+  </div>
+  <div class="srow">
+    <div class="sword"><svg viewBox="0 0 134.96 85.28" height="85.28" role="img" aria-label="that"><g transform="translate(7 7) scale(54)"><path d="M.14 .25 V.88 C.14 1.02 .3 1.02 .36 .96" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.02 .5 H.32" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(36.16 7) scale(54)"><path d="M.04 0 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.21 .22 0 0 1 .46 .72 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(71.8 7) scale(54)"><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.46 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(107.44 7) scale(54)"><path d="M.14 .25 V.88 C.14 1.02 .3 1.02 .36 .96" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.02 .5 H.32" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <label class="pick"><i></i>one new sound</label>
+    <label class="pick"><i></i>two sounds</label>
+  </div>
+  <div class="srow">
+    <div class="sword"><svg viewBox="0 0 155.48 85.28" height="85.28" role="img" aria-label="when"><g transform="translate(7 7) scale(54)"><path d="M.02 .5 L.16 1 L.33 .62 L.5 1 L.64 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(51.28 7) scale(54)"><path d="M.04 0 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.21 .22 0 0 1 .46 .72 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(86.92 7) scale(54)"><path d="M.04 .75 H.45 A.21 .25 0 1 0 .38 .93" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(121.48 7) scale(54)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.21 .22 0 0 1 .46 .72 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <label class="pick"><i></i>one new sound</label>
+    <label class="pick"><i></i>two sounds</label>
+  </div>
+
+  <footer>
+    <span>Set 2 of 2 · 7 words &middot; set 202</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Blends</span>
+  </footer>
+</div>
+
+</body>
+</html>

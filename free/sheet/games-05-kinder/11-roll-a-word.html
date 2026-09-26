@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="sheet-kind" content="game">
+<title>Roll a Word</title>
+<style>
+  @page { size: letter portrait; margin: 0.4in 0.45in; }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  :root {
+    --ink:    #16130F;
+    --muted:  #6B635A;
+    --rule:   #CFC3B2;
+    --guide:  #BCAE9C;
+    --accent: #C0511D;
+    --tint:   #F7EDE4;
+    --slate:  #2E5A78;
+    --tintslate: #E9EFF4;
+    --deep:   #2C4A45;
+    --tintdeep: #ECF1EF;
+  }
+
+  body {
+    font-family: Quicksand, 'URW Gothic', 'Century Gothic', sans-serif;
+    color: #000; background: #fff;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+
+  /* ORDER MATTERS. This generic rule must come BEFORE the @media screen block:
+   * both selectors have the same specificity, so whichever is declared last
+   * wins. With it after, it overrode the screen width and the preview stretched
+   * to the viewport — rows scaled up and pages measured 16in tall. Print was
+   * always fine (@media screen doesn't apply), but the on-screen proof lied. */
+  .page { width: 100%; }
+  .page + .page { page-break-before: always; }
+
+  @media screen {
+    body { padding: 0.4in; background: #ddd; }
+    .page {
+      background: #fff; padding: 0.4in 0.45in;
+      width: 8.5in; min-height: 11in;
+      margin: 0 auto 22px; box-shadow: 0 2px 10px rgba(0,0,0,.3);
+    }
+  }
+
+  header {
+    display: flex; align-items: center; gap: 16px;
+    border-bottom: 3px solid var(--slate); padding-bottom: 7px; margin-bottom: 2px;
+  }
+  .bigletter { font-size: 38pt; font-weight: 700; line-height: 1; letter-spacing: .02em; }
+  .htext { flex: 1; }
+  h1 { font-size: 14pt; font-weight: 700; margin: 0 0 2px; }
+  .sub { font-size: 10pt; color: var(--muted); margin: 0; }
+  .nameline {
+    font-size: 9.5pt; color: var(--muted);
+    border-bottom: 1px solid var(--ink); width: 2in;
+    padding-bottom: 1px; align-self: flex-end;
+  }
+
+  .label { font-size: 11.5pt; font-weight: 700; margin: 9px 0 1px; }
+  .label span { font-weight: 400; font-size: 10pt; color: var(--muted); }
+
+  .row { display: block; width: 100%; height: auto; margin-bottom: .06in; }
+  /* Rows that follow the header directly would otherwise jam against its rule. */
+  header + .row { margin-top: .12in; }
+
+  .words {
+    margin-top: 10px; padding-top: 7px; border-top: 1px solid var(--rule);
+    font-size: 12.5pt;
+    display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap;
+  }
+  .words b { font-size: 14pt; }
+  .words em { font-style: normal; color: var(--muted); }
+
+  /* The wordmark rides in the footer line that was already there — see the note
+     in lib/sheet.js. No height, upright, a size down, and never louder than the
+     two slots it sits between. */
+  .brand { font-style: normal; font-size: 7pt; letter-spacing: .04em;
+    color: var(--accent); align-self: center; }
+
+  footer {
+    margin-top: 7px; font-size: 8.5pt; color: var(--muted);
+    display: flex; justify-content: space-between;
+  }
+
+  .chart { display: grid; grid-template-columns: repeat(6, 1fr); gap: 7px; margin-top: 14px; }
+  .cell {
+    border: 2px solid var(--slate); border-radius: 8px; height: 1.35in;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .page.key { background: #fcfcfa; }
+  .page.key header { border-bottom-style: double; border-bottom-width: 3px; }
+  .keylist { font-size: 11pt; line-height: 1.7; }
+  .keylist p { margin: .02in 0; }
+  .keynote { border: 1.5px solid var(--deep); border-radius: 8px; padding: .07in .12in;
+    margin: .1in 0 0; font-size: 10pt; line-height: 1.5; }
+
+  .rules { border: 1.5px solid var(--accent); border-radius: 8px; padding: .09in .13in;
+    margin: .1in 0 .04in; font-size: 10pt; line-height: 1.45; color: var(--ink); }
+  svg { display: block; }
+
+  /* Every card carries a dashed edge, so there is a line to follow wherever
+     the scissors happen to start. */
+  .deck { display: grid; grid-template-columns: repeat(4, 1fr); margin-top: .12in; }
+  .card { border: 2px dashed var(--accent); height: 1.98in; margin: -1px 0 0 -1px;
+    display: flex; align-items: center; justify-content: center; }
+
+  .rolltable { display: grid; grid-template-columns: .9in repeat(3, 1fr);
+    margin-top: .12in; align-items: center; justify-items: center; }
+  .rhead { font-size: 11pt; font-weight: 700; padding-bottom: .04in; }
+  .rdie, .rlet { border: 1.5px solid var(--slate); margin: -1px 0 0 -1px; width: 100%;
+    display: flex; align-items: center; justify-content: center; padding: .015in 0; }
+
+  .scorehead { font-size: 12pt; font-weight: 700; margin: .16in 0 .04in;
+    border-top: 2.4px solid var(--slate); padding-top: .1in; }
+  .srow { display: flex; align-items: center; gap: .2in; padding: .05in 0; }
+  .sboxes { display: flex; }
+  .sboxes i { width: .46in; height: .46in; border: 2.2px solid var(--slate); margin-left: -2.2px;
+    display: block; }
+  .pick { display: flex; align-items: center; gap: .06in; font-size: 10.5pt; }
+  .pick i { width: .26in; height: .26in; border: 2.2px solid var(--slate); border-radius: 5px;
+    display: block; flex: 0 0 auto; }
+
+  .chips { display: grid; grid-template-columns: repeat(5, 1fr); margin-top: .12in; }
+  .chip { border: 2px dashed var(--accent); height: 1.55in; margin: -1px 0 0 -1px;
+    display: flex; align-items: center; justify-content: center; }
+
+  .board { margin-top: .18in; }
+  .btitle { font-size: 11pt; font-weight: 700; margin-bottom: .04in; }
+  .bgrid { display: grid; grid-template-columns: repeat(3, 1.6in);
+    grid-template-rows: repeat(3, 1.4in); justify-content: center; }
+  .bcell { border: 2px solid var(--ink); margin: -1px 0 0 -1px;
+    display: flex; align-items: center; justify-content: center; }
+
+  .track { display: block; width: 100%; height: auto; margin-top: .08in; }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <header>
+    <div class="bigletter">&#9860;</div>
+    <div class="htext">
+      <h1>Roll a Word</h1>
+      <p class="sub">Roll once for each column.</p>
+    </div>
+    <div class="nameline">Name</div>
+  </header>
+
+  <div class="rules">Say the three sounds, then say them fast. Write it and tick <b>real</b> or <b>silly</b>. Both score.</div>
+
+  <div class="rolltable">
+    <div class="rhead"></div>
+    <div class="rhead">first sound</div>
+    <div class="rhead">middle</div>
+    <div class="rhead">last sound</div>
+    <div class="rdie"><svg viewBox="0 0 40 40" height="40" role="img" aria-label="die showing 1">
+      <rect x="2" y="2" width="36" height="36" rx="7.199999999999999"
+        fill="white" stroke="#C0511D" stroke-width="2.4"/>
+      <circle cx="20" cy="20" r="3.6" fill="#16130F"/>
+    </svg></div>
+    <div class="rlet"><svg viewBox="0 0 33 64.16" height="64.16" role="img" aria-label="b"><g transform="translate(7 7) scale(38)"><path d="M.04 0 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <div class="rlet"><svg viewBox="0 0 33 64.16" height="64.16" role="img" aria-label="a"><g transform="translate(7 7) scale(38)"><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.46 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <div class="rlet"><svg viewBox="0 0 28.44 64.16" height="64.16" role="img" aria-label="t"><g transform="translate(7 7) scale(38)"><path d="M.14 .25 V.88 C.14 1.02 .3 1.02 .36 .96" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.02 .5 H.32" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <div class="rdie"><svg viewBox="0 0 40 40" height="40" role="img" aria-label="die showing 2">
+      <rect x="2" y="2" width="36" height="36" rx="7.199999999999999"
+        fill="white" stroke="#C0511D" stroke-width="2.4"/>
+      <circle cx="11.2" cy="11.2" r="3.6" fill="#16130F"/>
+      <circle cx="28.8" cy="28.8" r="3.6" fill="#16130F"/>
+    </svg></div>
+    <div class="rlet"><svg viewBox="0 0 32.24 64.16" height="64.16" role="img" aria-label="c"><g transform="translate(7 7) scale(38)"><path d="M.39 .57 A.21 .25 0 1 0 .39 .93" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <div class="rlet"><svg viewBox="0 0 32.24 64.16" height="64.16" role="img" aria-label="e"><g transform="translate(7 7) scale(38)"><path d="M.04 .75 H.45 A.21 .25 0 1 0 .38 .93" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <div class="rlet"><svg viewBox="0 0 33 64.16" height="64.16" role="img" aria-label="g"><g transform="translate(7 7) scale(38)"><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.46 .5 V1.1 C.46 1.32 .12 1.32 .06 1.2" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <div class="rdie"><svg viewBox="0 0 40 40" height="40" role="img" aria-label="die showing 3">
+      <rect x="2" y="2" width="36" height="36" rx="7.199999999999999"
+        fill="white" stroke="#C0511D" stroke-width="2.4"/>
+      <circle cx="11.2" cy="11.2" r="3.6" fill="#16130F"/>
+      <circle cx="20" cy="20" r="3.6" fill="#16130F"/>
+      <circle cx="28.8" cy="28.8" r="3.6" fill="#16130F"/>
+    </svg></div>
+    <div class="rlet"><svg viewBox="0 0 29.2 64.16" height="64.16" role="img" aria-label="f"><g transform="translate(7 7) scale(38)"><path d="M.36 .14 A.12 .12 0 0 0 .12 .14 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M0 .5 H.34" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <div class="rlet"><svg viewBox="0 0 23.88 64.16" height="64.16" role="img" aria-label="i"><g transform="translate(7 7) scale(38)"><path d="M.13 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0.13" cy="0.34" r="0.04" fill="#C0511D"/></g></svg></div>
+    <div class="rlet"><svg viewBox="0 0 33 64.16" height="64.16" role="img" aria-label="n"><g transform="translate(7 7) scale(38)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.21 .22 0 0 1 .46 .72 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <div class="rdie"><svg viewBox="0 0 40 40" height="40" role="img" aria-label="die showing 4">
+      <rect x="2" y="2" width="36" height="36" rx="7.199999999999999"
+        fill="white" stroke="#C0511D" stroke-width="2.4"/>
+      <circle cx="11.2" cy="11.2" r="3.6" fill="#16130F"/>
+      <circle cx="28.8" cy="11.2" r="3.6" fill="#16130F"/>
+      <circle cx="11.2" cy="28.8" r="3.6" fill="#16130F"/>
+      <circle cx="28.8" cy="28.8" r="3.6" fill="#16130F"/>
+    </svg></div>
+    <div class="rlet"><svg viewBox="0 0 42.12 64.16" height="64.16" role="img" aria-label="m"><g transform="translate(7 7) scale(38)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.16 .22 0 0 1 .36 .72 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.36 .72 A.16 .22 0 0 1 .68 .72 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <div class="rlet"><svg viewBox="0 0 33 64.16" height="64.16" role="img" aria-label="o"><g transform="translate(7 7) scale(38)"><path d="M.25 .5 A.22 .25 0 0 0 .25 1 A.22 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <div class="rlet"><svg viewBox="0 0 33 64.16" height="64.16" role="img" aria-label="p"><g transform="translate(7 7) scale(38)"><path d="M.04 .5 V1.3" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <div class="rdie"><svg viewBox="0 0 40 40" height="40" role="img" aria-label="die showing 5">
+      <rect x="2" y="2" width="36" height="36" rx="7.199999999999999"
+        fill="white" stroke="#C0511D" stroke-width="2.4"/>
+      <circle cx="11.2" cy="11.2" r="3.6" fill="#16130F"/>
+      <circle cx="28.8" cy="11.2" r="3.6" fill="#16130F"/>
+      <circle cx="20" cy="20" r="3.6" fill="#16130F"/>
+      <circle cx="11.2" cy="28.8" r="3.6" fill="#16130F"/>
+      <circle cx="28.8" cy="28.8" r="3.6" fill="#16130F"/>
+    </svg></div>
+    <div class="rlet"><svg viewBox="0 0 33 64.16" height="64.16" role="img" aria-label="p"><g transform="translate(7 7) scale(38)"><path d="M.04 .5 V1.3" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <div class="rlet"><svg viewBox="0 0 33 64.16" height="64.16" role="img" aria-label="u"><g transform="translate(7 7) scale(38)"><path d="M.04 .5 V.75 A.21 .25 0 0 0 .46 .75" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.46 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <div class="rlet"><svg viewBox="0 0 33 64.16" height="64.16" role="img" aria-label="d"><g transform="translate(7 7) scale(38)"><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.46 0 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <div class="rdie"><svg viewBox="0 0 40 40" height="40" role="img" aria-label="die showing 6">
+      <rect x="2" y="2" width="36" height="36" rx="7.199999999999999"
+        fill="white" stroke="#C0511D" stroke-width="2.4"/>
+      <circle cx="11.2" cy="9.6" r="3.6" fill="#16130F"/>
+      <circle cx="28.8" cy="9.6" r="3.6" fill="#16130F"/>
+      <circle cx="11.2" cy="20" r="3.6" fill="#16130F"/>
+      <circle cx="28.8" cy="20" r="3.6" fill="#16130F"/>
+      <circle cx="11.2" cy="30.4" r="3.6" fill="#16130F"/>
+      <circle cx="28.8" cy="30.4" r="3.6" fill="#16130F"/>
+    </svg></div>
+    <div class="rlet"><svg viewBox="0 0 29.96 64.16" height="64.16" role="img" aria-label="s"><g transform="translate(7 7) scale(38)"><path d="M.38 .6 C.32 .48 .04 .48 .04 .66 C.04 .82 .36 .78 .36 .92 C.36 1.06 .08 1.04 .02 .94" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <div class="rlet"><svg viewBox="0 0 33 64.16" height="64.16" role="img" aria-label="a"><g transform="translate(7 7) scale(38)"><path d="M.25 .5 A.21 .25 0 0 0 .25 1 A.21 .25 0 0 0 .25 .5" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.46 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+    <div class="rlet"><svg viewBox="0 0 42.12 64.16" height="64.16" role="img" aria-label="m"><g transform="translate(7 7) scale(38)"><path d="M.04 .5 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.04 .72 A.16 .22 0 0 1 .36 .72 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/><path d="M.36 .72 A.16 .22 0 0 1 .68 .72 V1" fill="none" stroke="#C0511D" stroke-width="0.05" stroke-linecap="round" stroke-linejoin="round"/></g></svg></div>
+  </div>
+  <div class="scorehead">My words</div>
+  <div class="score">
+    <div class="srow">
+      <div class="sboxes"><i></i><i></i><i></i></div>
+      <label class="pick"><i></i>real word</label>
+      <label class="pick"><i></i>silly word</label>
+    </div>
+    <div class="srow">
+      <div class="sboxes"><i></i><i></i><i></i></div>
+      <label class="pick"><i></i>real word</label>
+      <label class="pick"><i></i>silly word</label>
+    </div>
+    <div class="srow">
+      <div class="sboxes"><i></i><i></i><i></i></div>
+      <label class="pick"><i></i>real word</label>
+      <label class="pick"><i></i>silly word</label>
+    </div>
+    <div class="srow">
+      <div class="sboxes"><i></i><i></i><i></i></div>
+      <label class="pick"><i></i>real word</label>
+      <label class="pick"><i></i>silly word</label>
+    </div>
+    <div class="srow">
+      <div class="sboxes"><i></i><i></i><i></i></div>
+      <label class="pick"><i></i>real word</label>
+      <label class="pick"><i></i>silly word</label>
+    </div>
+  </div>
+
+  <footer>
+    <span>216 possible words</span>
+    <span class="brand">Kitchen Table</span>
+    <span>Roll a word</span>
+  </footer>
+</div>
+
+</body>
+</html>

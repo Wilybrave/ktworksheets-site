@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="sheet-kind" content="worksheet">
+<title>Squared paper</title>
+<style>
+  @page { size: letter portrait; margin: 0.4in 0.45in; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  :root {
+    --ink: #16130F; --muted: #6B635A; --rule: #CFC3B2; --guide: #BCAE9C;
+    --accent: #C0511D; --tint: #F7EDE4; --slate: #2E5A78;
+  }
+  body {
+    font-family: Quicksand, 'URW Gothic', 'Century Gothic', sans-serif;
+    color: #000; background: #fff;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  .page { width: 100%; }
+  .page + .page { page-break-before: always; }
+  /* A screen ignores @page margins, so the preview drew every made sheet edge
+     to edge while the paper has 0.4in / 0.45in of white round it. The shelf's
+     sheets carry the same screen padding; print is untouched. */
+  @media screen { .page { padding: 0.4in 0.45in; } }
+  header {
+    display: flex; align-items: center; gap: 16px;
+    border-bottom: 3px solid var(--slate); padding-bottom: 7px; margin-bottom: 2px;
+  }
+  .bigletter { font-size: 38pt; font-weight: 700; line-height: 1; letter-spacing: .02em; }
+  .htext { flex: 1; }
+  h1 { font-size: 14pt; font-weight: 700; margin: 0 0 2px; }
+  .sub { font-size: 10pt; color: var(--muted); margin: 0; }
+  .nameline {
+    font-size: 9.5pt; color: var(--muted);
+    border-bottom: 1px solid var(--ink); width: 2in;
+    padding-bottom: 1px; align-self: flex-end;
+  }
+  .dir { font-size: 11pt; margin: 12px 0 10px; }
+  footer {
+    margin-top: 10px; padding-top: 6px; border-top: 1px solid var(--rule);
+    font-size: 8.5pt; color: var(--muted);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .brand { font-size: 7pt; letter-spacing: .04em; color: var(--accent); }
+  table { border-collapse: collapse; }
+  /* The parent-copy badge, lifted from the shelf's key pages so the two match
+     on paper. Tinted rather than outlined, because it has to be recognisable
+     at a glance from across a table with the page upside down. */
+  .badgeline {
+    display: inline-block; font-size: 8.5pt; font-weight: 700;
+    letter-spacing: .06em; text-transform: uppercase;
+    color: var(--accent); background: var(--tint);
+    border: 1.5px solid var(--accent); padding: 2px 8px; margin-bottom: 8px;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <div class="bigletter">#</div>
+    <div class="htext">
+      <h1>Squared paper</h1>
+      <p class="sub">10mm</p>
+    </div>
+    <div class="nameline">Name</div>
+  </header>
+  
+  <svg viewBox="0 0 547.1999999999999 720" width="100%" role="img" aria-label="Squared paper"><line x1="0" y1="0" x2="0" y2="720" stroke="#CFC3B2" stroke-width="0.6"/><line x1="28.34645669291339" y1="0" x2="28.34645669291339" y2="720" stroke="#CFC3B2" stroke-width="0.6"/><line x1="56.69291338582678" y1="0" x2="56.69291338582678" y2="720" stroke="#CFC3B2" stroke-width="0.6"/><line x1="85.03937007874016" y1="0" x2="85.03937007874016" y2="720" stroke="#CFC3B2" stroke-width="0.6"/><line x1="113.38582677165356" y1="0" x2="113.38582677165356" y2="720" stroke="#CFC3B2" stroke-width="0.6"/><line x1="141.73228346456693" y1="0" x2="141.73228346456693" y2="720" stroke="#CFC3B2" stroke-width="0.6"/><line x1="170.07874015748033" y1="0" x2="170.07874015748033" y2="720" stroke="#CFC3B2" stroke-width="0.6"/><line x1="198.42519685039372" y1="0" x2="198.42519685039372" y2="720" stroke="#CFC3B2" stroke-width="0.6"/><line x1="226.7716535433071" y1="0" x2="226.7716535433071" y2="720" stroke="#CFC3B2" stroke-width="0.6"/><line x1="255.1181102362205" y1="0" x2="255.1181102362205" y2="720" stroke="#CFC3B2" stroke-width="0.6"/><line x1="283.46456692913387" y1="0" x2="283.46456692913387" y2="720" stroke="#CFC3B2" stroke-width="0.6"/><line x1="311.81102362204723" y1="0" x2="311.81102362204723" y2="720" stroke="#CFC3B2" stroke-width="0.6"/><line x1="340.1574803149606" y1="0" x2="340.1574803149606" y2="720" stroke="#CFC3B2" stroke-width="0.6"/><line x1="368.50393700787396" y1="0" x2="368.50393700787396" y2="720" stroke="#CFC3B2" stroke-width="0.6"/><line x1="396.8503937007873" y1="0" x2="396.8503937007873" y2="720" stroke="#CFC3B2" stroke-width="0.6"/><line x1="425.1968503937007" y1="0" x2="425.1968503937007" y2="720" stroke="#CFC3B2" stroke-width="0.6"/><line x1="453.54330708661405" y1="0" x2="453.54330708661405" y2="720" stroke="#CFC3B2" stroke-width="0.6"/><line x1="481.8897637795274" y1="0" x2="481.8897637795274" y2="720" stroke="#CFC3B2" stroke-width="0.6"/><line x1="510.2362204724408" y1="0" x2="510.2362204724408" y2="720" stroke="#CFC3B2" stroke-width="0.6"/><line x1="538.5826771653542" y1="0" x2="538.5826771653542" y2="720" stroke="#CFC3B2" stroke-width="0.6"/><line x1="0" y1="0" x2="547.1999999999999" y2="0" stroke="#CFC3B2" stroke-width="0.6"/><line x1="0" y1="28.34645669291339" x2="547.1999999999999" y2="28.34645669291339" stroke="#CFC3B2" stroke-width="0.6"/><line x1="0" y1="56.69291338582678" x2="547.1999999999999" y2="56.69291338582678" stroke="#CFC3B2" stroke-width="0.6"/><line x1="0" y1="85.03937007874016" x2="547.1999999999999" y2="85.03937007874016" stroke="#CFC3B2" stroke-width="0.6"/><line x1="0" y1="113.38582677165356" x2="547.1999999999999" y2="113.38582677165356" stroke="#CFC3B2" stroke-width="0.6"/><line x1="0" y1="141.73228346456693" x2="547.1999999999999" y2="141.73228346456693" stroke="#CFC3B2" stroke-width="0.6"/><line x1="0" y1="170.07874015748033" x2="547.1999999999999" y2="170.07874015748033" stroke="#CFC3B2" stroke-width="0.6"/><line x1="0" y1="198.42519685039372" x2="547.1999999999999" y2="198.42519685039372" stroke="#CFC3B2" stroke-width="0.6"/><line x1="0" y1="226.7716535433071" x2="547.1999999999999" y2="226.7716535433071" stroke="#CFC3B2" stroke-width="0.6"/><line x1="0" y1="255.1181102362205" x2="547.1999999999999" y2="255.1181102362205" stroke="#CFC3B2" stroke-width="0.6"/><line x1="0" y1="283.46456692913387" x2="547.1999999999999" y2="283.46456692913387" stroke="#CFC3B2" stroke-width="0.6"/><line x1="0" y1="311.81102362204723" x2="547.1999999999999" y2="311.81102362204723" stroke="#CFC3B2" stroke-width="0.6"/><line x1="0" y1="340.1574803149606" x2="547.1999999999999" y2="340.1574803149606" stroke="#CFC3B2" stroke-width="0.6"/><line x1="0" y1="368.50393700787396" x2="547.1999999999999" y2="368.50393700787396" stroke="#CFC3B2" stroke-width="0.6"/><line x1="0" y1="396.8503937007873" x2="547.1999999999999" y2="396.8503937007873" stroke="#CFC3B2" stroke-width="0.6"/><line x1="0" y1="425.1968503937007" x2="547.1999999999999" y2="425.1968503937007" stroke="#CFC3B2" stroke-width="0.6"/><line x1="0" y1="453.54330708661405" x2="547.1999999999999" y2="453.54330708661405" stroke="#CFC3B2" stroke-width="0.6"/><line x1="0" y1="481.8897637795274" x2="547.1999999999999" y2="481.8897637795274" stroke="#CFC3B2" stroke-width="0.6"/><line x1="0" y1="510.2362204724408" x2="547.1999999999999" y2="510.2362204724408" stroke="#CFC3B2" stroke-width="0.6"/><line x1="0" y1="538.5826771653542" x2="547.1999999999999" y2="538.5826771653542" stroke="#CFC3B2" stroke-width="0.6"/><line x1="0" y1="566.9291338582676" x2="547.1999999999999" y2="566.9291338582676" stroke="#CFC3B2" stroke-width="0.6"/><line x1="0" y1="595.275590551181" x2="547.1999999999999" y2="595.275590551181" stroke="#CFC3B2" stroke-width="0.6"/><line x1="0" y1="623.6220472440945" x2="547.1999999999999" y2="623.6220472440945" stroke="#CFC3B2" stroke-width="0.6"/><line x1="0" y1="651.9685039370079" x2="547.1999999999999" y2="651.9685039370079" stroke="#CFC3B2" stroke-width="0.6"/><line x1="0" y1="680.3149606299213" x2="547.1999999999999" y2="680.3149606299213" stroke="#CFC3B2" stroke-width="0.6"/><line x1="0" y1="708.6614173228347" x2="547.1999999999999" y2="708.6614173228347" stroke="#CFC3B2" stroke-width="0.6"/></svg>
+  <footer>
+    <span>10mm grid</span>
+    <span class="brand">KITCHEN TABLE</span>
+    <span></span>
+  </footer>
+</div>
+
+</body>
+</html>

@@ -339,6 +339,15 @@
   .deriv .kid { text-align: center; }
   .deriv .kid .how { display: block; font-size: 10pt; color: var(--muted); margin-top: 2px; line-height: 1.25; }
   .deriv .blank { border: 2.2px dashed var(--rule); border-radius: 8px; height: .9in; }
+  /* FILL 2026-11-05: the one worked row on a reading page, drawn big */
+  .deriv.big { grid-template-columns: 1.7in 30px 1fr 1fr; padding: 18px 14px; margin: 16px 0; }
+  .deriv.big .arrow { font-size: 22pt; }
+  .deriv.big .kid .how { font-size: 12pt; margin-top: 6px; }
+  /* FILL 2026-11-05: sheet 30 page 1, one card per beat */
+  .beatcards { display: flex; justify-content: center; gap: .3in; margin: 18px 0; }
+  .beatcards > div { border: 2.6px solid var(--ink); border-radius: 12px; padding: 12px 16px; }
+  .beatcards .latin { font-size: 64pt; line-height: 1; letter-spacing: .14em; padding: 14px 22px 20px 34px; }
+  .note.big { font-size: 14.5pt; line-height: 1.45; padding-top: 12px; padding-bottom: 12px; }
   .ktable { border-collapse: collapse; width: 100%; margin: 6px 0; }
   .ktable td, .ktable th { border: 1.4px solid var(--rule); text-align: center; padding: 3px 1px; }
   .ktable th { font-size: 9pt; color: var(--muted); font-weight: normal; }

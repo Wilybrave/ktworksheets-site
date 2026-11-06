@@ -327,6 +327,11 @@
   .cardline span { position: absolute; bottom: .02in; left: 0; font-size: 8.5pt;
     color: var(--soft); }
   .cardfoot { text-align: center; font-size: 9pt; color: var(--soft); margin-top: .04in; }
+  .card.big { max-width: 5.8in; margin: .16in auto .12in; }
+  .card.big .cardtitle { font-size: 15pt; }
+  .card.big .cardline { height: .66in; }
+  .card.big .cardline span { font-size: 10pt; }
+  .card.big .cardfoot { font-size: 10pt; }
 
   .gbox { display: flex; gap: .12in; align-items: flex-start; border: 2px solid var(--rule);
     border-radius: 10px; padding: .1in .14in; margin-bottom: .12in; }
@@ -409,11 +414,18 @@
   </header>
 
   <div class="directions">
-    <b>DIRECTIONS:</b> Fill in the card, cut it out, and put it in the coat you wear.
+    <b>DIRECTIONS:</b> Fill in the cards, cut them out: one for a coat, one for a bag.
   </div>
 
 
-  <div class="card">
+  <div class="card big">
+    <div class="cardtitle">If I am lost, please ring</div>
+    <div class="cardline"><span>Grown-up&rsquo;s name</span></div>
+    <div class="cardline"><span>Phone number</span></div>
+    <div class="cardline"><span>My name</span></div>
+    <div class="cardfoot">Fold in half and keep it in a pocket.</div>
+  </div>
+  <div class="card big">
     <div class="cardtitle">If I am lost, please ring</div>
     <div class="cardline"><span>Grown-up&rsquo;s name</span></div>
     <div class="cardline"><span>Phone number</span></div>
@@ -429,7 +441,7 @@
 
 
   <footer>
-    <span>1 card to cut out</span>
+    <span>2 cards to cut out</span>
     <span class="brand kt-stamp"><svg class="kt-logo" viewBox="6 26 88 70" aria-hidden="true"><path d="M6 30 L94 30 L94 41 L6 41 Z" fill="currentColor"/><path d="M20 41 L31 41 L28 92 L23 92 Z" fill="currentColor"/><path d="M69 41 L80 41 L77 92 L72 92 Z" fill="currentColor"/><path d="M26 72 L74 72 L74 79 L26 79 Z" fill="currentColor"/><path d="M36 48 L62 48 L62 51.4 L36 51.4 Z" fill="currentColor"/><path d="M36 56 L62 56 L62 59.4 L36 59.4 Z" fill="currentColor"/><path d="M36 64 L52 64 L52 67.4 L36 67.4 Z" fill="currentColor"/></svg>Kitchen Table · ktworksheets.com</span>
     <span>What I would say</span>
   </footer>

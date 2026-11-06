@@ -334,6 +334,9 @@
   .guess td.g { text-align: center; width: .95in; }
   .guess td.b { height: .52in; }
   .guess.tall td { height: .72in; }
+  /* FILL (2026-11-06): pages with fewer rows draw them bigger. */
+  .guess.roomy td { padding: 16px 10px; font-size: 14pt; }
+  .guess.xtall td { height: 1.12in; }
   .rad { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center;
     border: 2.4px solid var(--ink); border-radius: 9px; padding: 12px; margin: 9px 0; }
   .rad > div { text-align: center; }

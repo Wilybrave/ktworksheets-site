@@ -346,11 +346,17 @@
   .say .w { font-size: 20pt; font-weight: 700; font-style: italic; }
   .say td.b { height: .62in; }
   .say.big td.b { height: .85in; }
+  .say.huge .w { font-size: 30pt; }
+  .say.huge td.b { height: 1.25in; }
   .pairs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 26px; margin: 8px 0; }
   .pairs div { border: 1.6px solid var(--rule); border-radius: 5px; padding: 14px 10px;
     font-size: 16pt; }
   .pairs.big div { padding: 22px 10px; font-size: 18pt; }
+  .pairs.big.tall { gap: 14px 26px; }
+  .pairs.big.tall div { padding: 34px 10px; font-size: 18pt; }
   .es { font-style: italic; font-weight: 700; }
+  /* FILL 2026-11-05: sheet 20 page 2 is the picture and two sentences, so both are big */
+  .note.big { font-size: 15pt; line-height: 1.45; padding-top: 12px; padding-bottom: 12px; margin: 14px 0; }
 
 </style>
 <style>
@@ -415,10 +421,10 @@
 
 
   <div class="note" style="margin-top:0"><b>A word you have never seen.</b> You can still say it.</div>
-  <div style="text-align:center; font-size:48pt; font-weight:700; font-style:italic; margin:18px 0 6px">murciélago</div>
+  <div style="text-align:center; font-size:76pt; font-weight:700; font-style:italic; margin:22px 0 8px">murciélago</div>
   <div style="text-align:center; font-size:11pt; color:var(--muted); margin-bottom:12px">(it means bat &mdash; the animal)</div>
-  <div class="note"><b>Slowly:</b> &nbsp; mur &middot; ci &middot; é &middot; la &middot; go &nbsp; (vowels <b>u &middot; i &middot; e &middot; a &middot; o</b>: moon, see, bed, father, more). Then faster.</div>
-  <table class="say big" style="margin-top:10px">
+  <div class="note"><b>Slowly:</b> &nbsp; <span style="display:block;text-align:center;font-size:30pt;font-style:italic;font-weight:700;margin:4px 0 8px">mur &middot; ci &middot; é &middot; la &middot; go</span> &nbsp; (vowels <b>u &middot; i &middot; e &middot; a &middot; o</b>: moon, see, bed, father, more). Then faster.</div>
+  <table class="say big huge" style="margin-top:14px">
     <tr><th>Try these too. Say each one, then tick if it felt easy.</th><th style="width:18%">Easy?</th></tr>
     <tr><td class="w">elefante</td><td class="b"></td></tr>
     <tr><td class="w">chocolate</td><td class="b"></td></tr>

@@ -329,6 +329,12 @@
     text-align: center; }
   .ladder td.n { color: var(--muted); font-size: 9.5pt; }
   .ladder tr.wrap td { border-top: 2.6px solid var(--accent); }
+  /* FILL 2026-11-05: sheet 30 page 1 is reading only, so the ladder and the notes get big */
+  .ladder.big { margin: 18px auto; }
+  .twostaves { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; text-align: center; margin: 8px 0; }
+  .ladder.big td { font-size: 28pt; padding: 16px 26px; }
+  .ladder.big td.n { font-size: 12pt; padding: 8px; }
+  .note.big { font-size: 14.5pt; line-height: 1.45; padding-top: 12px; padding-bottom: 12px; margin: 14px 0; }
   .keys { display: flex; gap: 0; margin: 12px auto; width: 5.8in; height: 2.1in;
     border: 2.4px solid var(--ink); border-radius: 0 0 5px 5px; position: relative; }
   .keys.big { width: 6.9in; height: 2.9in; }

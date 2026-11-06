@@ -335,6 +335,9 @@
   .split .n { font-size: 24pt; font-weight: 700; text-align: center; width: .85in; }
   .split .es { font-size: 19pt; font-weight: 700; font-style: italic; }
   .split .en { font-size: 19pt; font-weight: 700; }
+  .split.roomy td { padding: 22px 12px; font-size: 15pt; }
+  .split.roomy .n { font-size: 32pt; }
+  .split.roomy .es { font-size: 27pt; }
   /* The two halves of a number word, colored apart so the ORDER is the thing
      the eye gets first. Print is one color, so it is weight and a rule under
      the ten-part rather than a hue. */
@@ -453,7 +456,7 @@
   </div>
 
 
-  <table class="split">
+  <table class="split roomy">
     <tr><th style="width:14%">Numeral</th><th style="width:34%">Spanish</th><th>Does the word tell you what it is made of?</th></tr>
     <tr><td class="n">11</td><td class="es">once</td><td>No</td></tr>
     <tr><td class="n">12</td><td class="es">doce</td><td>No</td></tr>
@@ -463,7 +466,7 @@
     <tr><td class="n">16</td><td class="es"><span class="ten">dieci</span><span class="unit">seis</span></td><td><b>Yes &mdash; and from here on, always</b></td></tr>
   </table>
   <div class="rule">Spanish explains its numbers from <b>sixteen</b>. English waits until <b>twenty-one</b>.</div>
-  <div class="note"><b>How many numbers does Spanish explain that English does not?</b> &nbsp; ____________</div>
+  <div class="note"><b>How many numbers does Spanish explain that English does not?</b> &nbsp; <span style="display:inline-block;vertical-align:middle;width:1.1in;height:.6in;border:2.2px solid var(--ink);border-radius:6px;background:#fff"></span></div>
 
   <footer>
     <span>Five numbers, and no more than that</span>

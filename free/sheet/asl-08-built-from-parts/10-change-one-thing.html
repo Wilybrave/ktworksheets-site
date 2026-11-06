@@ -332,6 +332,10 @@
   .part.rd { font-size: 13pt; line-height: 1.45; padding: 14px 14px; margin: 12px 0; }
   .part.rd .n { font-size: 15pt; }
   .part.rd .n b { font-size: 11pt; }
+  /* FILL 2026-11-06: sheet 20 page 2 is two parts to page 1's three; they get the room. */
+  .part.rd.big { font-size: 16pt; line-height: 1.5; padding: 20px 16px; margin: 16px 0; }
+  .part.rd.big .n { font-size: 19pt; }
+  .part.rd.big .n b { font-size: 13pt; }
   .mini { display: flex; gap: 6px; justify-content: center; align-items: center; }
   .faces { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 10px 0; }
   .faces > div { border: 2.2px solid var(--ink); border-radius: 9px; padding: 8px; text-align: center; }
@@ -345,6 +349,9 @@
   .sortrow.head { border-bottom: 2.2px solid var(--ink); font-size: 9.5pt; color: var(--muted); }
   .oneletter { display: grid; grid-template-columns: 2.3in 1fr; gap: 14px; font-size: 13pt; line-height: 1.45; align-items: center;
     border: 2.4px solid var(--ink); border-radius: 10px; padding: 11px 14px; margin: 11px 0; }
+  /* FILL 2026-11-05: sheet 50's page 1 is reading only; the hand and the words get the room. */
+  .oneletter.big { grid-template-columns: 3.1in 1fr; font-size: 16pt; line-height: 1.5; padding: 16px 18px; margin: 16px 0; }
+  .note.big { font-size: 16pt; line-height: 1.45; padding-top: 14px; padding-bottom: 14px; }
   .two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 10px 0; }
   .two > div { border: 2.2px solid var(--ink); border-radius: 9px; padding: 14px 14px; font-size: 13pt; line-height: 1.45; }
   .two h4 { margin: 0 0 6px; font-size: 14pt; }

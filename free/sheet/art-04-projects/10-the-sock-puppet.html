@@ -376,9 +376,11 @@
   .eyecell svg { display: block; margin: 0 auto 5px; }
   .eyecell span { display: block; font-size: 9.5pt; color: var(--muted); }
 
-  .partgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px 14px; margin: 12px 0; }
+  /* FILL 2026-11-05: two columns and parts nearly twice the size. At 1.7in
+     a pointed ear cut out at half an inch wide, small for a sock. */
+  .partgrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px 24px; margin: 12px 0; }
   .partcell { text-align: center; }
-  .partcell svg { display: block; width: 100%; max-width: 1.7in; margin: 0 auto 3px; }
+  .partcell svg { display: block; width: 100%; max-width: 2.9in; margin: 0 auto 3px; }
   .partcell b { display: block; font-size: 10pt; }
   .partcell span { display: block; font-size: 9pt; font-style: italic; color: var(--muted); line-height: 1.25; }
 

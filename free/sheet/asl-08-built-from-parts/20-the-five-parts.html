@@ -332,6 +332,10 @@
   .part.rd { font-size: 13pt; line-height: 1.45; padding: 14px 14px; margin: 12px 0; }
   .part.rd .n { font-size: 15pt; }
   .part.rd .n b { font-size: 11pt; }
+  /* FILL 2026-11-06: sheet 20 page 2 is two parts to page 1's three; they get the room. */
+  .part.rd.big { font-size: 16pt; line-height: 1.5; padding: 20px 16px; margin: 16px 0; }
+  .part.rd.big .n { font-size: 19pt; }
+  .part.rd.big .n b { font-size: 13pt; }
   .mini { display: flex; gap: 6px; justify-content: center; align-items: center; }
   .faces { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 10px 0; }
   .faces > div { border: 2.2px solid var(--ink); border-radius: 9px; padding: 8px; text-align: center; }
@@ -345,6 +349,9 @@
   .sortrow.head { border-bottom: 2.2px solid var(--ink); font-size: 9.5pt; color: var(--muted); }
   .oneletter { display: grid; grid-template-columns: 2.3in 1fr; gap: 14px; font-size: 13pt; line-height: 1.45; align-items: center;
     border: 2.4px solid var(--ink); border-radius: 10px; padding: 11px 14px; margin: 11px 0; }
+  /* FILL 2026-11-05: sheet 50's page 1 is reading only; the hand and the words get the room. */
+  .oneletter.big { grid-template-columns: 3.1in 1fr; font-size: 16pt; line-height: 1.5; padding: 16px 18px; margin: 16px 0; }
+  .note.big { font-size: 16pt; line-height: 1.45; padding-top: 14px; padding-bottom: 14px; }
   .two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 10px 0; }
   .two > div { border: 2.2px solid var(--ink); border-radius: 9px; padding: 14px 14px; font-size: 13pt; line-height: 1.45; }
   .two h4 { margin: 0 0 6px; font-size: 14pt; }
@@ -472,14 +479,14 @@
   </div>
 
 
-  <div class="part rd">
+  <div class="part rd big">
     <div class="n">4<b>orientation</b></div>
     <div><b>Which way the hand faces.</b> Palm up or palm down, fingers pointing at you or away.
     <div style="margin-top:6px"><b>Try it:</b> hold your hand flat, palm down, then turn it over. Same shape, same place, different orientation.</div></div>
   </div>
-  <div class="part rd">
+  <div class="part rd big">
     <div class="n">5<b>the face</b></div>
-    <div><div class="mini"><svg viewBox="0 0 112 200" width="123.2" height="220" role="img"
+    <div><div class="mini"><svg viewBox="0 0 112 200" width="168" height="300" role="img"
     aria-label="a face saying something">
     
   <path d="M56 50 C34 50 22 66 22 86 C22 98 24 108 28 116 C33 126 42 134 56 134
@@ -492,7 +499,7 @@
     <ellipse cx="70" cy="88" rx="4.6" ry="3.4" fill="#16130F"/>
     <path d="M47 112 Q56 116 65 112" fill="none" stroke="#16130F" stroke-width="2.2" stroke-linecap="round"/>
     <path d="M36 78 L48 78 M64 78 L76 78" fill="none" stroke="#16130F" stroke-width="3.2" stroke-linecap="round"/>
-  </svg><svg viewBox="0 0 112 200" width="123.2" height="220" role="img"
+  </svg><svg viewBox="0 0 112 200" width="168" height="300" role="img"
     aria-label="a face asking a yes-or-no question">
     
   <path d="M56 50 C34 50 22 66 22 86 C22 98 24 108 28 116 C33 126 42 134 56 134
@@ -505,7 +512,7 @@
     <ellipse cx="70" cy="88" rx="4.6" ry="3.4" fill="#16130F"/>
     <path d="M47 112 Q56 116 65 112" fill="none" stroke="#16130F" stroke-width="2.2" stroke-linecap="round"/>
     <path d="M35 70 Q42 65 49 70 M63 70 Q70 65 77 70" fill="none" stroke="#16130F" stroke-width="3.2" stroke-linecap="round"/>
-  </svg><svg viewBox="0 0 112 200" width="123.2" height="220" role="img"
+  </svg><svg viewBox="0 0 112 200" width="168" height="300" role="img"
     aria-label="a face asking a who-what-where question">
     
   <path d="M56 50 C34 50 22 66 22 86 C22 98 24 108 28 116 C33 126 42 134 56 134
@@ -522,7 +529,7 @@
     <div style="margin-top:4px"><b>What the face is doing.</b> Not the feeling &mdash; the <i>grammar</i>. The eyebrows turn the same hands into a statement, or a question, or a different kind of question. Sheet 30 is about nothing else.</div></div>
   </div>
 
-  <div class="note" style="margin-top:12px"><b>Swap any one part and you get a different word</b>, not a similar one.</div>
+  <div class="note big" style="margin-top:14px"><b>Swap any one part and you get a different word</b>, not a similar one.</div>
 
   <footer>
     <span>Five parts, and swapping any one changes the word</span>

@@ -353,6 +353,7 @@
   .getapp-text span { display:block; margin-top:.3rem; font-size:.85rem; color:var(--muted); }
   .getapp-text .badge { display:block; width:8.5rem; height:2.84rem; margin-top:.55rem; }
   .getapp-text .badge svg { display:block; }
+  .apppanel > p { max-width:34rem; }
 
 
   .legal { margin:.6rem 0 0; text-align:center; font-size:.78rem; color:var(--muted); }

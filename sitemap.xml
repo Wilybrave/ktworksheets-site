@@ -2,6 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://ktworksheets.com/</loc><lastmod>2026-11-11</lastmod></url>
   <url><loc>https://ktworksheets.com/about.html</loc><lastmod>2026-11-11</lastmod></url>
+  <url><loc>https://ktworksheets.com/free/</loc><lastmod>2026-11-11</lastmod></url>
   <url><loc>https://ktworksheets.com/free/arabic-09-joined.html</loc><lastmod>2026-11-11</lastmod></url>
   <url><loc>https://ktworksheets.com/free/arabic-09-joined/10-one-line-not-letters.html</loc><lastmod>2026-11-11</lastmod></url>
   <url><loc>https://ktworksheets.com/free/arabic-09-joined/20-four-shapes-one-letter.html</loc><lastmod>2026-11-11</lastmod></url>
@@ -260,7 +261,6 @@
   <url><loc>https://ktworksheets.com/free/hindi-09-comes-with-a-vowel/10-comes-with-a-vowel.html</loc><lastmod>2026-11-11</lastmod></url>
   <url><loc>https://ktworksheets.com/free/hindi-09-comes-with-a-vowel/20-four-directions.html</loc><lastmod>2026-11-11</lastmod></url>
   <url><loc>https://ktworksheets.com/free/hindi.html</loc><lastmod>2026-11-11</lastmod></url>
-  <url><loc>https://ktworksheets.com/free/index.html</loc><lastmod>2026-11-11</lastmod></url>
   <url><loc>https://ktworksheets.com/free/japanese-08-three-systems.html</loc><lastmod>2026-11-11</lastmod></url>
   <url><loc>https://ktworksheets.com/free/japanese-08-three-systems/10-three-at-once.html</loc><lastmod>2026-11-11</lastmod></url>
   <url><loc>https://ktworksheets.com/free/japanese-08-three-systems/20-why-three.html</loc><lastmod>2026-11-11</lastmod></url>
@@ -507,10 +507,10 @@
   <url><loc>https://ktworksheets.com/free/turkish-10-four-pieces-one-word/10-six-more-letters.html</loc><lastmod>2026-11-11</lastmod></url>
   <url><loc>https://ktworksheets.com/free/turkish-10-four-pieces-one-word/20-four-pieces.html</loc><lastmod>2026-11-11</lastmod></url>
   <url><loc>https://ktworksheets.com/free/turkish.html</loc><lastmod>2026-11-11</lastmod></url>
+  <url><loc>https://ktworksheets.com/make/</loc><lastmod>2026-11-11</lastmod></url>
   <url><loc>https://ktworksheets.com/make/award.html</loc><lastmod>2026-11-11</lastmod></url>
   <url><loc>https://ktworksheets.com/make/calendar.html</loc><lastmod>2026-11-11</lastmod></url>
   <url><loc>https://ktworksheets.com/make/crossword.html</loc><lastmod>2026-11-11</lastmod></url>
-  <url><loc>https://ktworksheets.com/make/index.html</loc><lastmod>2026-11-11</lastmod></url>
   <url><loc>https://ktworksheets.com/make/mandala.html</loc><lastmod>2026-11-11</lastmod></url>
   <url><loc>https://ktworksheets.com/make/maths.html</loc><lastmod>2026-11-11</lastmod></url>
   <url><loc>https://ktworksheets.com/make/name.html</loc><lastmod>2026-11-11</lastmod></url>

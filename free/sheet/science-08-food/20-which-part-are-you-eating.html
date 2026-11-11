@@ -152,7 +152,10 @@
   .cring-full { background: var(--accent); }
   .cring-half { background: linear-gradient(90deg, var(--accent) 50%, #fff 50%); }
   .cring-none { background: #fff; }
-  ol.qs.hasconf li { overflow: hidden; }
+  /* The rings float right; a clearing ::after holds the float inside its
+     question. (overflow:hidden did the same and also clipped the list
+     number, which sits outside the li — audit 2026-11-10.) */
+  ol.qs.hasconf li::after { content: ''; display: block; clear: both; }
 
   .conflegend {
     border: 1.2px solid var(--rule); border-radius: 4px;
@@ -199,7 +202,10 @@
   .opt { white-space: nowrap; }
 
   /* -------------------------------------------------------------- tables */
-  .tbl { border-collapse: collapse; margin: 8px 0; font-size: 11pt; width: 100%; }
+  /* Not quite 100%: a collapsed border sits half outside the table's box, so
+     a full-width table put half its right-hand rule past the column edge and
+     it printed open-ended (Grade 6 Math, every table; audit 2026-11-10). */
+  .tbl { border-collapse: collapse; margin: 8px 1px; font-size: 11pt; width: calc(100% - 2px); }
   .tbl th, .tbl td { border: 1.4px solid var(--ink); padding: 5px 8px; text-align: left; }
   .tbl th { color: var(--slate); }
   .tbl th { background: var(--tint); font-size: 10pt; letter-spacing: .02em; }
@@ -365,19 +371,19 @@
   <h3 class="h">Fill it in, then read the answers</h3>
   <p class="note">Cover the right-hand column, write your answer, then look.</p>
   <table class="veg"><tr><th>in the drawer</th><th>which part?</th><th></th></tr>
-    <tr><td class="n">Sweetcorn</td><td class="ans"></td><td class="t">Seeds, in rows, still attached to the plant. Each one would grow a whole maize plant.</td></tr>
+    <tr><td class="n">Sweet corn</td><td class="ans"></td><td class="t">Seeds, in rows, still attached to the plant. Each one would grow a whole maize plant.</td></tr>
     <tr><td class="n">Tomato</td><td class="ans"></td><td class="t">Grew around seeds, so it is a fruit. Every seed is still in there.</td></tr>
-    <tr><td class="n">Beetroot</td><td class="ans"></td><td class="t">Same idea as a carrot — a swollen root, storing sugar for a second year it usually never gets.</td></tr>
+    <tr><td class="n">Beet</td><td class="ans"></td><td class="t">Same idea as a carrot — a swollen root, storing sugar for a second year it usually never gets.</td></tr>
     <tr><td class="n">Celery</td><td class="ans"></td><td class="t">Stems, standing up, with the leaves cut off the top. The strings are the water pipes.</td></tr>
     <tr><td class="n">Cauliflower</td><td class="ans"></td><td class="t">The same plant as broccoli, bred so the buds crowd into a solid white head.</td></tr>
     <tr><td class="n">Potato</td><td class="ans"></td><td class="t">NOT a root. A swollen underground stem — which is why it has EYES, and an eye is a bud, and only stems have buds.</td></tr>
     <tr><td class="n">Carrot</td><td class="ans"></td><td class="t">One fat tap root, with the thin feeding roots trimmed off. The green top is the actual plant.</td></tr>
-    <tr><td class="n">Onion</td><td class="ans"></td><td class="t">Leaf bases, wrapped round each other underground. Cut one across and you are looking at rings of leaf.</td></tr>
+    <tr><td class="n">Onion</td><td class="ans"></td><td class="t">Leaf bases, wrapped around each other underground. Cut one across and you are looking at rings of leaf.</td></tr>
     <tr><td class="n">Broccoli</td><td class="ans"></td><td class="t">Hundreds of flower buds caught before they open. Let one bolt in a garden and it goes yellow and blooms.</td></tr>
     <tr><td class="n">Lettuce</td><td class="ans"></td><td class="t">Leaves, and nothing else. Same for cabbage, spinach and kale.</td></tr>
     <tr><td class="n">Peas</td><td class="ans"></td><td class="t">Seeds, and the pod is the fruit they grew inside.</td></tr>
     <tr><td class="n">Asparagus</td><td class="ans"></td><td class="t">A young shoot, cut before it opens out. Leave it and it becomes a tall feathery bush.</td></tr>
-    <tr><td class="n">Cucumber</td><td class="ans"></td><td class="t">Fruit. So are peppers, courgettes, aubergines and pumpkins — all of them grew around seeds.</td></tr>
+    <tr><td class="n">Cucumber</td><td class="ans"></td><td class="t">Fruit. So are peppers, zucchini, eggplants and pumpkins — all of them grew around seeds.</td></tr>
     <tr><td class="n">Radish</td><td class="ans"></td><td class="t">A root again. The heat is a chemical defense against being eaten, which has not worked.</td></tr>
   </table>
 

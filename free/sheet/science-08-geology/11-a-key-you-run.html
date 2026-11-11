@@ -152,7 +152,10 @@
   .cring-full { background: var(--accent); }
   .cring-half { background: linear-gradient(90deg, var(--accent) 50%, #fff 50%); }
   .cring-none { background: #fff; }
-  ol.qs.hasconf li { overflow: hidden; }
+  /* The rings float right; a clearing ::after holds the float inside its
+     question. (overflow:hidden did the same and also clipped the list
+     number, which sits outside the li — audit 2026-11-10.) */
+  ol.qs.hasconf li::after { content: ''; display: block; clear: both; }
 
   .conflegend {
     border: 1.2px solid var(--rule); border-radius: 4px;
@@ -199,7 +202,10 @@
   .opt { white-space: nowrap; }
 
   /* -------------------------------------------------------------- tables */
-  .tbl { border-collapse: collapse; margin: 8px 0; font-size: 11pt; width: 100%; }
+  /* Not quite 100%: a collapsed border sits half outside the table's box, so
+     a full-width table put half its right-hand rule past the column edge and
+     it printed open-ended (Grade 6 Math, every table; audit 2026-11-10). */
+  .tbl { border-collapse: collapse; margin: 8px 1px; font-size: 11pt; width: calc(100% - 2px); }
   .tbl th, .tbl td { border: 1.4px solid var(--ink); padding: 5px 8px; text-align: left; }
   .tbl th { color: var(--slate); }
   .tbl th { background: var(--tint); font-size: 10pt; letter-spacing: .02em; }
@@ -352,10 +358,10 @@
       </ul>
     </li>
     <li id="s2">
-      <p class="q">Can you scratch it with a copper coin?</p>
+      <p class="q">Does it rub off white on your fingers, and can your fingernail dig into it?</p>
       <ul>
-        <li><span class="say">Yes, easily — it is soft and often chalky on the fingers</span> <span class="is">Chalk</span><span class="tell">Soft, pale, powders on your hands. Made of shells too small to see.</span></li>
-        <li><span class="say">Not with a coin</span> <span class="go">go to 3</span></li>
+        <li><span class="say">Yes — it powders on your fingers and a fingernail marks it</span> <span class="is">Chalk</span><span class="tell">Soft, pale, powders on your hands. Made of shells too small to see.</span></li>
+        <li><span class="say">No — it stays hard and clean</span> <span class="go">go to 3</span></li>
       </ul>
     </li>
     <li id="s3">
@@ -390,7 +396,7 @@
       <p class="q">Can you see separate crystals, and how big?</p>
       <ul>
         <li><span class="say">Yes — big enough to tell apart, speckled light and dark</span> <span class="is">Granite</span><span class="tell">Cooled slowly, deep down. Slow cooling is what gave the crystals time to grow big.</span></li>
-        <li><span class="say">Too small to see, dark and heavy</span> <span class="is">Basalt</span><span class="tell">The same sort of melt as granite but cooled fast at the surface, so no crystal had time.</span></li>
+        <li><span class="say">Too small to see, dark and heavy</span> <span class="is">Basalt</span><span class="tell">A darker, iron-rich melt that cooled fast at the surface, so no crystal had time to grow big.</span></li>
         <li><span class="say">Full of little holes, and very light</span> <span class="is">Pumice</span><span class="tell">Froth. It cooled around its own gas bubbles, and it is the one rock that floats.</span></li>
       </ul>
     </li>

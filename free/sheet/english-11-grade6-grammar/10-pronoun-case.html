@@ -152,7 +152,10 @@
   .cring-full { background: var(--accent); }
   .cring-half { background: linear-gradient(90deg, var(--accent) 50%, #fff 50%); }
   .cring-none { background: #fff; }
-  ol.qs.hasconf li { overflow: hidden; }
+  /* The rings float right; a clearing ::after holds the float inside its
+     question. (overflow:hidden did the same and also clipped the list
+     number, which sits outside the li — audit 2026-11-10.) */
+  ol.qs.hasconf li::after { content: ''; display: block; clear: both; }
 
   .conflegend {
     border: 1.2px solid var(--rule); border-radius: 4px;
@@ -199,7 +202,10 @@
   .opt { white-space: nowrap; }
 
   /* -------------------------------------------------------------- tables */
-  .tbl { border-collapse: collapse; margin: 8px 0; font-size: 11pt; width: 100%; }
+  /* Not quite 100%: a collapsed border sits half outside the table's box, so
+     a full-width table put half its right-hand rule past the column edge and
+     it printed open-ended (Grade 6 Math, every table; audit 2026-11-10). */
+  .tbl { border-collapse: collapse; margin: 8px 1px; font-size: 11pt; width: calc(100% - 2px); }
   .tbl th, .tbl td { border: 1.4px solid var(--ink); padding: 5px 8px; text-align: left; }
   .tbl th { color: var(--slate); }
   .tbl th { background: var(--tint); font-size: 10pt; letter-spacing: .02em; }
@@ -344,7 +350,7 @@
 
   <ol class="qs" start="1"><li><span class="qt"><span style="font-size:12pt;line-height:1.85">Sam and ( <b>I</b> &nbsp;/&nbsp; <b>me</b> ) walked to the store after practice.</span></span></li><li><span class="qt"><span style="font-size:12pt;line-height:1.85">Mom drove Sam and ( <b>I</b> &nbsp;/&nbsp; <b>me</b> ) to practice.</span></span></li><li><span class="qt"><span style="font-size:12pt;line-height:1.85">( <b>He</b> &nbsp;/&nbsp; <b>Him</b> ) and Ravi built the whole ramp out of scrap wood.</span></span></li><li><span class="qt"><span style="font-size:12pt;line-height:1.85">The coach picked Nadia and ( <b>she</b> &nbsp;/&nbsp; <b>her</b> ) for the relay.</span></span></li><li><span class="qt"><span style="font-size:12pt;line-height:1.85">Nobody wanted to sit with Theo and ( <b>I</b> &nbsp;/&nbsp; <b>me</b> ).</span></span></li><li><span class="qt"><span style="font-size:12pt;line-height:1.85">( <b>We</b> &nbsp;/&nbsp; <b>Us</b> ) sixth graders raised four hundred dollars in two weeks.</span></span></li><li><span class="qt"><span style="font-size:12pt;line-height:1.85">My grandmother sent my sister and ( <b>I</b> &nbsp;/&nbsp; <b>me</b> ) a card with two dollars in it.</span></span></li><li><span class="qt"><span style="font-size:12pt;line-height:1.85">( <b>She</b> &nbsp;/&nbsp; <b>Her</b> ) and I finished the whole model in one night.</span></span></li></ol>
 
-  <div style="font-weight:bold;font-size:11pt;margin:14px 0 6px">9. Write out the short test sentence you used for numbers 2, 5 and 6.</div>
+  <ol class="qs" start="9" style="margin:14px 0 -7px"><li><span class="qt" style="font-weight:bold;font-size:11pt">Write out the short test sentence you used for numbers 2, 5 and 6.</span></li></ol>
   <div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div>
 
   <footer>
@@ -376,7 +382,7 @@
   <div class="note"><b>No possessive pronoun has an apostrophe.</b> <i>it’s</i> = it is; <i>who’s</i> = who
   is. If the long form fits, use the apostrophe.</div>
 
-  <div style="font-weight:bold;font-size:11pt;margin:14px 0 6px">16. Write one sentence about something you and one other person did this week. Then cover the other person with your finger and read it out loud.</div>
+  <ol class="qs" start="16" style="margin:14px 0 -7px"><li><span class="qt" style="font-weight:bold;font-size:11pt">Write one sentence about something you and one other person did this week. Then cover the other person with your finger and read it out loud.</span></li></ol>
   <div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div>
 
   <footer>

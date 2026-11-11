@@ -152,7 +152,10 @@
   .cring-full { background: var(--accent); }
   .cring-half { background: linear-gradient(90deg, var(--accent) 50%, #fff 50%); }
   .cring-none { background: #fff; }
-  ol.qs.hasconf li { overflow: hidden; }
+  /* The rings float right; a clearing ::after holds the float inside its
+     question. (overflow:hidden did the same and also clipped the list
+     number, which sits outside the li — audit 2026-11-10.) */
+  ol.qs.hasconf li::after { content: ''; display: block; clear: both; }
 
   .conflegend {
     border: 1.2px solid var(--rule); border-radius: 4px;
@@ -199,7 +202,10 @@
   .opt { white-space: nowrap; }
 
   /* -------------------------------------------------------------- tables */
-  .tbl { border-collapse: collapse; margin: 8px 0; font-size: 11pt; width: 100%; }
+  /* Not quite 100%: a collapsed border sits half outside the table's box, so
+     a full-width table put half its right-hand rule past the column edge and
+     it printed open-ended (Grade 6 Math, every table; audit 2026-11-10). */
+  .tbl { border-collapse: collapse; margin: 8px 1px; font-size: 11pt; width: calc(100% - 2px); }
   .tbl th, .tbl td { border: 1.4px solid var(--ink); padding: 5px 8px; text-align: left; }
   .tbl th { color: var(--slate); }
   .tbl th { background: var(--tint); font-size: 10pt; letter-spacing: .02em; }
@@ -402,7 +408,7 @@
   <div class="rules"><b>Scissors only, with a grown-up in the room.</b> If a step seems to want a knife, snip or fold instead.</div>
 
   <div class="note"><b>What you need:</b> a paper bag &middot; a cardboard box &middot; card &middot; scissors &middot; a glue stick &middot; markers &middot; tape &middot; string. One bag per puppet; one box for the
-  theatre.</div>
+  theater.</div>
 
   <div class="find"><b>The bag already has a mouth.</b> The folded flat bottom is a hinge: fingers up inside the flap, and it becomes a jaw.</div>
 
@@ -447,7 +453,7 @@
   </footer>
 </div>
 
-<div class="page g1">
+<div class="page g1" data-kdp-cut="no">
   <header class="cont">
     
     <h1>Where the Face Goes</h1>
@@ -530,16 +536,16 @@
   </div>
 
   <footer>
-    <span>The theatre is on page 4 &rarr;</span>
+    <span>The theater is on page 4 &rarr;</span>
     <span class="brand kt-stamp"><svg class="kt-logo" viewBox="6 26 88 70" aria-hidden="true"><path d="M6 30 L94 30 L94 41 L6 41 Z" fill="currentColor"/><path d="M20 41 L31 41 L28 92 L23 92 Z" fill="currentColor"/><path d="M69 41 L80 41 L77 92 L72 92 Z" fill="currentColor"/><path d="M26 72 L74 72 L74 79 L26 79 Z" fill="currentColor"/><path d="M36 48 L62 48 L62 51.4 L36 51.4 Z" fill="currentColor"/><path d="M36 56 L62 56 L62 59.4 L36 59.4 Z" fill="currentColor"/><path d="M36 64 L52 64 L52 67.4 L36 67.4 Z" fill="currentColor"/></svg>Kitchen Table · ktworksheets.com</span>
     <span>Parts that fold over the hinge</span>
   </footer>
 </div>
 
-<div class="page g1">
+<div class="page g1" data-kdp-cut="no">
   <header class="cont">
     
-    <h1>A Theatre From One Box</h1>
+    <h1>A Theater From One Box</h1>
     <p class="sub">Making &middot; Projects &middot; Page 4 of 6</p>
   </header>
 
@@ -577,13 +583,13 @@
 
   <table class="tbl ">
     <thead><tr><th>Do this</th><th>Because</th></tr></thead>
-    <tbody><tr><td><b>Window in the top third of the panel</b></td><td>Everything below it is the wall that hides you. This is the one that matters.</td></tr><tr><td><b>Leave a border all the way round</b></td><td>Cut right out to the edges and the box loses its corners and folds up on the first night.</td></tr><tr><td><b>Tape a strip of card along the bottom of the window, sticking up</b></td><td>A lip. Puppets can rest on it, and it hides the last inch of your hand.</td></tr><tr><td><b>Two bits of string across the top, and a curtain of paper hung over them</b></td><td>Opening a curtain is the moment the show starts. Without one, it just sort of begins.</td></tr><tr><td><b>Puppet head about a third of the window height</b></td><td>Bigger and it fills the stage with nowhere to go. Smaller and nobody in the room can see its face.</td></tr></tbody>
+    <tbody><tr><td><b>Window in the top third of the panel</b></td><td>Everything below it is the wall that hides you. This is the one that matters.</td></tr><tr><td><b>Leave a border all the way around</b></td><td>Cut right out to the edges and the box loses its corners and folds up on the first night.</td></tr><tr><td><b>Tape a strip of card along the bottom of the window, sticking up</b></td><td>A lip. Puppets can rest on it, and it hides the last inch of your hand.</td></tr><tr><td><b>Two bits of string across the top, and a curtain of paper hung over them</b></td><td>Opening a curtain is the moment the show starts. Without one, it just sort of begins.</td></tr><tr><td><b>Puppet head about a third of the window height</b></td><td>Bigger and it fills the stage with nowhere to go. Smaller and nobody in the room can see its face.</td></tr></tbody>
   </table>
 
   <footer>
     <span>Tickets on page 5 &rarr;</span>
     <span class="brand kt-stamp"><svg class="kt-logo" viewBox="6 26 88 70" aria-hidden="true"><path d="M6 30 L94 30 L94 41 L6 41 Z" fill="currentColor"/><path d="M20 41 L31 41 L28 92 L23 92 Z" fill="currentColor"/><path d="M69 41 L80 41 L77 92 L72 92 Z" fill="currentColor"/><path d="M26 72 L74 72 L74 79 L26 79 Z" fill="currentColor"/><path d="M36 48 L62 48 L62 51.4 L36 51.4 Z" fill="currentColor"/><path d="M36 56 L62 56 L62 59.4 L36 59.4 Z" fill="currentColor"/><path d="M36 64 L52 64 L52 67.4 L36 67.4 Z" fill="currentColor"/></svg>Kitchen Table · ktworksheets.com</span>
-    <span>A theatre from one box</span>
+    <span>A theater from one box</span>
   </footer>
 </div>
 
@@ -721,7 +727,7 @@
   <div class="note"><b>Two rules.</b> Come in from the side, never up from the bottom. Whoever is talking
   moves; everybody else holds still.</div>
 
-  <ol class="qs" start="3"><li><span class="qt">How many stubs did you collect?</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Something got a real laugh, and it was almost certainly not the bit you planned to be funny. What was it?</span><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">What would you change about the theatre itself — not the story, the box? Say what went wrong and how you would cut it differently.</span><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+  <ol class="qs" start="3"><li><span class="qt">How many stubs did you collect?</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Something got a real laugh, and it was almost certainly not the bit you planned to be funny. What was it?</span><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">What would you change about the theater itself — not the story, the box? Say what went wrong and how you would cut it differently.</span><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
 
   <footer>
     <span>Done &mdash; keep the box</span>

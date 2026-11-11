@@ -152,7 +152,10 @@
   .cring-full { background: var(--accent); }
   .cring-half { background: linear-gradient(90deg, var(--accent) 50%, #fff 50%); }
   .cring-none { background: #fff; }
-  ol.qs.hasconf li { overflow: hidden; }
+  /* The rings float right; a clearing ::after holds the float inside its
+     question. (overflow:hidden did the same and also clipped the list
+     number, which sits outside the li — audit 2026-11-10.) */
+  ol.qs.hasconf li::after { content: ''; display: block; clear: both; }
 
   .conflegend {
     border: 1.2px solid var(--rule); border-radius: 4px;
@@ -199,7 +202,10 @@
   .opt { white-space: nowrap; }
 
   /* -------------------------------------------------------------- tables */
-  .tbl { border-collapse: collapse; margin: 8px 0; font-size: 11pt; width: 100%; }
+  /* Not quite 100%: a collapsed border sits half outside the table's box, so
+     a full-width table put half its right-hand rule past the column edge and
+     it printed open-ended (Grade 6 Math, every table; audit 2026-11-10). */
+  .tbl { border-collapse: collapse; margin: 8px 1px; font-size: 11pt; width: calc(100% - 2px); }
   .tbl th, .tbl td { border: 1.4px solid var(--ink); padding: 5px 8px; text-align: left; }
   .tbl th { color: var(--slate); }
   .tbl th { background: var(--tint); font-size: 10pt; letter-spacing: .02em; }
@@ -314,6 +320,7 @@
   svg { display: inline-block; vertical-align: top; }
   svg.inline { vertical-align: middle; }
 
+  .write.big { height: .5in; }
   ul.real { margin: 6px 0 0; padding-left: .32in; }
   ul.real li { font-size: 16pt; line-height: 1.55; margin: 0 0 22px; }
   ol.sort.qs li { font-size: 15pt; line-height: 1.45; margin-bottom: .55in; }
@@ -342,18 +349,18 @@
 <div class="plan" style="display:flex;align-items:stretch;gap:.08in;margin:.02in 0 .1in"><div style="flex:1;display:flex;align-items:center;gap:.07in;border:1.8px solid var(--ink);border-radius:5px;padding:.05in .08in"><span style="flex:0 0 auto;display:inline-block;width:.26in;height:.26in;line-height:.26in;border-radius:50%;background:var(--ink);color:#fff;text-align:center;font-weight:700;font-size:11pt">1</span><span style="font-size:10.5pt;font-weight:700;line-height:1.2">Read both Tuesdays</span></div><div style="align-self:center;font-size:16pt;font-weight:700;color:var(--ink)">&rarr;</div><div style="flex:1;display:flex;align-items:center;gap:.07in;border:1.8px solid var(--ink);border-radius:5px;padding:.05in .08in"><span style="flex:0 0 auto;display:inline-block;width:.26in;height:.26in;line-height:.26in;border-radius:50%;background:var(--ink);color:#fff;text-align:center;font-weight:700;font-size:11pt">2</span><span style="font-size:10.5pt;font-weight:700;line-height:1.2">Page 2: cross out</span></div><div style="align-self:center;font-size:16pt;font-weight:700;color:var(--ink)">&rarr;</div><div style="flex:1;display:flex;align-items:center;gap:.07in;border:1.8px solid var(--ink);border-radius:5px;padding:.05in .08in"><span style="flex:0 0 auto;display:inline-block;width:.26in;height:.26in;line-height:.26in;border-radius:50%;background:var(--ink);color:#fff;text-align:center;font-weight:700;font-size:11pt">3</span><span style="font-size:10.5pt;font-weight:700;line-height:1.2">Then write your day</span></div></div>
   <div class="note" style="margin-top:2px"><b>Most people write this:</b></div>
 
-  <div class="rules" style="font-size:14pt">We did math, then we had break, then we did English. Then it was lunch. In the afternoon we had PE and then we came home.</div>
+  <div class="rules" style="font-size:14pt">We did math, then we had recess, then we did reading. Then it was lunch. In the afternoon we had gym and then we came home.</div>
 
-  <div class="note"><b>True, but it is the timetable: it fits every Tuesday.</b> Here is the same day,
+  <div class="note"><b>True, but it is the schedule: it fits every Tuesday.</b> Here is the same day,
   written from what changed:</div>
 
   <ul class="real">
-    <li>In math I got the one with the remainders right on my own, and I did not put my hand up to check.</li>
+    <li>In math I got the hard one right on my own, and I did not put my hand up to check.</li>
     <li>Amir was away, so I sat next to Josie, who talks the whole time.</li>
-    <li>It rained at break so we stayed in, and the classroom sounds completely different when everyone is in it at break.</li>
-    <li>Mrs Doyle read the next chapter and stopped in the worst possible place.</li>
-    <li>I could not find my PE shorts and had to borrow the spare ones, which are enormous.</li>
-    <li>On the way out Mr Peters said "see you tomorrow, Sam" and I have never told him my name.</li>
+    <li>It rained at recess so we stayed in, and the classroom sounds completely different when everyone is in it at recess.</li>
+    <li>Mrs. Doyle read the next chapter and stopped in the worst possible place.</li>
+    <li>I could not find my gym shorts and had to borrow the spare ones, which are enormous.</li>
+    <li>On the way out Mr. Peters said "see you tomorrow, Sam" and I have never told him my name.</li>
   </ul>
 
   <div class="rules"><b>Nothing dramatic happened.</b> An ordinary day is writeable if you look at it.</div>
@@ -377,7 +384,7 @@
   </div>
 
 
-  <ol class="sort qs" start="1"><li><span class="qt">We had assembly in the morning. &nbsp; <b>keep / cross out</b></span></li><li><span class="qt">The whiteboard pen ran out halfway through a word. &nbsp; <b>keep / cross out</b></span></li><li><span class="qt">We do reading after lunch. &nbsp; <b>keep / cross out</b></span></li><li><span class="qt">Josie brought in a conker the size of a plum. &nbsp; <b>keep / cross out</b></span></li><li><span class="qt">I sat at my usual table. &nbsp; <b>keep / cross out</b></span></li><li><span class="qt">The hall smelled of paint and nobody would say why. &nbsp; <b>keep / cross out</b></span></li><li><span class="qt">We have PE on Wednesdays. &nbsp; <b>keep / cross out</b></span></li><li><span class="qt">I finished my book on the bus and had nothing to read on the way home. &nbsp; <b>keep / cross out</b></span></li></ol>
+  <ol class="sort qs" start="1"><li><span class="qt">We said the Pledge in the morning. &nbsp; <b>keep / cross out</b></span></li><li><span class="qt">The whiteboard marker ran out halfway through a word. &nbsp; <b>keep / cross out</b></span></li><li><span class="qt">We do reading after lunch. &nbsp; <b>keep / cross out</b></span></li><li><span class="qt">Josie brought in a pinecone as big as her hand. &nbsp; <b>keep / cross out</b></span></li><li><span class="qt">I sat at my usual table. &nbsp; <b>keep / cross out</b></span></li><li><span class="qt">The hallway smelled of paint and nobody would say why. &nbsp; <b>keep / cross out</b></span></li><li><span class="qt">We have gym on Wednesdays. &nbsp; <b>keep / cross out</b></span></li><li><span class="qt">I finished my book on the bus and had nothing to read on the way home. &nbsp; <b>keep / cross out</b></span></li></ol>
 
   <div class="note" style="margin-top:12px"><b>It is a deleting job.</b> Most of a good piece about a day is
   what is left after crossing out.</div>
@@ -423,7 +430,7 @@
   </div>
 
 
-  <div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div>
+  <div class="write big"></div><div class="write big"></div><div class="write big"></div><div class="write big"></div><div class="write big"></div><div class="write big"></div><div class="write big"></div><div class="write big"></div><div class="write big"></div><div class="write big"></div><div class="write big"></div><div class="write big"></div>
 
   <footer>
     <span>More room on page 5 &rarr;</span>
@@ -444,10 +451,10 @@
   </div>
 
 
-  <div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div>
+  <div class="write big"></div><div class="write big"></div><div class="write big"></div><div class="write big"></div><div class="write big"></div><div class="write big"></div><div class="write big"></div><div class="write big"></div><div class="write big"></div><div class="write big"></div><div class="write big"></div><div class="write big"></div>
 
   <footer>
-    <span>Notes for a grown-up on the last page</span>
+    <span>Notes for a grown-up are with the answers</span>
     <span class="brand kt-stamp"><svg class="kt-logo" viewBox="6 26 88 70" aria-hidden="true"><path d="M6 30 L94 30 L94 41 L6 41 Z" fill="currentColor"/><path d="M20 41 L31 41 L28 92 L23 92 Z" fill="currentColor"/><path d="M69 41 L80 41 L77 92 L72 92 Z" fill="currentColor"/><path d="M26 72 L74 72 L74 79 L26 79 Z" fill="currentColor"/><path d="M36 48 L62 48 L62 51.4 L36 51.4 Z" fill="currentColor"/><path d="M36 56 L62 56 L62 59.4 L36 59.4 Z" fill="currentColor"/><path d="M36 64 L52 64 L52 67.4 L36 67.4 Z" fill="currentColor"/></svg>Kitchen Table · ktworksheets.com</span>
     <span>Write the day</span>
   </footer>

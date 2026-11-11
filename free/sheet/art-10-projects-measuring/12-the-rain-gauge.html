@@ -152,7 +152,10 @@
   .cring-full { background: var(--accent); }
   .cring-half { background: linear-gradient(90deg, var(--accent) 50%, #fff 50%); }
   .cring-none { background: #fff; }
-  ol.qs.hasconf li { overflow: hidden; }
+  /* The rings float right; a clearing ::after holds the float inside its
+     question. (overflow:hidden did the same and also clipped the list
+     number, which sits outside the li — audit 2026-11-10.) */
+  ol.qs.hasconf li::after { content: ''; display: block; clear: both; }
 
   .conflegend {
     border: 1.2px solid var(--rule); border-radius: 4px;
@@ -199,7 +202,10 @@
   .opt { white-space: nowrap; }
 
   /* -------------------------------------------------------------- tables */
-  .tbl { border-collapse: collapse; margin: 8px 0; font-size: 11pt; width: 100%; }
+  /* Not quite 100%: a collapsed border sits half outside the table's box, so
+     a full-width table put half its right-hand rule past the column edge and
+     it printed open-ended (Grade 6 Math, every table; audit 2026-11-10). */
+  .tbl { border-collapse: collapse; margin: 8px 1px; font-size: 11pt; width: calc(100% - 2px); }
   .tbl th, .tbl td { border: 1.4px solid var(--ink); padding: 5px 8px; text-align: left; }
   .tbl th { color: var(--slate); }
   .tbl th { background: var(--tint); font-size: 10pt; letter-spacing: .02em; }
@@ -406,7 +412,7 @@
 
   <div class="note"><b>What you need:</b> a plastic bottle &middot; a jar &middot; scissors &middot; tape &middot; a ruler &middot; card &middot; small stones &middot; a pencil.</div>
 
-  <ol class="qs" start="1"><li><span class="qt">A washing-up bowl and an egg cup are both left out in the same shower of rain. Which one ends up with deeper water in it?</span><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+  <ol class="qs" start="1"><li><span class="qt">A mixing bowl and an egg cup are both left out in the same shower of rain. Which one ends up with deeper water in it?</span><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
 
   <div class="find"><b>Neither: the same.</b> The bowl catches more, but spreads it over more floor, and the two cancel. <b>So rain is measured as a depth, not an amount</b>: half an inch in a thimble or a pool.</div>
 
@@ -927,7 +933,7 @@
 
   <table class="tbl ">
     <thead><tr><th>Do this</th><th>Because</th></tr></thead>
-    <tbody><tr><td><b>Out in the open, well away from anything tall</b></td><td>At least twice as far away as the thing is high. A wall, a fence or a hedge makes a pocket of still air on one side and a gust on the other, and rain does not fall straight down through either.</td></tr><tr><td><b>Never under the eaves, a branch or a washing line</b></td><td>It will read nothing at all in a light shower and then get a fortnight’s worth in one drip when the gutter overflows.</td></tr><tr><td><b>Rim about a foot off the ground</b></td><td>Lower and rain bouncing off the ground splashes back INTO it. Higher and the wind starts carrying drops over the top instead of into it.</td></tr><tr><td><b>Rim level, and check it again after a windy night</b></td><td>A tilted mouth is a smaller mouth as far as falling rain is concerned, so it under-reads — and it will not tell you it is doing it.</td></tr><tr><td><b>The same spot every time</b></td><td>The whole value of a rain log is comparing one week with another. Move the gauge and you have started a new log.</td></tr></tbody>
+    <tbody><tr><td><b>Out in the open, well away from anything tall</b></td><td>At least twice as far away as the thing is high. A wall, a fence or a hedge makes a pocket of still air on one side and a gust on the other, and rain does not fall straight down through either.</td></tr><tr><td><b>Never under the eaves, a branch or a clothesline</b></td><td>It will read nothing at all in a light shower and then get a fortnight’s worth in one drip when the gutter overflows.</td></tr><tr><td><b>Rim about a foot off the ground</b></td><td>Lower and rain bouncing off the ground splashes back INTO it. Higher and the wind starts carrying drops over the top instead of into it.</td></tr><tr><td><b>Rim level, and check it again after a windy night</b></td><td>A tilted mouth is a smaller mouth as far as falling rain is concerned, so it under-reads — and it will not tell you it is doing it.</td></tr><tr><td><b>The same spot every time</b></td><td>The whole value of a rain log is comparing one week with another. Move the gauge and you have started a new log.</td></tr></tbody>
   </table>
 
   <div class="find"><b>Why twice the height away?</b> Wind lifts over a wall and tumbles behind it, carrying rain to one side. Far enough away, it flattens out again.</div>

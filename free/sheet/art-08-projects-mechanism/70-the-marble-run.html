@@ -152,7 +152,10 @@
   .cring-full { background: var(--accent); }
   .cring-half { background: linear-gradient(90deg, var(--accent) 50%, #fff 50%); }
   .cring-none { background: #fff; }
-  ol.qs.hasconf li { overflow: hidden; }
+  /* The rings float right; a clearing ::after holds the float inside its
+     question. (overflow:hidden did the same and also clipped the list
+     number, which sits outside the li — audit 2026-11-10.) */
+  ol.qs.hasconf li::after { content: ''; display: block; clear: both; }
 
   .conflegend {
     border: 1.2px solid var(--rule); border-radius: 4px;
@@ -199,7 +202,10 @@
   .opt { white-space: nowrap; }
 
   /* -------------------------------------------------------------- tables */
-  .tbl { border-collapse: collapse; margin: 8px 0; font-size: 11pt; width: 100%; }
+  /* Not quite 100%: a collapsed border sits half outside the table's box, so
+     a full-width table put half its right-hand rule past the column edge and
+     it printed open-ended (Grade 6 Math, every table; audit 2026-11-10). */
+  .tbl { border-collapse: collapse; margin: 8px 1px; font-size: 11pt; width: calc(100% - 2px); }
   .tbl th, .tbl td { border: 1.4px solid var(--ink); padding: 5px 8px; text-align: left; }
   .tbl th { color: var(--slate); }
   .tbl th { background: var(--tint); font-size: 10pt; letter-spacing: .02em; }
@@ -392,7 +398,7 @@
   </div>
 
 
-  <div class="rules"><b>Scissors only, with a grown-up in the room.</b> If a step seems to want a knife, snip or fold instead.</div>
+  <div class="rules"><b>Scissors only, with a grown-up in the room.</b> If a step seems to want a knife, snip or fold instead. <b>Marbles are small:</b> keep them away from babies and toddlers.</div>
 
   <div class="note"><b>What you need:</b> card &middot; cardboard &middot; marbles &middot; masking tape &middot; a paper towel tube &middot; scissors &middot; a ruler &middot; a timer. Two marbles the same size.</div>
 
@@ -425,7 +431,7 @@
   </footer>
 </div>
 
-<div class="page ">
+<div class="page " data-kdp-cut="yes">
   <header class="cont">
     
     <h1>Two Ramps, Printed the Same</h1>
@@ -552,7 +558,7 @@
   </footer>
 </div>
 
-<div class="page g3">
+<div class="page g3" data-kdp-cut="no">
   <header class="cont">
     
     <h1>A Real One, Down a Door</h1>
@@ -566,7 +572,7 @@
 
   <table class="tbl ">
     <thead><tr><th>Do this</th><th>How</th><th>Why</th></tr></thead>
-    <tbody><tr><td><b>Cut the tubes in half the long way</b></td><td>Squash the tube flat, cut along one fold, open it out, cut along the other. Two half-pipes from one tube.</td><td>A whole tube hides the marble. Half a tube shows you exactly where it went wrong, which is the only way to fix anything.</td></tr><tr><td><b>Tape it to a door, top to bottom</b></td><td>Masking tape, two strips per piece, and press hard. Start at the top and work down.</td><td>A door is flat, tall, free, and you can take the whole thing off afterwards. Masking tape comes off paint; other tape does not.</td></tr><tr><td><b>Overlap each piece INSIDE the one below</b></td><td>The top of the lower piece goes underneath the bottom of the upper one, by about an inch.</td><td>Butt them end to end and the marble hits the lip and stops. Overlap the wrong way and it launches into the room.</td></tr><tr><td><b>Every drop lower than the last</b></td><td>Work down the door and never go back up.</td><td>Page 4. It cannot climb higher than it started, and it is lower than that already.</td></tr><tr><td><b>Corners cost you</b></td><td>Sweep them wide. A tight corner throws the marble up the outside wall.</td><td>Going up the wall is going uphill, and everything it spends climbing it does not get back.</td></tr><tr><td><b>Put a box at the bottom</b></td><td>A shoebox on its side, or a bowl.</td><td>Otherwise the marble goes under the sofa and this is the last time anybody plays with it.</td></tr></tbody>
+    <tbody><tr><td><b>Cut the tubes in half the long way</b></td><td>Squash the tube flat, cut along one fold, open it out, cut along the other. Two half-pipes from one tube.</td><td>A whole tube hides the marble. Half a tube shows you exactly where it went wrong, which is the only way to fix anything.</td></tr><tr><td><b>Tape it to a door, top to bottom</b></td><td>Masking tape, two strips per piece, and press hard. Start at the top and work down.</td><td>A door is flat, tall, free, and you can take the whole thing off afterwards. Masking tape comes off paint; other tape does not.</td></tr><tr><td><b>Overlap each piece INSIDE the one below</b></td><td>The top of the lower piece goes underneath the bottom of the upper one, by about an inch.</td><td>Butt them end to end and the marble hits the lip and stops. Overlap the wrong way and it launches into the room.</td></tr><tr><td><b>Every drop lower than the last</b></td><td>Work down the door and never go back up.</td><td>Page 4. It cannot climb higher than it started, and it is lower than that already.</td></tr><tr><td><b>Corners cost you</b></td><td>Sweep them wide. A tight corner throws the marble up the outside wall.</td><td>Going up the wall is going uphill, and everything it spends climbing it does not get back.</td></tr><tr><td><b>Put a box at the bottom</b></td><td>A shoebox on its side, or a bowl.</td><td>Otherwise the marble goes under the couch and this is the last time anybody plays with it.</td></tr></tbody>
   </table>
 
   <div class="find"><b>Start steep</b>, so the marble is fast for the rest of the run.</div>

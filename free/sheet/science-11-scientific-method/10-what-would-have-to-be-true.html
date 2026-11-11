@@ -152,7 +152,10 @@
   .cring-full { background: var(--accent); }
   .cring-half { background: linear-gradient(90deg, var(--accent) 50%, #fff 50%); }
   .cring-none { background: #fff; }
-  ol.qs.hasconf li { overflow: hidden; }
+  /* The rings float right; a clearing ::after holds the float inside its
+     question. (overflow:hidden did the same and also clipped the list
+     number, which sits outside the li — audit 2026-11-10.) */
+  ol.qs.hasconf li::after { content: ''; display: block; clear: both; }
 
   .conflegend {
     border: 1.2px solid var(--rule); border-radius: 4px;
@@ -199,7 +202,10 @@
   .opt { white-space: nowrap; }
 
   /* -------------------------------------------------------------- tables */
-  .tbl { border-collapse: collapse; margin: 8px 0; font-size: 11pt; width: 100%; }
+  /* Not quite 100%: a collapsed border sits half outside the table's box, so
+     a full-width table put half its right-hand rule past the column edge and
+     it printed open-ended (Grade 6 Math, every table; audit 2026-11-10). */
+  .tbl { border-collapse: collapse; margin: 8px 1px; font-size: 11pt; width: calc(100% - 2px); }
   .tbl th, .tbl td { border: 1.4px solid var(--ink); padding: 5px 8px; text-align: left; }
   .tbl th { color: var(--slate); }
   .tbl th { background: var(--tint); font-size: 10pt; letter-spacing: .02em; }
@@ -381,7 +387,7 @@
 
 
 
-<ol class="qs" start="5"><li><span class="qt">The number 34 bus is always late.</span><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">This coat is warm.</span><div class="write"></div><div class="write"></div></li><li><span class="qt">This is the best song ever written. <i>(Read the box underneath before you answer this one.)</i></span><div class="write"></div><div class="write"></div></li><li><span class="qt"><b>Two rewrites of one claim.</b> <i>This cereal is healthier.</i> &nbsp; <b>A:</b> more people say it feels healthier. &nbsp; <b>B:</b> a bowl has 4 g less sugar than a bowl of the old one. Both can be checked &mdash; which one is about the cereal, and what is the other about?</span><div class="write"></div><div class="write"></div></li><li><span class="qt">Write a claim you have actually heard this week &mdash; an advert, a friend, somebody at home &mdash; and then the version of it that could be checked.</span><div class="write"></div><div class="write"></div></li></ol>
+<ol class="qs" start="5"><li><span class="qt">The number 34 bus is always late.</span><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">This coat is warm.</span><div class="write"></div><div class="write"></div></li><li><span class="qt">This is the best song ever written. <i>(Read the box underneath before you answer this one.)</i></span><div class="write"></div><div class="write"></div></li><li><span class="qt"><b>Two rewrites of one claim.</b> <i>This cereal is healthier.</i> &nbsp; <b>A:</b> more people say it feels healthier. &nbsp; <b>B:</b> a bowl has 4 g less sugar than a bowl of the old one. Both can be checked &mdash; which one is about the cereal, and what is the other about?</span><div class="write"></div><div class="write"></div></li><li><span class="qt">Write a claim you have actually heard this week &mdash; an ad, a friend, somebody at home &mdash; and then the version of it that could be checked.</span><div class="write"></div><div class="write"></div></li></ol>
 
   <div class="rule"><b>Question 7 cannot be done, and that is fine.</b> "Best song" is about taste, and no
   measurement settles taste.</div>

@@ -152,7 +152,10 @@
   .cring-full { background: var(--accent); }
   .cring-half { background: linear-gradient(90deg, var(--accent) 50%, #fff 50%); }
   .cring-none { background: #fff; }
-  ol.qs.hasconf li { overflow: hidden; }
+  /* The rings float right; a clearing ::after holds the float inside its
+     question. (overflow:hidden did the same and also clipped the list
+     number, which sits outside the li — audit 2026-11-10.) */
+  ol.qs.hasconf li::after { content: ''; display: block; clear: both; }
 
   .conflegend {
     border: 1.2px solid var(--rule); border-radius: 4px;
@@ -199,7 +202,10 @@
   .opt { white-space: nowrap; }
 
   /* -------------------------------------------------------------- tables */
-  .tbl { border-collapse: collapse; margin: 8px 0; font-size: 11pt; width: 100%; }
+  /* Not quite 100%: a collapsed border sits half outside the table's box, so
+     a full-width table put half its right-hand rule past the column edge and
+     it printed open-ended (Grade 6 Math, every table; audit 2026-11-10). */
+  .tbl { border-collapse: collapse; margin: 8px 1px; font-size: 11pt; width: calc(100% - 2px); }
   .tbl th, .tbl td { border: 1.4px solid var(--ink); padding: 5px 8px; text-align: left; }
   .tbl th { color: var(--slate); }
   .tbl th { background: var(--tint); font-size: 10pt; letter-spacing: .02em; }
@@ -314,6 +320,7 @@
   svg { display: inline-block; vertical-align: top; }
   svg.inline { vertical-align: middle; }
 
+  .write.big { height: .5in; }
   ol.steps { columns: 2; column-gap: 30px; margin: 10px 0 8px; padding-left: .34in; }
   .big .tbl { font-size: 13.5pt; }
   .big .tbl td { padding: 9px 10px; }
@@ -337,7 +344,7 @@
     <span class="short">Date</span>
   </div>
   <div class="directions">
-    <b>DIRECTIONS:</b> Two mornings, the same forty minutes. Read both.
+    <b>DIRECTIONS:</b> Two mornings, the same forty minutes. Read both together. <b>Grown-up:</b> on every page in this part, a young writer can tell it while you write it down.
   </div>
 
 <div class="plan" style="display:flex;align-items:stretch;gap:.08in;margin:.02in 0 .1in"><div style="flex:1;display:flex;align-items:center;gap:.07in;border:1.8px solid var(--ink);border-radius:5px;padding:.05in .08in"><span style="flex:0 0 auto;display:inline-block;width:.26in;height:.26in;line-height:.26in;border-radius:50%;background:var(--ink);color:#fff;text-align:center;font-weight:700;font-size:11pt">1</span><span style="font-size:10.5pt;font-weight:700;line-height:1.2">Read both mornings</span></div><div style="align-self:center;font-size:16pt;font-weight:700;color:var(--ink)">&rarr;</div><div style="flex:1;display:flex;align-items:center;gap:.07in;border:1.8px solid var(--ink);border-radius:5px;padding:.05in .08in"><span style="flex:0 0 auto;display:inline-block;width:.26in;height:.26in;line-height:.26in;border-radius:50%;background:var(--ink);color:#fff;text-align:center;font-weight:700;font-size:11pt">2</span><span style="font-size:10.5pt;font-weight:700;line-height:1.2">Page 2: write yours</span></div><div style="align-self:center;font-size:16pt;font-weight:700;color:var(--ink)">&rarr;</div><div style="flex:1;display:flex;align-items:center;gap:.07in;border:1.8px solid var(--ink);border-radius:5px;padding:.05in .08in"><span style="flex:0 0 auto;display:inline-block;width:.26in;height:.26in;line-height:.26in;border-radius:50%;background:var(--ink);color:#fff;text-align:center;font-weight:700;font-size:11pt">3</span><span style="font-size:10.5pt;font-weight:700;line-height:1.2">Page 4: test it</span></div></div>
@@ -356,7 +363,7 @@
     <li>I look under the bed for the other one.</li>
     <li>I go to the bathroom.</li>
     <li>I wash my face with cold water because it wakes me up.</li>
-    <li>I clean my teeth for two minutes.</li>
+    <li>I brush my teeth for two minutes.</li>
     <li>I go back to my room.</li>
     <li>I take off my pajamas and put them under my pillow.</li>
     <li>I put on my socks first because the floor is cold.</li>
@@ -364,13 +371,13 @@
     <li>I move the cat off my school bag.</li>
     <li>I check the bag has my reading book in it.</li>
     <li>I go downstairs, missing the third step because it creaks.</li>
-    <li>I get a bowl out of the cupboard on the left.</li>
+    <li>I get a bowl out of the cabinet on the left.</li>
     <li>I pour the cereal in before the milk.</li>
     <li>I eat it standing up because I am late.</li>
     <li>I put my shoes on by the door.</li>
   </ol>
 
-  <div class="rules"><b>The small bits make it yours:</b> the missing sock, the creaky step, the cat.</div>
+  <div class="rules"><b>The small bits make it yours:</b> the missing slipper, the creaky step, the cat.</div>
 
   <footer>
     <span>Keep going on page 2 &rarr;</span>
@@ -394,7 +401,7 @@
 
   <div class="note" style="margin-top:2px">Only things you <i>do</i>. Put in three too boring to mention.</div>
 
-  <div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div>
+  <div class="write big"></div><div class="write big"></div><div class="write big"></div><div class="write big"></div><div class="write big"></div><div class="write big"></div><div class="write big"></div><div class="write big"></div><div class="write big"></div><div class="write big"></div><div class="write big"></div>
 
   <footer>
     <span>More room on page 3 &rarr;</span>
@@ -415,7 +422,7 @@
   </div>
 
 
-  <div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div>
+  <div class="write big"></div><div class="write big"></div><div class="write big"></div><div class="write big"></div><div class="write big"></div><div class="write big"></div><div class="write big"></div><div class="write big"></div><div class="write big"></div><div class="write big"></div><div class="write big"></div><div class="write big"></div>
 
   <footer>
     <span>Keep going on page 4 &rarr;</span>
@@ -438,7 +445,7 @@
 
   <table class="tbl ">
     <thead><tr><th>If you left out&hellip;</th><th>what the person following it does</th></tr></thead>
-    <tbody><tr><td>get a bowl out</td><td>they pour the cereal onto the table</td></tr><tr><td>take your pajamas off</td><td>they put the school sweater on over the pajamas</td></tr><tr><td>turn the tap on</td><td>they hold their hands under a dry tap</td></tr><tr><td>open the front door</td><td>they walk into it</td></tr><tr><td>say which shoes</td><td>they put on the rain boots</td></tr></tbody>
+    <tbody><tr><td>get a bowl out</td><td>they pour the cereal onto the table</td></tr><tr><td>take your pajamas off</td><td>they put the school sweater on over the pajamas</td></tr><tr><td>turn the faucet on</td><td>they hold their hands under a dry faucet</td></tr><tr><td>open the front door</td><td>they walk into it</td></tr><tr><td>say which shoes</td><td>they put on the rain boots</td></tr></tbody>
   </table>
 
   <ol class="qs" start="1"><li><span class="qt">Where did they get stuck first? Write the step number.</span><div class="write"></div></li><li><span class="qt">What was missing? Write the step that should have been there.</span><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Did they do anything that was <i>technically</i> what you wrote but not what you meant? Write what happened.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Now go back to page 2 and fix it. Write down how many steps you had to add.</span><div class="write"></div></li></ol>
@@ -469,7 +476,7 @@
 
   <div class="note"><b>"Then" eleven times is correct, and boring.</b> Keep the boring steps, though: nobody
   else could write them.</div>
-  <div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div>
+  <div class="write big"></div><div class="write big"></div><div class="write big"></div><div class="write big"></div><div class="write big"></div><div class="write big"></div>
 
   <footer>
     <span>Keep going on page 6 &rarr;</span>
@@ -490,10 +497,10 @@
   </div>
 
 
-  <div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div>
+  <div class="write big"></div><div class="write big"></div><div class="write big"></div><div class="write big"></div><div class="write big"></div><div class="write big"></div><div class="write big"></div><div class="write big"></div><div class="write big"></div><div class="write big"></div><div class="write big"></div><div class="write big"></div>
 
   <footer>
-    <span>Notes for a grown-up on the last page</span>
+    <span>Notes for a grown-up are with the answers</span>
     <span class="brand kt-stamp"><svg class="kt-logo" viewBox="6 26 88 70" aria-hidden="true"><path d="M6 30 L94 30 L94 41 L6 41 Z" fill="currentColor"/><path d="M20 41 L31 41 L28 92 L23 92 Z" fill="currentColor"/><path d="M69 41 L80 41 L77 92 L72 92 Z" fill="currentColor"/><path d="M26 72 L74 72 L74 79 L26 79 Z" fill="currentColor"/><path d="M36 48 L62 48 L62 51.4 L36 51.4 Z" fill="currentColor"/><path d="M36 56 L62 56 L62 59.4 L36 59.4 Z" fill="currentColor"/><path d="M36 64 L52 64 L52 67.4 L36 67.4 Z" fill="currentColor"/></svg>Kitchen Table · ktworksheets.com</span>
     <span>Written out</span>
   </footer>

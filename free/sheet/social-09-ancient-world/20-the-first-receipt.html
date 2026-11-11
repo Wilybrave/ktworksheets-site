@@ -152,7 +152,10 @@
   .cring-full { background: var(--accent); }
   .cring-half { background: linear-gradient(90deg, var(--accent) 50%, #fff 50%); }
   .cring-none { background: #fff; }
-  ol.qs.hasconf li { overflow: hidden; }
+  /* The rings float right; a clearing ::after holds the float inside its
+     question. (overflow:hidden did the same and also clipped the list
+     number, which sits outside the li — audit 2026-11-10.) */
+  ol.qs.hasconf li::after { content: ''; display: block; clear: both; }
 
   .conflegend {
     border: 1.2px solid var(--rule); border-radius: 4px;
@@ -199,7 +202,10 @@
   .opt { white-space: nowrap; }
 
   /* -------------------------------------------------------------- tables */
-  .tbl { border-collapse: collapse; margin: 8px 0; font-size: 11pt; width: 100%; }
+  /* Not quite 100%: a collapsed border sits half outside the table's box, so
+     a full-width table put half its right-hand rule past the column edge and
+     it printed open-ended (Grade 6 Math, every table; audit 2026-11-10). */
+  .tbl { border-collapse: collapse; margin: 8px 1px; font-size: 11pt; width: calc(100% - 2px); }
   .tbl th, .tbl td { border: 1.4px solid var(--ink); padding: 5px 8px; text-align: left; }
   .tbl th { color: var(--slate); }
   .tbl th { background: var(--tint); font-size: 10pt; letter-spacing: .02em; }
@@ -365,7 +371,7 @@
   </table>
 
 
-  <ol class="qs" start="1"><li><span class="qt">How many sheep are in the store altogether?</span><div class="work" style="height:0.9in"><span>Working</span></div><div class="write"></div></li><li><span class="qt">Who put in oil but no sheep?</span><div class="work" style="height:0.9in"><span>Working</span></div><div class="write"></div></li><li><span class="qt">Lugal comes to take his barley. How much does he get?</span><div class="work" style="height:0.9in"><span>Working</span></div><div class="write"></div></li></ol>
+  <ol class="qs" start="1"><li><span class="qt">How many sheep are in the store altogether?</span><div class="work" style="height:0.9in"><span>Work</span></div><div class="write"></div></li><li><span class="qt">Who put in oil but no sheep?</span><div class="work" style="height:0.9in"><span>Work</span></div><div class="write"></div></li><li><span class="qt">Lugal comes to take his barley. How much does he get?</span><div class="work" style="height:0.9in"><span>Work</span></div><div class="write"></div></li></ol>
 
 
   <footer>
@@ -429,10 +435,10 @@
   barley, 37 months, Kushim</em>. Kushim is an accountant, and his may be the oldest human name we know.
   <br>They did what you did: a mark for the KIND of thing, and separate marks for HOW MANY.</div>
 
-  <div class="rules soft">The first written story, Gilgamesh, is around 2100 BC:
-  <b>1,100 years</b> after the receipts.</div>
+  <div class="rules soft">The oldest written stories and poems found so far are from about 2600 BC:
+  <b>600 years</b> after the receipts. The famous story of Gilgamesh came later still, about 2100 BC.</div>
 
-  <ol class="qs" start="5"><li><span class="qt">Your marks and theirs both keep "what" separate from "how many". Say why that is better than drawing eleven sheep.</span><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Writing existed for about a thousand years before anybody wrote a story with it. What does that tell you about what people thought it was FOR?</span><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Kushim might be the oldest name we know, and he was an accountant rather than a king. Say why it would be him and not a king.</span><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+  <ol class="qs" start="5"><li><span class="qt">Your marks and theirs both keep “what” separate from “how many.” Say why that is better than drawing eleven sheep.</span><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Writing existed for hundreds of years before anybody wrote a story with it. What does that tell you about what people thought it was FOR?</span><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Kushim might be the oldest name we know, and he was an accountant rather than a king. Say why it would be him and not a king.</span><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
 
 
   <footer>
@@ -456,7 +462,7 @@
 
 
   <div class="oxrow">
-    <div class="oxcell"><svg class="inline" viewBox="0 0 96 92" width="96" height="92" role="img" aria-label="ox to A, step 1" xmlns="http://www.w3.org/2000/svg"><path d="M22,34 q26,-22 52,0" fill="none" stroke="#C0511D" stroke-width="2.4"/><circle cx="48" cy="58" r="20" fill="none" stroke="#16130F" stroke-width="2.4"/><circle cx="41" cy="54" r="2.4" fill="#16130F" stroke="none" stroke-width="1.6"/><circle cx="55" cy="54" r="2.4" fill="#16130F" stroke="none" stroke-width="1.6"/></svg><div class="oxlab"><b>A picture of an ox</b><br>It means "ox". Anybody can read it and nobody has to be taught.</div></div>
+    <div class="oxcell"><svg class="inline" viewBox="0 0 96 92" width="96" height="92" role="img" aria-label="ox to A, step 1" xmlns="http://www.w3.org/2000/svg"><path d="M22,34 q26,-22 52,0" fill="none" stroke="#C0511D" stroke-width="2.4"/><circle cx="48" cy="58" r="20" fill="none" stroke="#16130F" stroke-width="2.4"/><circle cx="41" cy="54" r="2.4" fill="#16130F" stroke="none" stroke-width="1.6"/><circle cx="55" cy="54" r="2.4" fill="#16130F" stroke="none" stroke-width="1.6"/></svg><div class="oxlab"><b>A picture of an ox</b><br>It means “ox.” Anybody can read it and nobody has to be taught.</div></div>
     <div class="oxcell"><svg class="inline" viewBox="0 0 96 92" width="96" height="92" role="img" aria-label="ox to A, step 2" xmlns="http://www.w3.org/2000/svg"><path d="M26,32 L48,52 L70,32" fill="none" stroke="#C0511D" stroke-width="2.6"/><path d="M34,52 L48,76 L62,52 Z" fill="none" stroke="#C0511D" stroke-width="2.6"/></svg><div class="oxlab"><b>Drawn faster</b><br>Scribes in a hurry, thousands of times. Horns and a head, nothing else.</div></div>
     <div class="oxcell"><svg class="inline" viewBox="0 0 96 92" width="96" height="92" role="img" aria-label="ox to A, step 3" xmlns="http://www.w3.org/2000/svg"><g transform="rotate(90 48 54)"><path d="M26,32 L48,52 L70,32" fill="none" stroke="#C0511D" stroke-width="2.6"/><path d="M34,52 L48,76 L62,52 Z" fill="none" stroke="#C0511D" stroke-width="2.6"/></g></svg><div class="oxlab"><b>Turned on its side</b><br>Nobody decided this. It just happened, over hundreds of years.</div></div>
     <div class="oxcell"><svg class="inline" viewBox="0 0 96 92" width="96" height="92" role="img" aria-label="ox to A, step 4" xmlns="http://www.w3.org/2000/svg"><text x="48" y="76" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, Verdana, sans-serif" font-size="56" font-weight="bold" text-anchor="middle" fill="#16130F">A</text></svg><div class="oxlab"><b>A</b><br>And it stopped meaning "ox" and started meaning the SOUND an ox-word starts with.</div></div>

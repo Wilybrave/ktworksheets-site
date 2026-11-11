@@ -152,7 +152,10 @@
   .cring-full { background: var(--accent); }
   .cring-half { background: linear-gradient(90deg, var(--accent) 50%, #fff 50%); }
   .cring-none { background: #fff; }
-  ol.qs.hasconf li { overflow: hidden; }
+  /* The rings float right; a clearing ::after holds the float inside its
+     question. (overflow:hidden did the same and also clipped the list
+     number, which sits outside the li — audit 2026-11-10.) */
+  ol.qs.hasconf li::after { content: ''; display: block; clear: both; }
 
   .conflegend {
     border: 1.2px solid var(--rule); border-radius: 4px;
@@ -199,7 +202,10 @@
   .opt { white-space: nowrap; }
 
   /* -------------------------------------------------------------- tables */
-  .tbl { border-collapse: collapse; margin: 8px 0; font-size: 11pt; width: 100%; }
+  /* Not quite 100%: a collapsed border sits half outside the table's box, so
+     a full-width table put half its right-hand rule past the column edge and
+     it printed open-ended (Grade 6 Math, every table; audit 2026-11-10). */
+  .tbl { border-collapse: collapse; margin: 8px 1px; font-size: 11pt; width: calc(100% - 2px); }
   .tbl th, .tbl td { border: 1.4px solid var(--ink); padding: 5px 8px; text-align: left; }
   .tbl th { color: var(--slate); }
   .tbl th { background: var(--tint); font-size: 10pt; letter-spacing: .02em; }
@@ -539,7 +545,7 @@
   The clapper in the middle is heavy, and a breeze cannot shift it. So the sail hangs below on a
   longer string, where it has room to swing and a broad face for the wind to push on &mdash; and it
   drags the clapper into the tubes. <b>Leave the sail off and your chime hangs silent</b> on a day
-  when the one three gardens away is going.</div>
+  when the one three yards away is going.</div>
 
   <div class="two sails">
     <div class="fig"><svg viewBox="0 0 180 260" width="100%"
@@ -634,7 +640,7 @@
 
   <table class="tbl ">
     <thead><tr><th>Step</th><th>How</th><th>Why</th></tr></thead>
-    <tbody><tr><td><b>1. The top</b></td><td>A stick, or a metal jar lid with holes punched round the edge.</td><td>It has to be stiff. A floppy top absorbs the ring, same as a bad knot.</td></tr><tr><td><b>2. Hang them in a ring</b></td><td>All the same distance from the middle, all hanging to the same height at the top.</td><td>The clapper has to be able to reach every one of them. Miss one and it never plays.</td></tr><tr><td><b>3. The clapper</b></td><td>Something wooden, hanging in the middle, at the height of the middle of the tubes.</td><td>Wood on metal is a note. Metal on metal is a clank. And the middle of the tube is where it moves most.</td></tr><tr><td><b>4. The sail</b></td><td>Below the clapper, on a longer string.</td><td>Page 4. It is the engine.</td></tr><tr><td><b>5. Order them</b></td><td>Longest to shortest, going round.</td><td>The wind plays them in the order you hang them, so hanging them in order means it plays a tune rather than a jumble.</td></tr></tbody>
+    <tbody><tr><td><b>1. The top</b></td><td>A stick, or a metal jar lid with holes punched around the edge (a grown-up punches the holes).</td><td>It has to be stiff. A floppy top absorbs the ring, same as a bad knot.</td></tr><tr><td><b>2. Hang them in a ring</b></td><td>All the same distance from the middle, all hanging to the same height at the top.</td><td>The clapper has to be able to reach every one of them. Miss one and it never plays.</td></tr><tr><td><b>3. The clapper</b></td><td>Something wooden, hanging in the middle, at the height of the middle of the tubes.</td><td>Wood on metal is a note. Metal on metal is a clank. And the middle of the tube is where it moves most.</td></tr><tr><td><b>4. The sail</b></td><td>Below the clapper, on a longer string.</td><td>Page 4. It is the engine.</td></tr><tr><td><b>5. Order them</b></td><td>Longest to shortest, going around.</td><td>It looks tidy, and every tube hangs where the clapper can reach it. The wind still plays them in any order: that is what a chime sounds like.</td></tr></tbody>
   </table>
 
   <div class="find"><b>Halving a string doubles the pitch. Halving a bar makes it four times higher</b>: two octaves. So one short tube pings out above the rest. Try a long fork beside a teaspoon.</div>

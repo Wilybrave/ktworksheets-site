@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="sheet-kind" content="worksheet">
+<title>The Count</title>
+<style>
+  :root { --font: Georgia, "Times New Roman", serif; }
+
+  /* Page margins live HERE only — body padding stays 0 for print so the two
+     don't stack and eat the sheet. */
+  @page { size: letter portrait; margin: 0.45in 0.5in; }
+
+  /*
+   * THE PALETTE. The same one the shop wears (kitchen-table/BRAND.md): warm
+   * near-black ink, one accent, pine kept back for the answer key.
+   *
+   * WHY A SHEET HAS COLOR AT ALL. Every sheet was pure grayscale — #000 rules,
+   * #333 subtitles, #f0f0f0 boxes — which is what you get by never deciding.
+   * The paper is the product and it looked like a fax. A printer set to
+   * grayscale, or one that has no color to give, renders all of this as the
+   * greys it already had, so nothing below costs a parent anything they were
+   * not already spending.
+   *
+   * WHAT STAYS BLACK, ON PURPOSE:
+   *   - anything drawn to be written on (rules, name lines, answer boxes)
+   *   - anything drawn to be traced or colored in (line art, letter guides)
+   *   - the confidence rings, which have to survive a mono laser
+   * Color marks the sheet's own furniture — its rule, its numbering, its
+   * boxes — and never the part a child puts a pencil through.
+   */
+  :root {
+    --ink:    #16130F;
+    --muted:  #6B635A;
+    --rule:   #CFC3B2;
+    --guide:  #BCAE9C;
+    --accent: #C0511D;
+    --tint:   #F7EDE4;
+    --slate:  #2E5A78;
+    --tintslate: #E9EFF4;
+    --deep:   #2C4A45;
+    --tintdeep: #ECF1EF;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font);
+    color: #000; background: #fff;
+    font-size: 12pt; line-height: 1.3;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+
+  /* ORDER MATTERS. This generic rule must come BEFORE the @media screen block:
+     same specificity, so whichever is declared last wins. With it after, the
+     on-screen preview stretches to the viewport instead of 8.5in — print is
+     unaffected, but the proof you check before printing is wrong. */
+  .page { width: 100%; }
+  .page + .page { page-break-before: always; }
+
+  @media screen {
+    body { padding: 0.5in; background: #ddd; }
+    .page {
+      background: #fff; padding: 0.45in 0.5in;
+      width: 8.5in; min-height: 11in;
+      margin: 0 auto 24px; box-shadow: 0 2px 10px rgba(0,0,0,.3);
+    }
+  }
+
+  /* ------------------------------------------------------------- header */
+  header { border-bottom: 3px double var(--accent); padding-bottom: 6px; }
+  header.cont { border-bottom: 1px solid var(--rule); }
+  h1 { font-size: 16pt; margin: 0 0 1px; letter-spacing: .01em; }
+  .sub { font-size: 10pt; font-style: italic; color: var(--muted); margin: 0; }
+
+  .nameline { display: flex; gap: 26px; font-size: 10.5pt; margin: 11px 0 12px; }
+  .nameline span { flex: 1; border-bottom: 1px solid var(--ink); padding-bottom: 1px; }
+  .nameline span.short { flex: 0 0 1.9in; }
+
+  .directions {
+    font-size: 10.5pt; line-height: 1.35;
+    background: var(--tint); border-left: 4px solid var(--accent);
+    padding: 7px 10px; margin: 12px 0 14px;
+  }
+  .directions b { letter-spacing: .03em; }
+  .tip { font-style: italic; margin-top: 3px; }
+
+  /* ------------------------------------------------- problems and grids */
+  .grid { display: grid; gap: 13px 16px; margin-top: 4px; }
+  .prob { page-break-inside: avoid; display: flex; gap: 5px; align-items: flex-start; }
+  .pn { font-weight: bold; font-size: 11pt; min-width: .28in; flex: 0 0 auto; color: var(--accent); }
+  .pbody { flex: 1; min-width: 0; }
+
+  /* Digits need lining figures and even widths whatever the body font is. */
+  .num, .vert, .horiz { font-family: "Trebuchet MS", "Segoe UI", Tahoma, Verdana, sans-serif; font-variant-numeric: lining-nums tabular-nums; }
+
+  /* A stacked column algorithm.
+     Two grid columns — operator, then digits — because a floated or absolutely
+     positioned operator overlaps the digits as soon as the numbers get wide,
+     and "324" with a + sitting on the 3 is unreadable. The grid also lets the
+     rule under the last operand span BOTH columns, which is how it is written
+     by hand. The rule is heavy: it is the line you write the answer beneath. */
+  .vert {
+    display: inline-grid; grid-template-columns: auto auto;
+    font-size: 15pt; line-height: 1.3; text-align: right;
+  }
+  .vert > span { padding: 0 0 1px 0; }
+  .vert .op { text-align: left; padding-right: .16in; }
+  .vert .last { border-bottom: 2.5px solid var(--ink); padding-bottom: 3px; }
+  .vert .ans { height: .4in; }
+  /* Partial-products working, for 2-digit x 1-digit before the short method. */
+  .vert .part { font-size: 11pt; color: var(--muted); }
+  /* A row of worked examples that fade — see lib/formats.js faded(). The
+     caption is what makes the fade legible: without it the third one looks like
+     a question somebody forgot to number. */
+  .egrow { display: flex; gap: .34in; align-items: flex-start; margin: 0 0 4px; }
+  .eg { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; }
+  .eglab { font-size: 8.5pt; color: var(--slate); letter-spacing: .02em; }
+
+  /* The carried digits. Small and grey so the sum still reads as the sum, and
+     tight to the row below it so a carry sits ON the column it goes into. */
+  .vert .carry { font-size: 9pt; color: var(--slate); line-height: 1; padding: 0 0 1px 0; }
+
+  .horiz { font-size: 14pt; white-space: nowrap; }
+
+  /* Row numbers in a word list. Gray and small: they are there so a list can be
+     dictated ("number seven") and marked without counting down the page, and
+     they must not compete with the word itself. */
+  .wn { color: var(--muted); font-size: 9pt; }
+
+  /* The box an answer goes in. inline-block so it can sit mid-sentence. */
+  .abox {
+    display: inline-block; border: 1.6px solid var(--slate); border-radius: 3px;
+    vertical-align: middle; margin: 0 3px; position: relative; background: #fff;
+  }
+  /* Scoped to the box: as a bare ".alab" it pinned any generator's own .alab
+     to the bottom of the page (life-07-signs-and-forms 40, 2026-09-24). */
+  .abox > .alab {
+    position: absolute; bottom: 1px; left: 0; right: 0;
+    text-align: center; font-size: 7pt; color: var(--muted); font-style: italic;
+  }
+
+  /* Confidence marks. The rings are drawn with a border and a gradient rather
+     than an SVG so they stay inline with the question text at any font size,
+     and print black on a mono laser without relying on a background image. */
+  .conf { float: right; margin: 2px 0 0 8px; white-space: nowrap; }
+  .cring {
+    display: inline-block; width: 11px; height: 11px; margin-left: 4px;
+    border: 1.4px solid var(--slate); border-radius: 50%; vertical-align: middle;
+  }
+  .cring-full { background: var(--accent); }
+  .cring-half { background: linear-gradient(90deg, var(--accent) 50%, #fff 50%); }
+  .cring-none { background: #fff; }
+  /* The rings float right; a clearing ::after holds the float inside its
+     question. (overflow:hidden did the same and also clipped the list
+     number, which sits outside the li — audit 2026-11-10.) */
+  ol.qs.hasconf li::after { content: ''; display: block; clear: both; }
+
+  .conflegend {
+    border: 1.2px solid var(--rule); border-radius: 4px;
+    padding: 3px 8px; margin: 0 0 7px;
+    font-size: 8.5pt; color: var(--muted); display: flex; gap: 14px; align-items: center;
+  }
+  .conftitle { font-weight: 700; color: var(--ink); }
+  .confitem { white-space: nowrap; }
+
+  .work {
+    border: 1.4px dashed var(--rule); border-radius: 4px;
+    margin: 6px 0 2px; position: relative;
+  }
+  /* The label S.work() puts in the box: a DIRECT child only. As ".work span"
+     it also caught every span inside any generator's own .work content and
+     stacked them all at the top-left corner (math-11-grade6 47, 2026-09-23). */
+  .work > span {
+    position: absolute; top: 3px; left: 6px;
+    font-size: 8pt; color: var(--muted); font-style: italic;
+  }
+
+  /* ------------------------------------------------------ writing lines */
+  /* Primary rule: solid top, dashed midline, heavy baseline. Capitals reach
+     the top line, lowercase bodies sit under the dashed one. */
+  .write {
+    position: relative; height: 0.375in;
+    margin: 6px 0 0 .3in;
+    border-top: 1px solid var(--rule); border-bottom: 2px solid var(--ink);
+  }
+  .write.flush { margin-left: 0; }
+  .write + .write { margin-top: .17in; }
+  .write::after {
+    content: ""; position: absolute; left: 0; right: 0; top: 50%;
+    border-top: 1px dashed var(--guide);
+  }
+
+  /* ------------------------------------------------------- question list */
+  ol.qs { margin: 0; padding: 0 0 0 .34in; }
+  ol.qs li { margin-bottom: 13px; page-break-inside: avoid; }
+  ol.qs li::marker { font-weight: bold; font-size: 11pt; color: var(--accent); }
+  .qt { display: block; }
+
+  .mcq { display: grid; gap: 3px 14px; margin: 5px 0 2px .12in; font-size: 11pt; }
+  .opt { white-space: nowrap; }
+
+  /* -------------------------------------------------------------- tables */
+  /* Not quite 100%: a collapsed border sits half outside the table's box, so
+     a full-width table put half its right-hand rule past the column edge and
+     it printed open-ended (Grade 6 Math, every table; audit 2026-11-10). */
+  .tbl { border-collapse: collapse; margin: 8px 1px; font-size: 11pt; width: calc(100% - 2px); }
+  .tbl th, .tbl td { border: 1.4px solid var(--ink); padding: 5px 8px; text-align: left; }
+  .tbl th { color: var(--slate); }
+  .tbl th { background: var(--tint); font-size: 10pt; letter-spacing: .02em; }
+  .tbl td.blank { height: .34in; }
+  .tbl.narrow { width: auto; }
+  .tbl.center td, .tbl.center th { text-align: center; }
+
+  /* ------------------------------------------------------------ passages */
+  .passage {
+    border: 1.5px solid var(--slate); border-radius: 4px;
+    padding: 11px 14px; margin-bottom: 12px;
+    font-size: 11.5pt; line-height: 1.55;
+  }
+  .passage h2 { font-size: 13pt; margin: 0 0 6px; color: var(--deep); }
+  .passage p { margin: 0 0 8px; }
+  .passage p:last-child { margin-bottom: 0; }
+  .passage .byline { font-size: 9.5pt; font-style: italic; color: var(--muted); margin-bottom: 8px; }
+  /* Numbered paragraphs, so a question can say "in paragraph 2". */
+  .passage p.np { position: relative; padding-left: .3in; }
+  .passage p.np::before {
+    content: attr(data-p); position: absolute; left: 0; top: 0;
+    font-size: 9pt; color: var(--accent); font-weight: bold;
+  }
+
+  .wordbank {
+    border: 1.5px dashed var(--slate); border-radius: 4px;
+    padding: 8px 12px; margin: 10px 0 12px;
+    font-size: 11.5pt; text-align: center;
+  }
+  .wordbank b { display: block; font-size: 9.5pt; letter-spacing: .06em;
+    text-transform: uppercase; margin-bottom: 4px; color: var(--accent); }
+  .wordbank span { display: inline-block; margin: 2px 11px; }
+
+  .note {
+    border-left: 4px solid var(--deep); background: var(--tintdeep);
+    padding: 7px 11px; margin: 10px 0; font-size: 10.5pt;
+  }
+  .note b { letter-spacing: .02em; }
+
+  /* -------------------------------------------------------------- footer */
+  /* THE WORDMARK SITS IN THE FOOTER THAT WAS ALREADY THERE, so it costs no
+     height at all — a sheet that fitted before fits now. Upright where the rest
+     of the line is italic, and a size down: it is a signature, not a message,
+     and it must never compete with "Score: ___ / 10". */
+  .brand { font-style: normal; font-size: 7.5pt; letter-spacing: .04em;
+    color: var(--accent); align-self: center; }
+
+  footer {
+    margin-top: 14px; padding-top: 6px; border-top: 1px solid var(--rule);
+    font-size: 9pt; font-style: italic; color: var(--muted);
+    display: flex; justify-content: space-between;
+  }
+
+  /* ---------------------------------------------------------- answer key */
+  .keybadge {
+    display: inline-block; border: 2px solid var(--deep); color: var(--deep); padding: 2px 9px;
+    font-size: 9.5pt; font-weight: bold; letter-spacing: .08em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .key .why {
+    display: block; font-size: 9pt; font-style: italic; color: var(--muted); margin-top: 1px;
+  }
+  /* Highlight rather than underline: <u> in a key marks WHAT CHANGED, and an
+     underline under a comma is invisible. */
+  .key u { text-decoration: none; background: var(--tint); padding: 0 2px; font-weight: bold; }
+  .keygrid .pbody { font-family: "Trebuchet MS", "Segoe UI", Tahoma, Verdana, sans-serif; font-size: 12pt; }
+  /* A key's pictures scale to their column: at 1fr a wide drawing pushed a
+     three-column key 92px off the paper (art-04-drawing 10, 2026-09-24). */
+  .keygrid svg { max-width: 100%; height: auto; }
+  .keylist .qt { font-weight: normal; }
+
+  /*
+   * The guide page. Four lines per question, and the ASK line is the one that
+   * gets used at the table, so it is the one with a rule beside it — a parent
+   * scanning this page in ten seconds should land on the follow-up question
+   * and nothing else.
+   */
+  .guide { padding-left: .3in; }
+  .guide li { margin-bottom: 11px; page-break-inside: avoid; }
+  .guide .gq { font-weight: bold; font-size: 11pt; margin-bottom: 3px; }
+  /* 9pt, matching the key's own why line, because the guide page is the
+     binding constraint on every open sheet: four lines per question against a
+     key's one, and at 10pt a sheet with seven questions ran onto a second
+     side. Found by measuring, not chosen. (No backticks in here — this CSS
+     lives inside a template literal and one would close it.) */
+  .guide .glook, .guide .gthin, .guide .gstrong {
+    font-size: 9pt; line-height: 1.3; margin-top: 1px;
+  }
+  .guide .gthin { color: var(--muted); }
+  .guide .gstrong { color: var(--muted); font-style: italic; }
+  .guide .gask {
+    font-size: 9.5pt; line-height: 1.3; margin-top: 3px;
+    border-left: 3px solid var(--slate); padding-left: 7px;
+  }
+  .key .qs li { margin-bottom: 9px; }
+
+  /*
+   * INLINE-BLOCK, NOT BLOCK, AND THIS WAS WRONG FOR A LONG TIME. A block-level
+   * svg ignores text-align: center on its parent and sits flush left — so 117
+   * sheets across 35 packs said "centre this diagram" and got a left-aligned
+   * one. Twenty-five of them were origami and paper-plane fold sequences, where
+   * the whole page is diagrams.
+   *
+   * Nobody spotted it because a left-flush diagram looks deliberate; it only
+   * reads as wrong next to a centered one, and no sheet has both.
+   *
+   * inline-block makes text-align do what every one of those authors meant,
+   * and leaves a diagram in a left-aligned container exactly where it was.
+   * vertical-align: top kills the baseline gap that inline elements otherwise
+   * leave underneath them, which would have pushed long pages over.
+   */
+  svg { display: inline-block; vertical-align: top; }
+  svg.inline { vertical-align: middle; }
+
+  ol.qs li { margin-bottom: 9px; }
+  .story { font-size: 11.5pt; line-height: 1.5; }
+  .story p { margin: 0 0 5px; position: relative; padding-left: .3in; }
+  .story p::before { content: attr(data-n); position: absolute; left: 0; top: 2px;
+    font-size: 8pt; color: var(--muted); font-family: Arial, sans-serif; }
+  .story .ttl { font-size: 15pt; font-weight: 700; padding-left: .3in; margin: 0 0 6px; letter-spacing: .02em; }
+  .story .ttl::before { content: none; }
+  .note6 { border: 1.8px solid var(--slate); border-radius: 8px; padding: .07in .12in;
+    margin: .08in 0; font-size: 11pt; line-height: 1.5; }
+  .eg6 { border: 1.8px dashed var(--slate); border-radius: 8px; padding: .07in .12in;
+    margin: .08in 0 .1in; font-size: 10.5pt; line-height: 1.5; }
+  .eg6 .h { font-weight: 700; font-size: 9.5pt; letter-spacing: .06em; }
+  .fable { font-size: 11.5pt; line-height: 1.5; border-left: 3px solid var(--slate);
+    padding: .02in 0 .02in .14in; margin: .06in 0; }
+  .fable p { margin: 0 0 5px; }
+  .sort6 { width: 100%; border-collapse: collapse; font-size: 11pt; margin: .05in 0 .08in; }
+  .sort6 td { border-bottom: 1px solid var(--rule); padding: .07in .05in; vertical-align: middle; }
+  .sort6 td.n { width: .3in; font-weight: 700; }
+  .sort6 td.b { width: 1.25in; color: var(--muted); font-size: 10pt; text-align: right; }
+  .lbl { font-weight: 700; font-size: 11pt; margin: .1in 0 .02in; }
+
+</style>
+<style>
+  .brand.kt-stamp { display: inline-flex; align-items: center; gap: .35em; white-space: nowrap; }
+  .kt-logo { width: 1.3em; height: 1.05em; flex: none; }
+</style></head>
+<body>
+
+<div class="page ">
+  <header>
+    
+    <h1>The Count</h1>
+    <p class="sub">A short story &middot; Page 1 of 6</p>
+  </header>
+  <div class="nameline">
+    <span>Name</span>
+    <span class="short">Date</span>
+  </div>
+  <div class="directions">
+    <b>DIRECTIONS:</b> Read the whole story once for what happens. Then read it again slowly before you start the questions.
+  </div>
+
+
+  <div class="story">
+    <div class="ttl">The Count</div>
+<p data-n="1">The project was called <i>Backyard Birds: A Two-Week Survey</i>, and I had a clipboard for it, which my brother said was a lot of clipboard for a bird feeder.</p>
+<p data-n="2">The rules were simple. Every morning before school I sat at the kitchen window for fifteen minutes and wrote down every bird that landed on the feeder. Not the ones in the trees. Not the ones I thought I saw. Only the ones on the feeder, because Ms. Ortiz said a scientist counts what is there, not what she hopes is there. I wrote that inside the cover of my notebook in capital letters.</p>
+<p data-n="3">Grandpa had been living with us since March. He had the room that used to be the sewing room, and most of his things were still in boxes, because he said there was no hurry. He got up before anybody. When I came down on the first morning of the survey, he was already at the window with his coffee, and he had already written in my notebook.</p>
+<p data-n="4"><i>Chickadee 3. Sparrow 5. Cardinal 2.</i></p>
+<p data-n="5">“You can’t do that,” I said. “It’s my project.”</p>
+<p data-n="6">“Just getting you started,” he said.</p>
+<p data-n="7">I crossed it out — neatly, one line, the way Ms. Ortiz showed us, so you can still read the mistake — and did my fifteen minutes. Two chickadees. Four sparrows. One cardinal, a male, so red he looked fake against the snow.</p>
+<p data-n="8">The next morning he had done it again. <i>Cardinal 2.</i> And the morning after that. His numbers were always close to mine, except for the cardinals. I always saw one. He always wrote two.</p>
+<p data-n="9">“There’s only one,” I told him on Thursday. I said it slowly, the way you say things to my brother. “I’ve been watching. It’s the same bird every time.”</p>
+<p data-n="10">Grandpa looked at the feeder for a long time. “Cardinals don’t go around alone,” he said. “Not as a rule.” Then he took his cup to the sink, and he took the other cup too, the one that was always on the windowsill next to his, still full, gone cold with a skin on top. I had thought it was for Mom. Mom drinks tea.</p>
+<p data-n="11">I started getting up earlier so I could get to the notebook first. It didn’t matter. He was always there before me, the notebook open at the right page and the pencil lying across it, and there it would be in his shaky up-and-down handwriting. <i>Cardinal 2.</i> So I went back to the first page and wrote a correction in the margin in red next to every one of his: <i>1 — observed.</i> After that I did it every morning. By the second week the margin was a column of little red ones, all the way down the page, like a fence.</p>
+<p data-n="12">My brother said I was being mean. I said I was being accurate. Those are different things, and I am the one doing the project.</p>
+  </div>
+
+  <footer>
+    <span>The story continues on the next page</span>
+    <span class="brand kt-stamp"><svg class="kt-logo" viewBox="6 26 88 70" aria-hidden="true"><path d="M6 30 L94 30 L94 41 L6 41 Z" fill="currentColor"/><path d="M20 41 L31 41 L28 92 L23 92 Z" fill="currentColor"/><path d="M69 41 L80 41 L77 92 L72 92 Z" fill="currentColor"/><path d="M26 72 L74 72 L74 79 L26 79 Z" fill="currentColor"/><path d="M36 48 L62 48 L62 51.4 L36 51.4 Z" fill="currentColor"/><path d="M36 56 L62 56 L62 59.4 L36 59.4 Z" fill="currentColor"/><path d="M36 64 L52 64 L52 67.4 L36 67.4 Z" fill="currentColor"/></svg>Kitchen Table · ktworksheets.com</span>
+    <span>The Count</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>The Count</h1>
+    <p class="sub">A short story &middot; Page 2 of 6</p>
+  </header>
+
+
+
+
+  <div class="story">
+<p data-n="13">On the last morning of the survey I set my alarm for 5:30. The kitchen was dark and the window was gray, and Grandpa was in his chair with the two cups in front of him, the way he always was. He didn’t hear me come in. He was talking, very quietly, and not to me.</p>
+<p data-n="14">“There he is,” he said. “Look at that. Rosie, look at him.”</p>
+<p data-n="15">The cardinal was on the feeder. One cardinal. I stood in the doorway with my clipboard and I counted him, because that is what I was there to do. One.</p>
+<p data-n="16">Grandpa turned around then and saw me. He didn’t look embarrassed, which is how I would have looked. He just slid the notebook across the table so it was in front of my chair.</p>
+<p data-n="17">“All yours,” he said. “Your count.”</p>
+<p data-n="18">I sat down. He had already written today’s line. <i>Cardinal 2.</i> The red pencil was right there next to it, where I had left it the day before. I picked it up. The cardinal sat on the feeder being red, and Grandpa’s coffee was steaming, and the other cup wasn’t.</p>
+<p data-n="19">Ms. Ortiz says a scientist counts what is there.</p>
+<p data-n="20">I put the red pencil down.</p>
+<p data-n="21">I handed in the project on Monday. The table was right, and the graph, and the conclusion. If you turn to the last page you will see a column of red ones running down the margin, thirteen of them, and then a space at the bottom where the fourteenth should be. Ms. Ortiz circled the space and drew a question mark next to it.</p>
+<p data-n="22">I never answered it.</p>
+  </div>
+  <div class="note6" style="margin-top:.16in"><b>The small numbers in the margin</b> number the paragraphs. When a question
+  asks for evidence, give the paragraph: <b>(¶10)</b>.</div>
+
+  <footer>
+    <span>Read it a second time before page 3</span>
+    <span class="brand kt-stamp"><svg class="kt-logo" viewBox="6 26 88 70" aria-hidden="true"><path d="M6 30 L94 30 L94 41 L6 41 Z" fill="currentColor"/><path d="M20 41 L31 41 L28 92 L23 92 Z" fill="currentColor"/><path d="M69 41 L80 41 L77 92 L72 92 Z" fill="currentColor"/><path d="M26 72 L74 72 L74 79 L26 79 Z" fill="currentColor"/><path d="M36 48 L62 48 L62 51.4 L36 51.4 Z" fill="currentColor"/><path d="M36 56 L62 56 L62 59.4 L36 59.4 Z" fill="currentColor"/><path d="M36 64 L52 64 L52 67.4 L36 67.4 Z" fill="currentColor"/></svg>Kitchen Table · ktworksheets.com</span>
+    <span>The Count</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>The Count &mdash; Who Is Telling It</h1>
+    <p class="sub">A short story &middot; Page 3 of 6</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Every answer has two parts: what you think, and the words from the story that made you think it.
+  </div>
+
+
+  <div class="eg6"><div class="h">DONE FOR YOU</div>
+  <b>What does the narrator’s brother think of her clipboard?</b><br>
+  He thinks it is too much for such a small project. He says it is &ldquo;a lot of clipboard for a bird
+  feeder&rdquo; (¶1).
+  <span style="color:var(--muted)">&larr; the answer, then the exact words, then the paragraph.</span></div>
+  <ol class="qs" start="1"><li><span class="qt">Who is telling this story, and is she a character <b>in</b> it or someone outside it? Copy two words from ¶1 that prove it.</span><div class="write"></div><div class="write"></div></li><li><span class="qt">At the start, what does the narrator want from the bird count? Copy the rule she lives by, and give its paragraph.</span><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">The story <b>never says</b> what happened to Grandpa’s wife. Find three details that let a reader work it out. Give the paragraph for each.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Keep going on page 4 &rarr;</span>
+    <span class="brand kt-stamp"><svg class="kt-logo" viewBox="6 26 88 70" aria-hidden="true"><path d="M6 30 L94 30 L94 41 L6 41 Z" fill="currentColor"/><path d="M20 41 L31 41 L28 92 L23 92 Z" fill="currentColor"/><path d="M69 41 L80 41 L77 92 L72 92 Z" fill="currentColor"/><path d="M26 72 L74 72 L74 79 L26 79 Z" fill="currentColor"/><path d="M36 48 L62 48 L62 51.4 L36 51.4 Z" fill="currentColor"/><path d="M36 56 L62 56 L62 59.4 L36 59.4 Z" fill="currentColor"/><path d="M36 64 L52 64 L52 67.4 L36 67.4 Z" fill="currentColor"/></svg>Kitchen Table · ktworksheets.com</span>
+    <span>The Count</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>The Count &mdash; What Nobody Says</h1>
+    <p class="sub">A short story &middot; Page 4 of 6</p>
+  </header>
+
+
+
+
+  <ol class="qs" start="4"><li><span class="qt">&ldquo;I had thought it was for Mom. Mom drinks tea&rdquo; (¶10). What does the narrator realize in that moment? Why do you think she does not say it straight out?</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">&ldquo;My brother said I was being mean. I said I was being accurate. Those are different things&rdquo; (¶12). Is she right that they are different things? Could she be <b>both</b> at once? Explain.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Why does Grandpa write &ldquo;Cardinal 2&rdquo; every day? Use what he says in ¶10 and what he says in ¶14 in your answer.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Keep going on page 5 &rarr;</span>
+    <span class="brand kt-stamp"><svg class="kt-logo" viewBox="6 26 88 70" aria-hidden="true"><path d="M6 30 L94 30 L94 41 L6 41 Z" fill="currentColor"/><path d="M20 41 L31 41 L28 92 L23 92 Z" fill="currentColor"/><path d="M69 41 L80 41 L77 92 L72 92 Z" fill="currentColor"/><path d="M26 72 L74 72 L74 79 L26 79 Z" fill="currentColor"/><path d="M36 48 L62 48 L62 51.4 L36 51.4 Z" fill="currentColor"/><path d="M36 56 L62 56 L62 59.4 L36 59.4 Z" fill="currentColor"/><path d="M36 64 L52 64 L52 67.4 L36 67.4 Z" fill="currentColor"/></svg>Kitchen Table · ktworksheets.com</span>
+    <span>The Count</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>The Count &mdash; What Changed</h1>
+    <p class="sub">A short story &middot; Page 5 of 6</p>
+  </header>
+
+
+
+
+  <ol class="qs" start="7"><li><span class="qt">Ms. Ortiz’s rule comes back in ¶19, alone in its own paragraph, right before the narrator puts the pencil down. On that last morning, what is &ldquo;there&rdquo; in the kitchen that a bird count cannot write down?</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">What does the narrator want by the end, and how is it different from what she wanted at the start? Name the paragraph where you think it changed.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">The story ends with a question mark the narrator &ldquo;never answered&rdquo; (¶22). If she had answered it, what would she have written to Ms. Ortiz? Write it in her voice, in two or three sentences.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Keep going on page 6 &rarr;</span>
+    <span class="brand kt-stamp"><svg class="kt-logo" viewBox="6 26 88 70" aria-hidden="true"><path d="M6 30 L94 30 L94 41 L6 41 Z" fill="currentColor"/><path d="M20 41 L31 41 L28 92 L23 92 Z" fill="currentColor"/><path d="M69 41 L80 41 L77 92 L72 92 Z" fill="currentColor"/><path d="M26 72 L74 72 L74 79 L26 79 Z" fill="currentColor"/><path d="M36 48 L62 48 L62 51.4 L36 51.4 Z" fill="currentColor"/><path d="M36 56 L62 56 L62 59.4 L36 59.4 Z" fill="currentColor"/><path d="M36 64 L52 64 L52 67.4 L36 67.4 Z" fill="currentColor"/></svg>Kitchen Table · ktworksheets.com</span>
+    <span>The Count</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>The Count &mdash; The Ending</h1>
+    <p class="sub">A short story &middot; Page 6 of 6</p>
+  </header>
+
+
+
+
+  <ol class="qs" start="10"><li><span class="qt">The writer could have ended with that answer. Instead the story stops at &ldquo;I never answered it.&rdquo; What does the story gain by <b>not</b> explaining?</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">The cardinal is &ldquo;so red he looked fake against the snow&rdquo; (¶7), and on the last morning he sits &ldquo;being red&rdquo; (¶18). Why might the writer keep pointing at the one bright thing in a gray, cold kitchen?</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Some readers think the narrator did the wrong thing: a science project should record what was really seen. Do you agree? Give one reason from the story and one of your own.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Answers on the parent page</span>
+    <span class="brand kt-stamp"><svg class="kt-logo" viewBox="6 26 88 70" aria-hidden="true"><path d="M6 30 L94 30 L94 41 L6 41 Z" fill="currentColor"/><path d="M20 41 L31 41 L28 92 L23 92 Z" fill="currentColor"/><path d="M69 41 L80 41 L77 92 L72 92 Z" fill="currentColor"/><path d="M26 72 L74 72 L74 79 L26 79 Z" fill="currentColor"/><path d="M36 48 L62 48 L62 51.4 L36 51.4 Z" fill="currentColor"/><path d="M36 56 L62 56 L62 59.4 L36 59.4 Z" fill="currentColor"/><path d="M36 64 L52 64 L52 67.4 L36 67.4 Z" fill="currentColor"/></svg>Kitchen Table · ktworksheets.com</span>
+    <span>The Count</span>
+  </footer>
+</div>
+
+</body>
+</html>

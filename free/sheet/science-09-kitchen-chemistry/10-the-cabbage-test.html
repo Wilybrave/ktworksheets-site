@@ -152,7 +152,10 @@
   .cring-full { background: var(--accent); }
   .cring-half { background: linear-gradient(90deg, var(--accent) 50%, #fff 50%); }
   .cring-none { background: #fff; }
-  ol.qs.hasconf li { overflow: hidden; }
+  /* The rings float right; a clearing ::after holds the float inside its
+     question. (overflow:hidden did the same and also clipped the list
+     number, which sits outside the li — audit 2026-11-10.) */
+  ol.qs.hasconf li::after { content: ''; display: block; clear: both; }
 
   .conflegend {
     border: 1.2px solid var(--rule); border-radius: 4px;
@@ -199,7 +202,10 @@
   .opt { white-space: nowrap; }
 
   /* -------------------------------------------------------------- tables */
-  .tbl { border-collapse: collapse; margin: 8px 0; font-size: 11pt; width: 100%; }
+  /* Not quite 100%: a collapsed border sits half outside the table's box, so
+     a full-width table put half its right-hand rule past the column edge and
+     it printed open-ended (Grade 6 Math, every table; audit 2026-11-10). */
+  .tbl { border-collapse: collapse; margin: 8px 1px; font-size: 11pt; width: calc(100% - 2px); }
   .tbl th, .tbl td { border: 1.4px solid var(--ink); padding: 5px 8px; text-align: left; }
   .tbl th { color: var(--slate); }
   .tbl th { background: var(--tint); font-size: 10pt; letter-spacing: .02em; }
@@ -436,11 +442,11 @@
     <div class="sslots"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
   </div>
 
-  <ol class="qs" start="1"><li><span class="qt">Which was the strongest acid you tested? The strongest base?</span><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Water sits in the middle and so does milk, nearly. Say what "the middle" means &mdash; none of either, or both?</span><div class="write"></div><div class="write"></div></li><li><span class="qt">Two of the things you tested are safe to drink and two would burn your mouth. Looking at your line, is that about which END they are at, or about how FAR along they are?</span><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">A cabbage knows no chemistry. Say what it is actually doing, and why that is enough to be useful.</span><div class="write"></div><div class="write"></div></li></ol>
+  <ol class="qs" start="1"><li><span class="qt">Which was the strongest acid you tested? The strongest base?</span><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Water sits in the middle and so does milk, nearly. Say what "the middle" means &mdash; none of either, or both?</span><div class="write"></div><div class="write"></div></li><li><span class="qt">People drink lemon juice, an acid. Washing soda, a base, would hurt your mouth. Does that mean bases are dangerous and acids are safe? Use your line: what else matters?</span><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">A cabbage knows no chemistry. Say what it is actually doing, and why that is enough to be useful.</span><div class="write"></div><div class="write"></div></li></ol>
 
 
   <footer>
-    <span>One more overleaf &rarr;</span>
+    <span>One more on the next page &rarr;</span>
     <span class="brand kt-stamp"><svg class="kt-logo" viewBox="6 26 88 70" aria-hidden="true"><path d="M6 30 L94 30 L94 41 L6 41 Z" fill="currentColor"/><path d="M20 41 L31 41 L28 92 L23 92 Z" fill="currentColor"/><path d="M69 41 L80 41 L77 92 L72 92 Z" fill="currentColor"/><path d="M26 72 L74 72 L74 79 L26 79 Z" fill="currentColor"/><path d="M36 48 L62 48 L62 51.4 L36 51.4 Z" fill="currentColor"/><path d="M36 56 L62 56 L62 59.4 L36 59.4 Z" fill="currentColor"/><path d="M36 64 L52 64 L52 67.4 L36 67.4 Z" fill="currentColor"/></svg>Kitchen Table · ktworksheets.com</span>
     <span>The scale</span>
   </footer>
@@ -449,7 +455,7 @@
 <div class="page ">
   <header class="cont">
     
-    <h1>Cancelling Out</h1>
+    <h1>Canceling Out</h1>
     <p class="sub">Kitchen Chemistry &middot; Page 3 of 4</p>
   </header>
 
@@ -480,9 +486,9 @@
 
 
   <footer>
-    <span>One more overleaf &rarr;</span>
+    <span>One more on the next page &rarr;</span>
     <span class="brand kt-stamp"><svg class="kt-logo" viewBox="6 26 88 70" aria-hidden="true"><path d="M6 30 L94 30 L94 41 L6 41 Z" fill="currentColor"/><path d="M20 41 L31 41 L28 92 L23 92 Z" fill="currentColor"/><path d="M69 41 L80 41 L77 92 L72 92 Z" fill="currentColor"/><path d="M26 72 L74 72 L74 79 L26 79 Z" fill="currentColor"/><path d="M36 48 L62 48 L62 51.4 L36 51.4 Z" fill="currentColor"/><path d="M36 56 L62 56 L62 59.4 L36 59.4 Z" fill="currentColor"/><path d="M36 64 L52 64 L52 67.4 L36 67.4 Z" fill="currentColor"/></svg>Kitchen Table · ktworksheets.com</span>
-    <span>Neutralising</span>
+    <span>Neutralizing</span>
   </footer>
 </div>
 
@@ -502,9 +508,9 @@
 
 
   <footer>
-    <span>Answer key overleaf</span>
+    <span>Answer key follows</span>
     <span class="brand kt-stamp"><svg class="kt-logo" viewBox="6 26 88 70" aria-hidden="true"><path d="M6 30 L94 30 L94 41 L6 41 Z" fill="currentColor"/><path d="M20 41 L31 41 L28 92 L23 92 Z" fill="currentColor"/><path d="M69 41 L80 41 L77 92 L72 92 Z" fill="currentColor"/><path d="M26 72 L74 72 L74 79 L26 79 Z" fill="currentColor"/><path d="M36 48 L62 48 L62 51.4 L36 51.4 Z" fill="currentColor"/><path d="M36 56 L62 56 L62 59.4 L36 59.4 Z" fill="currentColor"/><path d="M36 64 L52 64 L52 67.4 L36 67.4 Z" fill="currentColor"/></svg>Kitchen Table · ktworksheets.com</span>
-    <span>Neutralising</span>
+    <span>Neutralizing</span>
   </footer>
 </div>
 

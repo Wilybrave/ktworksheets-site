@@ -13,7 +13,7 @@
      Only the fallback colour lives here, for the instant before it applies. */
   body { background:var(--ground); color:var(--ink);
     font:16px/1.55 Quicksand, 'URW Gothic', 'Century Gothic', sans-serif; }
-  main { max-width:44rem; margin:0 auto; padding:1.2rem 1.2rem 4rem; }
+  main { max-width:50rem; margin:0 auto; padding:1.2rem 1.2rem 4rem; }
 
   /* The app's Panel: white paper, a hard contour, square corners, no shadow.
      src/ui.tsx draws exactly this and the contour does all the work. */
@@ -354,6 +354,33 @@
   .getapp-text .badge { display:block; width:8.5rem; height:2.84rem; margin-top:.55rem; }
   .getapp-text .badge svg { display:block; }
   .apppanel > p { max-width:34rem; }
+
+
+  .getbtn { margin-left:auto; background:var(--accent); color:#fff; border:2.5px solid var(--ink);
+    padding:.5rem .95rem; font-weight:700; font-size:.82rem; letter-spacing:.07em;
+    text-transform:uppercase; text-decoration:none; white-space:nowrap; }
+  .getbtn:hover { background:var(--ink); }
+  #getapp { scroll-margin-top:1rem; }
+  .phones { display:grid; grid-template-columns:repeat(4,1fr); gap:.9rem; margin:1.6rem 0 1.4rem; }
+  .phone { margin:0; }
+  .phone img { display:block; width:100%; height:auto; border:2.5px solid var(--ink);
+    border-radius:.9rem; background:var(--ground); }
+  .phone figcaption { margin-top:.5rem; font-size:.8rem; line-height:1.3; color:var(--muted); }
+  .phone figcaption b { display:block; color:var(--ink); font-size:.9rem; }
+  .sheetgrid { display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; margin-top:1.3rem; }
+  .bookgrid { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; margin-top:1.3rem; }
+  .sheetcard { display:block; text-decoration:none; color:var(--ink); }
+  .sheetcard img { display:block; width:100%; height:auto; border:2px solid var(--ink);
+    background:#fff; transition:transform .16s ease, box-shadow .16s ease; }
+  .sheetcard:hover img { transform:translate(-3px,-3px); box-shadow:5px 5px 0 var(--ink); }
+  .sheetcard b { display:block; margin-top:.55rem; font-size:.95rem; line-height:1.25; }
+  .sheetcard span { display:block; font-size:.7rem; letter-spacing:.08em;
+    text-transform:uppercase; color:var(--muted); }
+  @media (prefers-reduced-motion: reduce) { .sheetcard img { transition:none; } }
+  @media (max-width:44rem) {
+    .phones, .sheetgrid, .bookgrid { grid-template-columns:repeat(2,1fr); }
+    .getbtn { padding:.45rem .7rem; font-size:.74rem; }
+  }
 
 
   .legal { margin:.6rem 0 0; text-align:center; font-size:.78rem; color:var(--muted); }

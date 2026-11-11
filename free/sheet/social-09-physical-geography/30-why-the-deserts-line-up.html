@@ -152,7 +152,10 @@
   .cring-full { background: var(--accent); }
   .cring-half { background: linear-gradient(90deg, var(--accent) 50%, #fff 50%); }
   .cring-none { background: #fff; }
-  ol.qs.hasconf li { overflow: hidden; }
+  /* The rings float right; a clearing ::after holds the float inside its
+     question. (overflow:hidden did the same and also clipped the list
+     number, which sits outside the li — audit 2026-11-10.) */
+  ol.qs.hasconf li::after { content: ''; display: block; clear: both; }
 
   .conflegend {
     border: 1.2px solid var(--rule); border-radius: 4px;
@@ -199,7 +202,10 @@
   .opt { white-space: nowrap; }
 
   /* -------------------------------------------------------------- tables */
-  .tbl { border-collapse: collapse; margin: 8px 0; font-size: 11pt; width: 100%; }
+  /* Not quite 100%: a collapsed border sits half outside the table's box, so
+     a full-width table put half its right-hand rule past the column edge and
+     it printed open-ended (Grade 6 Math, every table; audit 2026-11-10). */
+  .tbl { border-collapse: collapse; margin: 8px 1px; font-size: 11pt; width: calc(100% - 2px); }
   .tbl th, .tbl td { border: 1.4px solid var(--ink); padding: 5px 8px; text-align: left; }
   .tbl th { color: var(--slate); }
   .tbl th { background: var(--tint); font-size: 10pt; letter-spacing: .02em; }
@@ -380,7 +386,7 @@
   up and sinks at about thirty degrees. <b>Sinking air warms and takes up water instead of giving it.</b> Dry air on
   dry ground is a desert.</div>
 
-  <ol class="qs" start="8"><li><span class="qt">Say why the rainforests and the deserts are both explained by the same loop, in opposite ways.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">The deserts appear at about thirty degrees BOTH north and south. Say what that tells you about the loop.</span><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">A desert is usually explained as "somewhere it does not rain". Using this page, give the better explanation of why it does not.</span><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+  <ol class="qs" start="8"><li><span class="qt">Say why the rainforests and the deserts are both explained by the same loop, in opposite ways.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">The deserts appear at about thirty degrees BOTH north and south. Say what that tells you about the loop.</span><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">A desert is usually explained as “somewhere it does not rain.” Using this page, give the better explanation of why it does not.</span><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
 
   <footer>
     <span>Keep going on page 3 →</span>
@@ -402,7 +408,8 @@
 
 
   <div class="note" style="margin-top:2px">The <b>Gobi</b> (45°N) is too far inside Asia for wet air to reach. The
-  <b>Atacama</b> (24°S), the driest place on earth, sits behind mountains that wring the air out first.
+  <b>Atacama</b> (24°S), the driest desert outside the poles, is dry for three reasons at once: it is at the
+  sinking-air latitude, a cold ocean current runs along its coast, and the Andes block wet air from the east.
   <b>Antarctica</b> is a desert too: almost nothing falls there.</div>
 
   <ol class="qs" start="11"><li><span class="qt">The Gobi and Antarctica are both deserts and neither is at thirty degrees. Say what all deserts really have in common, given that latitude is not it.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Does the Gobi disprove the thirty-degree pattern? Say what a good explanation is allowed to leave out.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>

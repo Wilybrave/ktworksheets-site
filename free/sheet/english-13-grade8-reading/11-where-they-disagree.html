@@ -152,7 +152,10 @@
   .cring-full { background: var(--accent); }
   .cring-half { background: linear-gradient(90deg, var(--accent) 50%, #fff 50%); }
   .cring-none { background: #fff; }
-  ol.qs.hasconf li { overflow: hidden; }
+  /* The rings float right; a clearing ::after holds the float inside its
+     question. (overflow:hidden did the same and also clipped the list
+     number, which sits outside the li — audit 2026-11-10.) */
+  ol.qs.hasconf li::after { content: ''; display: block; clear: both; }
 
   .conflegend {
     border: 1.2px solid var(--rule); border-radius: 4px;
@@ -199,7 +202,10 @@
   .opt { white-space: nowrap; }
 
   /* -------------------------------------------------------------- tables */
-  .tbl { border-collapse: collapse; margin: 8px 0; font-size: 11pt; width: 100%; }
+  /* Not quite 100%: a collapsed border sits half outside the table's box, so
+     a full-width table put half its right-hand rule past the column edge and
+     it printed open-ended (Grade 6 Math, every table; audit 2026-11-10). */
+  .tbl { border-collapse: collapse; margin: 8px 1px; font-size: 11pt; width: calc(100% - 2px); }
   .tbl th, .tbl td { border: 1.4px solid var(--ink); padding: 5px 8px; text-align: left; }
   .tbl th { color: var(--slate); }
   .tbl th { background: var(--tint); font-size: 10pt; letter-spacing: .02em; }
@@ -361,21 +367,21 @@
   </div>
 
   <div class="item8">
-    <div class="q8"><b>1. &nbsp;A</b> &nbsp;The bypass has cut traffic through the village by a third — the counter on the high street says so.</div>
-    <div class="q8"><b>B</b> &nbsp;Traffic through the village is barely changed — I sit in the same queue every morning at eight.</div>
+    <div class="q8"><b><span class="pn">1.</span> &nbsp;A</b> &nbsp;The new highway has cut traffic through town by a third — the counter on Main Street says so.</div>
+    <div class="q8"><b>B</b> &nbsp;Traffic through town is barely changed — I sit in the same line of cars every morning at eight.</div>
     <div style="font-size:12pt;margin-top:6px">Which kind?
       <span style="display:inline-block;border-bottom:1.8px solid var(--ink);width:2in;height:.3in"></span>
       &nbsp; Could anything settle it?<div class="write"></div><div class="write"></div></div>
   </div>
   <div class="item8">
-    <div class="q8"><b>2. &nbsp;A</b> &nbsp;Fewer than one in ten students is absent on a given day, so attendance is not a problem.</div>
+    <div class="q8"><b><span class="pn">2.</span> &nbsp;A</b> &nbsp;Fewer than one in ten students is absent on a given day, so attendance is not a problem.</div>
     <div class="q8"><b>B</b> &nbsp;Nearly a third of students missed more than two weeks last year, so attendance is a serious problem.</div>
     <div style="font-size:12pt;margin-top:6px">Which kind?
       <span style="display:inline-block;border-bottom:1.8px solid var(--ink);width:2in;height:.3in"></span>
       &nbsp; Could anything settle it?<div class="write"></div><div class="write"></div></div>
   </div>
   <div class="item8">
-    <div class="q8"><b>3. &nbsp;A</b> &nbsp;The new houses will bring four hundred people and the shops need them.</div>
+    <div class="q8"><b><span class="pn">3.</span> &nbsp;A</b> &nbsp;The new houses will bring four hundred people and the shops need them.</div>
     <div class="q8"><b>B</b> &nbsp;The new houses will bring four hundred people and the village will stop being a village.</div>
     <div style="font-size:12pt;margin-top:6px">Which kind?
       <span style="display:inline-block;border-bottom:1.8px solid var(--ink);width:2in;height:.3in"></span>
@@ -398,7 +404,7 @@
 
 
 
-<ol class="qs" start="1"><li><span class="qt">Only one of the three can be settled by going and finding something out. Which, and what would you go and find?</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">In pair 2, both numbers are correct. Explain how two correct numbers can point opposite ways.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">The two sentences in pair 3 are identical up to the comma. What does that tell you about what more evidence would achieve?</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+<ol class="qs" start="4"><li><span class="qt">Only one of the three can be settled by going and finding something out. Which, and what would you go and find?</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">In pair 2, both numbers are correct. Explain how two correct numbers can point opposite ways.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">The two sentences in pair 3 are identical up to the comma. What does that tell you about what more evidence would achieve?</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
 
   <footer>
     <span>More facts cannot settle a values disagreement</span>
@@ -416,7 +422,7 @@
 
 
 
-<ol class="qs" start="4"><li><span class="qt">Somebody in a values disagreement keeps producing more statistics. Why is that a waste of everybody's time — and what should they do instead?</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Think of a disagreement going on now, in the news or at home. Which of the three kinds is it? Be careful — it may be more than one at once.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+<ol class="qs" start="7"><li><span class="qt">Somebody in a values disagreement keeps producing more statistics. Why is that a waste of everybody's time — and what should they do instead?</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Think of a disagreement going on now, in the news or at home. Which of the three kinds is it? Be careful — it may be more than one at once.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
 
   <footer>
     <span>Most real disagreements are a mixture</span>

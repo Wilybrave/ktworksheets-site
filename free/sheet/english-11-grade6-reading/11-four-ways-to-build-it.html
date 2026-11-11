@@ -152,7 +152,10 @@
   .cring-full { background: var(--accent); }
   .cring-half { background: linear-gradient(90deg, var(--accent) 50%, #fff 50%); }
   .cring-none { background: #fff; }
-  ol.qs.hasconf li { overflow: hidden; }
+  /* The rings float right; a clearing ::after holds the float inside its
+     question. (overflow:hidden did the same and also clipped the list
+     number, which sits outside the li — audit 2026-11-10.) */
+  ol.qs.hasconf li::after { content: ''; display: block; clear: both; }
 
   .conflegend {
     border: 1.2px solid var(--rule); border-radius: 4px;
@@ -199,7 +202,10 @@
   .opt { white-space: nowrap; }
 
   /* -------------------------------------------------------------- tables */
-  .tbl { border-collapse: collapse; margin: 8px 0; font-size: 11pt; width: 100%; }
+  /* Not quite 100%: a collapsed border sits half outside the table's box, so
+     a full-width table put half its right-hand rule past the column edge and
+     it printed open-ended (Grade 6 Math, every table; audit 2026-11-10). */
+  .tbl { border-collapse: collapse; margin: 8px 1px; font-size: 11pt; width: calc(100% - 2px); }
   .tbl th, .tbl td { border: 1.4px solid var(--ink); padding: 5px 8px; text-align: left; }
   .tbl th { color: var(--slate); }
   .tbl th { background: var(--tint); font-size: 10pt; letter-spacing: .02em; }
@@ -360,7 +366,7 @@
   </div>
   <div class="shp">
     <span class="lab">B</span>
-    <div>There are two ways an account can pay you. Simple interest pays 5% of what you first put in, every year, for ever. Compound interest pays 5% of whatever is in there now. Over one year they are identical. Over thirty they are not: $1,000.00 earning simple interest becomes $2,500.00, <b>whereas</b> the same money compounding becomes $4,321.94. Both accounts advertise the same rate, <b>but</b> the <b>difference</b> between them is $1,821.94 — more than the original deposit.</div>
+    <div>There are two ways an account can pay you. Simple interest pays 5% of what you first put in, every year, forever. Compound interest pays 5% of whatever is in there now. Over one year they are identical. Over thirty they are not: $1,000.00 earning simple interest becomes $2,500.00, <b>whereas</b> the same money compounding becomes $4,321.94. Both accounts advertise the same rate, <b>but</b> the <b>difference</b> between them is $1,821.94 — more than the original deposit.</div>
     <div style="margin-top:10px;font-size:12.5pt">This one is built as
       <span style="display:inline-block;border-bottom:1.8px solid var(--ink);width:3.4in;height:.3in"></span></div>
   </div>

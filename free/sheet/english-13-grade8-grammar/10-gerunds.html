@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="sheet-kind" content="worksheet">
-<title>A Verb Doing a Noun&amp;rsquo;s Job &amp;mdash; Grade 8</title>
+<title>A Verb Doing a Noun&rsquo;s Job &mdash; Grade 8</title>
 <style>
   :root { --font: Georgia, "Times New Roman", serif; }
 
@@ -152,7 +152,10 @@
   .cring-full { background: var(--accent); }
   .cring-half { background: linear-gradient(90deg, var(--accent) 50%, #fff 50%); }
   .cring-none { background: #fff; }
-  ol.qs.hasconf li { overflow: hidden; }
+  /* The rings float right; a clearing ::after holds the float inside its
+     question. (overflow:hidden did the same and also clipped the list
+     number, which sits outside the li — audit 2026-11-10.) */
+  ol.qs.hasconf li::after { content: ''; display: block; clear: both; }
 
   .conflegend {
     border: 1.2px solid var(--rule); border-radius: 4px;
@@ -199,7 +202,10 @@
   .opt { white-space: nowrap; }
 
   /* -------------------------------------------------------------- tables */
-  .tbl { border-collapse: collapse; margin: 8px 0; font-size: 11pt; width: 100%; }
+  /* Not quite 100%: a collapsed border sits half outside the table's box, so
+     a full-width table put half its right-hand rule past the column edge and
+     it printed open-ended (Grade 6 Math, every table; audit 2026-11-10). */
+  .tbl { border-collapse: collapse; margin: 8px 1px; font-size: 11pt; width: calc(100% - 2px); }
   .tbl th, .tbl td { border: 1.4px solid var(--ink); padding: 5px 8px; text-align: left; }
   .tbl th { color: var(--slate); }
   .tbl th { background: var(--tint); font-size: 10pt; letter-spacing: .02em; }
@@ -357,7 +363,7 @@
   </div>
   <div class="directions">
     <b>DIRECTIONS:</b> Write <b>noun</b> or <b>verb</b> for each bold -ing word: what job does it do in <i>this</i> sentence?
-    <div class="tip">Put <b>it</b> in the word&rsquo;s place. <i>It is hard</i> stands, so &ldquo;swimming&rdquo; is a noun.</div>
+    <div class="tip">Try putting <b>it</b> where the word is: &ldquo;<i>It</i> is hard&rdquo; still makes sense, so &ldquo;swimming&rdquo; is a noun.</div>
   </div>
 
 <div class="done"><span class="wktag">Done for you</span><span class="sent"><b>Swimming</b> is hard.</span>

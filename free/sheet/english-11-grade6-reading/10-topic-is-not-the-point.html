@@ -152,7 +152,10 @@
   .cring-full { background: var(--accent); }
   .cring-half { background: linear-gradient(90deg, var(--accent) 50%, #fff 50%); }
   .cring-none { background: #fff; }
-  ol.qs.hasconf li { overflow: hidden; }
+  /* The rings float right; a clearing ::after holds the float inside its
+     question. (overflow:hidden did the same and also clipped the list
+     number, which sits outside the li — audit 2026-11-10.) */
+  ol.qs.hasconf li::after { content: ''; display: block; clear: both; }
 
   .conflegend {
     border: 1.2px solid var(--rule); border-radius: 4px;
@@ -199,7 +202,10 @@
   .opt { white-space: nowrap; }
 
   /* -------------------------------------------------------------- tables */
-  .tbl { border-collapse: collapse; margin: 8px 0; font-size: 11pt; width: 100%; }
+  /* Not quite 100%: a collapsed border sits half outside the table's box, so
+     a full-width table put half its right-hand rule past the column edge and
+     it printed open-ended (Grade 6 Math, every table; audit 2026-11-10). */
+  .tbl { border-collapse: collapse; margin: 8px 1px; font-size: 11pt; width: calc(100% - 2px); }
   .tbl th, .tbl td { border: 1.4px solid var(--ink); padding: 5px 8px; text-align: left; }
   .tbl th { color: var(--slate); }
   .tbl th { background: var(--tint); font-size: 10pt; letter-spacing: .02em; }
@@ -375,7 +381,7 @@ hundreds of meters of model and billions of kilometers of the real thing.</p>
 
 <p>That is why the pictures lie. A page is about a quarter of a meter wide. To
 fit Neptune on it at the true scale, the Sun would have to be smaller than a
-full stop and every planet would be invisible. So the artist does the only thing
+period and every planet would be invisible. So the artist does the only thing
 available: draws the planets big enough to see, and pushes them close enough to
 fit. Both changes are enormous. Neither is ever mentioned.</p>
 
@@ -388,8 +394,8 @@ is the fastest thing there is, and sunlight takes 8 minutes and
 19 seconds to reach us. Looking at the Sun means looking at where it
 was 8 minutes ago. To Neptune, that same light takes just over
 4 hours.</p></div>
-  <div class="src6">Every figure in this passage is computed from the shelf's own
-  <code>lib/solar.js</code>, which the build checks on every run.</div>
+  <div class="src6">Every figure in this passage is worked out from the real sizes and
+  distances of the Sun and planets.</div>
   <ol class="qs" start="1"><li><span class="qt">In two or three words, what is this passage <b>about</b>? (That is the topic.)</span><div class="write"></div></li><li><span class="qt">Now in one sentence, what does it <b>say</b> about that? (That is the point.) Your sentence should be one somebody could disagree with.</span><div class="write"></div><div class="write"></div></li></ol>
 
   <footer>

@@ -152,7 +152,10 @@
   .cring-full { background: var(--accent); }
   .cring-half { background: linear-gradient(90deg, var(--accent) 50%, #fff 50%); }
   .cring-none { background: #fff; }
-  ol.qs.hasconf li { overflow: hidden; }
+  /* The rings float right; a clearing ::after holds the float inside its
+     question. (overflow:hidden did the same and also clipped the list
+     number, which sits outside the li — audit 2026-11-10.) */
+  ol.qs.hasconf li::after { content: ''; display: block; clear: both; }
 
   .conflegend {
     border: 1.2px solid var(--rule); border-radius: 4px;
@@ -199,7 +202,10 @@
   .opt { white-space: nowrap; }
 
   /* -------------------------------------------------------------- tables */
-  .tbl { border-collapse: collapse; margin: 8px 0; font-size: 11pt; width: 100%; }
+  /* Not quite 100%: a collapsed border sits half outside the table's box, so
+     a full-width table put half its right-hand rule past the column edge and
+     it printed open-ended (Grade 6 Math, every table; audit 2026-11-10). */
+  .tbl { border-collapse: collapse; margin: 8px 1px; font-size: 11pt; width: calc(100% - 2px); }
   .tbl th, .tbl td { border: 1.4px solid var(--ink); padding: 5px 8px; text-align: left; }
   .tbl th { color: var(--slate); }
   .tbl th { background: var(--tint); font-size: 10pt; letter-spacing: .02em; }
@@ -357,7 +363,7 @@
     <div class="kgh">Worth keeping a handful of</div>
     <table class="tbl ">
     <thead><tr><th>What</th><th>What it is good at</th></tr></thead>
-    <tbody><tr><td><b>straws</b></td><td>the cheapest way to make a triangle, and triangles are what stop things wobbling</td></tr><tr><td><b>popsicle sticks</b></td><td>stiff, straight, and they take glue. The nearest thing to timber</td></tr><tr><td><b>clothespins</b></td><td>the only clamp you have. Hold glued things while they dry</td></tr><tr><td><b>elastic bands</b></td><td>store energy. Anything that flings, snaps back or drives itself</td></tr><tr><td><b>string</b></td><td>pulls but never pushes — same as a muscle</td></tr><tr><td><b>split pins</b></td><td>the only joint that turns. Everything that moves needs these</td></tr><tr><td><b>marbles</b></td><td>weight in a small space, and they roll, which is two different jobs</td></tr><tr><td><b>buttons</b></td><td>small weights, small wheels, and they have holes already</td></tr></tbody>
+    <tbody><tr><td><b>straws</b></td><td>the cheapest way to make a triangle, and triangles are what stop things wobbling</td></tr><tr><td><b>popsicle sticks</b></td><td>stiff, straight, and they take glue. The nearest thing to lumber</td></tr><tr><td><b>clothespins</b></td><td>the only clamp you have. Hold glued things while they dry</td></tr><tr><td><b>rubber bands</b></td><td>store energy. Anything that flings, snaps back or drives itself</td></tr><tr><td><b>string</b></td><td>pulls but never pushes — same as a muscle</td></tr><tr><td><b>brass fasteners</b></td><td>the only joint that turns. Everything that moves needs these</td></tr><tr><td><b>marbles</b></td><td>weight in a small space, and they roll, which is two different jobs</td></tr><tr><td><b>buttons</b></td><td>small weights, small wheels, and they have holes already</td></tr></tbody>
   </table>
   </div>
 
@@ -382,7 +388,7 @@
     <div class="kgh">From the drawer</div>
     <table class="tbl ">
     <thead><tr><th>What</th><th>What it is good at</th></tr></thead>
-    <tbody><tr><td><b>tape</b></td><td>fast, weak, and undoes. Use it while you are still deciding</td></tr><tr><td><b>masking tape</b></td><td>takes pen, peels off, and is what to label things with</td></tr><tr><td><b>white glue</b></td><td>slow, strong, and wants clamping. Use it once you are sure</td></tr><tr><td><b>a glue stick</b></td><td>paper to paper only. It will let you down on anything thicker</td></tr><tr><td><b>scissors</b></td><td>the sharpest thing this pack ever needs</td></tr><tr><td><b>a hole punch</b></td><td>makes a round hole in the right place, which is hard any other way</td></tr><tr><td><b>a ruler</b></td><td>for straight lines and for scoring folds — press hard with a closed pen</td></tr><tr><td><b>modeling clay</b></td><td>weight you can move around. The whole of the balancing sheet</td></tr></tbody>
+    <tbody><tr><td><b>tape</b></td><td>fast, weak, and undoes. Use it while you are still deciding</td></tr><tr><td><b>masking tape</b></td><td>takes pen, peels off, and is what to label things with</td></tr><tr><td><b>white glue</b></td><td>slow, strong, and wants clamping. Use it once you are sure</td></tr><tr><td><b>a glue stick</b></td><td>paper to paper only. It will let you down on anything thicker</td></tr><tr><td><b>scissors</b></td><td>the sharpest thing these crafts ever need</td></tr><tr><td><b>a hole punch</b></td><td>makes a round hole in the right place, which is hard any other way</td></tr><tr><td><b>a ruler</b></td><td>for straight lines and for scoring folds — press hard with a closed pen</td></tr><tr><td><b>modeling clay</b></td><td>weight you can move around. The whole of the balancing sheet</td></tr></tbody>
   </table>
   </div>
 
@@ -390,14 +396,14 @@
     <div class="kgh">Do not bother saving</div>
     <table class="tbl ">
     <thead><tr><th>What</th><th>Why not</th></tr></thead>
-    <tbody><tr><td><b>yoghurt pots</b></td><td>they squash the moment anything rests on them, and everybody saves forty</td></tr><tr><td><b>egg boxes</b></td><td>two is plenty. They are only ever bumps, and you already have bumps</td></tr><tr><td><b>anything that smelled of food</b></td><td>it still does, in a box, in a cupboard, in July</td></tr><tr><td><b>foil trays</b></td><td>sharp edges when cut, and they crumple instead of folding</td></tr><tr><td><b>sweet wrappers</b></td><td>they look like treasure and are structurally nothing at all</td></tr><tr><td><b>more than three of anything</b></td><td>if you have four, you are collecting rather than saving</td></tr></tbody>
+    <tbody><tr><td><b>yogurt cups</b></td><td>they squash the moment anything rests on them, and everybody saves forty</td></tr><tr><td><b>egg cartons</b></td><td>two is plenty. They are only ever bumps, and you already have bumps</td></tr><tr><td><b>anything that smelled of food</b></td><td>it still does, in a box, in a cabinet, in July</td></tr><tr><td><b>foil trays</b></td><td>sharp edges when cut, and they crumple instead of folding</td></tr><tr><td><b>candy wrappers</b></td><td>they look like treasure and are structurally nothing at all</td></tr><tr><td><b>more than three of anything</b></td><td>if you have four, you are collecting rather than saving</td></tr></tbody>
   </table>
   </div>
 
   <div class="rules"><b>Scissors only, with a grown-up in the room.</b> If a step seems to want a knife, snip or fold instead.</div>
 
   <footer>
-    <span>The list to tick is on page 3 &rarr;</span>
+    <span>The checklist is on page 3 &rarr;</span>
     <span class="brand kt-stamp"><svg class="kt-logo" viewBox="6 26 88 70" aria-hidden="true"><path d="M6 30 L94 30 L94 41 L6 41 Z" fill="currentColor"/><path d="M20 41 L31 41 L28 92 L23 92 Z" fill="currentColor"/><path d="M69 41 L80 41 L77 92 L72 92 Z" fill="currentColor"/><path d="M26 72 L74 72 L74 79 L26 79 Z" fill="currentColor"/><path d="M36 48 L62 48 L62 51.4 L36 51.4 Z" fill="currentColor"/><path d="M36 56 L62 56 L62 59.4 L36 59.4 Z" fill="currentColor"/><path d="M36 64 L52 64 L52 67.4 L36 67.4 Z" fill="currentColor"/></svg>Kitchen Table · ktworksheets.com</span>
     <span>The box</span>
   </footer>
@@ -411,7 +417,7 @@
   </header>
 
   <div class="directions">
-    <b>DIRECTIONS:</b> Tick what you have. Cross off what runs out.
+    <b>DIRECTIONS:</b> Check off what you have. Cross off what runs out.
   </div>
 
 
@@ -427,9 +433,9 @@
     <li><span class="tk"></span>straws</li>
     <li><span class="tk"></span>popsicle sticks</li>
     <li><span class="tk"></span>clothespins</li>
-    <li><span class="tk"></span>elastic bands</li>
+    <li><span class="tk"></span>rubber bands</li>
     <li><span class="tk"></span>string</li>
-    <li><span class="tk"></span>split pins</li>
+    <li><span class="tk"></span>brass fasteners</li>
     <li><span class="tk"></span>marbles</li>
     <li><span class="tk"></span>buttons</li>
     <li><span class="tk"></span>tape</li>
@@ -442,7 +448,7 @@
     <li><span class="tk"></span>modeling clay</li>
   </ul>
 
-  <div class="note"><b>The four everything depends on:</b> tape, scissors, cardboard and split pins.</div>
+  <div class="note"><b>The four everything depends on:</b> tape, scissors, cardboard and brass fasteners.</div>
 
   <div class="note"><b>Date started:</b> ______________________ &nbsp;&nbsp; In six months, take out
   anything never used.</div>

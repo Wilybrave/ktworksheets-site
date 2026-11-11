@@ -152,7 +152,10 @@
   .cring-full { background: var(--accent); }
   .cring-half { background: linear-gradient(90deg, var(--accent) 50%, #fff 50%); }
   .cring-none { background: #fff; }
-  ol.qs.hasconf li { overflow: hidden; }
+  /* The rings float right; a clearing ::after holds the float inside its
+     question. (overflow:hidden did the same and also clipped the list
+     number, which sits outside the li — audit 2026-11-10.) */
+  ol.qs.hasconf li::after { content: ''; display: block; clear: both; }
 
   .conflegend {
     border: 1.2px solid var(--rule); border-radius: 4px;
@@ -199,7 +202,10 @@
   .opt { white-space: nowrap; }
 
   /* -------------------------------------------------------------- tables */
-  .tbl { border-collapse: collapse; margin: 8px 0; font-size: 11pt; width: 100%; }
+  /* Not quite 100%: a collapsed border sits half outside the table's box, so
+     a full-width table put half its right-hand rule past the column edge and
+     it printed open-ended (Grade 6 Math, every table; audit 2026-11-10). */
+  .tbl { border-collapse: collapse; margin: 8px 1px; font-size: 11pt; width: calc(100% - 2px); }
   .tbl th, .tbl td { border: 1.4px solid var(--ink); padding: 5px 8px; text-align: left; }
   .tbl th { color: var(--slate); }
   .tbl th { background: var(--tint); font-size: 10pt; letter-spacing: .02em; }
@@ -314,6 +320,8 @@
   svg { display: inline-block; vertical-align: top; }
   svg.inline { vertical-align: middle; }
 
+  .tbl.gc th:nth-child(1) { width: 6%; } .tbl.gc th:nth-child(2) { width: 30%; }
+  .tbl.gc th:nth-child(3) { width: 17%; } .tbl.gc th:nth-child(4) { width: 47%; }
   .tbl td.blank { height: .5in; }
   ol.qs li { margin-bottom: 7px; }
   .note { margin: 7px 0; }
@@ -401,7 +409,7 @@
   <div class="note" style="margin-top:2px">Draw a few blobs of land on the orange. Peel it, then try to lay the peel
   flat without tearing or gaps. Watch your drawing.</div>
 
-  <ol class="qs" start="7"><li><span class="qt">What did you have to do to the peel to get it flat? What happened to the blobs?</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Say what this has to do with the three maps on page 1.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Somebody says "we should just use a better map that gets everything right". Use the orange to explain why that map cannot be made.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+  <ol class="qs" start="7"><li><span class="qt">What did you have to do to the peel to get it flat? What happened to the blobs?</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Say what this has to do with the three maps on page 1.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Somebody says “we should just use a better map that gets everything right.” Use the orange to explain why that map cannot be made.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
 
   <footer>
     <span>Score: ______ / 9</span>

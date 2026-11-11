@@ -152,7 +152,10 @@
   .cring-full { background: var(--accent); }
   .cring-half { background: linear-gradient(90deg, var(--accent) 50%, #fff 50%); }
   .cring-none { background: #fff; }
-  ol.qs.hasconf li { overflow: hidden; }
+  /* The rings float right; a clearing ::after holds the float inside its
+     question. (overflow:hidden did the same and also clipped the list
+     number, which sits outside the li — audit 2026-11-10.) */
+  ol.qs.hasconf li::after { content: ''; display: block; clear: both; }
 
   .conflegend {
     border: 1.2px solid var(--rule); border-radius: 4px;
@@ -199,7 +202,10 @@
   .opt { white-space: nowrap; }
 
   /* -------------------------------------------------------------- tables */
-  .tbl { border-collapse: collapse; margin: 8px 0; font-size: 11pt; width: 100%; }
+  /* Not quite 100%: a collapsed border sits half outside the table's box, so
+     a full-width table put half its right-hand rule past the column edge and
+     it printed open-ended (Grade 6 Math, every table; audit 2026-11-10). */
+  .tbl { border-collapse: collapse; margin: 8px 1px; font-size: 11pt; width: calc(100% - 2px); }
   .tbl th, .tbl td { border: 1.4px solid var(--ink); padding: 5px 8px; text-align: left; }
   .tbl th { color: var(--slate); }
   .tbl th { background: var(--tint); font-size: 10pt; letter-spacing: .02em; }
@@ -348,9 +354,9 @@
   <div class="label" style="font-weight:bold;font-size:11pt;margin:18px 0 6px">Common and proper nouns.</div>
   <div style="font-size:10.5pt;margin-bottom:6px">A <b>proper noun</b> names one particular person, place or thing. Circle them and add the missing capitals.</div>
   <ol class="qs" start="13">
-    <li><span style="font-size:12pt;line-height:2">we visited london in july with my cousin sara.</span><div class="write"></div><div class="write"></div></li>
-    <li><span style="font-size:12pt;line-height:2">on monday, mr patel took our class to the science museum.</span><div class="write"></div><div class="write"></div></li>
-    <li><span style="font-size:12pt;line-height:2">my dog rex likes to swim in the river thames.</span><div class="write"></div><div class="write"></div></li>
+    <li><span style="font-size:12pt;line-height:2">we visited chicago in july with my cousin sara.</span><div class="write"></div><div class="write"></div></li>
+    <li><span style="font-size:12pt;line-height:2">on monday, mr. patel took our class to the science museum.</span><div class="write"></div><div class="write"></div></li>
+    <li><span style="font-size:12pt;line-height:2">my dog rex likes to swim in lake michigan.</span><div class="write"></div><div class="write"></div></li>
   </ol>
 
   <footer>
@@ -379,9 +385,9 @@
 
   <ol class="qs" start="16">
     <li><span style="font-size:12pt;line-height:2">The three cat s sat on my sister s bed.</span><div class="write"></div><div class="write"></div></li>
-    <li><span style="font-size:12pt;line-height:2">My friend s bike has a flat tire, so we walked to the store s.</span><div class="write"></div><div class="write"></div></li>
-    <li><span style="font-size:12pt;line-height:2">The bird built it s nest in Mr Jones tree.</span><div class="write"></div><div class="write"></div></li>
-    <li><span style="font-size:12pt;line-height:2">Its going to rain, so bring the dog s lead and two umbrella s.</span><div class="write"></div><div class="write"></div></li>
+    <li><span style="font-size:12pt;line-height:2">My friend s bike has a flat tire, so we walked past three store s.</span><div class="write"></div><div class="write"></div></li>
+    <li><span style="font-size:12pt;line-height:2">The bird built it s nest in Mr. Jones tree.</span><div class="write"></div><div class="write"></div></li>
+    <li><span style="font-size:12pt;line-height:2">Its going to rain, so bring the dog s leash and two umbrella s.</span><div class="write"></div><div class="write"></div></li>
   </ol>
 
   <div class="label" style="font-weight:bold;font-size:11pt;margin:14px 0 5px">Circle the right word.</div>

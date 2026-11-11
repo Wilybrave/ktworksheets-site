@@ -32,7 +32,10 @@
   body {
     font-family: Georgia, "Times New Roman", serif;
     color: var(--ink);
-    background: #ddd;
+    /* White, not the screen grey: a print with background graphics on (and
+       the KDP build prints them) put #ddd behind every page. The grey is the
+       on-screen proof's desk, so it lives in @media screen below only. */
+    background: #fff;
     font-size: 12pt;
     line-height: 1.3;
     -webkit-print-color-adjust: exact;
@@ -87,10 +90,18 @@
 
   ol { margin: 0; padding: 0; list-style: none; }
 
+  /* A HANGING INDENT (2026-11-10). A sentence that wrapped started its
+   * second line under the number ("…come back / in"). The number now hangs in
+   * the .3in the li pads on its left, and every line of the sentence starts at
+   * the same place; the writing strips and the key's note sit at that same
+   * .3in, which is where they always were. */
   li {
     margin-bottom: 12px;
     page-break-inside: avoid;
+    padding-left: .3in;
+    text-indent: -.3in;
   }
+  li *, li::before { text-indent: 0; }
   li::before {
     content: attr(data-n) ".";
     font-weight: bold;
@@ -109,7 +120,7 @@
   .write {
     position: relative;
     height: .45in;
-    margin: 6px 0 0 .3in;
+    margin: 6px 0 0;
     border-top: 1px solid var(--rule);
     border-bottom: 2px solid var(--slate);
   }
@@ -134,7 +145,7 @@
    * class from the key's .fixed on purpose: check.js pairs every .bad with
    * one .fixed, and the example is not a second answer. */
   li.done { background: var(--tint); border-left: 4px solid var(--accent);
-    padding: 5px 8px 8px 0; }
+    padding: 5px 8px 8px .3in; }
   .donetag { display: inline-block; font-family: Georgia, serif; font-size: 8pt;
     font-weight: bold; letter-spacing: .08em; text-transform: uppercase;
     color: var(--accent); border: 1.5px solid var(--accent); padding: 0 5px;
@@ -146,8 +157,10 @@
     position: relative; z-index: 1; white-space: nowrap; }
   .donefix { position: relative; z-index: 1; font-style: italic;
     color: var(--deep); white-space: nowrap; line-height: 1; }
+  /* No side padding on a highlight: it printed as a gap, so a corrected
+   * capital read as "W e" and a corrected period as "ready ." (2026-11-10). */
   .donefix u { text-decoration: none; background: #fff; font-weight: bold;
-    padding: 0 1px; border-bottom: 2px solid var(--accent); }
+    padding: 0; border-bottom: 2px solid var(--accent); }
 
   .brand { font-style: normal; font-size: 7.5pt; letter-spacing: .04em;
     color: var(--accent); align-self: center; }
@@ -168,12 +181,12 @@
   .key .fixed u {
     text-decoration: none;
     background: var(--tint);
-    padding: 0 2px;
+    padding: 0;
     font-weight: bold;
   }
   .key .why {
     display: block;
-    margin-left: .3in;
+    margin-left: 0;
     font-size: 9.5pt;
     font-style: italic;
     color: var(--muted);
@@ -259,14 +272,14 @@
   <header>
     
     <h1>The Line You Drew Was the Wrong Line</h1>
-    <p class="sub">Nothing Was Watching · Page 1 of 4</p>
+    <p class="sub">Deep time · Page 1 of 4</p>
   </header>
   <div class="nameline">
     <span>Name</span>
     <span class="short">Date</span>
   </div>
   <div class="directions">
-    <b>DIRECTIONS:</b> Your history line held all 300,000 years of people. How much longer is the Earth's story?
+    <b>DIRECTIONS:</b> People have been around for about 300,000 years. How much longer is the Earth's story?
   </div>
 
 
@@ -274,7 +287,7 @@
 
   <table class="tbl h10">
     <thead><tr><th>#</th><th></th><th>How long</th><th>In millions of years</th></tr></thead>
-    <tbody><tr><td><span class="pn">1.</span></td><td>All of human history — your old line</td><td>300,000 years</td><td class="blank"></td></tr><tr><td><span class="pn">2.</span></td><td>The age of the Earth</td><td>4,540 million years</td><td class="blank"></td></tr></tbody>
+    <tbody><tr><td><span class="pn">1.</span></td><td>All of human history</td><td>300,000 years</td><td class="blank"></td></tr><tr><td><span class="pn">2.</span></td><td>The age of the Earth</td><td>4,540 million years</td><td class="blank"></td></tr></tbody>
   </table>
 
   <ol class="qs" start="3"><li><span class="qt">Divide the second by the first. How many times longer is the Earth's history than the whole of human history?</span><div class="work" style="height:1.5in"><span>Show your work</span></div><div class="write"></div><div class="write"></div></li></ol>
@@ -290,7 +303,7 @@
   <header class="cont">
     
     <h1>Now Draw It Properly</h1>
-    <p class="sub">Nothing Was Watching · Page 2 of 4</p>
+    <p class="sub">Deep time · Page 2 of 4</p>
   </header>
 
   <div class="directions">
@@ -314,7 +327,7 @@
   <header class="cont">
     
     <h1>Where Things Land on It</h1>
-    <p class="sub">Nothing Was Watching · Page 3 of 4</p>
+    <p class="sub">Deep time · Page 3 of 4</p>
   </header>
 
   <div class="directions">
@@ -327,7 +340,7 @@
     <tbody><tr><td><span class="pn">6.</span></td><td>The first life</td><td>3,700</td><td class="blank"></td></tr><tr><td><span class="pn">7.</span></td><td>Oxygen appears in the air</td><td>2,400</td><td class="blank"></td></tr><tr><td><span class="pn">8.</span></td><td>The Cambrian explosion</td><td>539</td><td class="blank"></td></tr><tr><td><span class="pn">9.</span></td><td>The first dinosaurs</td><td>230</td><td class="blank"></td></tr><tr><td><span class="pn">10.</span></td><td>The asteroid, and the end of the dinosaurs</td><td>66</td><td class="blank"></td></tr></tbody>
   </table>
 
-  <ol class="qs" start="11"><li><span class="qt">The dinosaurs are the thing most people picture when they hear "long ago". How much of the line is BEFORE the first dinosaur?</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+  <ol class="qs" start="11"><li><span class="qt">The dinosaurs are the thing most people picture when they hear "long ago." How much of the line is BEFORE the first dinosaur?</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
 
   <footer>
     <span>Keep going on page 4 →</span>
@@ -340,7 +353,7 @@
   <header class="cont">
     
     <h1>What Was Happening in the Empty Part</h1>
-    <p class="sub">Nothing Was Watching · Page 4 of 4</p>
+    <p class="sub">Deep time · Page 4 of 4</p>
   </header>
 
   <div class="directions">
@@ -348,13 +361,13 @@
   </div>
 
 
-  <div class="note">For the first 3,000 million years, everything alive was a <b>single cell</b>. About 2,400 million
-  years ago, living things began putting <b>oxygen</b> into the air, and it poisoned most of what was alive.</div>
+  <div class="note">For the first 3,000 million years, almost everything alive was a <b>single cell</b>. About 2,400 million
+  years ago, living things began putting <b>oxygen</b> into the air, and it may have poisoned much of what was alive.</div>
 
   <ol class="qs" start="12"><li><span class="qt">Somebody says "the Earth is really old — like, dinosaurs old." Using your line, explain what is wrong with that sentence.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Why do you think almost everything you have been taught about the past sits in the last few centimeters? Give a reason that is about EVIDENCE, not about importance.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
 
   <footer>
-    <span>Score: ______ / 13 (each table is marked as one)</span>
+    <span>Score: ______ / 13</span>
     <span class="brand kt-stamp"><svg class="kt-logo" viewBox="6 26 88 70" aria-hidden="true"><path d="M6 30 L94 30 L94 41 L6 41 Z" fill="currentColor"/><path d="M20 41 L31 41 L28 92 L23 92 Z" fill="currentColor"/><path d="M69 41 L80 41 L77 92 L72 92 Z" fill="currentColor"/><path d="M26 72 L74 72 L74 79 L26 79 Z" fill="currentColor"/><path d="M36 48 L62 48 L62 51.4 L36 51.4 Z" fill="currentColor"/><path d="M36 56 L62 56 L62 59.4 L36 59.4 Z" fill="currentColor"/><path d="M36 64 L52 64 L52 67.4 L36 67.4 Z" fill="currentColor"/></svg>Kitchen Table · ktworksheets.com</span>
     <span>How long is long</span>
   </footer>
@@ -516,7 +529,7 @@
 
   <div class="note"><b>What you need:</b> a plastic bottle &middot; a jar &middot; scissors &middot; tape &middot; a ruler &middot; card &middot; small stones &middot; a pencil.</div>
 
-  <ol class="qs" start="1"><li><span class="qt">A washing-up bowl and an egg cup are both left out in the same shower of rain. Which one ends up with deeper water in it?</span><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+  <ol class="qs" start="1"><li><span class="qt">A mixing bowl and an egg cup are both left out in the same shower of rain. Which one ends up with deeper water in it?</span><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
 
   <div class="find"><b>Neither: the same.</b> The bowl catches more, but spreads it over more floor, and the two cancel. <b>So rain is measured as a depth, not an amount</b>: half an inch in a thimble or a pool.</div>
 
@@ -1037,7 +1050,7 @@
 
   <table class="tbl ">
     <thead><tr><th>Do this</th><th>Because</th></tr></thead>
-    <tbody><tr><td><b>Out in the open, well away from anything tall</b></td><td>At least twice as far away as the thing is high. A wall, a fence or a hedge makes a pocket of still air on one side and a gust on the other, and rain does not fall straight down through either.</td></tr><tr><td><b>Never under the eaves, a branch or a washing line</b></td><td>It will read nothing at all in a light shower and then get a fortnight’s worth in one drip when the gutter overflows.</td></tr><tr><td><b>Rim about a foot off the ground</b></td><td>Lower and rain bouncing off the ground splashes back INTO it. Higher and the wind starts carrying drops over the top instead of into it.</td></tr><tr><td><b>Rim level, and check it again after a windy night</b></td><td>A tilted mouth is a smaller mouth as far as falling rain is concerned, so it under-reads — and it will not tell you it is doing it.</td></tr><tr><td><b>The same spot every time</b></td><td>The whole value of a rain log is comparing one week with another. Move the gauge and you have started a new log.</td></tr></tbody>
+    <tbody><tr><td><b>Out in the open, well away from anything tall</b></td><td>At least twice as far away as the thing is high. A wall, a fence or a hedge makes a pocket of still air on one side and a gust on the other, and rain does not fall straight down through either.</td></tr><tr><td><b>Never under the eaves, a branch or a clothesline</b></td><td>It will read nothing at all in a light shower and then get a fortnight’s worth in one drip when the gutter overflows.</td></tr><tr><td><b>Rim about a foot off the ground</b></td><td>Lower and rain bouncing off the ground splashes back INTO it. Higher and the wind starts carrying drops over the top instead of into it.</td></tr><tr><td><b>Rim level, and check it again after a windy night</b></td><td>A tilted mouth is a smaller mouth as far as falling rain is concerned, so it under-reads — and it will not tell you it is doing it.</td></tr><tr><td><b>The same spot every time</b></td><td>The whole value of a rain log is comparing one week with another. Move the gauge and you have started a new log.</td></tr></tbody>
   </table>
 
   <div class="find"><b>Why twice the height away?</b> Wind lifts over a wall and tumbles behind it, carrying rain to one side. Far enough away, it flattens out again.</div>

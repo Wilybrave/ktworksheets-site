@@ -1,7 +1,7 @@
 <!DOCTYPE html><html><head>
 <meta charset="utf-8">
-<meta name="sheet-kind" content="open">
-<title>The Narrator Is a Person</title>
+<meta name="sheet-kind" content="worksheet">
+<title>The Count</title>
 <style>
   :root { --font: Georgia, "Times New Roman", serif; }
 
@@ -150,7 +150,10 @@
   .cring-full { background: var(--accent); }
   .cring-half { background: linear-gradient(90deg, var(--accent) 50%, #fff 50%); }
   .cring-none { background: #fff; }
-  ol.qs.hasconf li { overflow: hidden; }
+  /* The rings float right; a clearing ::after holds the float inside its
+     question. (overflow:hidden did the same and also clipped the list
+     number, which sits outside the li — audit 2026-11-10.) */
+  ol.qs.hasconf li::after { content: ''; display: block; clear: both; }
 
   .conflegend {
     border: 1.2px solid var(--rule); border-radius: 4px;
@@ -197,7 +200,10 @@
   .opt { white-space: nowrap; }
 
   /* -------------------------------------------------------------- tables */
-  .tbl { border-collapse: collapse; margin: 8px 0; font-size: 11pt; width: 100%; }
+  /* Not quite 100%: a collapsed border sits half outside the table's box, so
+     a full-width table put half its right-hand rule past the column edge and
+     it printed open-ended (Grade 6 Math, every table; audit 2026-11-10). */
+  .tbl { border-collapse: collapse; margin: 8px 1px; font-size: 11pt; width: calc(100% - 2px); }
   .tbl th, .tbl td { border: 1.4px solid var(--ink); padding: 5px 8px; text-align: left; }
   .tbl th { color: var(--slate); }
   .tbl th { background: var(--tint); font-size: 10pt; letter-spacing: .02em; }
@@ -312,12 +318,26 @@
   svg { display: inline-block; vertical-align: top; }
   svg.inline { vertical-align: middle; }
 
-  ol.qs li { margin-bottom: 10px; }
-  .note { margin: 9px 0; }
-  .hint { border: 1.6px dashed var(--rule); border-radius: 6px; padding: 6px 11px;
-    margin: 9px 0; font-size: 10.5pt; }
-  .kinds { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 16px;
-    margin: 6px 0 2px; font-size: 10.5pt; }
+  ol.qs li { margin-bottom: 9px; }
+  .story { font-size: 11.5pt; line-height: 1.5; }
+  .story p { margin: 0 0 5px; position: relative; padding-left: .3in; }
+  .story p::before { content: attr(data-n); position: absolute; left: 0; top: 2px;
+    font-size: 8pt; color: var(--muted); font-family: Arial, sans-serif; }
+  .story .ttl { font-size: 15pt; font-weight: 700; padding-left: .3in; margin: 0 0 6px; letter-spacing: .02em; }
+  .story .ttl::before { content: none; }
+  .note6 { border: 1.8px solid var(--slate); border-radius: 8px; padding: .07in .12in;
+    margin: .08in 0; font-size: 11pt; line-height: 1.5; }
+  .eg6 { border: 1.8px dashed var(--slate); border-radius: 8px; padding: .07in .12in;
+    margin: .08in 0 .1in; font-size: 10.5pt; line-height: 1.5; }
+  .eg6 .h { font-weight: 700; font-size: 9.5pt; letter-spacing: .06em; }
+  .fable { font-size: 11.5pt; line-height: 1.5; border-left: 3px solid var(--slate);
+    padding: .02in 0 .02in .14in; margin: .06in 0; }
+  .fable p { margin: 0 0 5px; }
+  .sort6 { width: 100%; border-collapse: collapse; font-size: 11pt; margin: .05in 0 .08in; }
+  .sort6 td { border-bottom: 1px solid var(--rule); padding: .07in .05in; vertical-align: middle; }
+  .sort6 td.n { width: .3in; font-weight: 700; }
+  .sort6 td.b { width: 1.25in; color: var(--muted); font-size: 10pt; text-align: right; }
+  .lbl { font-weight: 700; font-size: 11pt; margin: .1in 0 .02in; }
 
 </style>
 <style>
@@ -328,51 +348,153 @@
 <div class="page ">
   <header>
     
-    <h1>The Narrator Is a Person</h1>
-    <p class="sub">Any book &middot; Reading closely &middot; Page 1 of 2</p>
+    <h1>The Count</h1>
+    <p class="sub">A short story &middot; Page 1 of 6</p>
   </header>
   <div class="nameline">
     <span>Name</span>
     <span class="short">Date</span>
   </div>
   <div class="directions">
-    <b>DIRECTIONS:</b> Book open beside you. Give a page number with every answer, and copy lines exactly.
+    <b>DIRECTIONS:</b> Read the whole story once for what happens. Then read it again slowly before you start the questions.
   </div>
 
 
-  <div class="note" style="margin-top:2px"><b>Somebody is telling you this story.</b> They choose what you
-  get told, in what order &mdash; and what to leave out.</div>
-
-  <div style="font-size:10.5pt;font-weight:bold;margin:10px 0 3px">The book</div>
-  <div class="write"></div>
-
-  <ol class="qs" start="1"><li><span class="qt">Is the person telling this story <b>in</b> it, or standing outside it? Copy one line from anywhere in the book that settles it, and give the page.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Find one place where that choice <b>shows</b>. If the teller is in the story: something that happened while they were not in the room, and how the book got it to you anyway. If the teller is outside it: somewhere you are told a thing no person in the book knows.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
-
+  <div class="story">
+    <div class="ttl">The Count</div>
+<p data-n="1">The project was called <i>Backyard Birds: A Two-Week Survey</i>, and I had a clipboard for it, which my brother said was a lot of clipboard for a bird feeder.</p>
+<p data-n="2">The rules were simple. Every morning before school I sat at the kitchen window for fifteen minutes and wrote down every bird that landed on the feeder. Not the ones in the trees. Not the ones I thought I saw. Only the ones on the feeder, because Ms. Ortiz said a scientist counts what is there, not what she hopes is there. I wrote that inside the cover of my notebook in capital letters.</p>
+<p data-n="3">Grandpa had been living with us since March. He had the room that used to be the sewing room, and most of his things were still in boxes, because he said there was no hurry. He got up before anybody. When I came down on the first morning of the survey, he was already at the window with his coffee, and he had already written in my notebook.</p>
+<p data-n="4"><i>Chickadee 3. Sparrow 5. Cardinal 2.</i></p>
+<p data-n="5">“You can’t do that,” I said. “It’s my project.”</p>
+<p data-n="6">“Just getting you started,” he said.</p>
+<p data-n="7">I crossed it out — neatly, one line, the way Ms. Ortiz showed us, so you can still read the mistake — and did my fifteen minutes. Two chickadees. Four sparrows. One cardinal, a male, so red he looked fake against the snow.</p>
+<p data-n="8">The next morning he had done it again. <i>Cardinal 2.</i> And the morning after that. His numbers were always close to mine, except for the cardinals. I always saw one. He always wrote two.</p>
+<p data-n="9">“There’s only one,” I told him on Thursday. I said it slowly, the way you say things to my brother. “I’ve been watching. It’s the same bird every time.”</p>
+<p data-n="10">Grandpa looked at the feeder for a long time. “Cardinals don’t go around alone,” he said. “Not as a rule.” Then he took his cup to the sink, and he took the other cup too, the one that was always on the windowsill next to his, still full, gone cold with a skin on top. I had thought it was for Mom. Mom drinks tea.</p>
+<p data-n="11">I started getting up earlier so I could get to the notebook first. It didn’t matter. He was always there before me, the notebook open at the right page and the pencil lying across it, and there it would be in his shaky up-and-down handwriting. <i>Cardinal 2.</i> So I went back to the first page and wrote a correction in the margin in red next to every one of his: <i>1 — observed.</i> After that I did it every morning. By the second week the margin was a column of little red ones, all the way down the page, like a fence.</p>
+<p data-n="12">My brother said I was being mean. I said I was being accurate. Those are different things, and I am the one doing the project.</p>
+  </div>
 
   <footer>
-    <span>Keep going on page 2 &rarr;</span>
+    <span>The story continues on the next page</span>
     <span class="brand kt-stamp"><svg class="kt-logo" viewBox="6 26 88 70" aria-hidden="true"><path d="M6 30 L94 30 L94 41 L6 41 Z" fill="currentColor"/><path d="M20 41 L31 41 L28 92 L23 92 Z" fill="currentColor"/><path d="M69 41 L80 41 L77 92 L72 92 Z" fill="currentColor"/><path d="M26 72 L74 72 L74 79 L26 79 Z" fill="currentColor"/><path d="M36 48 L62 48 L62 51.4 L36 51.4 Z" fill="currentColor"/><path d="M36 56 L62 56 L62 59.4 L36 59.4 Z" fill="currentColor"/><path d="M36 64 L52 64 L52 67.4 L36 67.4 Z" fill="currentColor"/></svg>Kitchen Table · ktworksheets.com</span>
-    <span>The narrator</span>
+    <span>The Count</span>
   </footer>
 </div>
 
 <div class="page ">
   <header class="cont">
     
-    <h1>The Narrator Is a Person</h1>
-    <p class="sub">Any book &middot; Reading closely &middot; Page 2 of 2</p>
+    <h1>The Count</h1>
+    <p class="sub">A short story &middot; Page 2 of 6</p>
   </header>
 
 
 
 
-  <ol class="qs" start="3"><li><span class="qt">Find a sentence that crosses more time than it takes to read &mdash; <i>that winter passed slowly</i>, <i>by the time we moved house</i>. Copy it with the page, then name three things that must have happened inside it and are not in the book.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Find a line where you are told what somebody is <b>thinking</b> &mdash; not their face, not what they said aloud, the inside. Copy it, with the page.</span><div class="write"></div><div class="write"></div></li><li><span class="qt">How could the teller possibly know that? Somebody who is in the story cannot read minds. So: were they guessing from something they could see, were they told about it later, or has the book quietly forgotten who is talking? Decide, and say what decided it.</span><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Find something you were told <b>late</b> that could have been told on page one. What was it, which page did it arrive on, and what had you believed until then?</span><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
-
+  <div class="story">
+<p data-n="13">On the last morning of the survey I set my alarm for 5:30. The kitchen was dark and the window was gray, and Grandpa was in his chair with the two cups in front of him, the way he always was. He didn’t hear me come in. He was talking, very quietly, and not to me.</p>
+<p data-n="14">“There he is,” he said. “Look at that. Rosie, look at him.”</p>
+<p data-n="15">The cardinal was on the feeder. One cardinal. I stood in the doorway with my clipboard and I counted him, because that is what I was there to do. One.</p>
+<p data-n="16">Grandpa turned around then and saw me. He didn’t look embarrassed, which is how I would have looked. He just slid the notebook across the table so it was in front of my chair.</p>
+<p data-n="17">“All yours,” he said. “Your count.”</p>
+<p data-n="18">I sat down. He had already written today’s line. <i>Cardinal 2.</i> The red pencil was right there next to it, where I had left it the day before. I picked it up. The cardinal sat on the feeder being red, and Grandpa’s coffee was steaming, and the other cup wasn’t.</p>
+<p data-n="19">Ms. Ortiz says a scientist counts what is there.</p>
+<p data-n="20">I put the red pencil down.</p>
+<p data-n="21">I handed in the project on Monday. The table was right, and the graph, and the conclusion. If you turn to the last page you will see a column of red ones running down the margin, thirteen of them, and then a space at the bottom where the fourteenth should be. Ms. Ortiz circled the space and drew a question mark next to it.</p>
+<p data-n="22">I never answered it.</p>
+  </div>
+  <div class="note6" style="margin-top:.16in"><b>The small numbers in the margin</b> number the paragraphs. When a question
+  asks for evidence, give the paragraph: <b>(¶10)</b>.</div>
 
   <footer>
-    <span>Answers vary &mdash; guidance overleaf</span>
+    <span>Read it a second time before page 3</span>
     <span class="brand kt-stamp"><svg class="kt-logo" viewBox="6 26 88 70" aria-hidden="true"><path d="M6 30 L94 30 L94 41 L6 41 Z" fill="currentColor"/><path d="M20 41 L31 41 L28 92 L23 92 Z" fill="currentColor"/><path d="M69 41 L80 41 L77 92 L72 92 Z" fill="currentColor"/><path d="M26 72 L74 72 L74 79 L26 79 Z" fill="currentColor"/><path d="M36 48 L62 48 L62 51.4 L36 51.4 Z" fill="currentColor"/><path d="M36 56 L62 56 L62 59.4 L36 59.4 Z" fill="currentColor"/><path d="M36 64 L52 64 L52 67.4 L36 67.4 Z" fill="currentColor"/></svg>Kitchen Table · ktworksheets.com</span>
-    <span>The narrator</span>
+    <span>The Count</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>The Count &mdash; Who Is Telling It</h1>
+    <p class="sub">A short story &middot; Page 3 of 6</p>
+  </header>
+
+  <div class="directions">
+    <b>DIRECTIONS:</b> Every answer has two parts: what you think, and the words from the story that made you think it.
+  </div>
+
+
+  <div class="eg6"><div class="h">DONE FOR YOU</div>
+  <b>What does the narrator’s brother think of her clipboard?</b><br>
+  He thinks it is too much for such a small project. He says it is &ldquo;a lot of clipboard for a bird
+  feeder&rdquo; (¶1).
+  <span style="color:var(--muted)">&larr; the answer, then the exact words, then the paragraph.</span></div>
+  <ol class="qs" start="1"><li><span class="qt">Who is telling this story, and is she a character <b>in</b> it or someone outside it? Copy two words from ¶1 that prove it.</span><div class="write"></div><div class="write"></div></li><li><span class="qt">At the start, what does the narrator want from the bird count? Copy the rule she lives by, and give its paragraph.</span><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">The story <b>never says</b> what happened to Grandpa’s wife. Find three details that let a reader work it out. Give the paragraph for each.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Keep going on page 4 &rarr;</span>
+    <span class="brand kt-stamp"><svg class="kt-logo" viewBox="6 26 88 70" aria-hidden="true"><path d="M6 30 L94 30 L94 41 L6 41 Z" fill="currentColor"/><path d="M20 41 L31 41 L28 92 L23 92 Z" fill="currentColor"/><path d="M69 41 L80 41 L77 92 L72 92 Z" fill="currentColor"/><path d="M26 72 L74 72 L74 79 L26 79 Z" fill="currentColor"/><path d="M36 48 L62 48 L62 51.4 L36 51.4 Z" fill="currentColor"/><path d="M36 56 L62 56 L62 59.4 L36 59.4 Z" fill="currentColor"/><path d="M36 64 L52 64 L52 67.4 L36 67.4 Z" fill="currentColor"/></svg>Kitchen Table · ktworksheets.com</span>
+    <span>The Count</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>The Count &mdash; What Nobody Says</h1>
+    <p class="sub">A short story &middot; Page 4 of 6</p>
+  </header>
+
+
+
+
+  <ol class="qs" start="4"><li><span class="qt">&ldquo;I had thought it was for Mom. Mom drinks tea&rdquo; (¶10). What does the narrator realize in that moment? Why do you think she does not say it straight out?</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">&ldquo;My brother said I was being mean. I said I was being accurate. Those are different things&rdquo; (¶12). Is she right that they are different things? Could she be <b>both</b> at once? Explain.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Why does Grandpa write &ldquo;Cardinal 2&rdquo; every day? Use what he says in ¶10 and what he says in ¶14 in your answer.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Keep going on page 5 &rarr;</span>
+    <span class="brand kt-stamp"><svg class="kt-logo" viewBox="6 26 88 70" aria-hidden="true"><path d="M6 30 L94 30 L94 41 L6 41 Z" fill="currentColor"/><path d="M20 41 L31 41 L28 92 L23 92 Z" fill="currentColor"/><path d="M69 41 L80 41 L77 92 L72 92 Z" fill="currentColor"/><path d="M26 72 L74 72 L74 79 L26 79 Z" fill="currentColor"/><path d="M36 48 L62 48 L62 51.4 L36 51.4 Z" fill="currentColor"/><path d="M36 56 L62 56 L62 59.4 L36 59.4 Z" fill="currentColor"/><path d="M36 64 L52 64 L52 67.4 L36 67.4 Z" fill="currentColor"/></svg>Kitchen Table · ktworksheets.com</span>
+    <span>The Count</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>The Count &mdash; What Changed</h1>
+    <p class="sub">A short story &middot; Page 5 of 6</p>
+  </header>
+
+
+
+
+  <ol class="qs" start="7"><li><span class="qt">Ms. Ortiz’s rule comes back in ¶19, alone in its own paragraph, right before the narrator puts the pencil down. On that last morning, what is &ldquo;there&rdquo; in the kitchen that a bird count cannot write down?</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">What does the narrator want by the end, and how is it different from what she wanted at the start? Name the paragraph where you think it changed.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">The story ends with a question mark the narrator &ldquo;never answered&rdquo; (¶22). If she had answered it, what would she have written to Ms. Ortiz? Write it in her voice, in two or three sentences.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Keep going on page 6 &rarr;</span>
+    <span class="brand kt-stamp"><svg class="kt-logo" viewBox="6 26 88 70" aria-hidden="true"><path d="M6 30 L94 30 L94 41 L6 41 Z" fill="currentColor"/><path d="M20 41 L31 41 L28 92 L23 92 Z" fill="currentColor"/><path d="M69 41 L80 41 L77 92 L72 92 Z" fill="currentColor"/><path d="M26 72 L74 72 L74 79 L26 79 Z" fill="currentColor"/><path d="M36 48 L62 48 L62 51.4 L36 51.4 Z" fill="currentColor"/><path d="M36 56 L62 56 L62 59.4 L36 59.4 Z" fill="currentColor"/><path d="M36 64 L52 64 L52 67.4 L36 67.4 Z" fill="currentColor"/></svg>Kitchen Table · ktworksheets.com</span>
+    <span>The Count</span>
+  </footer>
+</div>
+
+<div class="page ">
+  <header class="cont">
+    
+    <h1>The Count &mdash; The Ending</h1>
+    <p class="sub">A short story &middot; Page 6 of 6</p>
+  </header>
+
+
+
+
+  <ol class="qs" start="10"><li><span class="qt">The writer could have ended with that answer. Instead the story stops at &ldquo;I never answered it.&rdquo; What does the story gain by <b>not</b> explaining?</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">The cardinal is &ldquo;so red he looked fake against the snow&rdquo; (¶7), and on the last morning he sits &ldquo;being red&rdquo; (¶18). Why might the writer keep pointing at the one bright thing in a gray, cold kitchen?</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Some readers think the narrator did the wrong thing: a science project should record what was really seen. Do you agree? Give one reason from the story and one of your own.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+
+  <footer>
+    <span>Answers on the parent page</span>
+    <span class="brand kt-stamp"><svg class="kt-logo" viewBox="6 26 88 70" aria-hidden="true"><path d="M6 30 L94 30 L94 41 L6 41 Z" fill="currentColor"/><path d="M20 41 L31 41 L28 92 L23 92 Z" fill="currentColor"/><path d="M69 41 L80 41 L77 92 L72 92 Z" fill="currentColor"/><path d="M26 72 L74 72 L74 79 L26 79 Z" fill="currentColor"/><path d="M36 48 L62 48 L62 51.4 L36 51.4 Z" fill="currentColor"/><path d="M36 56 L62 56 L62 59.4 L36 59.4 Z" fill="currentColor"/><path d="M36 64 L52 64 L52 67.4 L36 67.4 Z" fill="currentColor"/></svg>Kitchen Table · ktworksheets.com</span>
+    <span>The Count</span>
   </footer>
 </div>
 
@@ -424,7 +546,7 @@
 
 
   <div class="pnote"><b>Not medical advice.</b> A fever can go too high, and what to do about it is a doctor's call.</div>
-  <ol class="qs" start="1"><li><span class="qt">If a fever is your body helping itself, say why somebody might take medicine to bring it down anyway. Give a real reason, not just "it feels bad".</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Two people catch the same virus. One is much iller than the other. Using this sheet, give an explanation that is <b>not</b> "one of them got more virus".</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Somebody says "I have got rid of my cold, I only have the cough left". Say what is odd about that sentence.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+  <ol class="qs" start="1"><li><span class="qt">If a fever is your body helping itself, say why somebody might take medicine to bring it down anyway. Give a real reason, not just "it feels bad."</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Two people catch the same virus. One is much sicker than the other. Using this sheet, give an explanation that is <b>not</b> "one of them got more virus."</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">Somebody says "I have got rid of my cold, I only have the cough left." Say what is odd about that sentence.</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
 
   <footer>
     <span>Score: ______ / 3</span>

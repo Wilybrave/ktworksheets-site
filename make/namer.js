@@ -180,7 +180,7 @@ var __defs = {
  * sweep 1 = clockwise. large-arc 1 takes the long way round.
  */
 const UPPER = {
-  A: { w: 0.64, d: ['M0 1 L.32 0 L.64 1', 'M.14 .64 H.5'] },
+  A: { w: 0.64, d: ['M.32 0 L0 1', 'M.32 0 L.64 1', 'M.14 .64 H.5'] },
   B: { w: 0.56, d: ['M0 0 V1', 'M0 0 A.42 .25 0 0 1 0 .5', 'M0 .5 A.48 .25 0 0 1 0 1'] },
   C: { w: 0.62, d: ['M.54 .16 A.28 .48 0 1 0 .54 .84'] },
   D: { w: 0.62, d: ['M0 0 V1', 'M0 0 A.6 .5 0 0 1 0 1'] },
@@ -194,8 +194,8 @@ const UPPER = {
   J: { w: 0.5, d: ['M.4 0 V.76 A.18 .22 0 0 1 .04 .76'] },
   K: { w: 0.58, d: ['M0 0 V1', 'M.54 0 L.06 .55', 'M.22 .4 L.58 1'] },
   L: { w: 0.52, d: ['M0 0 V1 H.5'] },
-  M: { w: 0.68, d: ['M0 1 V0 L.34 .62 L.68 0 V1'] },
-  N: { w: 0.62, d: ['M0 1 V0 L.62 1 V0'] },
+  M: { w: 0.68, d: ['M0 0 V1', 'M0 0 L.34 .62 L.68 0 V1'] },
+  N: { w: 0.62, d: ['M0 0 V1', 'M0 0 L.62 1 V0'] },
   O: { w: 0.68, d: ['M.34 0 A.32 .5 0 0 0 .34 1 A.32 .5 0 0 0 .34 0'] },
   P: { w: 0.56, d: ['M0 0 V1', 'M0 0 A.46 .27 0 0 1 0 .54'] },
   Q: { w: 0.68, d: ['M.34 0 A.32 .5 0 0 0 .34 1 A.32 .5 0 0 0 .34 0', 'M.44 .74 L.68 1.06'] },
@@ -1761,7 +1761,7 @@ module.exports = {
  * sweep 1 = clockwise. large-arc 1 takes the long way round.
  */
 const UPPER = {
-  A: { w: 0.64, d: ['M0 1 L.32 0 L.64 1', 'M.14 .64 H.5'] },
+  A: { w: 0.64, d: ['M.32 0 L0 1', 'M.32 0 L.64 1', 'M.14 .64 H.5'] },
   B: { w: 0.56, d: ['M0 0 V1', 'M0 0 A.42 .25 0 0 1 0 .5', 'M0 .5 A.48 .25 0 0 1 0 1'] },
   C: { w: 0.62, d: ['M.54 .16 A.28 .48 0 1 0 .54 .84'] },
   D: { w: 0.62, d: ['M0 0 V1', 'M0 0 A.6 .5 0 0 1 0 1'] },
@@ -1775,8 +1775,8 @@ const UPPER = {
   J: { w: 0.5, d: ['M.4 0 V.76 A.18 .22 0 0 1 .04 .76'] },
   K: { w: 0.58, d: ['M0 0 V1', 'M.54 0 L.06 .55', 'M.22 .4 L.58 1'] },
   L: { w: 0.52, d: ['M0 0 V1 H.5'] },
-  M: { w: 0.68, d: ['M0 1 V0 L.34 .62 L.68 0 V1'] },
-  N: { w: 0.62, d: ['M0 1 V0 L.62 1 V0'] },
+  M: { w: 0.68, d: ['M0 0 V1', 'M0 0 L.34 .62 L.68 0 V1'] },
+  N: { w: 0.62, d: ['M0 0 V1', 'M0 0 L.62 1 V0'] },
   O: { w: 0.68, d: ['M.34 0 A.32 .5 0 0 0 .34 1 A.32 .5 0 0 0 .34 0'] },
   P: { w: 0.56, d: ['M0 0 V1', 'M0 0 A.46 .27 0 0 1 0 .54'] },
   Q: { w: 0.68, d: ['M.34 0 A.32 .5 0 0 0 .34 1 A.32 .5 0 0 0 .34 0', 'M.44 .74 L.68 1.06'] },
@@ -1965,8 +1965,12 @@ const RULE_H = '0.375in';
  * author-supplied string runs it through this; helpers that deliberately accept
  * markup (rich(), the answer-key `fixed` strings) say so in their comment.
  */
+/* An & that already begins an entity is left as it is: generators write
+ * &hellip; and &rsquo; into labels and titles, and escaping those a second
+ * time printed the code itself ("The letter stands for&hellip;", Grade 7 Math
+ * p.32; audit 2026-11-10). No worksheet ever means to print a literal entity. */
 const esc = (s) =>
-  String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  String(s).replace(/&(?!(?:[a-z]+|#\d+|#x[0-9a-f]+);)/gi, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
 /*
  * For the handful of places that WANT inline markup — <u> in an answer key,
@@ -2203,7 +2207,11 @@ const page = ({
   footR = '',
   cls = '',
   cont = false,
-}) => `<div class="page ${cls}">
+  /* true when the child cuts this page up: kdp.js then gives it a leaf of its
+   * own with a blank back. false says it is not a cut-out page even though
+   * it mentions cutting. Left out, kdp.js reads the page's words. */
+  cut,
+}) => `<div class="page ${cls}"${cut === true ? ' data-kdp-cut="yes"' : cut === false ? ' data-kdp-cut="no"' : ''}>
   <header${cont ? ' class="cont"' : ''}>
     ${badge ? `<div class="keybadge">${esc(badge)}</div>` : ''}
     <h1>${rich(title)}</h1>
@@ -2241,8 +2249,41 @@ ${body}
  *
  * So unnumbered answers go after the run, labeled, instead of inside it.
  */
-const keyPage = ({ title, sub, items, after = '', footL = '', footR = '', cols = 4 }) =>
-  page({
+/*
+ * KEY NUMBERS THAT MATCH THE SHEET (audit 2026-11-09). Position numbering went
+ * wrong in four books the same way: a sheet whose numbering skips (an
+ * unnumbered table, a section that restarts at 1) got a key numbered 1, 2, 3…
+ * straight through, so "9" in the key answered something other than question 9.
+ * An item may now say what it answers:
+ *   { n: 15, a: '…' }        printed as "15." and the run continues from 15
+ *   { label: 'Table', a: '…' } printed with that label and not counted
+ * Plain strings and items without either are numbered on from the last number,
+ * so every existing key prints exactly as before.
+ */
+/* `start` continues a count across key pages: a key split over two pages
+ * with items.slice(0, 6) and items.slice(6) restarted at 1 on the second
+ * (life-07, every online-safety key; audit 2026-11-10). */
+const keyNumbers = (items, start = 1) => {
+  let k = start - 1;
+  return items.map((it) => {
+    if (it && typeof it === 'object' && Number.isFinite(it.n)) return { n: (k = it.n), text: `${it.n}.` };
+    if (it && typeof it === 'object' && it.label) return { n: null, text: it.label };
+    k += 1;
+    return { n: k, text: `${k}.` };
+  });
+};
+
+/* An answer string that types its own number ("3. N — …") under a key that
+ * already prints that number came out "3. 3. N — …" (Grade 6 Math statistics
+ * key, audit 2026-11-10). Only the item's OWN number is taken off, so an answer
+ * that genuinely begins with a figure ("12. That is the…") is never touched
+ * unless it happens to be that very number with a period and a space. */
+const dropOwnNumber = (text, n) =>
+  n == null ? text : String(text).replace(new RegExp(`^\\s*${n}[.)]\\s+`), '');
+
+const keyPage = ({ title, sub, items, after = '', footL = '', footR = '', cols = 4, start = 1 }) => {
+  const nums = keyNumbers(items, start);
+  return page({
     badge: 'Answer Key — Parent Copy',
     title,
     sub,
@@ -2250,8 +2291,8 @@ const keyPage = ({ title, sub, items, after = '', footL = '', footR = '', cols =
     body: `<div class="grid keygrid" style="grid-template-columns:repeat(${cols},minmax(0,1fr))">${items
       .map(
         (it, i) =>
-          `<div class="prob"><span class="pn">${i + 1}.</span><div class="pbody">${rich(
-            typeof it === 'string' ? it : it.a
+          `<div class="prob"><span class="pn">${esc(nums[i].text)}</span><div class="pbody">${rich(
+            dropOwnNumber(typeof it === 'string' ? it : it.a, nums[i].n)
           )}${
             typeof it === 'object' && it.why
               ? `<span class="why">${rich(it.why)}</span>`
@@ -2262,6 +2303,7 @@ const keyPage = ({ title, sub, items, after = '', footL = '', footR = '', cols =
     footL,
     footR,
   });
+};
 
 /*
  * THE PARENT PAGE FOR A SHEET THAT HAS NO ANSWERS.
@@ -2316,10 +2358,13 @@ const guidePage = ({
 
   <div class="note" style="margin-top:8px">${rich(dont)}</div>
 
+  ${/* The list numbers the questions. Generators that typed "1. Where…" into
+        q printed "1. 1. Where…" (24 pages of Grade 6 Comprehension, audit
+        2026-11-10), so a typed number is taken off and the list's stands. */ ''}
   <ol class="guide" style="margin-top:12px">${items
     .map(
       (it) => `<li>
-      <div class="gq">${rich(it.q)}</div>
+      <div class="gq">${rich(String(it.q).replace(/^\s*\d+[.)]\s+/, ''))}</div>
       <div class="glook"><b>Looking for:</b> ${rich(it.look)}</div>
       <div class="gthin"><b>Not yet:</b> ${rich(it.thin)}</div>
       <div class="gask"><b>Ask:</b> ${rich(it.ask)}</div>
@@ -2333,25 +2378,41 @@ const guidePage = ({
 
 /* A key laid out as a numbered list instead of a grid — for written answers
  * that are sentences rather than numbers. */
-const keyListPage = ({ title, sub, items, footL = '', footR = '' }) =>
-  page({
+const keyListPage = ({ title, sub, items, footL = '', footR = '', start = 1 }) => {
+  /* Same { n } / { label } items as keyPage: an <ol> numbers by position, so
+   * an item that says its number gets value="n", and a labeled one is taken
+   * out of the count. */
+  const nums = keyNumbers(items, start);
+  let expect = 1;
+  return page({
     badge: 'Answer Key — Parent Copy',
     title,
     sub,
     cls: 'key',
     body: `<ol class="qs keylist">${items
       .map(
-        (it) =>
-          `<li><span class="qt">${rich(typeof it === 'string' ? it : it.a)}</span>${
+        (it, i) => {
+          const num = nums[i];
+          let open = '<li>';
+          if (num.n === null) {
+            open = `<li style="list-style:none;counter-increment:none"><b>${esc(num.text)}</b> `;
+            expect = -1; /* say the next number outright, whatever the counter did */
+          } else {
+            if (num.n !== expect) open = `<li value="${num.n}">`;
+            expect = num.n + 1;
+          }
+          return `${open}<span class="qt">${rich(dropOwnNumber(typeof it === 'string' ? it : it.a, num.n))}</span>${
             typeof it === 'object' && it.why
               ? `<span class="why">${rich(it.why)}</span>`
               : ''
-          }</li>`
+          }</li>`;
+        }
       )
       .join('')}</ol>`,
     footL,
     footR,
   });
+};
 
 /* --------------------------------------------------------------------- CSS */
 
@@ -2498,7 +2559,10 @@ const CSS = `
   .cring-full { background: var(--accent); }
   .cring-half { background: linear-gradient(90deg, var(--accent) 50%, #fff 50%); }
   .cring-none { background: #fff; }
-  ol.qs.hasconf li { overflow: hidden; }
+  /* The rings float right; a clearing ::after holds the float inside its
+     question. (overflow:hidden did the same and also clipped the list
+     number, which sits outside the li — audit 2026-11-10.) */
+  ol.qs.hasconf li::after { content: ''; display: block; clear: both; }
 
   .conflegend {
     border: 1.2px solid var(--rule); border-radius: 4px;
@@ -2545,7 +2609,10 @@ const CSS = `
   .opt { white-space: nowrap; }
 
   /* -------------------------------------------------------------- tables */
-  .tbl { border-collapse: collapse; margin: 8px 0; font-size: 11pt; width: 100%; }
+  /* Not quite 100%: a collapsed border sits half outside the table's box, so
+     a full-width table put half its right-hand rule past the column edge and
+     it printed open-ended (Grade 6 Math, every table; audit 2026-11-10). */
+  .tbl { border-collapse: collapse; margin: 8px 1px; font-size: 11pt; width: calc(100% - 2px); }
   .tbl th, .tbl td { border: 1.4px solid var(--ink); padding: 5px 8px; text-align: left; }
   .tbl th { color: var(--slate); }
   .tbl th { background: var(--tint); font-size: 10pt; letter-spacing: .02em; }

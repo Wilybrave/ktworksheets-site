@@ -150,7 +150,10 @@
   .cring-full { background: var(--accent); }
   .cring-half { background: linear-gradient(90deg, var(--accent) 50%, #fff 50%); }
   .cring-none { background: #fff; }
-  ol.qs.hasconf li { overflow: hidden; }
+  /* The rings float right; a clearing ::after holds the float inside its
+     question. (overflow:hidden did the same and also clipped the list
+     number, which sits outside the li — audit 2026-11-10.) */
+  ol.qs.hasconf li::after { content: ''; display: block; clear: both; }
 
   .conflegend {
     border: 1.2px solid var(--rule); border-radius: 4px;
@@ -197,7 +200,10 @@
   .opt { white-space: nowrap; }
 
   /* -------------------------------------------------------------- tables */
-  .tbl { border-collapse: collapse; margin: 8px 0; font-size: 11pt; width: 100%; }
+  /* Not quite 100%: a collapsed border sits half outside the table's box, so
+     a full-width table put half its right-hand rule past the column edge and
+     it printed open-ended (Grade 6 Math, every table; audit 2026-11-10). */
+  .tbl { border-collapse: collapse; margin: 8px 1px; font-size: 11pt; width: calc(100% - 2px); }
   .tbl th, .tbl td { border: 1.4px solid var(--ink); padding: 5px 8px; text-align: left; }
   .tbl th { color: var(--slate); }
   .tbl th { background: var(--tint); font-size: 10pt; letter-spacing: .02em; }
@@ -589,7 +595,7 @@
 <div class="page ">
   <header>
     
-    <h1>Square Roots and Cube Roots</h1>
+    <h1>Catching a Repeating Decimal</h1>
     <p class="sub">Grade 8 · Number · Page 1 of 2</p>
   </header>
   <div class="nameline">
@@ -597,27 +603,24 @@
     <span class="short">Date</span>
   </div>
   <div class="directions">
-    <b>DIRECTIONS:</b> Fill every gap in both tables, then work out Part C.
+    <b>DIRECTIONS:</b> Write each repeating decimal as a fraction in simplest form. Show the subtraction.
+    <div class="tip">The bar marks the digits that repeat: 0.<span class="rep">27</span> means 0.272727&hellip;</div>
   </div>
 
-<div class="fill" style="zoom:1.35">
-  <div class="note" style="margin-top:2px"><span class="rt">√<span class="rad">144</span></span> = 12, because 12 &times; 12 = 144.
-  &nbsp; <span class="rt"><span class="idx">3</span>√<span class="rad">125</span></span> = 5, because 5 &times; 5 &times; 5 = 125.</div>
+<div class="fill" style="zoom:1.1">
+  <div class="note" style="margin-top:2px"><b>Example:</b> x = 0.<span class="rep">27</span>. Two digits repeat,
+  so multiply by 100 to slide the repeat over by two places, then subtract. The tails are the same, so they cancel.
+  <table class="wk">
+    <tr><td>100x =</td><td>27.272727&hellip;</td><td class="l"></td></tr>
+    <tr><td>&minus; x =</td><td>0.272727&hellip;</td><td class="l"></td></tr>
+    <tr class="sum"><td>99x =</td><td>27</td><td class="l">so x = 27/99 = <b>3/11</b>. &nbsp;Check: 3 &divide; 11 = 0.2727&hellip;</td></tr>
+  </table></div>
 
-  <div class="label" style="font-weight:bold;font-size:11pt;margin:13px 0 6px">Part A — The perfect squares. Fill every gap.</div>
-  <table class="tbl ">
-    <thead><tr><th>n</th><th>n²</th><th>n</th><th>n²</th><th>n</th><th>n²</th></tr></thead>
-    <tbody><tr><td>1</td><td class="blank"></td><td>6</td><td>36</td><td>11</td><td class="blank"></td></tr><tr><td>2</td><td>4</td><td>7</td><td>49</td><td>12</td><td class="blank"></td></tr><tr><td>3</td><td class="blank"></td><td>8</td><td class="blank"></td><td>13</td><td class="blank"></td></tr><tr><td>4</td><td>16</td><td>9</td><td class="blank"></td><td>14</td><td>196</td></tr><tr><td>5</td><td class="blank"></td><td>10</td><td class="blank"></td><td>15</td><td>225</td></tr></tbody>
-  </table>
+  <div class="label" style="font-weight:bold;font-size:11pt;margin:12px 0 6px">Part A — One digit repeats. Multiply by 10, then subtract x.</div>
+  <div class="grid " style="grid-template-columns:repeat(2,1fr)"><div class="prob"><span class="pn">1.</span><div class="pbody"><span class="expr">x = 0.<span class="rep">7</span></span> <span style="font-size:9pt;color:var(--muted)">(0.7777&hellip;)</span><div class="work" style="height:0.85in"><span></span></div>fraction <span class="abox" style="width:0.95in;height:0.42in"></span></div></div><div class="prob"><span class="pn">2.</span><div class="pbody"><span class="expr">x = 0.<span class="rep">5</span></span> <span style="font-size:9pt;color:var(--muted)">(0.5555&hellip;)</span><div class="work" style="height:0.85in"><span></span></div>fraction <span class="abox" style="width:0.95in;height:0.42in"></span></div></div><div class="prob"><span class="pn">3.</span><div class="pbody"><span class="expr">x = 0.<span class="rep">6</span></span> <span style="font-size:9pt;color:var(--muted)">(0.6666&hellip;)</span><div class="work" style="height:0.85in"><span></span></div>fraction <span class="abox" style="width:0.95in;height:0.42in"></span></div></div><div class="prob"><span class="pn">4.</span><div class="pbody"><span class="expr">x = 0.<span class="rep">1</span></span> <span style="font-size:9pt;color:var(--muted)">(0.1111&hellip;)</span><div class="work" style="height:0.85in"><span></span></div>fraction <span class="abox" style="width:0.95in;height:0.42in"></span></div></div></div>
 
-  <div class="label" style="font-weight:bold;font-size:11pt;margin:13px 0 6px">Part B — The perfect cubes.</div>
-  <table class="tbl ">
-    <thead><tr><th>n</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th></tr></thead>
-    <tbody><tr><td>n³</td><td class="blank"></td><td class="blank"></td><td class="blank"></td><td>64</td><td>125</td></tr></tbody>
-  </table>
-
-  <div class="label" style="font-weight:bold;font-size:11pt;margin:13px 0 6px">Part C — Evaluate.</div>
-  <div class="grid " style="grid-template-columns:repeat(3,1fr)"><div class="prob"><span class="pn">3.</span><div class="pbody"><span class="expr"><span class="rt">√<span class="rad">100</span></span></span> = <span class="abox" style="width:0.6in;height:0.34in"></span></div></div><div class="prob"><span class="pn">4.</span><div class="pbody"><span class="expr"><span class="rt">√<span class="rad">64</span></span></span> = <span class="abox" style="width:0.6in;height:0.34in"></span></div></div><div class="prob"><span class="pn">5.</span><div class="pbody"><span class="expr"><span class="rt">√<span class="rad">25</span></span></span> = <span class="abox" style="width:0.6in;height:0.34in"></span></div></div><div class="prob"><span class="pn">6.</span><div class="pbody"><span class="expr"><span class="rt"><span class="idx">3</span>√<span class="rad">&minus;64</span></span></span> = <span class="abox" style="width:0.6in;height:0.34in"></span></div></div><div class="prob"><span class="pn">7.</span><div class="pbody"><span class="expr"><span class="rt"><span class="idx">3</span>√<span class="rad">8</span></span></span> = <span class="abox" style="width:0.6in;height:0.34in"></span></div></div></div></div>
+  <div class="label" style="font-weight:bold;font-size:11pt;margin:12px 0 6px">Part B — Two digits repeat. Multiply by 100, then subtract x.</div>
+  <div class="grid " style="grid-template-columns:repeat(2,1fr)"><div class="prob"><span class="pn">5.</span><div class="pbody"><span class="expr">x = 0.<span class="rep">15</span></span> <span style="font-size:9pt;color:var(--muted)">(0.151515&hellip;)</span><div class="work" style="height:0.95in"><span></span></div>fraction <span class="abox" style="width:0.95in;height:0.42in"></span></div></div><div class="prob"><span class="pn">6.</span><div class="pbody"><span class="expr">x = 0.<span class="rep">72</span></span> <span style="font-size:9pt;color:var(--muted)">(0.727272&hellip;)</span><div class="work" style="height:0.95in"><span></span></div>fraction <span class="abox" style="width:0.95in;height:0.42in"></span></div></div></div></div>
 
   <footer>
     <span>Keep going on page 2 &rarr;</span>
@@ -629,24 +632,23 @@
 <div class="page ">
   <header class="cont">
     
-    <h1>Square Roots and Cube Roots — continued</h1>
+    <h1>Catching a Repeating Decimal — continued</h1>
     <p class="sub">Grade 8 · Number · Page 2 of 2</p>
   </header>
 
 
 
-<div class="fill" style="zoom:1.05">
-  <div class="note" style="margin-top:2px">x&sup2; = 49 has two answers, 7 and &minus;7. But <span class="rt">√<span class="rad">49</span></span>
-  means only the positive one: 7.</div>
+<div class="fill" style="zoom:1">
+  <div class="grid " style="grid-template-columns:repeat(2,1fr)"><div class="prob"><span class="pn">7.</span><div class="pbody"><span class="expr">x = 0.<span class="rep">18</span></span> <span style="font-size:9pt;color:var(--muted)">(0.181818&hellip;)</span><div class="work" style="height:0.95in"><span></span></div>fraction <span class="abox" style="width:0.95in;height:0.42in"></span></div></div><div class="prob"><span class="pn">8.</span><div class="pbody"><span class="expr">x = 0.<span class="rep">81</span></span> <span style="font-size:9pt;color:var(--muted)">(0.818181&hellip;)</span><div class="work" style="height:0.95in"><span></span></div>fraction <span class="abox" style="width:0.95in;height:0.42in"></span></div></div></div>
 
-  <div class="label" style="font-weight:bold;font-size:11pt;margin:13px 0 6px">Part D — Solve. Give every answer the equation has.</div>
-  <div class="grid " style="grid-template-columns:repeat(3,1fr)"><div class="prob"><span class="pn">8.</span><div class="pbody"><span class="expr">x&sup2; = 196</span><br>x = <span class="abox" style="width:0.5in;height:0.32in"></span> <span style="font-size:9pt;color:var(--muted)">or</span> x = <span class="abox" style="width:0.5in;height:0.32in"></span></div></div><div class="prob"><span class="pn">9.</span><div class="pbody"><span class="expr">x&sup2; = 225</span><br>x = <span class="abox" style="width:0.5in;height:0.32in"></span> <span style="font-size:9pt;color:var(--muted)">or</span> x = <span class="abox" style="width:0.5in;height:0.32in"></span></div></div><div class="prob"><span class="pn">10.</span><div class="pbody"><span class="expr">x&sup2; = 121</span><br>x = <span class="abox" style="width:0.5in;height:0.32in"></span> <span style="font-size:9pt;color:var(--muted)">or</span> x = <span class="abox" style="width:0.5in;height:0.32in"></span></div></div><div class="prob"><span class="pn">11.</span><div class="pbody"><span class="expr">x&sup3; = &minus;27</span><br>x = <span class="abox" style="width:0.5in;height:0.32in"></span></div></div></div>
+  <div class="label" style="font-weight:bold;font-size:11pt;margin:12px 0 6px">Part C — A whole number in front, and a repeat that starts late.</div>
+  <div class="grid " style="grid-template-columns:repeat(2,1fr)"><div class="prob"><span class="pn">9.</span><div class="pbody"><span class="expr">x = 2.<span class="rep">2</span></span> <span style="font-size:9pt;color:var(--muted)">(2.2222&hellip;)</span><div class="work" style="height:1in"><span></span></div>fraction <span class="abox" style="width:0.95in;height:0.42in"></span></div></div><div class="prob"><span class="pn">10.</span><div class="pbody"><span class="expr">x = 0.1<span class="rep">6</span></span> <span style="font-size:9pt;color:var(--muted)">(0.16666&hellip;)</span><div class="work" style="height:1in"><span></span></div>fraction <span class="abox" style="width:0.95in;height:0.42in"></span><br><span style="font-size:9pt;color:var(--muted)">Hint: multiply by 10 AND by 100, then subtract those two.</span></div></div></div>
 
-  <div class="label" style="font-weight:bold;font-size:11pt;margin:13px 0 6px">Part E — Explain it.</div>
-  <ol class="qs" start="12"><li><span class="qt">Priya solves x&sup2; = 81 and writes x = 9. She is not wrong, but she is not finished. What is missing &mdash; and why does <span class="rt">√<span class="rad">81</span></span> = 9 have only the one answer?</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li><li><span class="qt">In Part C you worked out <span class="rt"><span class="idx">3</span>√<span class="rad">&minus;64</span></span>, and it is a perfectly ordinary number. But <span class="rt">√<span class="rad">&minus;64</span></span> is not a number at all. What is the difference between cubing and squaring that causes that?</span><div class="write"></div><div class="write"></div><div class="write"></div><div class="write"></div></li></ol></div>
+  <div class="label" style="font-weight:bold;font-size:11pt;margin:12px 0 6px">Part D — Check it, and a surprise.</div>
+  <ol class="qs" start="11"><li><span class="qt">Question 5 said 0.<span class="rep">15</span> is a fraction. Divide its numerator by its denominator using long division. Write the remainder at each step. When does a remainder come back, and what does that do to the digits?</span><div class="work" style="height:1.05in"><span>Show your work</span></div></li><li><span class="qt">Use the same method on x = 0.<span class="rep">9</span> (0.9999&hellip;). What number do you get? Does that seem right? Explain in a sentence.</span><div class="work" style="height:0.7in"><span>Show your work</span></div><div class="write"></div></li></ol></div>
 
   <footer>
-    <span>Score: ______ / 13</span>
+    <span>Score: ______ / 12</span>
     <span class="brand kt-stamp"><svg class="kt-logo" viewBox="6 26 88 70" aria-hidden="true"><path d="M6 30 L94 30 L94 41 L6 41 Z" fill="currentColor"/><path d="M20 41 L31 41 L28 92 L23 92 Z" fill="currentColor"/><path d="M69 41 L80 41 L77 92 L72 92 Z" fill="currentColor"/><path d="M26 72 L74 72 L74 79 L26 79 Z" fill="currentColor"/><path d="M36 48 L62 48 L62 51.4 L36 51.4 Z" fill="currentColor"/><path d="M36 56 L62 56 L62 59.4 L36 59.4 Z" fill="currentColor"/><path d="M36 64 L52 64 L52 67.4 L36 67.4 Z" fill="currentColor"/></svg>Kitchen Table · ktworksheets.com</span>
     <span>Number</span>
   </footer>

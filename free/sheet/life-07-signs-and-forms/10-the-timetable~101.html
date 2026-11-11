@@ -152,7 +152,10 @@
   .cring-full { background: var(--accent); }
   .cring-half { background: linear-gradient(90deg, var(--accent) 50%, #fff 50%); }
   .cring-none { background: #fff; }
-  ol.qs.hasconf li { overflow: hidden; }
+  /* The rings float right; a clearing ::after holds the float inside its
+     question. (overflow:hidden did the same and also clipped the list
+     number, which sits outside the li — audit 2026-11-10.) */
+  ol.qs.hasconf li::after { content: ''; display: block; clear: both; }
 
   .conflegend {
     border: 1.2px solid var(--rule); border-radius: 4px;
@@ -199,7 +202,10 @@
   .opt { white-space: nowrap; }
 
   /* -------------------------------------------------------------- tables */
-  .tbl { border-collapse: collapse; margin: 8px 0; font-size: 11pt; width: 100%; }
+  /* Not quite 100%: a collapsed border sits half outside the table's box, so
+     a full-width table put half its right-hand rule past the column edge and
+     it printed open-ended (Grade 6 Math, every table; audit 2026-11-10). */
+  .tbl { border-collapse: collapse; margin: 8px 1px; font-size: 11pt; width: calc(100% - 2px); }
   .tbl th, .tbl td { border: 1.4px solid var(--ink); padding: 5px 8px; text-align: left; }
   .tbl th { color: var(--slate); }
   .tbl th { background: var(--tint); font-size: 10pt; letter-spacing: .02em; }
@@ -421,7 +427,7 @@
 
 
   <div class="rules"><b>The last bus that fits is the answer</b>, not the first. An earlier one just means
-  standing about.</div>
+  waiting.</div>
 
   <table class="tbl tt">
   <thead><tr><th class="stopcol">Stop</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th></tr></thead>
@@ -455,7 +461,7 @@
   </div>
 
 
-  <ol class="qs" start="5"><li><span class="qt">You have to be at <b>The Library</b> by 9:00&thinsp;am. Which is the last bus you can catch, and what time does it leave Elm Street?</span><div class="work" style="height:2.3in"><span>Show your work</span></div></li><li><span class="qt">Take that bus. How long are you standing about at the library before 9:00&thinsp;am?</span><div class="write"></div><div class="write"></div></li><li><span class="qt">Your friend says "just get bus 4, it is quicker" &mdash; but you are going to the <b>Swimming Pool</b>. What is wrong with that advice?</span><div class="write"></div><div class="write"></div></li><li><span class="qt">The pool closes at 11:00&thinsp;am. What is the last bus that gets you there while it is still open, and how long would you have?</span><div class="work" style="height:0.8in"><span>Show your work</span></div></li></ol>
+  <ol class="qs" start="5"><li><span class="qt">You have to be at <b>The Library</b> by 9:00&thinsp;am. Which is the last bus you can catch, and what time does it leave Elm Street?</span><div class="work" style="height:2.3in"><span>Show your work</span></div></li><li><span class="qt">Take that bus. How long are you waiting at the library before 9:00&thinsp;am?</span><div class="write"></div><div class="write"></div></li><li><span class="qt">Your friend says "just get bus 4, it is quicker" &mdash; but you are going to the <b>Swimming Pool</b>. What is wrong with that advice?</span><div class="write"></div><div class="write"></div></li><li><span class="qt">The pool closes at 11:00&thinsp;am. What is the last bus that gets you there while it is still open, and how long would you have?</span><div class="work" style="height:0.8in"><span>Show your work</span></div></li></ol>
 
 
   <footer>
@@ -488,7 +494,7 @@
   </tbody>
 </table>
 
-  <ol class="qs" start="9"><li><span class="qt">You get to Elm Street at 8:13&thinsp;am and the bus has just gone. When is the next one, and how long is the wait?</span><div class="write"></div><div class="write"></div></li><li><span class="qt">Somebody tells you "there is a bus every half hour". Look down the Elm Street row and say whether that is true.</span><div class="write"></div><div class="write"></div></li></ol>
+  <ol class="qs" start="9"><li><span class="qt">You get to Elm Street at 8:13&thinsp;am and the bus has just gone. When is the next one, and how long is the wait?</span><div class="write"></div><div class="write"></div></li><li><span class="qt">Somebody tells you, "There is a bus every half hour." Look down the Elm Street row and say whether that is true.</span><div class="write"></div><div class="write"></div></li></ol>
 
 
   <footer>
@@ -510,7 +516,7 @@
   </div>
 
 
-  <ol class="qs" start="11"><li><span class="qt">Which gap between buses is the longest one on this timetable? Write the two times and the length of the gap.</span><div class="work" style="height:1.2in"><span>Show your work</span></div></li><li><span class="qt">A timetable tells you when the bus is <b>meant</b> to be there. Write one sentence about what you should do differently because of the word "meant".</span><div class="write"></div><div class="write"></div></li><li><span class="qt">You need to be at Hill Top, and you can walk there from The Library in 20 minutes. Does that give you any bus you did not have before? Which one, and why might you still not want it?</span><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
+  <ol class="qs" start="11"><li><span class="qt">Look along the Elm Street row. Which gap between buses is the longest? Write the two times and the length of the gap.</span><div class="work" style="height:1.2in"><span>Show your work</span></div></li><li><span class="qt">A timetable tells you when the bus is <b>meant</b> to be there. Write one sentence about what you should do differently because of the word <i>meant</i>.</span><div class="write"></div><div class="write"></div></li><li><span class="qt">You need to be at Hill Top, and you can walk there from The Library in 20 minutes. Does that give you any bus you did not have before? Which one, and why might you still not want it?</span><div class="write"></div><div class="write"></div><div class="write"></div></li></ol>
 
 
   <footer>

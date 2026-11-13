@@ -21,7 +21,7 @@
 <meta name="twitter:title" content="Kitchen Table Worksheets — printable practice, pre-K to grade 8">
 <meta name="twitter:description" content="Printable worksheets and coloring pages for kids, pre-K to grade 8. Made to be done at the table, with you beside them.">
 <meta name="twitter:image" content="https://ktworksheets.com/homeimg/og.png">
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://ktworksheets.com/#org","name":"Wilcodes LLC","url":"https://ktworksheets.com/","email":"hello@ktworksheets.com","address":{"@type":"PostalAddress","addressLocality":"Delray Beach","addressRegion":"FL","addressCountry":"US"}},{"@type":"WebSite","@id":"https://ktworksheets.com/#site","name":"Kitchen Table Worksheets","url":"https://ktworksheets.com/","publisher":{"@id":"https://ktworksheets.com/#org"}},{"@type":"MobileApplication","name":"Kitchen Table Worksheets","operatingSystem":"iOS, iPadOS, Android","sameAs":["https://play.google.com/store/apps/details?id=com.wilcodes.kitchentable"],"applicationCategory":"EducationalApplication","url":"https://apps.apple.com/app/kitchen-table-worksheets/id6817992308","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":"https://ktworksheets.com/#org"}}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://ktworksheets.com/#org","name":"Wilcodes LLC","url":"https://ktworksheets.com/","email":"hello@ktworksheets.com","address":{"@type":"PostalAddress","addressLocality":"Delray Beach","addressRegion":"FL","addressCountry":"US"}},{"@type":"WebSite","@id":"https://ktworksheets.com/#site","name":"Kitchen Table Worksheets","url":"https://ktworksheets.com/","publisher":{"@id":"https://ktworksheets.com/#org"}},{"@type":"MobileApplication","name":"Kitchen Table Worksheets","operatingSystem":"iOS, iPadOS, Android","sameAs":["https://play.google.com/store/apps/details?id=com.wilcodes.kitchentable"],"applicationCategory":"EducationalApplication","url":"https://apps.apple.com/app/kitchen-table-worksheets/id6817992308","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":"https://ktworksheets.com/#org"}},{"@type":"Book","name":"Grade 3 Math Workbook","isbn":"9798141256370","bookFormat":"https://schema.org/Paperback","author":{"@type":"Organization","name":"Kitchen Table"},"publisher":{"@id":"https://ktworksheets.com/#org"},"typicalAgeRange":"8-9","educationalLevel":"Grade 3","inLanguage":"en-US","url":"https://www.amazon.com/dp/B0HRB1PJZ4"},{"@type":"Book","name":"Grade 3 Language Arts Workbook","isbn":"9798141259814","bookFormat":"https://schema.org/Paperback","author":{"@type":"Organization","name":"Kitchen Table"},"publisher":{"@id":"https://ktworksheets.com/#org"},"typicalAgeRange":"8-9","educationalLevel":"Grade 3","inLanguage":"en-US","url":"https://www.amazon.com/dp/B0HR9X66H6"}]}</script>
 <!--
   The template for (see make-site.js, THE WARM LOOK) the Kitchen Table home page,
   in the manner of the Nudge one — one long scroll with two pinned scenes. The real site
@@ -209,6 +209,10 @@ h1,h2,h3{font-weight:700;letter-spacing:-.02em;line-height:1.02;margin:0}
 .tile:hover img{transform:translate(-4px,-4px);box-shadow:6px 6px 0 var(--ink)}
 .tile b{display:block;margin-top:.6rem;line-height:1.25}
 .tile span{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+/* a workbook: the paperback (Amazon) where there is one, and the PDF (Etsy) */
+.tile .buy{display:flex;flex-wrap:wrap;gap:.3rem .9rem;margin-top:.35rem}
+.tile .buy a{font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink);text-underline-offset:3px}
+.tile .buy a:hover{color:var(--accent)}
 
 /* what it does not do */
 .nots{padding:4rem 0}
@@ -504,7 +508,7 @@ html.dusk .close h2 em{color:#fff}
 <section class="free" style="padding-top:2rem"><div class="wrap">
   <span class="tab rv">Whole workbooks</span>
   <h2 class="rv">Want the whole book?</h2>
-  <p class="rv">Six of the shelf's workbooks are on Etsy as printable PDFs, with the answers in the back. No app needed.</p>
+  <p class="rv">Six of the shelf's workbooks are printable PDFs on Etsy, and the Grade 3 books are paperbacks on Amazon too. Answers in the back, no app needed.</p>
   <div class="grid3" id="books"></div>
   <a class="btn rv" href="https://www.etsy.com/shop/KitchenTableWorkbook" target="_blank" rel="noopener">See the Etsy shop</a>
 </div></section>
@@ -568,8 +572,10 @@ html.dusk .close h2 em{color:#fff}
     ['math-04-prek','10-numbers-trace','Numbers 0 to 9','Math · age 4',S+'math-04-prek.jpg'],['english-08-cursive','10-the-climbers','The Climbers','Cursive · age 8',S+'english-08-cursive.jpg']];
   $('#freegrid').innerHTML=FREE.map(function(f){return '<a class="tile rv" href="/free/'+f[0]+'/'+f[1]+'.html"><img src="'+f[4]+'" alt="'+f[2]+', a printable worksheet" loading="lazy"><b>'+f[2]+'</b><span>'+f[3]+'</span></a>'}).join('');
   var SHOP='https://www.etsy.com/shop/KitchenTableWorkbook';
-  var BOOKS=[['math-04-05','Pre-K & K Math',''],['english-04-prek','Pre-K Handwriting',''],['math-06-grade1','Grade 1 Math','4613690493'],['math-07-grade2','Grade 2 Math','4613691149'],['math-08-grade3','Grade 3 Math','4613259612'],['english-08-grade3-reading','Grade 3 Language Arts','']];
-  $('#books').innerHTML=BOOKS.map(function(b){return '<a class="tile rv" target="_blank" rel="noopener" href="'+(b[2]?'https://www.etsy.com/listing/'+b[2]:SHOP)+'"><img src="/home/etsy-'+b[0]+'.jpg" alt="'+b[1]+' workbook" loading="lazy"><b>'+b[1]+'</b><span>Printable PDF</span></a>'}).join('');
+  /* [slug, title, Etsy listing id, Amazon paperback ASIN] — paperbacks LIVE 2026-11-12: Grade 3 Math + Language Arts */
+  var BOOKS=[['math-04-05','Pre-K & K Math','',''],['english-04-prek','Pre-K Handwriting','',''],['math-06-grade1','Grade 1 Math','4613690493',''],['math-07-grade2','Grade 2 Math','4613691149',''],['math-08-grade3','Grade 3 Math','4613259612','B0HRB1PJZ4'],['english-08-grade3-reading','Grade 3 Language Arts','','B0HR9X66H6']];
+  $('#books').innerHTML=BOOKS.map(function(b){var etsy=b[2]?'https://www.etsy.com/listing/'+b[2]:SHOP,amz=b[3]?'https://www.amazon.com/dp/'+b[3]:'',x=' target="_blank" rel="noopener"';
+    return '<div class="tile rv"><a'+x+' href="'+(amz||etsy)+'"><img src="/home/etsy-'+b[0]+'.jpg" alt="'+b[1]+' workbook'+(amz?', paperback and printable PDF':', printable PDF')+'" loading="lazy"></a><b>'+b[1]+'</b><span class="buy">'+(amz?'<a'+x+' href="'+amz+'">Paperback · Amazon</a>':'')+'<a'+x+' href="'+etsy+'">'+(amz?'PDF · Etsy':'Printable PDF · Etsy')+'</a></span></div>'}).join('');
 
   /* statement words */
   var st=$('#statement'),words=[];

@@ -2917,7 +2917,21 @@ ${pages.join('\n\n')}
  * Write a file and report it the same way every generator does, so `node
  * build.js` output reads as one list rather than five different formats.
  */
+/*
+ * ONE SHEET, WHEN ONE IS ALL THAT IS WANTED. The app makes a sheet by running
+ * its whole generator, and a colouring generator builds up to 18 sheets of
+ * 10-15 MB each (every drawing base64'd) to hand back one: about 187 MB for the
+ * famous places, which crashed the phone (2026-11-12). The app sets
+ * globalThis.__KT_ONLY to the file it wants; a generator that asks wanted()
+ * skips the rest. Node never sets it, so the shelf build is unchanged.
+ */
+function wanted(file) {
+  const only = globalThis.__KT_ONLY;
+  return !only || only === file;
+}
+
 function emit(fs, path, outDir, name, html, note = '') {
+  if (html == null) return; /* skipped by wanted() */
   fs.writeFileSync(path.join(outDir, name), html);
   console.log(`${name.padEnd(34)} ${note}`);
 }
@@ -2979,6 +2993,7 @@ module.exports = {
   guidePage,
   doc,
   emit,
+  wanted,
   CSS,
 };
 

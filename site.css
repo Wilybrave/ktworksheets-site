@@ -351,8 +351,10 @@
   .getapp .qr svg { display:block; }
   .getapp-text b { display:block; font-size:1rem; line-height:1.3; }
   .getapp-text span { display:block; margin-top:.3rem; font-size:.85rem; color:var(--muted); }
-  .getapp-text .badge { display:block; width:8.5rem; height:2.84rem; margin-top:.55rem; }
-  .getapp-text .badge svg { display:block; }
+  .getapp-text .badges { display:flex; flex-wrap:wrap; gap:.45rem; margin-top:.55rem; }
+  .getapp-text .badge { display:block; width:7.2rem; height:2.4rem; }
+  .getapp-text .badge.play { width:8.06rem; }
+  .getapp-text .badge svg, .getapp-text .badge img { display:block; width:100%; height:100%; }
   .apppanel > p { max-width:34rem; }
 
 

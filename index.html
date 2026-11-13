@@ -181,10 +181,13 @@ h1,h2,h3{font-weight:700;letter-spacing:-.02em;line-height:1.02;margin:0}
 .app h2{font-size:clamp(2.2rem,6vw,4.8rem);max-width:15ch;margin:.8rem 0 2.5rem}
 .appgrid{display:grid;grid-template-columns:19rem 1fr;gap:2.5rem;align-items:start}
 .vid{position:relative}
-.vid video{width:100%;aspect-ratio:9/16;object-fit:cover;border:3px solid var(--ink);border-radius:1.6rem;background:var(--ground);display:block;box-shadow:var(--sh) var(--sh) 0 var(--ink)}
+.vid video{width:100%;aspect-ratio:9/16;object-fit:contain;border:3px solid var(--ink);border-radius:1.6rem;background:var(--ground);display:block;box-shadow:var(--sh) var(--sh) 0 var(--ink)}
 .play{position:absolute;left:50%;bottom:9%;margin-left:-2.4rem;width:4.8rem;height:4.8rem;border-radius:50%;border:3px solid var(--ink);background:var(--paper);cursor:pointer;display:grid;place-items:center;box-shadow:5px 5px 0 var(--ink)}
 .play:after{content:"";border-style:solid;border-width:.9rem 0 .9rem 1.5rem;border-color:transparent transparent transparent var(--ink);margin-left:.35rem}
 .vid.playing .play{display:none}
+/* expanded: the whole portrait video on black, not zoomed to fill a wide screen, and none of the card styling */
+.vid video:fullscreen{object-fit:contain;border:0!important;border-radius:0;box-shadow:none!important;background:#000;aspect-ratio:auto}
+.vid video:-webkit-full-screen{object-fit:contain;border:0!important;border-radius:0;box-shadow:none!important;background:#000;aspect-ratio:auto}
 .shots{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem}
 .shots figure{margin:0}
 .shots img{border:3px solid var(--ink);border-radius:1rem;width:100%}

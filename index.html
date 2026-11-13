@@ -204,6 +204,8 @@ h1,h2,h3{font-weight:700;letter-spacing:-.02em;line-height:1.02;margin:0}
 .free>.wrap>p{max-width:40rem;color:var(--muted)}
 .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:1.2rem;margin:2rem 0}
 .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;margin:2rem 0}
+/* ten workbooks: two rows of five, math above reading by grade */
+.grid3.books5{grid-template-columns:repeat(5,1fr)}
 .tile{display:block;text-decoration:none}
 .tile img{border:3px solid var(--ink);background:#fff;width:100%;transition:transform .25s ease,box-shadow .25s ease}
 .tile:hover img{transform:translate(-4px,-4px);box-shadow:6px 6px 0 var(--ink)}
@@ -347,6 +349,7 @@ html.dusk .close h2 em{color:#fff}
   .vid{max-width:17rem;margin:0 auto}
   .shots,.grid4{grid-template-columns:repeat(2,1fr)}
   .grid3{grid-template-columns:repeat(2,1fr)}
+  .grid3.books5{grid-template-columns:repeat(2,1fr)}
   .nots .grid3{grid-template-columns:1fr}
   .getit .qr{display:none}
   .state{padding:5rem 0}
@@ -508,8 +511,8 @@ html.dusk .close h2 em{color:#fff}
 <section class="free" style="padding-top:2rem"><div class="wrap">
   <span class="tab rv">Whole workbooks</span>
   <h2 class="rv">Want the whole book?</h2>
-  <p class="rv">Six of the shelf's workbooks are printable PDFs on Etsy, and the Grade 3 books are paperbacks on Amazon too. Answers in the back, no app needed.</p>
-  <div class="grid3" id="books"></div>
+  <p class="rv">Ten of the shelf's workbooks, pre-K to grade 4, are printable PDFs on Etsy, and the Grade 3 books are paperbacks on Amazon too. Answers in the back, no app needed.</p>
+  <div class="grid3 books5" id="books"></div>
   <a class="btn rv" href="https://www.etsy.com/shop/KitchenTableWorkbook" target="_blank" rel="noopener">See the Etsy shop</a>
 </div></section>
 
@@ -573,7 +576,9 @@ html.dusk .close h2 em{color:#fff}
   $('#freegrid').innerHTML=FREE.map(function(f){return '<a class="tile rv" href="/free/'+f[0]+'/'+f[1]+'.html"><img src="'+f[4]+'" alt="'+f[2]+', a printable worksheet" loading="lazy"><b>'+f[2]+'</b><span>'+f[3]+'</span></a>'}).join('');
   var SHOP='https://www.etsy.com/shop/KitchenTableWorkbook';
   /* [slug, title, Etsy listing id, Amazon paperback ASIN] — paperbacks LIVE 2026-11-12: Grade 3 Math + Language Arts */
-  var BOOKS=[['math-04-05','Pre-K & K Math','',''],['english-04-prek','Pre-K Handwriting','',''],['math-06-grade1','Grade 1 Math','4613690493',''],['math-07-grade2','Grade 2 Math','4613691149',''],['math-08-grade3','Grade 3 Math','4613259612','B0HRB1PJZ4'],['english-08-grade3-reading','Grade 3 Language Arts','','B0HR9X66H6']];
+  /* all ten Etsy listings by id (batch 2 live 2026-11-13: Grade 1 + 2 language arts, Grade 4 math + reading) */
+  var BOOKS=[['math-04-05','Pre-K & K Math','4613251307',''],['math-06-grade1','Grade 1 Math','4613690493',''],['math-07-grade2','Grade 2 Math','4613691149',''],['math-08-grade3','Grade 3 Math','4613259612','B0HRB1PJZ4'],['math-09-grade4','Grade 4 Math','4616159779',''],
+    ['english-04-prek','Pre-K Handwriting','4613249667',''],['english-06','Grade 1 Language Arts','4616168326',''],['english-07','Grade 2 Language Arts','4616159589',''],['english-08-grade3-reading','Grade 3 Language Arts','4613266828','B0HR9X66H6'],['english-09-grade4-reading','Grade 4 Reading & Writing','4616161123','']];
   $('#books').innerHTML=BOOKS.map(function(b){var etsy=b[2]?'https://www.etsy.com/listing/'+b[2]:SHOP,amz=b[3]?'https://www.amazon.com/dp/'+b[3]:'',x=' target="_blank" rel="noopener"';
     return '<div class="tile rv"><a'+x+' href="'+(amz||etsy)+'"><img src="/home/etsy-'+b[0]+'.jpg" alt="'+b[1]+' workbook'+(amz?', paperback and printable PDF':', printable PDF')+'" loading="lazy"></a><b>'+b[1]+'</b><span class="buy">'+(amz?'<a'+x+' href="'+amz+'">Paperback · Amazon</a>':'')+'<a'+x+' href="'+etsy+'">'+(amz?'PDF · Etsy':'Printable PDF · Etsy')+'</a></span></div>'}).join('');
 
